@@ -44,12 +44,32 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Vertesaur.Core">
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.4488.21888\lib\net40-client\Vertesaur.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\PigeoidAssemblyInfo.cs">
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Contracts\IAxis.cs" />
+    <Compile Include="Contracts\ICrs.cs" />
+    <Compile Include="Contracts\ICrsCompound.cs" />
+    <Compile Include="Contracts\ICrsFitted.cs" />
+    <Compile Include="Contracts\ICrsGeocentric.cs" />
+    <Compile Include="Contracts\ICrsGeodetic.cs" />
+    <Compile Include="Contracts\ICrsGeographic.cs" />
+    <Compile Include="Contracts\ICrsLocal.cs" />
+    <Compile Include="Contracts\ICrsProjected.cs" />
+    <Compile Include="Contracts\ICrsVertical.cs" />
+    <Compile Include="Contracts\IDatum.cs" />
+    <Compile Include="Contracts\IDatumGeodetic.cs" />
+    <Compile Include="Contracts\IPrimeMeridian.cs" />
+    <Compile Include="Contracts\IUom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProjectDir)..\..\build\NuGet.targets" />
