@@ -44,14 +44,18 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vertesaur.Core">
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.4488.21888\lib\net40-client\Vertesaur.Core.dll</HintPath>
+    <Reference Include="Vertesaur.Core, Version=0.5.4488.39705, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.4488.39705\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\PigeoidAssemblyInfo.cs">
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="AuthorityTag.cs" />
+    <Compile Include="Contracts\IAuthorityBound.cs" />
+    <Compile Include="Contracts\IAuthorityTag.cs" />
     <Compile Include="Contracts\IAxis.cs" />
     <Compile Include="Contracts\ICrs.cs" />
     <Compile Include="Contracts\ICrsCompound.cs" />
@@ -66,6 +70,20 @@
     <Compile Include="Contracts\IDatumGeodetic.cs" />
     <Compile Include="Contracts\IPrimeMeridian.cs" />
     <Compile Include="Contracts\IUom.cs" />
+    <Compile Include="Ogc\OgcCrsCompound.cs" />
+    <Compile Include="Ogc\OgcCrsFitted.cs" />
+    <Compile Include="Ogc\OgcCrsGeocentric.cs" />
+    <Compile Include="Ogc\OgcCrsGeographic.cs" />
+    <Compile Include="Ogc\OgcCrsLocal.cs" />
+    <Compile Include="Ogc\OgcDatumType.cs" />
+    <Compile Include="Ogc\OgcAngularUnit.cs" />
+    <Compile Include="Ogc\OgcAxis.cs" />
+    <Compile Include="Ogc\OgcLinearUnit.cs" />
+    <Compile Include="Ogc\OgcNamedAuthorityBoundEntity.cs" />
+    <Compile Include="Ogc\OgcPrimeMeridian.cs" />
+    <Compile Include="Ogc\OgcSpheroid.cs" />
+    <Compile Include="Ogc\OgcUnitBase.cs" />
+    <Compile Include="Ogc\OgcOrientationType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

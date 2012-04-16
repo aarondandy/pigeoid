@@ -10,7 +10,7 @@ namespace Pigeoid.Contracts
 		/// <summary>
 		/// The orientation of the axis.
 		/// </summary>
-		string Direction { get; }
+		string Orientation { get; }
 
 	}
 }

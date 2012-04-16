@@ -3,6 +3,18 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Core", "src\Pigeoid.Core\Pigeoid.Core.csproj", "{ECDC3D02-067E-4D6F-9DF2-58015EFDAE87}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3BF3752F-F50D-44DF-84C5-10BA1B5ABC22}"
+	ProjectSection(SolutionItems) = preProject
+		src\PigeoidAssemblyInfo.cs = src\PigeoidAssemblyInfo.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{F588ACEA-9B25-40DF-BE2F-4CFB44C7147C}"
+	ProjectSection(SolutionItems) = preProject
+		build\NuGet.targets = build\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7E955526-8715-4399-984C-CB96BF2A158B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -16,5 +28,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{ECDC3D02-067E-4D6F-9DF2-58015EFDAE87} = {3BF3752F-F50D-44DF-84C5-10BA1B5ABC22}
 	EndGlobalSection
 EndGlobal
