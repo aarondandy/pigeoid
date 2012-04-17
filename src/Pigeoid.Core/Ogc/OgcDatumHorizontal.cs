@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Pigeoid.Contracts;
+using Pigeoid.Transformation;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Ogc
@@ -42,28 +42,24 @@ namespace Pigeoid.Ogc
 			_spheroid = spheroid;
 		}
 
-		public bool IsTransformableToWgs84 {
-			get { return null != _transformation; }
-		}
-
-		public Helmert7Transformation PrimaryTransformation {
-			get { return _transformation; }
-		}
-
-		public IEnumerator<Helmert7Transformation> GetEnumerator() {
-			return new[] { _transformation }.AsEnumerable().GetEnumerator();
-		}
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
-			return GetEnumerator();
-		}
-
 		public IPrimeMeridian PrimeMeridian {
 			get { return _primeMeritidan; }
 		}
 
 		public ISpheroid<double> Spheroid {
 			get { return _spheroid; }
+		}
+
+		public bool IsTransformableToWgs84 {
+			get { return null != _transformation; }
+		}
+
+		public Helmert7Transformation PrimaryWgs84Transformation {
+			get { return _transformation; }
+		}
+
+		public IEnumerable<Helmert7Transformation> Wgs84Transformations {
+			get { return new[] { _transformation }; }
 		}
 
 	}

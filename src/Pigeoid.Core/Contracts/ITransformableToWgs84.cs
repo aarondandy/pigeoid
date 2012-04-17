@@ -7,7 +7,7 @@ namespace Pigeoid.Contracts
 	/// <summary>
 	/// Allows an entity or CRS to be transformed to WGS84.
 	/// </summary>
-	public interface ITransformableToWgs84 : IEnumerable<Helmert7Transformation>
+	public interface ITransformableToWgs84
 	{
 		/// <summary>
 		/// Determines if this CRS or entity can be transformed to WGS84.

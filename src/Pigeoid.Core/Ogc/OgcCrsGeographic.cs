@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Pigeoid.Contracts;
+using Pigeoid.Transformation;
 
 namespace Pigeoid.Ogc
 {
@@ -11,7 +10,8 @@ namespace Pigeoid.Ogc
 	/// </summary>
 	public class OgcCrsGeographic :
 		OgcNamedAuthorityBoundEntity,
-		ICrsGeographic
+		ICrsGeographic,
+		ITransformableToWgs84
 	{
 
 		private readonly Helmert7Transformation[] _toWgs84;
@@ -57,23 +57,20 @@ namespace Pigeoid.Ogc
 			_toWgs84 = null == toWgs84 ? new Helmert7Transformation[0] : toWgs84.ToArray();
 		}
 
-		public IEnumerator<Helmert7Transformation> GetEnumerator() {
-			return _toWgs84.AsEnumerable().GetEnumerator();
-		}
-
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
-			return GetEnumerator();
-		}
-
-		public bool IsTransformableToWgs84 { get { return 0 != _toWgs84.Length; } }
-
-		public Helmert7Transformation PrimaryTransformation { get { return (0 < _toWgs84.Length) ? _toWgs84[0] : null; } }
-
 		public IDatumGeodetic Datum { get { return _datum; } }
 
 		public IUom Unit { get { return _unit; } }
 
 		public IEnumerable<IAxis> Axes { get { return _axes.AsEnumerable(); } }
 
+		public bool IsTransformableToWgs84 { get { return 0 != _toWgs84.Length; } }
+
+		public Helmert7Transformation PrimaryWgs84Transformation {
+			get { return (0 < _toWgs84.Length) ? _toWgs84[0] : null; }
+		}
+
+		public IEnumerable<Helmert7Transformation> Wgs84Transformations {
+			get { return _toWgs84.AsEnumerable(); }
+		}
 	}
 }

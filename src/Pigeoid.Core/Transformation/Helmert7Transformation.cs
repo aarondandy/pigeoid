@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Pigeoid.Contracts;
 using Vertesaur;
 using Vertesaur.Contracts;
 
@@ -11,8 +12,7 @@ namespace Pigeoid.Transformation
 	/// </summary>
 	public class Helmert7Transformation :
 		ITransformation<Point3>,
-		IEquatable<Helmert7Transformation>,
-		ICoordinateOperationInfo
+		IEquatable<Helmert7Transformation>
 	{
 
 		/// <summary>
@@ -118,7 +118,7 @@ namespace Pigeoid.Transformation
 			M = 1 + (mppm / 1000000.0);
 		}
 
-		public void TransformValue(ref Point3 coord) {
+		private void TransformValue(ref Point3 coord) {
 			coord = new Point3(
 				((coord.X + (coord.Z * R.Y) - (coord.Y * R.Z)) * M) + D.X,
 				((coord.Y + (coord.X * R.Z) - (coord.Z * R.X)) * M) + D.Y,

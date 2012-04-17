@@ -45,7 +45,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Vertesaur.Core">
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.4489.23979\lib\net40-client\Vertesaur.Core.dll</HintPath>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.4490.2312\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -95,6 +95,7 @@
     <Compile Include="Contracts\IDatumGeodetic.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Contracts\INamedParameter.cs" />
     <Compile Include="Contracts\IPrimeMeridian.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -102,6 +103,7 @@
     <Compile Include="Contracts\IUom.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="NamedParameter.cs" />
     <Compile Include="Ogc\OgcCrsCompound.cs" />
     <Compile Include="Ogc\OgcCrsFitted.cs" />
     <Compile Include="Ogc\OgcCrsGeocentric.cs" />
