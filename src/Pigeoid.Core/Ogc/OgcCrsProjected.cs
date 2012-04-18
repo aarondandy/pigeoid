@@ -1,4 +1,6 @@
-﻿using System;
+﻿// TODO: source header
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pigeoid.Contracts;
@@ -16,7 +18,6 @@ namespace Pigeoid.Ogc
 		private readonly IUom _unit;
 		private readonly ITransformation _projection;
 		private readonly IAxis[] _axes;
-
 
 		/// <summary>
 		/// Constructs a new projected CRS.
@@ -37,45 +38,43 @@ namespace Pigeoid.Ogc
 		)
 			: base(name, authority) {
 
-			if (null == baseCrs) {
+			if (null == baseCrs)
 				throw new ArgumentNullException("baseCrs");
-			}
-			if (null == linearUnit) {
+			if (null == linearUnit)
 				throw new ArgumentNullException("linearUnit");
-			}
-			if (null == projection) {
+			if (null == projection)
 				throw new ArgumentNullException("projection");
-			}
+
 			_baseCrs = baseCrs;
 			_unit = linearUnit;
 			_projection = projection;
 			_axes = null == axes ? new IAxis[0] : axes.ToArray();
 		}
 
-
+		/// <inheritdoc/>
 		public ICrsGeodetic BaseCrs {
 			get { return _baseCrs; }
 		}
 
+		/// <inheritdoc/>
 		public IUom Unit {
 			get { return _unit; }
 		}
 
+		/// <inheritdoc/>
 		public ITransformation Projection {
 			get { return _projection; }
 		}
 
-
+		/// <inheritdoc/>
 		public IEnumerable<IAxis> Axes {
 			get { return _axes.AsEnumerable(); }
 		}
 
+		/// <inheritdoc/>
 		public IDatumGeodetic Datum {
 			get { return null == _baseCrs ? null : _baseCrs.Datum; }
 		}
 
-		public IUom Uom {
-			get { return _unit; }
-		}
 	}
 }

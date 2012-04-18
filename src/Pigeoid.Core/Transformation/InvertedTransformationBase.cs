@@ -1,4 +1,5 @@
-﻿
+﻿// TODO: source header
+
 using System.Collections.Generic;
 using System.Linq;
 using Vertesaur.Contracts;
@@ -32,7 +33,6 @@ namespace Pigeoid.Transformation
 		ITransformation ITransformation.GetInverse() {
 			return GetInverse();
 		}
-
 
 		public abstract TTarget TransformValue(TSource value);
 

@@ -1,4 +1,5 @@
-﻿
+﻿// TODO: source header
+
 namespace Pigeoid.Contracts
 {
 	/// <summary>

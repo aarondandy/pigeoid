@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// TODO: source header
+
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
@@ -35,7 +33,7 @@ namespace Pigeoid.Ogc
 		public OgcPrimeMeridian(string name, double longitude, IUom angularUnit, IAuthorityTag authority)
 			: base(name, authority) {
 			_longitude = longitude;
-			_unit = angularUnit; // TODO: default to degrees if no unit is specified
+			_unit = angularUnit ?? OgcAngularUnit.DefaultDegrees;
 		}
 
 		public double Longitude {

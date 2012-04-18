@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿// TODO: source header
+
+using System.Diagnostics;
 using Pigeoid.Contracts;
 
 namespace Pigeoid

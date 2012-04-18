@@ -1,4 +1,6 @@
-﻿using System;
+﻿// TODO: source header
+
+using System;
 using Pigeoid.Contracts;
 using Vertesaur.Contracts;
 
@@ -31,18 +33,22 @@ namespace Pigeoid.Ogc
 			_baseCrs = baseCrs;
 		}
 
+		/// <summary>
+		/// The name of the CRS.
+		/// </summary>
 		public string Name {
 			get { return _name; }
 		}
 
+		/// <inheritdoc/>
 		public ICrs BaseCrs {
 			get { return _baseCrs; }
 		}
 
+		/// <inheritdoc/>
 		public ITransformation ToBaseOperation {
 			get { return _toBaseOperation; }
 		}
-
 
 	}
 }

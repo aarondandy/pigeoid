@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// TODO: source header
 
 namespace Pigeoid.Contracts
 {
+	/// <summary>
+	/// A named parameter. Used primarily for interoperability and serialization of transformations.
+	/// </summary>
 	public interface INamedParameter
 	{
 		string Name { get; }

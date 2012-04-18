@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// TODO: source header
+
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using Pigeoid.Contracts;
 
 namespace Pigeoid
@@ -16,11 +14,14 @@ namespace Pigeoid
 		/// <summary>
 		/// The authority name.
 		/// </summary>
-		public readonly string Name;
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private readonly string _name;
+
 		/// <summary>
 		/// The authority code.
 		/// </summary>
-		public readonly string Code;
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private readonly string _code;
 
 		/// <summary>
 		/// Constructs a new authority tag.
@@ -28,18 +29,19 @@ namespace Pigeoid
 		/// <param name="name">The authority name.</param>
 		/// <param name="code">The authority code.</param>
 		public AuthorityTag(string name, string code) {
-			Name = name;
-			Code = code;
+			_name = name;
+			_code = code;
 		}
 
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		string IAuthorityTag.Name {
-			get { return Name; }
+		/// <inheritdoc/>
+		public string Name {
+			get { return _name; }
 		}
 
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		string IAuthorityTag.Code {
-			get { return Code; }
+		/// <inheritdoc/>
+		public string Code {
+			get { return _code; }
 		}
+
 	}
 }

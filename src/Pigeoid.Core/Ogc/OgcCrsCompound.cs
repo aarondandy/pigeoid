@@ -1,4 +1,6 @@
-﻿using System;
+﻿// TODO: source header
+
+using System;
 using System.Collections.Generic;
 using Pigeoid.Contracts;
 
@@ -44,14 +46,8 @@ namespace Pigeoid.Ogc
 		public ICrs Tail { get { return _tail; } }
 
 		/// <inheritdoc/>
-		public IEnumerator<ICrs> GetEnumerator() {
-			return (new[] { _head, _tail } as IEnumerable<ICrs>).GetEnumerator();
+		public IEnumerable<ICrs> CrsComponents {
+			get { return new[]{_head, _tail}; }
 		}
-
-		/// <inheritdoc/>
-		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
-			return GetEnumerator();
-		}
-
 	}
 }

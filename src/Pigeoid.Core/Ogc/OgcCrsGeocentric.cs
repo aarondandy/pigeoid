@@ -1,4 +1,6 @@
-﻿using System;
+﻿// TODO: source header
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pigeoid.Contracts;
@@ -40,10 +42,13 @@ namespace Pigeoid.Ogc
 			_axes = (null == axes) ? new IAxis[0] : axes.ToArray();
 		}
 
+		/// <inheritdoc/>
 		public IDatumGeodetic Datum { get { return _datum; } }
 
+		/// <inheritdoc/>
 		public IUom Unit { get { return _unit; } }
 
+		/// <inheritdoc/>
 		public IEnumerable<IAxis> Axes{ get { return _axes.AsEnumerable(); } }
 
 	}

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// TODO: source header
+
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
@@ -19,8 +17,7 @@ namespace Pigeoid.Ogc
         /// <param name="name">The datum name.</param>
         /// <param name="type">The datum type code.</param>
         /// <param name="authority">The authority.</param>
-        public OgcDatum(string name, OgcDatumType type, IAuthorityTag authority)
-            : base(name, authority)
+        public OgcDatum(string name, OgcDatumType type, IAuthorityTag authority) : base(name, authority)
         {
             _datumType = type;
         }

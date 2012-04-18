@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿// TODO: source header
+
 using Pigeoid.Contracts;
 using Vertesaur.Contracts;
 
@@ -10,9 +8,7 @@ namespace Pigeoid.Ogc
 	/// <summary>
 	/// A spheroid.
 	/// </summary>
-	public class OgcSpheroid :
-		OgcNamedAuthorityBoundEntity,
-		ISpheroid<double>
+	public class OgcSpheroid : OgcNamedAuthorityBoundEntity, ISpheroid<double>
 	{
 		/// <summary>
 		/// The spheroid data this OGC spheroid is based on.

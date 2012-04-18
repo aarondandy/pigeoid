@@ -1,4 +1,6 @@
-﻿using System;
+﻿// TODO: source header
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pigeoid.Contracts;
@@ -18,8 +20,7 @@ namespace Pigeoid.Transformation
 		/// <summary>
 		/// A transformation which does nothing.
 		/// </summary>
-		public static readonly Helmert7Transformation ZeroTransformation
-			= new Helmert7Transformation(Vector3.ZeroVector);
+		public static readonly Helmert7Transformation IdentityTransformation = new Helmert7Transformation(Vector3.ZeroVector);
 
 		private class Inverted :
 			InvertedTransformationBase<Helmert7Transformation, Point3>,
@@ -154,9 +155,7 @@ namespace Pigeoid.Transformation
 		}
 
 		public bool HasInverse {
-			get {
-				return 0 != M;
-			}
+			get { return 0 != M; }
 		}
 
 		ITransformation ITransformation.GetInverse() {
@@ -173,10 +172,7 @@ namespace Pigeoid.Transformation
 
 		public override bool Equals(object obj) {
 			return null != obj
-				&& (
-					(obj is Helmert7Transformation && Equals(obj as Helmert7Transformation))
-				)
-			;
+				&& (obj is Helmert7Transformation && Equals(obj as Helmert7Transformation));
 		}
 
 		public override int GetHashCode() {

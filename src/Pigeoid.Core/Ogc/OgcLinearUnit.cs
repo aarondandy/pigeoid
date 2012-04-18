@@ -1,4 +1,7 @@
-﻿using Pigeoid.Contracts;
+﻿// TODO: source header
+
+using System.Diagnostics;
+using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
 {
@@ -7,6 +10,15 @@ namespace Pigeoid.Ogc
 	/// </summary>
 	public class OgcLinearUnit : OgcUnitBase
 	{
+
+		private static readonly OgcLinearUnit _defaultMeter = new OgcLinearUnit("meter", 1);
+
+		/// <summary>
+		/// The default OGC reference unit for length measures.
+		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static OgcLinearUnit DefaultMeter { get { return _defaultMeter; } }
+
 		/// <summary>
 		/// Constructs a new unit.
 		/// </summary>

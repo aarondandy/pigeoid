@@ -1,13 +1,13 @@
-﻿using Pigeoid.Contracts;
+﻿// TODO: source header
+
+using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
 {
 	/// <summary>
 	/// The base OGC unit of measure class. All units are relative to a single base unit by some factor.
 	/// </summary>
-	public abstract class OgcUnitBase :
-		OgcNamedAuthorityBoundEntity,
-		IUom
+	public abstract class OgcUnitBase : OgcNamedAuthorityBoundEntity, IUom
 	{
 		private readonly double _factor;
 

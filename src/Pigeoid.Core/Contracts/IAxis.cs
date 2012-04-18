@@ -1,6 +1,10 @@
-﻿
+﻿// TODO: source header
+
 namespace Pigeoid.Contracts
 {
+	/// <summary>
+	/// An axis with a name and a general orientation.
+	/// </summary>
 	public interface IAxis
 	{
 		/// <summary>

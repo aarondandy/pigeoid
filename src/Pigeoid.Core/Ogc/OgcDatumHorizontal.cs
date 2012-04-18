@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// TODO: source header
+
+using System;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 using Vertesaur.Contracts;
@@ -10,10 +10,7 @@ namespace Pigeoid.Ogc
 	/// <summary>
 	/// A horizontal or geodetic datum.
 	/// </summary>
-	public class OgcDatumHorizontal :
-		OgcDatum,
-		IDatumGeodetic,
-		ITransformableToWgs84
+	public class OgcDatumHorizontal : OgcDatum, IDatumGeodetic
 	{
 		private readonly ISpheroid<double> _spheroid;
 		private readonly IPrimeMeridian _primeMeritidan;
@@ -33,7 +30,9 @@ namespace Pigeoid.Ogc
 			IPrimeMeridian primeMeridian,
 			Helmert7Transformation transform,
 			IAuthorityTag authority
-		) : base(name, OgcDatumType.None, authority) {
+		)
+			: base(name, OgcDatumType.None, authority)
+		{
 			if (null == spheroid)
 				throw new ArgumentNullException("spheroid");
 
@@ -56,10 +55,6 @@ namespace Pigeoid.Ogc
 
 		public Helmert7Transformation PrimaryWgs84Transformation {
 			get { return _transformation; }
-		}
-
-		public IEnumerable<Helmert7Transformation> Wgs84Transformations {
-			get { return new[] { _transformation }; }
 		}
 
 	}

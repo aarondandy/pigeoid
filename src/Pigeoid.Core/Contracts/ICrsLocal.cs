@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿// TODO: source header
+
+using System.Collections.Generic;
 
 namespace Pigeoid.Contracts
 {

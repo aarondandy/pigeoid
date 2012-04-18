@@ -1,7 +1,7 @@
-﻿using System;
+﻿// TODO: source header
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
@@ -9,9 +9,7 @@ namespace Pigeoid.Ogc
 	/// <summary>
 	/// A local CRS.
 	/// </summary>
-	public class OgcCrsLocal :
-		OgcNamedAuthorityBoundEntity,
-		ICrsLocal
+	public class OgcCrsLocal : OgcNamedAuthorityBoundEntity, ICrsLocal
 	{
 
 		private readonly IDatum _datum;
@@ -38,10 +36,13 @@ namespace Pigeoid.Ogc
 			_axes = axes ==  null ? new IAxis[0] : axes.ToArray();
 		}
 
+		/// <inheritdoc/>
 		public IDatum Datum { get { return _datum; } }
 
+		/// <inheritdoc/>
 		public IUom Unit { get { return _unit; } }
 
+		/// <inheritdoc/>
 		public IEnumerable<IAxis> Axes { get { return _axes.AsEnumerable(); } }
 
 	}
