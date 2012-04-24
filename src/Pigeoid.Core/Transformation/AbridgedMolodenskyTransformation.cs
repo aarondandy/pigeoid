@@ -33,13 +33,13 @@ namespace Pigeoid.Transformation
 		/// <param name="sourceSpheroid">The source CRS spheroid.</param>
 		/// <param name="targetSpheroid">The destination CRS spheroid.</param>
 		public AbridgedMolodenskyTransformation(
-			ICoordinateTriple<double> translation,
+			Vector3 translation,
 			ISpheroid<double> sourceSpheroid,
 			ISpheroid<double> targetSpheroid
 		) {
 			SourceSpheroid = sourceSpheroid;
 			TargetSpheroid = targetSpheroid;
-			D = new Vector3(translation);
+			D = translation;
 			double sf = sourceSpheroid.F;
 			double tf = targetSpheroid.F;
 			double df = tf - sf;

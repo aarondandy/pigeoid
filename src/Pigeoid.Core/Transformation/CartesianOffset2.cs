@@ -12,8 +12,8 @@ namespace Pigeoid.Transformation
 
 		public readonly Vector2 Offset;
 
-		public CartesianOffset2(ICoordinatePair<double> offset) {
-			Offset = new Vector2(offset);
+		public CartesianOffset2(Vector2 offset) {
+			Offset = offset;
 		}
 
 		public void TransformValues(Point2[] values) {

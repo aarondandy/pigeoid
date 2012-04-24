@@ -45,7 +45,7 @@ namespace Pigeoid.Transformation
 		/// <param name="topocentricOrigin">The topocentric origin.</param>
 		/// <param name="spheroid">The spheroid.</param>
 		public GeocentricTopocentricTransformation(
-			ICoordinateTriple<double> topocentricOrigin,
+			Point3 topocentricOrigin,
 			ISpheroid<double> spheroid
 		) {
 			GeographicTransform = new GeographicGeocentricTransformation(spheroid);
@@ -56,8 +56,8 @@ namespace Pigeoid.Transformation
 		/// Sets the topocentric origin for this transformation.
 		/// </summary>
 		/// <param name="topocentricOrigin">The topocentric origin.</param>
-		public void SetTopocentricOrigin(ICoordinateTriple<double> topocentricOrigin) {
-			_topocentricOrigin = new Point3(topocentricOrigin);
+		public void SetTopocentricOrigin(Point3 topocentricOrigin) {
+			_topocentricOrigin = topocentricOrigin;
 			GeographicCoord ellipsoidalOrigin =
 				(GeographicTransform.GetInverse() as ITransformation<Point3, GeographicCoord>)
 				.TransformValue(_topocentricOrigin);

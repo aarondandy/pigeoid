@@ -45,7 +45,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Vertesaur.Core">
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.4490.42694\lib\net40-client\Vertesaur.Core.dll</HintPath>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.4493.15055\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +103,7 @@
     </Compile>
     <Compile Include="GeographicCoord.cs" />
     <Compile Include="GeographicHeightCoord.cs" />
+    <Compile Include="Interop\CoordinateOperationStandardNames.cs" />
     <Compile Include="NamedParameter.cs" />
     <Compile Include="Ogc\OgcCrsCompound.cs" />
     <Compile Include="Ogc\OgcCrsFitted.cs" />
@@ -122,6 +123,23 @@
     <Compile Include="Ogc\OgcSpheroid.cs" />
     <Compile Include="Ogc\OgcUnitBase.cs" />
     <Compile Include="Ogc\OgcOrientationType.cs" />
+    <Compile Include="Projection\CassiniSoldner.cs" />
+    <Compile Include="Projection\HyperbolicCassiniSoldner.cs" />
+    <Compile Include="Projection\LambertAzimuthalEqualArea.cs" />
+    <Compile Include="Projection\LambertAzimuthalEqualAreaSpherical.cs" />
+    <Compile Include="Projection\LambertConicConformal.cs" />
+    <Compile Include="Projection\LambertConicConformal1Sp.cs" />
+    <Compile Include="Projection\LambertConicConformal1SpWest.cs" />
+    <Compile Include="Projection\LambertConicConformal2Sp.cs" />
+    <Compile Include="Projection\LambertConicConformalBelgium.cs" />
+    <Compile Include="Projection\Mercator.cs" />
+    <Compile Include="Projection\MercatorSpherical.cs" />
+    <Compile Include="Projection\ObliqueStereographic.cs" />
+    <Compile Include="Projection\PolarStereographic.cs" />
+    <Compile Include="Projection\ProjectionBase.cs" />
+    <Compile Include="Projection\TransverseMercator.cs" />
+    <Compile Include="Projection\TransverseMercatorSouth.cs" />
+    <Compile Include="Projection\TransverseMercatorZoned.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transformation\AbridgedMolodenskyTransformation.cs" />
     <Compile Include="Transformation\CartesianOffset2.cs" />
@@ -133,10 +151,12 @@
     <Compile Include="Transformation\Helmert7Transformation.cs" />
     <Compile Include="Transformation\InvertedTransformationBase.cs" />
     <Compile Include="Transformation\MolodenskyBadekasTransformation.cs" />
+    <Compile Include="Uom\Unit.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProjectDir)..\..\build\NuGet.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

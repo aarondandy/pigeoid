@@ -20,7 +20,7 @@ namespace Pigeoid.Transformation
 		/// <summary>
 		/// A transformation which does nothing.
 		/// </summary>
-		public static readonly Helmert7Transformation IdentityTransformation = new Helmert7Transformation(Vector3.ZeroVector);
+		public static readonly Helmert7Transformation IdentityTransformation = new Helmert7Transformation(Vector3.Zero);
 
 		private class Inverted :
 			InvertedTransformationBase<Helmert7Transformation, Point3>,
@@ -97,10 +97,8 @@ namespace Pigeoid.Transformation
 		/// Constructs a new Helmert 7 parameter transform.
 		/// </summary>
 		/// <param name="translationVector">The vector used to translate.</param>
-		public Helmert7Transformation(
-			ICoordinateTriple<double> translationVector
-		)
-			: this(translationVector, Vector3.ZeroVector, 0) { }
+		public Helmert7Transformation(Vector3 translationVector)
+			: this(translationVector, Vector3.Zero, 0) { }
 
 		/// <summary>
 		/// Constructs a new Helmert 7 parameter transform.
@@ -109,12 +107,12 @@ namespace Pigeoid.Transformation
 		/// <param name="rotationVector">The vector containing rotation parameters.</param>
 		/// <param name="mppm">The scale factor offset in PPM.</param>
 		public Helmert7Transformation(
-			ICoordinateTriple<double> translationVector,
-			ICoordinateTriple<double> rotationVector,
+			Vector3 translationVector,
+			Vector3 rotationVector,
 			double mppm
 		) {
-			D = new Vector3(translationVector);
-			R = new Vector3(rotationVector);
+			D = translationVector;
+			R = rotationVector;
 			Mppm = mppm;
 			M = 1 + (mppm / 1000000.0);
 		}

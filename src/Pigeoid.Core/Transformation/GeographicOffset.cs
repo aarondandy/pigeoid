@@ -25,12 +25,11 @@ namespace Pigeoid.Transformation
 			: this(d.Latitude, d.Longitude) { }
 
 		public void TransformValues(GeographicCoord[] values) {
-			for (int i = 0; i < values.Length; i++) {
+			for (int i = 0; i < values.Length; i++)
 				TransformValue(ref values[i]);
-			}
 		}
 
-		public void TransformValue(ref GeographicCoord value) {
+		private void TransformValue(ref GeographicCoord value) {
 			value = new GeographicCoord(value.Latitude + DLat, value.Longitude + DLon);
 		}
 

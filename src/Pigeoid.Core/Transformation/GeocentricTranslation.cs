@@ -19,8 +19,8 @@ namespace Pigeoid.Transformation
 		/// Constructs a new geocentric translation opartation.
 		/// </summary>
 		/// <param name="d"></param>
-		public GeocentricTranslation(ICoordinateTriple<double> d) {
-			D = new Vector3(d);
+		public GeocentricTranslation(Vector3 d) {
+			D = d;
 		}
 
 		public Point3 TransformValue(Point3 p) {
