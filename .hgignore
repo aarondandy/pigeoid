@@ -5,3 +5,6 @@ bin/*
 *.ReSharper.user
 *.suo
 packages/*
+*.user
+*.sdf
+*.ipch
