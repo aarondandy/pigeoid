@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Interop.Proj4", "sr
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pigeoid.Interop.Proj4.Unmanaged", "src\Pigeoid.Interop.Proj4.Unmanaged\Pigeoid.Interop.Proj4.Unmanaged.vcxproj", "{4DB7B813-449C-42E8-8424-52C62CB4B8EB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Epsg.DataTransmogrifier", "build\Pigeoid.Epsg.DataTransmogrifier\Pigeoid.Epsg.DataTransmogrifier.csproj", "{90BDF391-AE05-4CDB-8B62-7DD588C29001}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{4DB7B813-449C-42E8-8424-52C62CB4B8EB}.Release|Win32.ActiveCfg = Release|Win32
 		{4DB7B813-449C-42E8-8424-52C62CB4B8EB}.Release|Win32.Build.0 = Release|Win32
 		{4DB7B813-449C-42E8-8424-52C62CB4B8EB}.Release|x86.ActiveCfg = Release|Win32
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Debug|Win32.ActiveCfg = Debug|x86
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Debug|x86.ActiveCfg = Debug|x86
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Debug|x86.Build.0 = Debug|x86
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Release|Any CPU.ActiveCfg = Release|x86
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Release|Mixed Platforms.Build.0 = Release|x86
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Release|Win32.ActiveCfg = Release|x86
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Release|x86.ActiveCfg = Release|x86
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +105,7 @@ Global
 		{ECDC3D02-067E-4D6F-9DF2-58015EFDAE87} = {3BF3752F-F50D-44DF-84C5-10BA1B5ABC22}
 		{560D8E81-795B-456F-A9F1-7166B3BE13B1} = {3BF3752F-F50D-44DF-84C5-10BA1B5ABC22}
 		{4DB7B813-449C-42E8-8424-52C62CB4B8EB} = {3BF3752F-F50D-44DF-84C5-10BA1B5ABC22}
+		{90BDF391-AE05-4CDB-8B62-7DD588C29001} = {F588ACEA-9B25-40DF-BE2F-4CFB44C7147C}
 		{E598B157-1063-4652-A4BE-DD54E02C23FB} = {7E955526-8715-4399-984C-CB96BF2A158B}
 	EndGlobalSection
 EndGlobal

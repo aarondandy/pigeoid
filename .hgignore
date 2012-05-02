@@ -8,3 +8,5 @@ packages/*
 *.user
 *.sdf
 *.ipch
+*.*sdf
+build/Pigeoid.Epsg.DataTransmogrifier/data
