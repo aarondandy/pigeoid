@@ -43,39 +43,85 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		private static void Transmogrify(IDbConnection connection, string outFolder) {
 
-			// generate a list of words
-			var wordLookup = GenerateWordLookup(connection, new Dictionary<string, Func<dynamic,dynamic>>{
-				{"Alias",o => o.ALIAS},
-				{"Area",o => o.AREA_NAME},
-				{"Coordinate Axis", o => o.COORD_AXIS_ORIENTATION},
-				{"Coordinate Axis Name", o => o.COORD_AXIS_NAME},
-				{"Coordinate Reference System",o => o.COORD_REF_SYS_NAME},
-				{"Coordinate System",o => o.COORD_SYS_NAME},
-				{"Coordinate_Operation",o => o.COORD_OP_NAME},
-				{"Coordinate_Operation Method",o => o.COORD_OP_METHOD_NAME},
-				{"Coordinate_Operation Parameter",o => o.PARAMETER_NAME},
-				{"Coordinate_Operation Parameter Value",o => o.PARAM_VALUE_FILE_REF},
-				{"Datum",o => o.DATUM_NAME},
-				{"Ellipsoid",o => o.ELLIPSOID_NAME},
-				{"Prime Meridian",o => o.PRIME_MERIDIAN_NAME},
-				{"Unit of Measure",o => o.UNIT_OF_MEAS_NAME},
-			});
-			var words = wordLookup
-				.OrderByDescending(e => e.Value)
-				.Select(e => e.Key)
-				.ToList();
-
 			if (!Directory.Exists(outFolder))
 				Directory.CreateDirectory(outFolder);
 
+			// generate a list of words from used columns
+			// TODO: make sure all of these are used, if not they need to be removed!
+			var words = GenerateWordLookup(connection, new Dictionary<string, Func<dynamic, dynamic>>{
+				{"Alias", o => o.ALIAS},
+				{"Area", o => o.AREA_NAME},
+				{"Coordinate Axis", o => o.COORD_AXIS_ORIENTATION},
+				{"Coordinate Axis Name", o => o.COORD_AXIS_NAME},
+				{"Coordinate Reference System", o => o.COORD_REF_SYS_NAME},
+				{"Coordinate System", o => o.COORD_SYS_NAME},
+				{"Coordinate_Operation", o => o.COORD_OP_NAME},
+				{"Coordinate_Operation Method", o => o.COORD_OP_METHOD_NAME},
+				{"Coordinate_Operation Parameter", o => o.PARAMETER_NAME},
+				{"Coordinate_Operation Parameter Value", o => o.PARAM_VALUE_FILE_REF},
+				{"Datum", o => o.DATUM_NAME},
+				{"Ellipsoid", o => o.ELLIPSOID_NAME},
+				{"Prime Meridian", o => o.PRIME_MERIDIAN_NAME},
+				{"Unit of Measure", o => o.UNIT_OF_MEAS_NAME},
+			});
+
 			// save the list of words to the DAT file)
-			using (var stream = File.Open(Path.Combine(outFolder,"words.dat"), FileMode.Create))
+			using (var stream = File.Open(Path.Combine(outFolder, "words.dat"), FileMode.Create))
 				WordsToDatFile(words, stream);
+
+			// generate a list of numbers from used columns
+			// TODO: make sure all of these are used, if not they need to be removed!
+			var numbers = GenerateNumberValueLookup(connection, new Dictionary<string, List<Func<dynamic, dynamic>>>{
+				{"Area", new List<Func<dynamic, dynamic>>{o => o.AREA_SOUTH_BOUND_LAT,o => o.AREA_NORTH_BOUND_LAT,o => o.AREA_WEST_BOUND_LON,o => o.AREA_EAST_BOUND_LON}},
+				{"Coordinate_Operation Parameter Value",new List<Func<dynamic, dynamic>>{o => o.PARAMETER_VALUE}},
+				{"Ellipsoid", new List<Func<dynamic, dynamic>>{o => o.SEMI_MAJOR_AXIS,o => o.INV_FLATTENING,o => o.SEMI_MINOR_AXIS}},
+				{"Prime Meridian", new List<Func<dynamic, dynamic>>{o => o.GREENWICH_LONGITUDE}},
+				{"Unit of Measure", new List<Func<dynamic, dynamic>>{o => o.FACTOR_B,o => o.FACTOR_C}},
+			});
+
+			// save the list of numbers to the DAT file)
+			using (var stream = File.Open(Path.Combine(outFolder, "numbers.dat"), FileMode.Create))
+				NumbersToDatFile(numbers, stream);
+
+		}
+
+		private static void NumbersToDatFile(List<double> numbers, FileStream stream) {
+			using (var writer = new BinaryWriter(stream)) {
+				writer.Write((ushort)numbers.Count);
+				foreach (var number in numbers) {
+					writer.Write(number);
+				}
+			}
+		}
+
+		private static List<double> GenerateNumberValueLookup(IDbConnection connection, Dictionary<string, List<Func<dynamic, dynamic>>> numberSources) {
+			// get all the strings we care about and break them into individual "words" to be used later
+			var numberCounts = new Dictionary<double, int>();
+			foreach (var table in numberSources) {
+				var queryString = String.Format("Select * from [{0}]", table.Key);
+				foreach (var queryFunc in table.Value) {
+					foreach (var result in connection.Query(queryString)) {
+						var data = queryFunc(result);
+						if (data is double || data is float || data is int) {
+							var number = (double) data;
+							int numberCount;
+							numberCounts[number] = numberCounts.TryGetValue(number, out numberCount)
+								? numberCount + 1
+								: 1;
+						}
+					}
+				}
+			}
+			// more often used words go to the front of the list
+			return numberCounts
+				.OrderByDescending(e => e.Value)
+				.Select(e => e.Key)
+				.ToList();
 		}
 
 		private static void WordsToDatFile(List<string> words, FileStream stream) {
 			using (var writer = new BinaryWriter(stream)) {
-				writer.Write((int)words.Count);
+				writer.Write((ushort)words.Count);
 				foreach (var word in words) {
 					var textBytes = Encoding.UTF8.GetBytes(word);
 					writer.Write((byte)textBytes.Length);
@@ -84,7 +130,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			}
 		}
 
-		private static Dictionary<string, int> GenerateWordLookup(IDbConnection connection, Dictionary<string, Func<dynamic, dynamic>> wordSources) {
+		private static List<string> GenerateWordLookup(IDbConnection connection, Dictionary<string, Func<dynamic, dynamic>> wordSources) {
+			// get all the strings we care about and break them into individual "words" to be used later
 			var wordCounts = new Dictionary<string, int>();
 			foreach(var table in wordSources) {
 				var queryString = String.Format("Select * from [{0}]",table.Key);
@@ -99,7 +146,11 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				}
 				;
 			}
-			return wordCounts;
+			// more often used words go to the front of the list
+			return wordCounts
+				.OrderByDescending(e => e.Value)
+				.Select(e => e.Key)
+				.ToList();
 		}
 
 		static bool SplitBetween(char a, char b) {
