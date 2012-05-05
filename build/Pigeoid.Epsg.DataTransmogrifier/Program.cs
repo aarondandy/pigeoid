@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.OleDb;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using Dapper;
+using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg.Db;
 
 namespace Pigeoid.Epsg.DataTransmogrifier
 {
 	public class Program
 	{
+
 		static string GetDatabasePath(string dataFolderPath) {
 			return new DirectoryInfo(dataFolderPath)
 				.GetFiles("*.mdb", SearchOption.AllDirectories)
@@ -33,22 +30,38 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				throw new FileNotFoundException("Database file not found.");
 			Console.WriteLine("Found database: " + dataFilePath);
 
-			var connectionString = @"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + dataFilePath;
-			using(var connection = new OleDbConnection(connectionString)) {
-				connection.Open();
-				Transmogrify(connection,Path.Combine(dataFolderPath,"out"));
+			var sessionFactory = Fluently.Configure()
+				.Database(JetDriverConfiguration.Standard.ConnectionString(c =>
+					c.DatabaseFile(dataFilePath)
+					.Provider("Microsoft.Jet.OLEDB.4.0")
+				))
+				.Mappings(m => m.FluentMappings.AddFromAssemblyOf<Program>())
+				.BuildSessionFactory();
+
+			using(var session = sessionFactory.OpenSession()) {
+				var epsgData = new EpsgData(session);
+				var aliases = epsgData.Aliases;
+				var areas = epsgData.Areas;
+				var axes = epsgData.Axes;
+				var axisNames = epsgData.AxisNames;
+				var coordSys = epsgData.CoordinateSystems;
+				var coordOps = epsgData.CoordinateOperations;
+				var crs = epsgData.Crs;
+				;
 			}
 
 		}
+		/*
+		private static void Transmogrify(ISession session, string outFolder) {
 
-		private static void Transmogrify(IDbConnection connection, string outFolder) {
+			var epsgData = new EpsgData();
 
 			if (!Directory.Exists(outFolder))
 				Directory.CreateDirectory(outFolder);
 
 			// generate a list of words from used columns
-			// TODO: make sure all of these are used, if not they need to be removed!
-			var words = GenerateWordLookup(connection, new Dictionary<string, Func<dynamic, dynamic>>{
+			// TODO: make sure all of these are used, if not they need to be removed to save space!
+			epsgData.AllWords = GenerateWordLookup(session, new Dictionary<string, Func<dynamic, dynamic>>{
 				{"Alias", o => o.ALIAS},
 				{"Area", o => o.AREA_NAME},
 				{"Coordinate Axis", o => o.COORD_AXIS_ORIENTATION},
@@ -65,13 +78,13 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				{"Unit of Measure", o => o.UNIT_OF_MEAS_NAME},
 			});
 
-			// save the list of words to the DAT file)
+			// save the list of words to the DAT file
 			using (var stream = File.Open(Path.Combine(outFolder, "words.dat"), FileMode.Create))
-				WordsToDatFile(words, stream);
+				WordsToDatFile(epsgData.AllWords, stream);
 
 			// generate a list of numbers from used columns
-			// TODO: make sure all of these are used, if not they need to be removed!
-			var numbers = GenerateNumberValueLookup(connection, new Dictionary<string, List<Func<dynamic, dynamic>>>{
+			// TODO: make sure all of these are used, if not they need to be removed to save space!
+			epsgData.AllNumbers = GenerateNumberValueLookup(connection, new Dictionary<string, List<Func<dynamic, dynamic>>>{
 				{"Area", new List<Func<dynamic, dynamic>>{o => o.AREA_SOUTH_BOUND_LAT,o => o.AREA_NORTH_BOUND_LAT,o => o.AREA_WEST_BOUND_LON,o => o.AREA_EAST_BOUND_LON}},
 				{"Coordinate_Operation Parameter Value",new List<Func<dynamic, dynamic>>{o => o.PARAMETER_VALUE}},
 				{"Ellipsoid", new List<Func<dynamic, dynamic>>{o => o.SEMI_MAJOR_AXIS,o => o.INV_FLATTENING,o => o.SEMI_MINOR_AXIS}},
@@ -79,10 +92,36 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				{"Unit of Measure", new List<Func<dynamic, dynamic>>{o => o.FACTOR_B,o => o.FACTOR_C}},
 			});
 
-			// save the list of numbers to the DAT file)
+			// save the list of numbers to the DAT file
 			using (var stream = File.Open(Path.Combine(outFolder, "numbers.dat"), FileMode.Create))
-				NumbersToDatFile(numbers, stream);
+				NumbersToDatFile(epsgData.AllNumbers, stream);
 
+			epsgData.Ellipsoids = connection.Query("SELECT * FROM [Ellipsoid]").ToList();
+			epsgData.Areas = connection.Query("SELECT * FROM [Area]").ToList();
+
+			using (var stream = File.Open(Path.Combine(outFolder, "ellipsoid.dat"), FileMode.Create))
+				EllipsoidsToDatFile(epsgData, stream);
+
+		}
+		*/
+
+		/*
+		private static void EllipsoidsToDatFile(EpsgData epsgData, FileStream stream) {
+			using (var writer = new BinaryWriter(stream)) {
+				foreach (var ellipsoid in epsgData.Ellipsoids) {
+					var major = (double) ellipsoid.SEMI_MAJOR_AXIS;
+					var minor = null == ellipsoid.SEMI_MINOR_AXIS ? Double.NaN : (double) ellipsoid.SEMI_MINOR_AXIS;
+					var invFlat = null == ellipsoid.INV_FLATTENING ? Double.NaN : (double) ellipsoid.INV_FLATTENING;
+
+					writer.Write((ushort)ellipsoid.ELLIPSOID_CODE);
+					writer.Write(epsgData.AllNumbers.IndexOf(major));
+					writer.Write(epsgData.AllNumbers.IndexOf(Double.IsNaN(invFlat) ? minor : invFlat));
+					writer.Write((byte)((int)ellipsoid.UOM_CODE - 9000));
+					var textBytes = Encoding.UTF8.GetBytes(ellipsoid.ELLIPSOID_NAME as string ?? String.Empty);
+					writer.Write((byte)textBytes.Length);
+					writer.Write(textBytes);
+				}
+			}
 		}
 
 		private static void NumbersToDatFile(List<double> numbers, FileStream stream) {
@@ -208,6 +247,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			}
 			return LetterClass.Other;
 		}
+		*/
 
 	}
 }

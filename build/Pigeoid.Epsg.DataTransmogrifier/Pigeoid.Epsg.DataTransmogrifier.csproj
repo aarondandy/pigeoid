@@ -34,10 +34,22 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dapper">
-      <HintPath>..\..\packages\Dapper.1.8\lib\net40\Dapper.dll</HintPath>
+    <Reference Include="FluentNHibernate">
+      <HintPath>..\..\packages\FluentNHibernate.1.3.0.727\lib\FluentNHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="Iesi.Collections">
+      <HintPath>..\..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\packages\log4net.2.0.0\lib\net40-client\log4net.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="NHibernate">
+      <HintPath>..\..\packages\NHibernate.3.3.0.4000\lib\Net35\NHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate.JetDriver">
+      <HintPath>.\NHibernate.JetDriver.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -47,6 +59,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EpsgAlias.cs" />
+    <Compile Include="EpsgArea.cs" />
+    <Compile Include="EpsgAxis.cs" />
+    <Compile Include="EpsgAxisName.cs" />
+    <Compile Include="EpsgCoordinateOperation.cs" />
+    <Compile Include="EpsgCoordinateSystem.cs" />
+    <Compile Include="EpsgCrs.cs" />
+    <Compile Include="EpsgData.cs" />
+    <Compile Include="Maps\EpsgAliasMap.cs" />
+    <Compile Include="Maps\EpsgAreaMap.cs" />
+    <Compile Include="Maps\EpsgAxisMap.cs" />
+    <Compile Include="Maps\EpsgAxisNameMap.cs" />
+    <Compile Include="Maps\EpsgCoordinateOperationMap.cs" />
+    <Compile Include="Maps\EpsgCoordinateSystemMap.cs" />
+    <Compile Include="Maps\EpsgCrsMap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

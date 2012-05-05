@@ -10,3 +10,4 @@ packages/*
 *.ipch
 *.*sdf
 build/Pigeoid.Epsg.DataTransmogrifier/data
+*NHibernate.JetDriver.dll
