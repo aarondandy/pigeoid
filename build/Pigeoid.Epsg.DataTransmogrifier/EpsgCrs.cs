@@ -16,7 +16,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public virtual EpsgCoordinateSystem CoordinateSystem { get; set; }
 
-		public virtual int DatumCode { get; set; }
+		public virtual EpsgDatum Datum { get; set; }
 
 		public virtual EpsgCrs SourceGeographicCrs { get; set; }
 
@@ -27,12 +27,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		public virtual EpsgCrs CompoundVerticalCrs { get; set; }
 
 		public virtual string Scope { get; set; }
-
-		public virtual string Remarks { get; set; }
-
-		public virtual string InformationSource { get; set; }
-
-		public virtual string DataSource { get; set; }
 
 		public virtual DateTime RevisionDate { get; set; }
 

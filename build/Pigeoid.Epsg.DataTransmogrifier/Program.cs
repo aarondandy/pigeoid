@@ -46,7 +46,19 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				var axisNames = epsgData.AxisNames;
 				var coordSys = epsgData.CoordinateSystems;
 				var coordOps = epsgData.CoordinateOperations;
+				var opMethods = epsgData.CoordinateOperationMethods;
 				var crs = epsgData.Crs;
+				var datums = epsgData.Datums;
+				var deps = epsgData.Deprecations;
+				var elps = epsgData.Ellipsoids;
+				var nameSystems = epsgData.NamingSystems;
+				var primeMeridians = epsgData.PrimeMeridians;
+				var supersessions = epsgData.Supersessions;
+				var uoms = epsgData.Uoms;
+				var prms = epsgData.Parameters;
+				var paramUses = epsgData.ParamUses;
+				var paramValues = epsgData.ParamValues;
+				var coordOpPathItems = epsgData.CoordOpPathItems;
 				;
 			}
 

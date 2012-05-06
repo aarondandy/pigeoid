@@ -37,8 +37,56 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			get { return GetAllItems<EpsgCoordinateOperation>(); }
 		}
 
+		public IList<EpsgCoordinateOperationMethod> CoordinateOperationMethods {
+			get { return GetAllItems<EpsgCoordinateOperationMethod>(); }
+		}
+
 		public IList<EpsgCrs> Crs {
 			get { return GetAllItems<EpsgCrs>(); }
+		}
+
+		public IList<EpsgDatum> Datums {
+			get { return GetAllItems<EpsgDatum>(); }
+		}
+
+		public IList<EpsgEllipsoid> Ellipsoids {
+			get { return GetAllItems<EpsgEllipsoid>(); }
+		}
+
+		public IList<EpsgDeprecation> Deprecations {
+			get { return GetAllItems<EpsgDeprecation>(); }
+		}
+
+		public IList<EpsgNamingSystem> NamingSystems {
+			get { return GetAllItems<EpsgNamingSystem>(); }
+		}
+
+		public IList<EpsgPrimeMeridian> PrimeMeridians {
+			get { return GetAllItems<EpsgPrimeMeridian>(); }
+		}
+
+		public IList<EpsgSupersession> Supersessions {
+			get { return GetAllItems<EpsgSupersession>(); }
+		}
+
+		public IList<EpsgUom> Uoms {
+			get { return GetAllItems<EpsgUom>(); }
+		}
+
+		public IList<EpsgParameter> Parameters {
+			get { return GetAllItems<EpsgParameter>(); }
+		}
+
+		public IList<EpsgParamUse> ParamUses {
+			get { return GetAllItems<EpsgParamUse>(); }
+		}
+
+		public IList<EpsgParamValue> ParamValues {
+			get { return GetAllItems<EpsgParamValue>(); }
+		}
+
+		public IList<EpsgCoordOpPathItem> CoordOpPathItems {
+			get { return GetAllItems<EpsgCoordOpPathItem>(); }
 		}
 
 		private IList<T> GetAllItems<T>() where T:class {

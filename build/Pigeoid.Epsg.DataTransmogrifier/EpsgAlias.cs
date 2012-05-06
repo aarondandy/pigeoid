@@ -15,8 +15,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public virtual string Alias { get; set; }
 
-		public virtual string Remarks { get; set; }
-
 		public override string ToString() {
 			return Alias + " (" + Code + ')';
 		}

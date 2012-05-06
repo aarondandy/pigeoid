@@ -16,9 +16,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.Iso2).Column("ISO_A2_CODE");
 			Map(x => x.Iso3).Column("ISO_A3_CODE");
 			Map(x => x.IsoNCode).Column("ISO_N_CODE");
-			Map(x => x.Remarks).Column("REMARKS");
-			Map(x => x.InformationSource).Column("INFORMATION_SOURCE");
-			Map(x => x.DataSource).Column("DATA_SOURCE");
 			Map(x => x.RevisionDate).Column("REVISION_DATE");
 			Map(x => x.ChangeId).Column("CHANGE_ID");
 			Map(x => x.Deprecated).Column("DEPRECATED");

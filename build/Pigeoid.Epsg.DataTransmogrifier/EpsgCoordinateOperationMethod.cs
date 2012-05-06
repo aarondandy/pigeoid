@@ -3,16 +3,18 @@ using System.Collections.Generic;
 
 namespace Pigeoid.Epsg.DataTransmogrifier
 {
-	public class EpsgCoordinateSystem
+	public class EpsgCoordinateOperationMethod
 	{
 
 		public virtual int Code { get; set; }
 
 		public virtual string Name { get; set; }
 
-		public virtual string TypeName { get; set; }
+		public virtual bool Reverse { get; set; }
 
-		public virtual int Dimension { get; set; }
+		public virtual string Formula { get; set; }
+
+		public virtual string Example { get; set; }
 
 		public virtual DateTime RevisionDate { get; set; }
 
@@ -20,9 +22,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public virtual bool Deprecated { get; set; }
 
-		public virtual IList<EpsgAxis> Axes { get; set; }
-
-		public virtual IList<EpsgCrs> CrsUsage { get; set; }
+		public virtual IList<EpsgCoordinateOperation> UsedBy { get; set; }
 
 		public override string ToString() {
 			return Name + " (" + Code + ')';

@@ -14,9 +14,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Id(x => x.Code).Column("COORD_AXIS_NAME_CODE");
 			Map(x => x.Name).Column("COORD_AXIS_NAME");
 			Map(x => x.Description).Column("DESCRIPTION");
-			Map(x => x.Remarks).Column("REMARKS");
-			Map(x => x.InformationSource).Column("INFORMATION_SOURCE");
-			Map(x => x.DataSource).Column("DATA_SOURCE");
 			Map(x => x.RevisionDate).Column("REVISION_DATE");
 			Map(x => x.ChangeId).Column("CHANGE_ID");
 			Map(x => x.Deprecated).Column("DEPRECATED");

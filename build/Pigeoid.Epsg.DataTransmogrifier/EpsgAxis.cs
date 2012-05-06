@@ -21,7 +21,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public virtual string Abbreviation { get; set; }
 
-		public virtual int UomCode { get; set; }
+		public virtual EpsgUom Uom { get; set; }
 
 		public virtual int OrderValue { get; set; }
 

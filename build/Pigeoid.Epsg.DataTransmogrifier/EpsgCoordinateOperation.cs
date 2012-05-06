@@ -25,17 +25,11 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public virtual double? Accuracy { get; set; }
 
-		public virtual int MethodCode { get; set; }
+		public virtual EpsgCoordinateOperationMethod Method { get; set; }
 
-		public virtual int? SourceUomCode { get; set; }
+		public virtual EpsgUom SourceUom { get; set; }
 
-		public virtual int? TargetUomCode { get; set; }
-
-		public virtual string Remarks { get; set; }
-
-		public virtual string InformationSource { get; set; }
-
-		public virtual string DataSource { get; set; }
+		public virtual EpsgUom TargetUom { get; set; }
 
 		public virtual DateTime RevisionDate { get; set; }
 

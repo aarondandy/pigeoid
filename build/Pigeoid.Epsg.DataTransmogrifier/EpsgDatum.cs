@@ -1,18 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Pigeoid.Epsg.DataTransmogrifier
 {
-	public class EpsgCoordinateSystem
+	public class EpsgDatum
 	{
 
 		public virtual int Code { get; set; }
 
 		public virtual string Name { get; set; }
 
-		public virtual string TypeName { get; set; }
+		public virtual string Type { get; set; }
 
-		public virtual int Dimension { get; set; }
+		public virtual string OriginDescription { get; set; }
+
+		public virtual int? RealizationEpoch { get; set; }
+
+		public virtual EpsgEllipsoid Ellipsoid { get; set; }
+
+		public virtual EpsgPrimeMeridian PrimeMeridian { get; set; }
+
+		public virtual EpsgArea AreaOfUse { get; set; }
+
+		public virtual string Scope { get; set; }
 
 		public virtual DateTime RevisionDate { get; set; }
 
@@ -20,13 +29,10 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public virtual bool Deprecated { get; set; }
 
-		public virtual IList<EpsgAxis> Axes { get; set; }
-
-		public virtual IList<EpsgCrs> CrsUsage { get; set; }
-
 		public override string ToString() {
 			return Name + " (" + Code + ')';
 		}
 
 	}
+
 }
