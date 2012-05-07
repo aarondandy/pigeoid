@@ -92,6 +92,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public List<string> WordLookupList { get; set; }
 
+		public List<double> NumberLookupList { get; set; }
+
 		private IList<T> GetAllItems<T>() where T:class {
 			return Session.CreateCriteria(typeof (T)).List<T>();
 		}

@@ -43,9 +43,9 @@
     <Target Name="RestorePackages" DependsOnTargets="CheckPrerequisites">
 		<MakeDir
 		   Directories="$(PackagesDir)" Condition="!Exists('$(PackagesDir)')" />
-		<Exec Command="$(UpdateCommand)"
+		<!--<Exec Command="$(UpdateCommand)"
               LogStandardErrorAsError="true"
-              Condition="Exists('$(PackagesConfig)')" />
+              Condition="Exists('$(PackagesConfig)')" />-->
         <Exec Command="$(RestoreCommand)"
               LogStandardErrorAsError="true"
               Condition="Exists('$(PackagesConfig)')" />

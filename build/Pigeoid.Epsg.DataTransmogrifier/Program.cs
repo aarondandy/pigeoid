@@ -25,87 +25,35 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			}
 		}
 
-		private static IEnumerable<string> ExtractStrings<T>(IList<T> objects, params Func<T, string>[] extractions) {
+		private static IEnumerable<string> ExtractStrings<T>(IEnumerable<T> objects, params Func<T, string>[] extractions) {
 			foreach (var item in objects) {
 				foreach (var extraction in extractions) {
 					var extractedValue = extraction(item);
 					if (null != extractedValue)
-						yield return extraction(item);
+						yield return extractedValue;
 				}
 			}
 		}
 
-		static bool SplitBetween(char a, char b) {
-			return SplitBetween(Classify(a), Classify(b));
-		}
-
-		static bool SplitBetween(LetterClass a, LetterClass b) {
-			return a != b
-				|| a == LetterClass.Other
-				|| b == LetterClass.Other
-			;
-		}
-
-		static string[] BreakIntoWordParts(string text) {
-			if (null == text)
-				return new string[0];
-			var breaks = new List<int>();
-			for (int i = 1; i < text.Length; i++) {
-				bool split = SplitBetween(text[i - 1], text[i]);
-				if (split) {
-					breaks.Add(i);
+		private static IEnumerable<double> ExtractDoubles<T>(IEnumerable<T> objects, params Func<T, double>[] extractions) {
+			foreach (var item in objects) {
+				foreach (var extraction in extractions) {
+					var extractedValue = extraction(item);
+					if (!Double.IsNaN(extractedValue))
+						yield return extractedValue;
 				}
 			}
-			string[] words = new string[breaks.Count + 1];
-			if (0 == breaks.Count) {
-				words[0] = text;
-			}
-			else {
-				words[words.Length - 1] = text.Substring(breaks[breaks.Count - 1]);
-				words[0] = text.Substring(0, breaks[0]);
-				for (int i = 1; i < breaks.Count; i++) {
-					words[i] = text.Substring(breaks[i - 1], breaks[i] - breaks[i - 1]);
+		}
+
+		private static IEnumerable<double> ExtractDoubles<T>(IEnumerable<T> objects, params Func<T, double?>[] extractions) {
+			foreach (var item in objects) {
+				foreach (var extraction in extractions) {
+					var extractedValue = extraction(item);
+					if (extractedValue.HasValue && !Double.IsNaN(extractedValue.Value))
+						yield return extractedValue.Value;
 				}
 			}
-			return words;
 		}
-
-		enum LetterClass
-		{
-			// TODO: see if the file size/extraction performance is better if we combine Text and Number together to cause fewer word breaks
-			Text,
-			Number,
-			Other,
-			Space
-		}
-
-		static LetterClass Classify(char c) {
-			if (Char.IsLetter(c)) {
-				return LetterClass.Text;
-			}
-			if (Char.IsDigit(c)) {
-				return LetterClass.Number;
-			}
-			if (' ' == c) {
-				return LetterClass.Space;
-			}
-			return LetterClass.Other;
-		}
-
-		private static Dictionary<string, int> BuildWordCountLookup(IEnumerable<string> wordList) {
-			var wordCounts = new Dictionary<string, int>();
-			foreach (var word in wordList) {
-				int currentCount;
-				if (wordCounts.TryGetValue(word, out currentCount)) {
-					wordCounts[word] = currentCount + 1;
-				}
-				else {
-					wordCounts[word] = 1;
-				}
-			}
-			return wordCounts;
-		}
-
 		static void Main(string[] args) {
 
 			string dataFolderPath = "data";
@@ -131,30 +79,37 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			using(var session = sessionFactory.OpenSession()) {
 				var epsgData = new EpsgData(session);
 
-				var allStrings = Concat(
-					ExtractStrings(epsgData.Aliases, o => o.Alias),
-					ExtractStrings(epsgData.Areas, o => o.Name, o => o.AreaOfUse, o => o.Iso2, o => o.Iso3),
-					ExtractStrings(epsgData.Axes, o => o.Name, o => o.Orientation, o => o.Abbreviation),
-					ExtractStrings(epsgData.Crs, o => o.Name),
-					ExtractStrings(epsgData.CoordinateSystems, o => o.Name),
-					ExtractStrings(epsgData.CoordinateOperations, o => o.Name),
-					ExtractStrings(epsgData.CoordinateOperationMethods, o => o.Name),
-					ExtractStrings(epsgData.Parameters, o => o.Name, o => o.Description),
-					ExtractStrings(epsgData.ParamValues, o => o.TextValue),
-					ExtractStrings(epsgData.Datums, o => o.Name),
-					ExtractStrings(epsgData.Ellipsoids, o => o.Name),
-					ExtractStrings(epsgData.PrimeMeridians, o => o.Name),
-					ExtractStrings(epsgData.Uoms, o => o.Name),
-					ExtractStrings(epsgData.NamingSystems, o => o.Name)
-				);
-
-				epsgData.WordLookupList = BuildWordCountLookup(allStrings.SelectMany(BreakIntoWordParts))
-					.OrderByDescending(w => w.Value)
-					.Select(w => w.Key)
+				epsgData.WordLookupList = StringUtils.BuildWordCountLookup(Concat(
+						ExtractStrings(epsgData.Aliases, o => o.Alias),
+						ExtractStrings(epsgData.Areas, o => o.Name, o => o.AreaOfUse, o => o.Iso2, o => o.Iso3),
+						ExtractStrings(epsgData.Axes, o => o.Name, o => o.Orientation, o => o.Abbreviation),
+						ExtractStrings(epsgData.Crs, o => o.Name),
+						ExtractStrings(epsgData.CoordinateSystems, o => o.Name),
+						ExtractStrings(epsgData.CoordinateOperations, o => o.Name),
+						ExtractStrings(epsgData.CoordinateOperationMethods, o => o.Name),
+						ExtractStrings(epsgData.Parameters, o => o.Name, o => o.Description),
+						ExtractStrings(epsgData.ParamValues, o => o.TextValue),
+						ExtractStrings(epsgData.Datums, o => o.Name),
+						ExtractStrings(epsgData.Ellipsoids, o => o.Name),
+						ExtractStrings(epsgData.PrimeMeridians, o => o.Name),
+						ExtractStrings(epsgData.Uoms, o => o.Name),
+						ExtractStrings(epsgData.NamingSystems, o => o.Name)
+					).SelectMany(StringUtils.BreakIntoWordParts))
+					.OrderByDescending(o => o.Value)
+					.Select(o => o.Key)
 					.ToList();
 
-
-
+				epsgData.NumberLookupList = NumberUtils.BuildNumberCountLookup(Concat(
+						ExtractDoubles(epsgData.Areas, o=>o.EastBound, o=> o.WestBound, o=>o.SouthBound, o=> o.NorthBound),
+						ExtractDoubles(epsgData.CoordinateOperations, o=>o.Accuracy),
+						ExtractDoubles(epsgData.Ellipsoids, o=>o.SemiMajorAxis, o=>o.SemiMinorAxis, o=>o.InverseFlattening),
+						ExtractDoubles(epsgData.ParamValues, o=>o.NumericValue),
+						ExtractDoubles(epsgData.PrimeMeridians, o=>o.GreenwichLon),
+						ExtractDoubles(epsgData.Uoms, o=>o.FactorB, o=>o.FactorC)
+					))
+					.OrderByDescending(o=>o.Value)
+					.Select(o => o.Key)
+					.ToList();
 				;
 			}
 
