@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using FluentNHibernate.Cfg;
@@ -14,6 +15,95 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				.GetFiles("*.mdb", SearchOption.AllDirectories)
 				.Select(fi => fi.FullName)
 				.FirstOrDefault();
+		}
+
+		private static IEnumerable<T> Concat<T>(params IEnumerable<T>[] itemLists) {
+			foreach (var itemList in itemLists) {
+				foreach (var item in itemList) {
+					yield return item;
+				}
+			}
+		}
+
+		private static IEnumerable<string> ExtractStrings<T>(IList<T> objects, params Func<T, string>[] extractions) {
+			foreach (var item in objects) {
+				foreach (var extraction in extractions) {
+					var extractedValue = extraction(item);
+					if (null != extractedValue)
+						yield return extraction(item);
+				}
+			}
+		}
+
+		static bool SplitBetween(char a, char b) {
+			return SplitBetween(Classify(a), Classify(b));
+		}
+
+		static bool SplitBetween(LetterClass a, LetterClass b) {
+			return a != b
+				|| a == LetterClass.Other
+				|| b == LetterClass.Other
+			;
+		}
+
+		static string[] BreakIntoWordParts(string text) {
+			if (null == text)
+				return new string[0];
+			var breaks = new List<int>();
+			for (int i = 1; i < text.Length; i++) {
+				bool split = SplitBetween(text[i - 1], text[i]);
+				if (split) {
+					breaks.Add(i);
+				}
+			}
+			string[] words = new string[breaks.Count + 1];
+			if (0 == breaks.Count) {
+				words[0] = text;
+			}
+			else {
+				words[words.Length - 1] = text.Substring(breaks[breaks.Count - 1]);
+				words[0] = text.Substring(0, breaks[0]);
+				for (int i = 1; i < breaks.Count; i++) {
+					words[i] = text.Substring(breaks[i - 1], breaks[i] - breaks[i - 1]);
+				}
+			}
+			return words;
+		}
+
+		enum LetterClass
+		{
+			// TODO: see if the file size/extraction performance is better if we combine Text and Number together to cause fewer word breaks
+			Text,
+			Number,
+			Other,
+			Space
+		}
+
+		static LetterClass Classify(char c) {
+			if (Char.IsLetter(c)) {
+				return LetterClass.Text;
+			}
+			if (Char.IsDigit(c)) {
+				return LetterClass.Number;
+			}
+			if (' ' == c) {
+				return LetterClass.Space;
+			}
+			return LetterClass.Other;
+		}
+
+		private static Dictionary<string, int> BuildWordCountLookup(IEnumerable<string> wordList) {
+			var wordCounts = new Dictionary<string, int>();
+			foreach (var word in wordList) {
+				int currentCount;
+				if (wordCounts.TryGetValue(word, out currentCount)) {
+					wordCounts[word] = currentCount + 1;
+				}
+				else {
+					wordCounts[word] = 1;
+				}
+			}
+			return wordCounts;
 		}
 
 		static void Main(string[] args) {
@@ -40,29 +130,40 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 			using(var session = sessionFactory.OpenSession()) {
 				var epsgData = new EpsgData(session);
-				var aliases = epsgData.Aliases;
-				var areas = epsgData.Areas;
-				var axes = epsgData.Axes;
-				var axisNames = epsgData.AxisNames;
-				var coordSys = epsgData.CoordinateSystems;
-				var coordOps = epsgData.CoordinateOperations;
-				var opMethods = epsgData.CoordinateOperationMethods;
-				var crs = epsgData.Crs;
-				var datums = epsgData.Datums;
-				var deps = epsgData.Deprecations;
-				var elps = epsgData.Ellipsoids;
-				var nameSystems = epsgData.NamingSystems;
-				var primeMeridians = epsgData.PrimeMeridians;
-				var supersessions = epsgData.Supersessions;
-				var uoms = epsgData.Uoms;
-				var prms = epsgData.Parameters;
-				var paramUses = epsgData.ParamUses;
-				var paramValues = epsgData.ParamValues;
-				var coordOpPathItems = epsgData.CoordOpPathItems;
+
+				var allStrings = Concat(
+					ExtractStrings(epsgData.Aliases, o => o.Alias),
+					ExtractStrings(epsgData.Areas, o => o.Name, o => o.AreaOfUse, o => o.Iso2, o => o.Iso3),
+					ExtractStrings(epsgData.Axes, o => o.Name, o => o.Orientation, o => o.Abbreviation),
+					ExtractStrings(epsgData.Crs, o => o.Name),
+					ExtractStrings(epsgData.CoordinateSystems, o => o.Name),
+					ExtractStrings(epsgData.CoordinateOperations, o => o.Name),
+					ExtractStrings(epsgData.CoordinateOperationMethods, o => o.Name),
+					ExtractStrings(epsgData.Parameters, o => o.Name, o => o.Description),
+					ExtractStrings(epsgData.ParamValues, o => o.TextValue),
+					ExtractStrings(epsgData.Datums, o => o.Name),
+					ExtractStrings(epsgData.Ellipsoids, o => o.Name),
+					ExtractStrings(epsgData.PrimeMeridians, o => o.Name),
+					ExtractStrings(epsgData.Uoms, o => o.Name),
+					ExtractStrings(epsgData.NamingSystems, o => o.Name)
+				);
+
+				epsgData.WordLookupList = BuildWordCountLookup(allStrings.SelectMany(BreakIntoWordParts))
+					.OrderByDescending(w => w.Value)
+					.Select(w => w.Key)
+					.ToList();
+
+
+
 				;
 			}
 
 		}
+
+		
+
+		
+
 		/*
 		private static void Transmogrify(ISession session, string outFolder) {
 

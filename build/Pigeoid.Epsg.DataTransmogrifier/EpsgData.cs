@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using NHibernate;
 
 namespace Pigeoid.Epsg.DataTransmogrifier
@@ -89,17 +90,11 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			get { return GetAllItems<EpsgCoordOpPathItem>(); }
 		}
 
+		public List<string> WordLookupList { get; set; }
+
 		private IList<T> GetAllItems<T>() where T:class {
 			return Session.CreateCriteria(typeof (T)).List<T>();
 		}
-
-		/*public List<string> AllWords { get; set; }
-
-		public List<double> AllNumbers { get; set; }
-
-		public List<dynamic> Ellipsoids { get; set; }
-
-		public List<dynamic> Areas { get; set; }*/
 
 	}
 }
