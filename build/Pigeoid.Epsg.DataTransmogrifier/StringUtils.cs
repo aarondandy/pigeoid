@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -7,6 +8,13 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 {
 	public static class StringUtils
 	{
+
+		public static string TrimTrailingPeriod(string text) {
+			if(!String.IsNullOrEmpty(text) && text.Last() == '.') {
+				return text.Substring(0, text.Length - 1);
+			}
+			return text;
+		}
 
 		static bool SplitBetween(char a, char b) {
 			return SplitBetween(Classify(a), Classify(b));
@@ -77,6 +85,34 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				}
 			}
 			return wordCounts;
+		}
+
+		public static IEnumerable<int> GenerateWordIndices(List<string> wordLookup, string text) {
+			foreach(var word in BreakIntoWordParts(text)) {
+				var index = wordLookup.IndexOf(word);
+				if(index < 0)
+					throw new InvalidDataException();
+				yield return index;
+			}
+		}
+
+		public static byte[] To7BitArray(IEnumerable<int> nums) {
+			var data = new List<byte>();
+			foreach (int n in nums) {
+				// Write out an int 7 bits at a time. The high bit of the byte,
+				// when on, tells reader to continue reading more bytes.
+				var v = (uint)n; // support negative numbers
+				while (v >= 0x80) {
+					data.Add(unchecked((byte)(v | 0x80)));
+					v >>= 7;
+				}
+				data.Add((byte)v);
+			}
+			return data.ToArray();
+		}
+
+		public static byte[] GenerateWordIndexBytes(List<string> wordLookup, string text) {
+			return To7BitArray(GenerateWordIndices(wordLookup, text));
 		}
 
 	}

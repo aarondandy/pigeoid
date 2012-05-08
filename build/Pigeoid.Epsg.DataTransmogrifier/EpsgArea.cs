@@ -12,13 +12,13 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public virtual string AreaOfUse { get; set; }
 
-		public virtual double SouthBound { get; set; }
+		public virtual double? SouthBound { get; set; }
 
-		public virtual double NorthBound { get; set; }
+		public virtual double? NorthBound { get; set; }
 
-		public virtual double WestBound { get; set; }
+		public virtual double? WestBound { get; set; }
 
-		public virtual double EastBound { get; set; }
+		public virtual double? EastBound { get; set; }
 
 		public virtual string Iso2 { get; set; }
 

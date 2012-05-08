@@ -94,6 +94,10 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public List<double> NumberLookupList { get; set; }
 
+		public byte[] GenerateWordIndexBytes(string text) {
+			return StringUtils.GenerateWordIndexBytes(this.WordLookupList, text);
+		}
+
 		private IList<T> GetAllItems<T>() where T:class {
 			return Session.CreateCriteria(typeof (T)).List<T>();
 		}
