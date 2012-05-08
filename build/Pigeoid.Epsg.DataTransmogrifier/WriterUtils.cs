@@ -64,7 +64,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			);
 
 			dataWriter.Write((ushort)data.Areas.Count);
-			foreach(var area in data.Areas) {
+			foreach (var area in data.Areas.OrderBy(x => x.Code)) {
 				dataWriter.Write((ushort)area.Code);
 				/*dataWriter.Write((short)((area.WestBound ?? 0) * 100));
 				dataWriter.Write((short)((area.EastBound ?? 0) * 100));
@@ -114,7 +114,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 			int c = data.Ellipsoids.Count;
 			dataWriter.Write((ushort)c);
-			foreach (var ellipsoid in data.Ellipsoids) {
+			foreach (var ellipsoid in data.Ellipsoids.OrderBy(x => x.Code)) {
 				dataWriter.Write((ushort)ellipsoid.Code);
 				dataWriter.Write(data.NumberLookupList.IndexOf(ellipsoid.SemiMajorAxis));
 				dataWriter.Write(data.NumberLookupList.IndexOf(ellipsoid.InverseFlattening ?? ellipsoid.SemiMinorAxis ?? 0));
@@ -132,7 +132,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 			int c = data.PrimeMeridians.Count;
 			dataWriter.Write((ushort)c);
-			foreach (var meridian in data.PrimeMeridians) {
+			foreach (var meridian in data.PrimeMeridians.OrderBy(x => x.Code)) {
 				dataWriter.Write((ushort)meridian.Code);
 				dataWriter.Write((ushort)meridian.Uom.Code);
 				dataWriter.Write(data.NumberLookupList.IndexOf(meridian.GreenwichLon));
@@ -147,7 +147,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				.Distinct()
 			);
 
-			foreach(var datum in data.Datums) {
+			foreach (var datum in data.Datums.OrderBy(x => x.Code)) {
 				switch(datum.Type.ToUpper())
 				{
 					case "ENGINEERING": {
@@ -171,6 +171,37 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				}
 			}
 
+		}
+
+		public static void WriteUoms(EpsgData data, BinaryWriter lenWriter, BinaryWriter angWriter, BinaryWriter sclWriter, BinaryWriter textWriter) {
+			var stringLookup = WriteTextDictionary(data, textWriter,
+				data.Uoms.Select(x => x.Name)
+				.Where(x => !String.IsNullOrEmpty(x))
+				.Distinct()
+			);
+
+			foreach (var uom in data.Uoms.OrderBy(x => x.Code)) {
+				BinaryWriter writer = null;
+				switch (uom.Type.ToUpper()) {
+					case "LENGTH": {
+						writer = lenWriter;
+						break;
+					}
+					case "ANGLE": {
+						writer = angWriter;
+						break;
+					}
+					case "SCALE": {
+						writer = sclWriter;
+						break;
+					}
+					default: throw new InvalidDataException("Invalid uom type: " + uom.Type);
+				}
+				writer.Write((ushort)uom.Code);
+				writer.Write((ushort)stringLookup[uom.Name]);
+				writer.Write((ushort)data.NumberLookupList.IndexOf(uom.FactorB ?? 0));
+				writer.Write((ushort)data.NumberLookupList.IndexOf(uom.FactorC ?? 0));
+			}
 
 		}
 

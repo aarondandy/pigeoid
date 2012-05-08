@@ -157,6 +157,16 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				using (var writerText = new BinaryWriter(streamText))
 					WriterUtils.WriteDatums(epsgData, writerDataEgr, writerDataVer, writerDataGeo, writerText);
 
+				using (var streamDataLen = File.Open(Path.Combine(outFolder, "uomlen.dat"), FileMode.Create))
+				using (var writerDataLen = new BinaryWriter(streamDataLen))
+				using (var streamDataAng = File.Open(Path.Combine(outFolder, "uomang.dat"), FileMode.Create))
+				using (var writerDataAng = new BinaryWriter(streamDataAng))
+				using (var streamDataScl = File.Open(Path.Combine(outFolder, "uomscl.dat"), FileMode.Create))
+				using (var writerDataScl = new BinaryWriter(streamDataScl))
+				using (var streamText = File.Open(Path.Combine(outFolder, "uoms.txt"), FileMode.Create))
+				using (var writerText = new BinaryWriter(streamText))
+					WriterUtils.WriteUoms(epsgData, writerDataLen, writerDataAng, writerDataScl, writerText);
+
 			}
 
 		}
