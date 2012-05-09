@@ -365,5 +365,33 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			}
 		}
 
+
+		internal static void WriteCoordSystems(EpsgData data, BinaryWriter writerData, BinaryWriter writerText) {
+			var stringLookup = WriteTextDictionary(data, writerText,
+				data.CoordinateSystems.Select(x => x.Name)
+				.Where(x => !String.IsNullOrEmpty(x))
+				.Distinct()
+			);
+
+			int c = data.PrimeMeridians.Count;
+			writerData.Write((ushort)c);
+			foreach (var cs in data.CoordinateSystems.OrderBy(x => x.Code)) {
+
+				byte typeByte = 0;
+				switch (cs.TypeName.ToLower()) {
+					case "cartesian": typeByte = 16; break;
+					case "ellipsoidal": typeByte = 32; break;
+					case "spherical": typeByte = 48; break;
+					case "vertical": typeByte = 64; break;
+					default: throw new InvalidDataException();
+				}
+				byte dimByte = (byte)cs.Dimension;
+				byte typeDimVal = checked((byte)(typeByte | dimByte));
+				
+				writerData.Write((ushort)cs.Code);
+				writerData.Write((byte)typeDimVal);
+				writerData.Write((ushort)stringLookup[cs.Name]);
+			}
+		}
 	}
 }

@@ -185,6 +185,12 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				using (var writerText = new BinaryWriter(streamText))
 					WriterUtils.WriteOpMethod(epsgData, writerData, writerText);
 
+				using (var streamData = File.Open(Path.Combine(outFolder, "coordsys.dat"), FileMode.Create))
+				using (var writerData = new BinaryWriter(streamData))
+				using (var streamText = File.Open(Path.Combine(outFolder, "coordsys.txt"), FileMode.Create))
+				using (var writerText = new BinaryWriter(streamText))
+					WriterUtils.WriteCoordSystems(epsgData, writerData, writerText);
+
 			}
 
 		}
