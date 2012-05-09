@@ -70,7 +70,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			if (Char.IsWhiteSpace(c)) {
 				return LetterClass.Space;
 			}
-			return LetterClass.Other;
+			return LetterClass.Space; // spaces and other crap tend to be together so just count it as spaces to keep them together
 		}
 
 		public static Dictionary<string, int> BuildWordCountLookup(IEnumerable<string> wordList) {

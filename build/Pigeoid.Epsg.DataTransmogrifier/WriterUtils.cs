@@ -48,7 +48,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				}
 			}
 
-			for (int quality = roots.Select(x => x.Text.Length).Max()/2; quality >= 0; quality--) {
+			for (int quality = Math.Min(6,roots.Select(x => x.Text.Length).Max()/2); quality >= 0; quality--) {
 				for (int i = 0; i < roots.Count; i++) {
 					for (int j = i + 1; j < roots.Count; j++) {
 						int overlapAt = StringUtils.OverlapIndex(roots[i].Text, roots[j].Text);
@@ -58,7 +58,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 							roots.RemoveAt(j);
 							roots[i] = newNode;
 							i--;
-							continue;
+							break;
 						}
 						overlapAt = StringUtils.OverlapIndex(roots[j].Text, roots[i].Text);
 						if (overlapAt >= 0 && (roots[j].Text.Length - overlapAt) >= quality) {
@@ -67,7 +67,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 							roots.RemoveAt(j);
 							roots[i] = newNode;
 							i--;
-							continue;
+							break;
 						}
 					}
 				}
@@ -89,7 +89,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 			foreach(var word in data.WordLookupList) {
 				indexWriter.Write((ushort)offsetLookup[word]);
-				indexWriter.Write((byte)word.Length);
+				indexWriter.Write((byte)(Encoding.UTF8.GetByteCount(word)));
 			}
 		}
 
@@ -331,6 +331,38 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				writer.Write((ushort)data.NumberLookupList.IndexOf(uom.FactorC ?? 0));
 			}
 
+		}
+
+
+		public static void WriteParameters(EpsgData data, BinaryWriter writerData, BinaryWriter writerText) {
+			var stringLookup = WriteTextDictionary(data, writerText,
+				data.Parameters.Select(x => x.Name)
+				.Where(x => !String.IsNullOrEmpty(x))
+				.Distinct()
+			);
+
+			int c = data.PrimeMeridians.Count;
+			writerData.Write((ushort)c);
+			foreach (var parameter in data.Parameters.OrderBy(x => x.Code)) {
+				writerData.Write((ushort)parameter.Code);
+				writerData.Write((ushort)stringLookup[parameter.Name]);
+			}
+		}
+
+		public static void WriteOpMethod(EpsgData data, BinaryWriter writerData, BinaryWriter writerText) {
+			var stringLookup = WriteTextDictionary(data, writerText,
+				data.CoordinateOperationMethods.Select(x => x.Name)
+				.Where(x => !String.IsNullOrEmpty(x))
+				.Distinct()
+			);
+
+			int c = data.PrimeMeridians.Count;
+			writerData.Write((ushort)c);
+			foreach (var opMethod in data.CoordinateOperationMethods.OrderBy(x => x.Code)) {
+				writerData.Write((ushort)opMethod.Code);
+				writerData.Write((byte)(opMethod.Reverse ? 'B' : 'U'));
+				writerData.Write((ushort)stringLookup[opMethod.Name]);
+			}
 		}
 
 	}

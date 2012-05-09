@@ -173,6 +173,18 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				using (var writerText = new BinaryWriter(streamText))
 					WriterUtils.WriteUoms(epsgData, writerDataLen, writerDataAng, writerDataScl, writerText);
 
+				using (var streamData = File.Open(Path.Combine(outFolder, "parameters.dat"), FileMode.Create))
+				using (var writerData = new BinaryWriter(streamData))
+				using (var streamText = File.Open(Path.Combine(outFolder, "parameters.txt"), FileMode.Create))
+				using (var writerText = new BinaryWriter(streamText))
+					WriterUtils.WriteParameters(epsgData, writerData, writerText);
+
+				using (var streamData = File.Open(Path.Combine(outFolder, "opmethod.dat"), FileMode.Create))
+				using (var writerData = new BinaryWriter(streamData))
+				using (var streamText = File.Open(Path.Combine(outFolder, "opmethod.txt"), FileMode.Create))
+				using (var writerText = new BinaryWriter(streamText))
+					WriterUtils.WriteOpMethod(epsgData, writerData, writerText);
+
 			}
 
 		}
