@@ -113,6 +113,15 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static byte[] GenerateWordIndexBytes(List<string> wordLookup, string text) {
 			return To7BitArray(GenerateWordIndices(wordLookup, text));
+		} 
+
+		public static int OverlapIndex(string a, string b) {
+			for(int i = Math.Max(0,a.Length-b.Length); i < a.Length; i++) {
+				if(a.Substring(i) == b.Substring(0,a.Length-i)) {
+					return i;
+				}
+			}
+			return -1;
 		}
 
 	}

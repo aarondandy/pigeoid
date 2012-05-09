@@ -84,28 +84,30 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				var epsgData = new EpsgData(session);
 
 				epsgData.WordLookupList = StringUtils.BuildWordCountLookup(Concat(
-						ExtractStrings(epsgData.Aliases, o => o.Alias),
-						ExtractStrings(epsgData.Areas, o => o.Name, o => o.AreaOfUse, o => o.Iso2, o => o.Iso3),
+						//ExtractStrings(epsgData.Aliases, o => o.Alias),
+						ExtractStrings(epsgData.Areas, o => o.Name/*, o => StringUtils.TrimTrailingPeriod(o.AreaOfUse)*/ /*,o => o.Iso2*/ /*,o => o.Iso3*/),
 						ExtractStrings(epsgData.Axes, o => o.Name, o => o.Orientation, o => o.Abbreviation),
 						ExtractStrings(epsgData.Crs, o => o.Name),
 						ExtractStrings(epsgData.CoordinateSystems, o => o.Name),
 						ExtractStrings(epsgData.CoordinateOperations, o => o.Name),
 						ExtractStrings(epsgData.CoordinateOperationMethods, o => o.Name),
-						ExtractStrings(epsgData.Parameters, o => o.Name, o => o.Description),
+						ExtractStrings(epsgData.Parameters, o => o.Name , o => o.Description),
 						ExtractStrings(epsgData.ParamValues, o => o.TextValue),
 						ExtractStrings(epsgData.Datums, o => o.Name),
 						ExtractStrings(epsgData.Ellipsoids, o => o.Name),
 						ExtractStrings(epsgData.PrimeMeridians, o => o.Name),
-						ExtractStrings(epsgData.Uoms, o => o.Name),
-						ExtractStrings(epsgData.NamingSystems, o => o.Name)
+						ExtractStrings(epsgData.Uoms, o => o.Name)
+						//ExtractStrings(epsgData.NamingSystems, o => o.Name)
 					).SelectMany(StringUtils.BreakIntoWordParts))
 					.OrderByDescending(o => o.Value)
 					.Select(o => o.Key)
 					.ToList();
 
-				using (var stream = File.Open(Path.Combine(outFolder, "words.dat"), FileMode.Create))
-				using (var writer = new BinaryWriter(stream))
-					WriterUtils.WriteWordLookup(epsgData, writer);
+				using (var streamIndex = File.Open(Path.Combine(outFolder, "words.dat"), FileMode.Create))
+				using (var writerIndex = new BinaryWriter(streamIndex))
+				using (var streamText = File.Open(Path.Combine(outFolder, "words.txt"), FileMode.Create))
+				using (var writerText = new BinaryWriter(streamText))
+					WriterUtils.WriteWordLookup(epsgData, writerText, writerIndex);
 
 				epsgData.NumberLookupList = NumberUtils.BuildNumberCountLookup(Concat(
 						ExtractDoubles(epsgData.Areas, o=>o.EastBound, o=> o.WestBound, o=>o.SouthBound, o=> o.NorthBound),
@@ -127,7 +129,11 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				using (var writerData = new BinaryWriter(streamData))
 				using (var streamText = File.Open(Path.Combine(outFolder, "areas.txt"), FileMode.Create))
 				using (var writerText = new BinaryWriter(streamText))
-					WriterUtils.WriteAreas(epsgData, writerData, writerText);
+				using (var streamIso2 = File.Open(Path.Combine(outFolder, "iso2.dat"), FileMode.Create))
+				using (var writerIso2 = new BinaryWriter(streamIso2))
+				using (var streamIso3 = File.Open(Path.Combine(outFolder, "iso3.dat"), FileMode.Create))
+				using (var writerIso3 = new BinaryWriter(streamIso3))
+					WriterUtils.WriteAreas(epsgData, writerData, writerText, writerIso2, writerIso3);
 
 				using (var streamData = File.Open(Path.Combine(outFolder, "axis.dat"), FileMode.Create))
 				using (var writerData = new BinaryWriter(streamData))
