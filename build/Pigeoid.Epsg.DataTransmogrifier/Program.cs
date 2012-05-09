@@ -85,7 +85,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 				epsgData.WordLookupList = StringUtils.BuildWordCountLookup(Concat(
 						//ExtractStrings(epsgData.Aliases, o => o.Alias),
-						ExtractStrings(epsgData.Areas, o => o.Name/*, o => StringUtils.TrimTrailingPeriod(o.AreaOfUse)*/ /*,o => o.Iso2*/ /*,o => o.Iso3*/),
+						ExtractStrings(epsgData.Areas, o => o.Name /*, o => StringUtils.TrimTrailingPeriod(o.AreaOfUse)*/ /*,o => o.Iso2*/ /*,o => o.Iso3*/),
 						ExtractStrings(epsgData.Axes, o => o.Name, o => o.Orientation, o => o.Abbreviation),
 						ExtractStrings(epsgData.Crs, o => o.Name),
 						ExtractStrings(epsgData.CoordinateSystems, o => o.Name),
@@ -109,21 +109,25 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				using (var writerText = new BinaryWriter(streamText))
 					WriterUtils.WriteWordLookup(epsgData, writerText, writerIndex);
 
-				epsgData.NumberLookupList = NumberUtils.BuildNumberCountLookup(Concat(
-						ExtractDoubles(epsgData.Areas, o=>o.EastBound, o=> o.WestBound, o=>o.SouthBound, o=> o.NorthBound),
-						ExtractDoubles(epsgData.CoordinateOperations, o=>o.Accuracy),
-						ExtractDoubles(epsgData.Ellipsoids, o=>o.SemiMajorAxis, o=>o.SemiMinorAxis, o=>o.InverseFlattening),
-						ExtractDoubles(epsgData.ParamValues, o=>o.NumericValue),
-						ExtractDoubles(epsgData.PrimeMeridians, o=>o.GreenwichLon),
-						ExtractDoubles(epsgData.Uoms, o=>o.FactorB, o=>o.FactorC)
+				epsgData.SetNumberLists(NumberUtils.BuildNumberCountLookup(Concat(
+						//ExtractDoubles(epsgData.Areas, o => o.EastBound, o => o.WestBound, o => o.SouthBound, o => o.NorthBound),
+						ExtractDoubles(epsgData.CoordinateOperations, o => o.Accuracy),
+						ExtractDoubles(epsgData.Ellipsoids, o => o.SemiMajorAxis, o => o.SemiMinorAxis, o => o.InverseFlattening),
+						ExtractDoubles(epsgData.ParamValues, o => o.NumericValue),
+						ExtractDoubles(epsgData.PrimeMeridians, o => o.GreenwichLon),
+						ExtractDoubles(epsgData.Uoms, o => o.FactorB, o => o.FactorC)
 					))
-					.OrderByDescending(o=>o.Value)
+					.OrderByDescending(o => o.Value)
 					.Select(o => o.Key)
-					.ToList();
+				);
 
-				using (var stream = File.Open(Path.Combine(outFolder, "numbers.dat"), FileMode.Create))
-				using (var writer = new BinaryWriter(stream))
-					WriterUtils.WriteNumberLookup(epsgData, writer);
+				using (var streamDouble = File.Open(Path.Combine(outFolder, "numbersd.dat"), FileMode.Create))
+				using (var writerDouble = new BinaryWriter(streamDouble))
+				using (var streamInt = File.Open(Path.Combine(outFolder, "numbersi.dat"), FileMode.Create))
+				using (var writerInt = new BinaryWriter(streamInt))
+				using (var streamShort = File.Open(Path.Combine(outFolder, "numberss.dat"), FileMode.Create))
+				using (var writerShort = new BinaryWriter(streamShort))
+					WriterUtils.WriteNumberLookups(epsgData, writerDouble, writerInt, writerShort);
 
 				using (var streamData = File.Open(Path.Combine(outFolder, "areas.dat"), FileMode.Create))
 				using (var writerData = new BinaryWriter(streamData))

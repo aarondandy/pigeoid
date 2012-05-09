@@ -147,11 +147,15 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			}
 		}
 
-		public static void WriteNumberLookup(EpsgData data, BinaryWriter writer) {
-			int numberCount = data.NumberLookupList.Count;
-			writer.Write((ushort)numberCount);
-			foreach (var number in data.NumberLookupList) {
-				writer.Write(number);
+		public static void WriteNumberLookups(EpsgData data, BinaryWriter writerDouble, BinaryWriter writerInt, BinaryWriter writerShort) {
+			foreach (var number in data.NumberLookupDouble) {
+				writerDouble.Write(number);
+			}
+			foreach (var number in data.NumberLookupInt) {
+				writerInt.Write((int)number);
+			}
+			foreach (var number in data.NumberLookupShort) {
+				writerShort.Write((short)number);
 			}
 		}
 
@@ -186,10 +190,10 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				dataWriter.Write((short)((area.EastBound ?? 0) * 100));
 				dataWriter.Write((short)((area.SouthBound ?? 0) * 100));
 				dataWriter.Write((short)((area.NorthBound ?? 0) * 100));*/
-				dataWriter.Write((ushort)(data.NumberLookupList.IndexOf(area.WestBound ?? 0)));
-				dataWriter.Write((ushort)(data.NumberLookupList.IndexOf(area.EastBound ?? 0)));
-				dataWriter.Write((ushort)(data.NumberLookupList.IndexOf(area.SouthBound ?? 0)));
-				dataWriter.Write((ushort)(data.NumberLookupList.IndexOf(area.NorthBound ?? 0)));
+				dataWriter.Write((short)((area.WestBound ?? 0) * 100));
+				dataWriter.Write((short)((area.EastBound ?? 0) * 100));
+				dataWriter.Write((short)((area.SouthBound ?? 0) * 100));
+				dataWriter.Write((short)((area.NorthBound ?? 0) * 100));
 				dataWriter.Write((ushort)stringLookup[area.Name ?? String.Empty]);
 				//dataWriter.Write((ushort)stringLookup[StringUtils.TrimTrailingPeriod(area.AreaOfUse) ?? String.Empty]);
 				//dataWriter.Write((ushort)stringLookup[area.Iso2 ?? String.Empty]);
@@ -244,8 +248,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			dataWriter.Write((ushort)c);
 			foreach (var ellipsoid in data.Ellipsoids.OrderBy(x => x.Code)) {
 				dataWriter.Write((ushort)ellipsoid.Code);
-				dataWriter.Write((ushort)data.NumberLookupList.IndexOf(ellipsoid.SemiMajorAxis));
-				dataWriter.Write((ushort)data.NumberLookupList.IndexOf(ellipsoid.InverseFlattening ?? ellipsoid.SemiMinorAxis ?? 0));
+				dataWriter.Write((ushort)data.GetNumberIndex(ellipsoid.SemiMajorAxis));
+				dataWriter.Write((ushort)data.GetNumberIndex(ellipsoid.InverseFlattening ?? ellipsoid.SemiMinorAxis ?? 0));
 				dataWriter.Write((ushort)stringLookup[ellipsoid.Name]);
 				dataWriter.Write((byte)(ellipsoid.Uom.Code - 9000));
 			}
@@ -263,7 +267,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			foreach (var meridian in data.PrimeMeridians.OrderBy(x => x.Code)) {
 				dataWriter.Write((ushort)meridian.Code);
 				dataWriter.Write((ushort)meridian.Uom.Code);
-				dataWriter.Write((ushort)data.NumberLookupList.IndexOf(meridian.GreenwichLon));
+				dataWriter.Write((ushort)data.GetNumberIndex(meridian.GreenwichLon));
 				dataWriter.Write((byte)stringLookup[meridian.Name]);
 			}
 		}
@@ -327,8 +331,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				}
 				writer.Write((ushort)uom.Code);
 				writer.Write((ushort)stringLookup[uom.Name]);
-				writer.Write((ushort)data.NumberLookupList.IndexOf(uom.FactorB ?? 0));
-				writer.Write((ushort)data.NumberLookupList.IndexOf(uom.FactorC ?? 0));
+				writer.Write((ushort)data.GetNumberIndex(uom.FactorB ?? 0));
+				writer.Write((ushort)data.GetNumberIndex(uom.FactorC ?? 0));
 			}
 
 		}
