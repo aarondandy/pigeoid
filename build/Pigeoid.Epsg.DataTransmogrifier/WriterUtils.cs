@@ -370,7 +370,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		}
 
 
-		internal static void WriteCoordSystems(EpsgData data, BinaryWriter writerData, BinaryWriter writerText) {
+		public static void WriteCoordSystems(EpsgData data, BinaryWriter writerData, BinaryWriter writerText) {
 			var stringLookup = WriteTextDictionary(data, writerText,
 				data.CoordinateSystems.Select(x => x.Name)
 				.Where(x => !String.IsNullOrEmpty(x))
@@ -396,6 +396,184 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				writerData.Write((byte)typeDimVal);
 				writerData.Write((ushort)stringLookup[cs.Name]);
 			}
+		}
+
+		public static void WriteParamData(EpsgData data, BinaryWriter writerText, Func<ushort,BinaryWriter> paramFileGenerator) {
+			var stringLookup = WriteTextDictionary(data, writerText,
+				data.ParamValues.Select(x => x.TextValue)
+				.Where(x => !String.IsNullOrEmpty(x))
+				.Distinct()
+			);
+
+			foreach(var coordOpMethod in data.CoordinateOperationMethods) {
+				if(coordOpMethod.UsedBy.Count <= 0)
+					continue;
+
+				using(var writerData = paramFileGenerator((ushort)coordOpMethod.Code)) {
+					writerData.Write((byte)coordOpMethod.ParamUse.Count);
+					var paramUses = coordOpMethod.ParamUse.OrderBy(x => x.SortOrder).ToList();
+					foreach (var paramUse in paramUses) {
+						writerData.Write((ushort)paramUse.Parameter.Code);
+						writerData.Write((byte)(paramUse.SignReversal.GetValueOrDefault() ? 0x01 : 0x02));
+					}
+					writerData.Write((ushort)coordOpMethod.UsedBy.Count);
+					foreach(var coordOp in coordOpMethod.UsedBy.OrderBy(x => x.Code)) {
+						writerData.Write((ushort)coordOp.Code);
+						var paramValues = coordOp.ParameterValues.ToList();
+						foreach (var paramUse in paramUses) {
+							var paramCode = paramUse.Parameter.Code;
+							var paramValue = paramValues.FirstOrDefault(x => x.Parameter.Code == paramCode);
+
+							// the value
+							if(null != paramValue && paramValue.NumericValue.HasValue)
+								writerData.Write((ushort)data.GetNumberIndex(paramValue.NumericValue.Value));
+							else if(null != paramValue && !String.IsNullOrWhiteSpace(paramValue.TextValue))
+								writerData.Write((ushort)(stringLookup[paramValue.TextValue] | 0x8000));
+							else
+								writerData.Write((ushort)0xffff);
+
+							// the uom of the value
+							if (null != paramValue && null != paramValue.Uom)
+								writerData.Write((ushort)paramValue.Uom.Code);
+							else
+								writerData.Write((ushort)0xffff);
+						}
+					}
+
+					writerData.Flush();
+				}
+
+			}
+		}
+
+		public static void WriteCrs(EpsgData data, BinaryWriter writerText, BinaryWriter writerProj, BinaryWriter writerGeo, BinaryWriter writerCmp) {
+			var stringLookup = WriteTextDictionary(data, writerText,
+				data.Crs.Select(x => x.Name)
+				.Where(x => !String.IsNullOrEmpty(x))
+				.Distinct()
+			);
+
+			foreach(var crs in data.Crs.OrderBy(x => x.Code)) {
+				byte kindByte;
+				switch (crs.Kind.ToLower()) {
+					case "compound":
+						kindByte = (byte)'C';
+						break;
+					case "engineering":
+						kindByte = (byte)'E';
+						break;
+					case "geocentric":
+						kindByte = (byte)'G';
+						break;
+					case "geographic 2d":
+						kindByte = (byte)'2';
+						break;
+					case "geographic 3d":
+						kindByte = (byte)'3';
+						break;
+					case "projected":
+						kindByte = (byte)'P';
+						break;
+					case "vertical":
+						kindByte = (byte)'V';
+						break;
+					default: throw new NotSupportedException();
+				}
+
+				if(kindByte == (byte)'P') {
+					if(crs.Code > 0xffffff)
+						throw new InvalidDataException();
+					writerProj.Write((byte)(crs.Code & 0xff));
+					writerProj.Write((byte)((crs.Code >> 8) & 0xff));
+					writerProj.Write((byte)((crs.Code >> 16) & 0xff));
+
+					writerProj.Write((ushort)crs.SourceGeographicCrs.Code);
+					writerProj.Write((ushort)crs.Projection.Code);
+
+					writerProj.Write((ushort)crs.CoordinateSystem.Code);
+					writerProj.Write((ushort)crs.Area.Code);
+					writerProj.Write((ushort)stringLookup[crs.Name]);
+					writerProj.Write((byte)(crs.Deprecated ? 0xff : 0));
+				}
+				else if (kindByte == (byte)'C') {
+					writerCmp.Write((ushort)crs.Code);
+					
+					writerCmp.Write((ushort)crs.CompoundHorizontalCrs.Code);
+					writerCmp.Write((ushort)crs.CompoundVerticalCrs.Code);
+
+					writerCmp.Write((ushort)crs.Area.Code);
+					writerCmp.Write((ushort)stringLookup[crs.Name]);
+					writerCmp.Write((byte)(crs.Deprecated ? 0xff : 0));
+				}
+				else {
+					writerGeo.Write((uint) crs.Code);
+
+					writerGeo.Write((ushort)(null == crs.Datum ? 0 : crs.Datum.Code));
+
+					writerGeo.Write((ushort)crs.CoordinateSystem.Code);
+					writerGeo.Write((ushort)crs.Area.Code);
+					writerGeo.Write((ushort)stringLookup[crs.Name]);
+					writerGeo.Write((byte)(crs.Deprecated ? 0xff : 0));
+					writerGeo.Write((byte)kindByte);
+				}
+
+			}
+
+		}
+
+
+
+		public static void WriteCoordOps(EpsgData data, BinaryWriter writerText, BinaryWriter writerDataConv, BinaryWriter writerDataTran, BinaryWriter writerDataCat, BinaryWriter writerDataPath) {
+			var stringLookup = WriteTextDictionary(data, writerText,
+				data.CoordinateOperations.Select(x => x.Name)
+				.Where(x => !String.IsNullOrEmpty(x))
+				.Distinct()
+			);
+
+			var pathOffset = 0;
+
+			foreach(var op in data.CoordinateOperations.OrderBy(x => x.Code)) {
+				switch(op.TypeName.ToLower()) {
+					case "transformation": {
+						writerDataTran.Write((ushort)op.Code);
+						writerDataTran.Write((ushort)op.SourceCrs.Code);
+						writerDataTran.Write((ushort)op.TargetCrs.Code);
+						writerDataTran.Write((ushort)op.Method.Code);
+						writerDataTran.Write((ushort)data.GetNumberIndex(op.Accuracy ?? 0));
+						writerDataTran.Write((ushort)op.Area.Code);
+						writerDataTran.Write((byte)(op.Deprecated ? 0xff : 0));
+						break;
+					}
+					case "conversion": {
+						writerDataConv.Write((ushort)op.Code);
+						writerDataConv.Write((ushort)op.Method.Code);
+						writerDataConv.Write((ushort)op.Area.Code);
+						writerDataConv.Write((byte)(op.Deprecated ? 0xff : 0));
+
+						break;
+					}
+					case "concatenated operation": {
+						writerDataCat.Write((ushort)op.Code);
+						writerDataCat.Write((ushort)op.SourceCrs.Code);
+						writerDataCat.Write((ushort)op.TargetCrs.Code);
+						writerDataCat.Write((ushort)op.Area.Code);
+						writerDataCat.Write((byte)(op.Deprecated ? 0xff : 0));
+						var catOps = data.CoordOpPathItems
+							.Where(x => x.CatCode == op.Code)
+							.OrderBy(x => x.Step)
+							.ToList();
+						writerDataCat.Write((byte)(catOps.Count));
+						writerDataCat.Write((ushort)pathOffset);
+						foreach(var catOp in catOps) {
+							writerDataPath.Write((ushort)catOp.Operation.Code);
+						}
+						pathOffset += catOps.Count*sizeof (ushort);
+						break;
+					}
+					default: throw new InvalidDataException();
+				}
+			}
+
 		}
 	}
 }

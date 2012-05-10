@@ -16,6 +16,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.ChangeId).Column("CHANGE_ID");
 			Map(x => x.Deprecated).Column("DEPRECATED");
 			HasMany(x => x.UsedBy).KeyColumn("COORD_OP_METHOD_CODE");
+			HasMany(x => x.ParamUse).KeyColumn("COORD_OP_METHOD_CODE");
 		}
 
 	}

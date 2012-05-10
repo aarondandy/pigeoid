@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Pigeoid.Epsg.DataTransmogrifier
 {
@@ -38,6 +39,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		public virtual bool ShowOperation { get; set; }
 
 		public virtual bool Deprecated { get; set; }
+
+		public virtual IList<EpsgParamValue> ParameterValues { get; set; }
 
 		public override string ToString() {
 			return Name + " (" + Code + ')';

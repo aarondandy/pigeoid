@@ -93,7 +93,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public List<string> WordLookupList { get; set; }
 
-
 		public void SetNumberLists(IEnumerable<double> numbers) {
 			var dList = new List<double>();
 			var iList = new List<double>();

@@ -65,7 +65,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				return LetterClass.Text;
 			}
 			if (Char.IsDigit(c)) {
-				return LetterClass.Number;
+				return LetterClass.Space;
 			}
 			if (Char.IsWhiteSpace(c)) {
 				return LetterClass.Space;
@@ -96,7 +96,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			}
 		}
 
-		public static byte[] To7BitArray(IEnumerable<int> nums) {
+
+		internal static byte[] To7BitArray(IEnumerable<int> nums) {
 			var data = new List<byte>();
 			foreach (int n in nums) {
 				// Write out an int 7 bits at a time. The high bit of the byte,

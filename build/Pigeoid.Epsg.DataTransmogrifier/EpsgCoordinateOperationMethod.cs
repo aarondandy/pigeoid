@@ -24,6 +24,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public virtual IList<EpsgCoordinateOperation> UsedBy { get; set; }
 
+		public virtual IList<EpsgParamUse> ParamUse { get; set; }
+
 		public override string ToString() {
 			return Name + " (" + Code + ')';
 		}

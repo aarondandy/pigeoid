@@ -195,6 +195,40 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				using (var writerText = new BinaryWriter(streamText))
 					WriterUtils.WriteCoordSystems(epsgData, writerData, writerText);
 
+				using (var streamText = File.Open(Path.Combine(outFolder, "params.txt"), FileMode.Create))
+				using (var writerText = new BinaryWriter(streamText))
+					WriterUtils.WriteParamData(
+						epsgData, writerText,
+						code => new BinaryWriter(
+							File.Open(
+								Path.Combine(outFolder, String.Format("param{0}.dat",code)),
+								FileMode.Create
+							)
+						)
+					);
+
+				using (var streamDataPrj = File.Open(Path.Combine(outFolder, "crsprj.dat"), FileMode.Create))
+				using (var writerDataPrj = new BinaryWriter(streamDataPrj))
+				using (var streamDataCmp = File.Open(Path.Combine(outFolder, "crscmp.dat"), FileMode.Create))
+				using (var writerDataCmp = new BinaryWriter(streamDataCmp))
+				using (var streamDataGeo = File.Open(Path.Combine(outFolder, "crsgeo.dat"), FileMode.Create))
+				using (var writerDataGeo = new BinaryWriter(streamDataGeo))
+				using (var streamText = File.Open(Path.Combine(outFolder, "crs.txt"), FileMode.Create))
+				using (var writerText = new BinaryWriter(streamText))
+					WriterUtils.WriteCrs(epsgData, writerText, writerDataPrj, writerDataGeo, writerDataCmp);
+
+				using (var streamDataConv = File.Open(Path.Combine(outFolder, "opconv.dat"), FileMode.Create))
+				using (var writerDataConv = new BinaryWriter(streamDataConv))
+				using (var streamDataCat = File.Open(Path.Combine(outFolder, "opcat.dat"), FileMode.Create))
+				using (var writerDataCat = new BinaryWriter(streamDataCat))
+				using (var streamDataTran = File.Open(Path.Combine(outFolder, "optran.dat"), FileMode.Create))
+				using (var writerDataTran = new BinaryWriter(streamDataTran))
+				using (var streamDataPath = File.Open(Path.Combine(outFolder, "oppath.dat"), FileMode.Create))
+				using (var writerDataPath = new BinaryWriter(streamDataPath))
+				using (var streamText = File.Open(Path.Combine(outFolder, "op.txt"), FileMode.Create))
+				using (var writerText = new BinaryWriter(streamText))
+					WriterUtils.WriteCoordOps(epsgData, writerText, writerDataConv, writerDataTran, writerDataCat, writerDataPath);
+
 			}
 
 		}
