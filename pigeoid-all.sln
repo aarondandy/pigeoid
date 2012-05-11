@@ -23,6 +23,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Pigeoid.Interop.Proj4.Unman
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Epsg.DataTransmogrifier", "build\Pigeoid.Epsg.DataTransmogrifier\Pigeoid.Epsg.DataTransmogrifier.csproj", "{90BDF391-AE05-4CDB-8B62-7DD588C29001}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Epsg", "src\Pigeoid.Epsg\Pigeoid.Epsg.csproj", "{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8964A867-824D-44EB-857D-41C46AF5910E}"
+	ProjectSection(SolutionItems) = preProject
+		Performance1.psess = Performance1.psess
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -97,6 +104,18 @@ Global
 		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Release|Win32.ActiveCfg = Release|x86
 		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Release|x86.ActiveCfg = Release|x86
 		{90BDF391-AE05-4CDB-8B62-7DD588C29001}.Release|x86.Build.0 = Release|x86
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Release|Win32.ActiveCfg = Release|Any CPU
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -105,6 +124,7 @@ Global
 		{ECDC3D02-067E-4D6F-9DF2-58015EFDAE87} = {3BF3752F-F50D-44DF-84C5-10BA1B5ABC22}
 		{560D8E81-795B-456F-A9F1-7166B3BE13B1} = {3BF3752F-F50D-44DF-84C5-10BA1B5ABC22}
 		{4DB7B813-449C-42E8-8424-52C62CB4B8EB} = {3BF3752F-F50D-44DF-84C5-10BA1B5ABC22}
+		{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE} = {3BF3752F-F50D-44DF-84C5-10BA1B5ABC22}
 		{90BDF391-AE05-4CDB-8B62-7DD588C29001} = {F588ACEA-9B25-40DF-BE2F-4CFB44C7147C}
 		{E598B157-1063-4652-A4BE-DD54E02C23FB} = {7E955526-8715-4399-984C-CB96BF2A158B}
 	EndGlobalSection

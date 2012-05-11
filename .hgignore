@@ -11,3 +11,5 @@ packages/*
 *.*sdf
 build/Pigeoid.Epsg.DataTransmogrifier/data
 *NHibernate.JetDriver.dll
+*.vsp
+*.psess

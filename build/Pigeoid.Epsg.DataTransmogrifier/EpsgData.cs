@@ -143,7 +143,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		}
 
 		private IList<T> GetAllItems<T>() where T:class {
-			return Session.CreateCriteria(typeof (T)).List<T>();
+			return Session.CreateCriteria(typeof (T)).SetCacheable(true).List<T>();
 		}
 
 	}

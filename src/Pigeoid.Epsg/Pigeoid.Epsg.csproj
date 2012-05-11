@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pigeoid.Epsg</RootNamespace>
+    <AssemblyName>Pigeoid.Epsg</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\PigeoidAssemblyInfo.cs">
+      <Link>Properties\PigeoidAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="EpsgArea.cs" />
+    <Compile Include="EpsgAuthorityTag.cs" />
+    <Compile Include="EpsgDataResource.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Pigeoid.Core\Pigeoid.Core.csproj">
+      <Project>{ECDC3D02-067E-4D6F-9DF2-58015EFDAE87}</Project>
+      <Name>Pigeoid.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\areas.dat" />
+    <EmbeddedResource Include="Resources\axis.dat" />
+    <EmbeddedResource Include="Resources\coordsys.dat" />
+    <EmbeddedResource Include="Resources\crscmp.dat" />
+    <EmbeddedResource Include="Resources\crsgeo.dat" />
+    <EmbeddedResource Include="Resources\crsprj.dat" />
+    <EmbeddedResource Include="Resources\datumegr.dat" />
+    <EmbeddedResource Include="Resources\datumgeo.dat" />
+    <EmbeddedResource Include="Resources\datumver.dat" />
+    <EmbeddedResource Include="Resources\ellipsoids.dat" />
+    <EmbeddedResource Include="Resources\iso2.dat" />
+    <EmbeddedResource Include="Resources\iso3.dat" />
+    <EmbeddedResource Include="Resources\meridians.dat" />
+    <EmbeddedResource Include="Resources\numbersd.dat" />
+    <EmbeddedResource Include="Resources\numbersi.dat" />
+    <EmbeddedResource Include="Resources\numberss.dat" />
+    <EmbeddedResource Include="Resources\opcat.dat" />
+    <EmbeddedResource Include="Resources\opconv.dat" />
+    <EmbeddedResource Include="Resources\opmethod.dat" />
+    <EmbeddedResource Include="Resources\oppath.dat" />
+    <EmbeddedResource Include="Resources\optran.dat" />
+    <EmbeddedResource Include="Resources\param1024.dat" />
+    <EmbeddedResource Include="Resources\param1025.dat" />
+    <EmbeddedResource Include="Resources\param1027.dat" />
+    <EmbeddedResource Include="Resources\param1028.dat" />
+    <EmbeddedResource Include="Resources\param1029.dat" />
+    <EmbeddedResource Include="Resources\param1030.dat" />
+    <EmbeddedResource Include="Resources\param1033.dat" />
+    <EmbeddedResource Include="Resources\param1036.dat" />
+    <EmbeddedResource Include="Resources\param1040.dat" />
+    <EmbeddedResource Include="Resources\param1041.dat" />
+    <EmbeddedResource Include="Resources\param1042.dat" />
+    <EmbeddedResource Include="Resources\param1043.dat" />
+    <EmbeddedResource Include="Resources\param1045.dat" />
+    <EmbeddedResource Include="Resources\param9601.dat" />
+    <EmbeddedResource Include="Resources\param9602.dat" />
+    <EmbeddedResource Include="Resources\param9603.dat" />
+    <EmbeddedResource Include="Resources\param9606.dat" />
+    <EmbeddedResource Include="Resources\param9607.dat" />
+    <EmbeddedResource Include="Resources\param9613.dat" />
+    <EmbeddedResource Include="Resources\param9614.dat" />
+    <EmbeddedResource Include="Resources\param9615.dat" />
+    <EmbeddedResource Include="Resources\param9616.dat" />
+    <EmbeddedResource Include="Resources\param9617.dat" />
+    <EmbeddedResource Include="Resources\param9618.dat" />
+    <EmbeddedResource Include="Resources\param9619.dat" />
+    <EmbeddedResource Include="Resources\param9620.dat" />
+    <EmbeddedResource Include="Resources\param9621.dat" />
+    <EmbeddedResource Include="Resources\param9624.dat" />
+    <EmbeddedResource Include="Resources\param9630.dat" />
+    <EmbeddedResource Include="Resources\param9631.dat" />
+    <EmbeddedResource Include="Resources\param9632.dat" />
+    <EmbeddedResource Include="Resources\param9633.dat" />
+    <EmbeddedResource Include="Resources\param9634.dat" />
+    <EmbeddedResource Include="Resources\param9636.dat" />
+    <EmbeddedResource Include="Resources\param9637.dat" />
+    <EmbeddedResource Include="Resources\param9638.dat" />
+    <EmbeddedResource Include="Resources\param9639.dat" />
+    <EmbeddedResource Include="Resources\param9640.dat" />
+    <EmbeddedResource Include="Resources\param9641.dat" />
+    <EmbeddedResource Include="Resources\param9642.dat" />
+    <EmbeddedResource Include="Resources\param9643.dat" />
+    <EmbeddedResource Include="Resources\param9644.dat" />
+    <EmbeddedResource Include="Resources\param9645.dat" />
+    <EmbeddedResource Include="Resources\param9648.dat" />
+    <EmbeddedResource Include="Resources\param9651.dat" />
+    <EmbeddedResource Include="Resources\param9652.dat" />
+    <EmbeddedResource Include="Resources\param9653.dat" />
+    <EmbeddedResource Include="Resources\param9654.dat" />
+    <EmbeddedResource Include="Resources\param9655.dat" />
+    <EmbeddedResource Include="Resources\param9656.dat" />
+    <EmbeddedResource Include="Resources\param9657.dat" />
+    <EmbeddedResource Include="Resources\param9658.dat" />
+    <EmbeddedResource Include="Resources\param9659.dat" />
+    <EmbeddedResource Include="Resources\param9661.dat" />
+    <EmbeddedResource Include="Resources\param9662.dat" />
+    <EmbeddedResource Include="Resources\param9663.dat" />
+    <EmbeddedResource Include="Resources\param9664.dat" />
+    <EmbeddedResource Include="Resources\param9665.dat" />
+    <EmbeddedResource Include="Resources\param9666.dat" />
+    <EmbeddedResource Include="Resources\param9801.dat" />
+    <EmbeddedResource Include="Resources\param9802.dat" />
+    <EmbeddedResource Include="Resources\param9803.dat" />
+    <EmbeddedResource Include="Resources\param9804.dat" />
+    <EmbeddedResource Include="Resources\param9805.dat" />
+    <EmbeddedResource Include="Resources\param9806.dat" />
+    <EmbeddedResource Include="Resources\param9807.dat" />
+    <EmbeddedResource Include="Resources\param9808.dat" />
+    <EmbeddedResource Include="Resources\param9809.dat" />
+    <EmbeddedResource Include="Resources\param9810.dat" />
+    <EmbeddedResource Include="Resources\param9811.dat" />
+    <EmbeddedResource Include="Resources\param9812.dat" />
+    <EmbeddedResource Include="Resources\param9813.dat" />
+    <EmbeddedResource Include="Resources\param9815.dat" />
+    <EmbeddedResource Include="Resources\param9816.dat" />
+    <EmbeddedResource Include="Resources\param9817.dat" />
+    <EmbeddedResource Include="Resources\param9818.dat" />
+    <EmbeddedResource Include="Resources\param9819.dat" />
+    <EmbeddedResource Include="Resources\param9820.dat" />
+    <EmbeddedResource Include="Resources\param9821.dat" />
+    <EmbeddedResource Include="Resources\param9822.dat" />
+    <EmbeddedResource Include="Resources\param9823.dat" />
+    <EmbeddedResource Include="Resources\param9824.dat" />
+    <EmbeddedResource Include="Resources\param9826.dat" />
+    <EmbeddedResource Include="Resources\param9828.dat" />
+    <EmbeddedResource Include="Resources\param9829.dat" />
+    <EmbeddedResource Include="Resources\param9830.dat" />
+    <EmbeddedResource Include="Resources\param9831.dat" />
+    <EmbeddedResource Include="Resources\param9832.dat" />
+    <EmbeddedResource Include="Resources\param9833.dat" />
+    <EmbeddedResource Include="Resources\param9834.dat" />
+    <EmbeddedResource Include="Resources\param9836.dat" />
+    <EmbeddedResource Include="Resources\param9837.dat" />
+    <EmbeddedResource Include="Resources\param9838.dat" />
+    <EmbeddedResource Include="Resources\param9841.dat" />
+    <EmbeddedResource Include="Resources\param9842.dat" />
+    <EmbeddedResource Include="Resources\param9843.dat" />
+    <EmbeddedResource Include="Resources\param9844.dat" />
+    <EmbeddedResource Include="Resources\parameters.dat" />
+    <EmbeddedResource Include="Resources\uomang.dat" />
+    <EmbeddedResource Include="Resources\uomlen.dat" />
+    <EmbeddedResource Include="Resources\uomscl.dat" />
+    <EmbeddedResource Include="Resources\words.dat" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\areas.txt" />
+    <EmbeddedResource Include="Resources\axis.txt" />
+    <EmbeddedResource Include="Resources\coordsys.txt" />
+    <EmbeddedResource Include="Resources\crs.txt" />
+    <EmbeddedResource Include="Resources\datums.txt" />
+    <EmbeddedResource Include="Resources\ellipsoids.txt" />
+    <EmbeddedResource Include="Resources\meridians.txt" />
+    <EmbeddedResource Include="Resources\op.txt" />
+    <EmbeddedResource Include="Resources\opmethod.txt" />
+    <EmbeddedResource Include="Resources\parameters.txt" />
+    <EmbeddedResource Include="Resources\params.txt" />
+    <EmbeddedResource Include="Resources\uoms.txt" />
+    <EmbeddedResource Include="Resources\words.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

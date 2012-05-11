@@ -61,14 +61,16 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		}
 
 		static LetterClass Classify(char c) {
-			if (Char.IsLetter(c)) {
-				return LetterClass.Text;
-			}
-			if (Char.IsDigit(c)) {
-				return LetterClass.Space;
-			}
-			if (Char.IsWhiteSpace(c)) {
-				return LetterClass.Space;
+			if (unchecked((byte)c <= 127)) {
+				if (Char.IsLetter(c)) {
+					return LetterClass.Text;
+				}
+				if (Char.IsDigit(c)) {
+					return LetterClass.Text;
+				}
+				if (Char.IsWhiteSpace(c)) {
+					return LetterClass.Space;
+				}
 			}
 			return LetterClass.Space; // spaces and other crap tend to be together so just count it as spaces to keep them together
 		}
@@ -118,11 +120,19 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static int OverlapIndex(string a, string b) {
 			for(int i = Math.Max(0,a.Length-b.Length); i < a.Length; i++) {
-				if(a.Substring(i) == b.Substring(0,a.Length-i)) {
+				if(SubstringsEqual(a,b,i,0,a.Length-i)) {
 					return i;
 				}
 			}
 			return -1;
+		}
+
+		public static bool SubstringsEqual(string a, string b, int offsetA,int offsetB, int length) {
+			for (int i = 0; i < length; i++ ) {
+				if (a[i + offsetA] != b[i + offsetB])
+					return false;
+			}
+			return true;
 		}
 
 	}

@@ -177,8 +177,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			var stringLookup = WriteTextDictionary(data, textWriter,
 				data.Areas.Select(x => x.Name)
 				//.Concat(data.Areas.Select(x => StringUtils.TrimTrailingPeriod(x.AreaOfUse)))
-				//.Concat(data.Areas.Select(x => x.Iso2))
-				//.Concat(data.Areas.Select(x => x.Iso3))
 				.Where(x => !String.IsNullOrEmpty(x))
 				.Distinct()
 			);
@@ -186,18 +184,12 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			dataWriter.Write((ushort)data.Areas.Count);
 			foreach (var area in data.Areas.OrderBy(x => x.Code)) {
 				dataWriter.Write((ushort)area.Code);
-				/*dataWriter.Write((short)((area.WestBound ?? 0) * 100));
-				dataWriter.Write((short)((area.EastBound ?? 0) * 100));
-				dataWriter.Write((short)((area.SouthBound ?? 0) * 100));
-				dataWriter.Write((short)((area.NorthBound ?? 0) * 100));*/
 				dataWriter.Write((short)((area.WestBound ?? 0) * 100));
 				dataWriter.Write((short)((area.EastBound ?? 0) * 100));
 				dataWriter.Write((short)((area.SouthBound ?? 0) * 100));
 				dataWriter.Write((short)((area.NorthBound ?? 0) * 100));
 				dataWriter.Write((ushort)stringLookup[area.Name ?? String.Empty]);
 				//dataWriter.Write((ushort)stringLookup[StringUtils.TrimTrailingPeriod(area.AreaOfUse) ?? String.Empty]);
-				//dataWriter.Write((ushort)stringLookup[area.Iso2 ?? String.Empty]);
-				//dataWriter.Write((ushort)stringLookup[area.Iso3 ?? String.Empty]);
 				if(!String.IsNullOrWhiteSpace(area.Iso2)) {
 					iso2Writer.Write((ushort)area.Code);
 					iso2Writer.Write((byte)area.Iso2[0]);
@@ -481,7 +473,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				}
 
 				if(kindByte == (byte)'P') {
-					if(crs.Code > 0xffffff)
+					if(crs.Code >= 0xffffff)
 						throw new InvalidDataException();
 					writerProj.Write((byte)(crs.Code & 0xff));
 					writerProj.Write((byte)((crs.Code >> 8) & 0xff));
@@ -542,6 +534,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 						writerDataTran.Write((ushort)data.GetNumberIndex(op.Accuracy ?? 0));
 						writerDataTran.Write((ushort)op.Area.Code);
 						writerDataTran.Write((byte)(op.Deprecated ? 0xff : 0));
+						writerDataTran.Write((ushort)stringLookup[op.Name]);
 						break;
 					}
 					case "conversion": {
@@ -549,7 +542,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 						writerDataConv.Write((ushort)op.Method.Code);
 						writerDataConv.Write((ushort)op.Area.Code);
 						writerDataConv.Write((byte)(op.Deprecated ? 0xff : 0));
-
+						writerDataConv.Write((ushort)stringLookup[op.Name]);
 						break;
 					}
 					case "concatenated operation": {
@@ -558,6 +551,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 						writerDataCat.Write((ushort)op.TargetCrs.Code);
 						writerDataCat.Write((ushort)op.Area.Code);
 						writerDataCat.Write((byte)(op.Deprecated ? 0xff : 0));
+						writerDataCat.Write((ushort)stringLookup[op.Name]);
 						var catOps = data.CoordOpPathItems
 							.Where(x => x.CatCode == op.Code)
 							.OrderBy(x => x.Step)
