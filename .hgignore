@@ -9,7 +9,7 @@ packages/*
 *.sdf
 *.ipch
 *.*sdf
-build/Pigeoid.Epsg.DataTransmogrifier/data
 *NHibernate.JetDriver.dll
 *.vsp
 *.psess
+build/data

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using FluentNHibernate.Cfg;
-using FluentNHibernate.Cfg.Db;
 
 namespace Pigeoid.Epsg.DataTransmogrifier
 {
@@ -58,7 +56,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 			string dataFolderPath = "data";
 			if (args.Length > 0 && !String.IsNullOrWhiteSpace(args[0]))
-				dataFolderPath = args[0];
+				dataFolderPath = Path.GetFullPath(args[0]);
 
 			if (!Directory.Exists(dataFolderPath))
 				throw new IOException("Folder does not exist: " + dataFolderPath);
@@ -68,35 +66,27 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				throw new FileNotFoundException("Database file not found.");
 			Console.WriteLine("Found database: " + dataFilePath);
 
-			var sessionFactory = Fluently.Configure()
-				.Database(JetDriverConfiguration.Standard.ConnectionString(c =>
-					c.DatabaseFile(dataFilePath)
-					.Provider("Microsoft.Jet.OLEDB.4.0")
-				))
-				.Mappings(m => m.FluentMappings.AddFromAssemblyOf<Program>())
-				.BuildSessionFactory();
-
 			var outFolder = Path.Combine(dataFolderPath, "out");
 			if (!Directory.Exists(outFolder))
 				Directory.CreateDirectory(outFolder);
 
-			using(var session = sessionFactory.OpenSession()) {
-				var epsgData = new EpsgData(session);
+			using (var repository = new EpsgRepository(new FileInfo(dataFilePath))) {
+				var epsgData = new EpsgData(repository);
 
 				epsgData.WordLookupList = StringUtils.BuildWordCountLookup(Concat(
 						//ExtractStrings(epsgData.Aliases, o => o.Alias),
-						ExtractStrings(epsgData.Areas, o => o.Name /*, o => StringUtils.TrimTrailingPeriod(o.AreaOfUse)*/ /*,o => o.Iso2*/ /*,o => o.Iso3*/),
-						ExtractStrings(epsgData.Axes, o => o.Name, o => o.Orientation, o => o.Abbreviation),
-						ExtractStrings(epsgData.Crs, o => o.Name),
-						ExtractStrings(epsgData.CoordinateSystems, o => o.Name),
-						ExtractStrings(epsgData.CoordinateOperations, o => o.Name),
-						ExtractStrings(epsgData.CoordinateOperationMethods, o => o.Name),
-						ExtractStrings(epsgData.Parameters, o => o.Name , o => o.Description),
-						ExtractStrings(epsgData.ParamValues, o => o.TextValue),
-						ExtractStrings(epsgData.Datums, o => o.Name),
-						ExtractStrings(epsgData.Ellipsoids, o => o.Name),
-						ExtractStrings(epsgData.PrimeMeridians, o => o.Name),
-						ExtractStrings(epsgData.Uoms, o => o.Name)
+						ExtractStrings(epsgData.Repository.Areas, o => o.Name /*, o => StringUtils.TrimTrailingPeriod(o.AreaOfUse)*/ /*,o => o.Iso2*/ /*,o => o.Iso3*/),
+						ExtractStrings(epsgData.Repository.Axes, o => o.Name, o => o.Orientation, o => o.Abbreviation),
+						ExtractStrings(epsgData.Repository.Crs, o => o.Name),
+						ExtractStrings(epsgData.Repository.CoordinateSystems, o => o.Name),
+						ExtractStrings(epsgData.Repository.CoordinateOperations, o => o.Name),
+						ExtractStrings(epsgData.Repository.CoordinateOperationMethods, o => o.Name),
+						ExtractStrings(epsgData.Repository.Parameters, o => o.Name , o => o.Description),
+						ExtractStrings(epsgData.Repository.ParamValues, o => o.TextValue),
+						ExtractStrings(epsgData.Repository.Datums, o => o.Name),
+						ExtractStrings(epsgData.Repository.Ellipsoids, o => o.Name),
+						ExtractStrings(epsgData.Repository.PrimeMeridians, o => o.Name),
+						ExtractStrings(epsgData.Repository.Uoms, o => o.Name)
 						//ExtractStrings(epsgData.NamingSystems, o => o.Name)
 					).SelectMany(StringUtils.BreakIntoWordParts))
 					.OrderByDescending(o => o.Value)
@@ -111,11 +101,11 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 				epsgData.SetNumberLists(NumberUtils.BuildNumberCountLookup(Concat(
 						//ExtractDoubles(epsgData.Areas, o => o.EastBound, o => o.WestBound, o => o.SouthBound, o => o.NorthBound),
-						ExtractDoubles(epsgData.CoordinateOperations, o => o.Accuracy),
-						ExtractDoubles(epsgData.Ellipsoids, o => o.SemiMajorAxis, o => o.SemiMinorAxis, o => o.InverseFlattening),
-						ExtractDoubles(epsgData.ParamValues, o => o.NumericValue),
-						ExtractDoubles(epsgData.PrimeMeridians, o => o.GreenwichLon),
-						ExtractDoubles(epsgData.Uoms, o => o.FactorB, o => o.FactorC)
+						ExtractDoubles(epsgData.Repository.CoordinateOperations, o => o.Accuracy),
+						ExtractDoubles(epsgData.Repository.Ellipsoids, o => o.SemiMajorAxis, o => o.SemiMinorAxis, o => o.InverseFlattening),
+						ExtractDoubles(epsgData.Repository.ParamValues, o => o.NumericValue),
+						ExtractDoubles(epsgData.Repository.PrimeMeridians, o => o.GreenwichLon),
+						ExtractDoubles(epsgData.Repository.Uoms, o => o.FactorB, o => o.FactorC)
 					))
 					.OrderByDescending(o => o.Value)
 					.Select(o => o.Key)

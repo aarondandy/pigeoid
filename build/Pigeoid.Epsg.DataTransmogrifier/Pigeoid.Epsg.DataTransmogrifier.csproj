@@ -21,7 +21,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -31,28 +31,12 @@
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="FluentNHibernate">
-      <HintPath>..\..\packages\FluentNHibernate.1.3.0.727\lib\FluentNHibernate.dll</HintPath>
-    </Reference>
-    <Reference Include="Iesi.Collections">
-      <HintPath>..\..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\packages\log4net.2.0.0\lib\net40-client\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="NHibernate">
-      <HintPath>..\..\packages\NHibernate.3.3.0.4000\lib\Net35\NHibernate.dll</HintPath>
-    </Reference>
-    <Reference Include="NHibernate.JetDriver">
-      <HintPath>.\NHibernate.JetDriver.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -62,45 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EpsgAlias.cs" />
-    <Compile Include="EpsgArea.cs" />
-    <Compile Include="EpsgAxis.cs" />
-    <Compile Include="EpsgAxisName.cs" />
-    <Compile Include="EpsgCoordinateOperation.cs" />
-    <Compile Include="EpsgCoordinateOperationMethod.cs" />
-    <Compile Include="EpsgCoordinateSystem.cs" />
-    <Compile Include="EpsgCoordOpPathItem.cs" />
-    <Compile Include="EpsgCrs.cs" />
     <Compile Include="EpsgData.cs" />
-    <Compile Include="EpsgDatum.cs" />
-    <Compile Include="EpsgDeprecation.cs" />
-    <Compile Include="EpsgEllipsoid.cs" />
-    <Compile Include="EpsgNamingSystem.cs" />
-    <Compile Include="EpsgParameter.cs" />
-    <Compile Include="EpsgParamUse.cs" />
-    <Compile Include="EpsgParamValue.cs" />
-    <Compile Include="EpsgPrimeMeridian.cs" />
-    <Compile Include="EpsgSupersession.cs" />
-    <Compile Include="EpsgUom.cs" />
-    <Compile Include="Maps\EpsgAliasMap.cs" />
-    <Compile Include="Maps\EpsgAreaMap.cs" />
-    <Compile Include="Maps\EpsgAxisMap.cs" />
-    <Compile Include="Maps\EpsgAxisNameMap.cs" />
-    <Compile Include="Maps\EpsgCoordinateOperationMap.cs" />
-    <Compile Include="Maps\EpsgCoordinateOperationMethodMap.cs" />
-    <Compile Include="Maps\EpsgCoordinateSystemMap.cs" />
-    <Compile Include="Maps\EpsgCoordOpPathItemMap.cs" />
-    <Compile Include="Maps\EpsgCrsMap.cs" />
-    <Compile Include="Maps\EpsgDatumMap.cs" />
-    <Compile Include="Maps\EpsgDeprecationMap.cs" />
-    <Compile Include="Maps\EpsgEllipsoidMap.cs" />
-    <Compile Include="Maps\EpsgNamingSystemMap.cs" />
-    <Compile Include="Maps\EpsgParameterMap.cs" />
-    <Compile Include="Maps\EpsgParamUseMap.cs" />
-    <Compile Include="Maps\EpsgParamValueMap.cs" />
-    <Compile Include="Maps\EpsgPrimeMeridianMap.cs" />
-    <Compile Include="Maps\EpsgSupersessionMap.cs" />
-    <Compile Include="Maps\EpsgUomMap.cs" />
     <Compile Include="NumberUtils.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -114,6 +60,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Pigeoid.Epsg.DbRepository\Pigeoid.Epsg.DbRepository.csproj">
+      <Project>{4D930C82-3FDF-4B55-A57B-6295B4459CD7}</Project>
+      <Name>Pigeoid.Epsg.DbRepository</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProjectDir)..\..\build\NuGet.targets" />

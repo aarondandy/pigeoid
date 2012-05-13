@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{4D930C82-3FDF-4B55-A57B-6295B4459CD7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pigeoid.Epsg.DbRepository</RootNamespace>
+    <AssemblyName>Pigeoid.Epsg.DbRepository</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="FluentNHibernate">
+      <HintPath>..\..\packages\FluentNHibernate.1.3.0.727\lib\FluentNHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="Iesi.Collections">
+      <HintPath>..\..\packages\Iesi.Collections.3.2.0.4000\lib\Net35\Iesi.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="log4net">
+      <HintPath>..\..\packages\log4net.2.0.0\lib\net40-full\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate">
+      <HintPath>..\..\packages\NHibernate.3.3.0.4000\lib\Net35\NHibernate.dll</HintPath>
+    </Reference>
+    <Reference Include="NHibernate.JetDriver">
+      <HintPath>.\NHibernate.JetDriver.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="EpsgAlias.cs" />
+    <Compile Include="EpsgArea.cs" />
+    <Compile Include="EpsgAxis.cs" />
+    <Compile Include="EpsgAxisName.cs" />
+    <Compile Include="EpsgCoordinateOperation.cs" />
+    <Compile Include="EpsgCoordinateOperationMethod.cs" />
+    <Compile Include="EpsgCoordinateSystem.cs" />
+    <Compile Include="EpsgCoordOpPathItem.cs" />
+    <Compile Include="EpsgCrs.cs" />
+    <Compile Include="EpsgRepository.cs" />
+    <Compile Include="EpsgDatum.cs" />
+    <Compile Include="EpsgDeprecation.cs" />
+    <Compile Include="EpsgEllipsoid.cs" />
+    <Compile Include="EpsgNamingSystem.cs" />
+    <Compile Include="EpsgParameter.cs" />
+    <Compile Include="EpsgParamUse.cs" />
+    <Compile Include="EpsgParamValue.cs" />
+    <Compile Include="EpsgPrimeMeridian.cs" />
+    <Compile Include="EpsgSupersession.cs" />
+    <Compile Include="EpsgUom.cs" />
+    <Compile Include="Maps\EpsgAliasMap.cs" />
+    <Compile Include="Maps\EpsgAreaMap.cs" />
+    <Compile Include="Maps\EpsgAxisMap.cs" />
+    <Compile Include="Maps\EpsgAxisNameMap.cs" />
+    <Compile Include="Maps\EpsgCoordinateOperationMap.cs" />
+    <Compile Include="Maps\EpsgCoordinateOperationMethodMap.cs" />
+    <Compile Include="Maps\EpsgCoordinateSystemMap.cs" />
+    <Compile Include="Maps\EpsgCoordOpPathItemMap.cs" />
+    <Compile Include="Maps\EpsgCrsMap.cs" />
+    <Compile Include="Maps\EpsgDatumMap.cs" />
+    <Compile Include="Maps\EpsgDeprecationMap.cs" />
+    <Compile Include="Maps\EpsgEllipsoidMap.cs" />
+    <Compile Include="Maps\EpsgNamingSystemMap.cs" />
+    <Compile Include="Maps\EpsgParameterMap.cs" />
+    <Compile Include="Maps\EpsgParamUseMap.cs" />
+    <Compile Include="Maps\EpsgParamValueMap.cs" />
+    <Compile Include="Maps\EpsgPrimeMeridianMap.cs" />
+    <Compile Include="Maps\EpsgSupersessionMap.cs" />
+    <Compile Include="Maps\EpsgUomMap.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\data\EPSG_v7_9.mdb">
+      <Link>EPSG_v7_9.mdb</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

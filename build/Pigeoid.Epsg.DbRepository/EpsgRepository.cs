@@ -1,22 +1,40 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using FluentNHibernate.Cfg;
+using FluentNHibernate.Cfg.Db;
 using NHibernate;
+using NHibernate.Criterion;
 
 namespace Pigeoid.Epsg.DataTransmogrifier
 {
-	public class EpsgData
+	public class EpsgRepository : IDisposable
 	{
 
-		public EpsgData(ISession session) {
-			Session = session;
+		public EpsgRepository(FileInfo databaseFilePath) {
+			SessionFactory = Fluently.Configure()
+				.Database(JetDriverConfiguration.Standard.ConnectionString(c =>
+					c.DatabaseFile(databaseFilePath.FullName)
+					.Provider("Microsoft.Jet.OLEDB.4.0")
+				))
+				.Mappings(m => m.FluentMappings.AddFromAssemblyOf<EpsgRepository>())
+				.BuildSessionFactory();
+			Session = SessionFactory.OpenSession();
 		}
 
-		public ISession Session { get; set; }
+		private ISessionFactory SessionFactory { get; set; }
+
+		public ISession Session { get; private set; }
 
 		public IList<EpsgAlias> Aliases {
-			get { return Session.CreateSQLQuery("SELECT * FROM Alias").AddEntity(typeof(EpsgAlias)).List<EpsgAlias>(); }
-			//get { return GetAllItems<EpsgAlias>(); } // fails because of a space in the column name. Jet driver bug?
+			get {
+				return Session
+					.CreateSQLQuery("SELECT * FROM Alias ORDER BY AREA_CODE")
+					.AddEntity(typeof(EpsgAlias))
+					.List<EpsgAlias>();
+			}
 		}
 
 		public IList<EpsgArea> Areas {
@@ -91,59 +109,31 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			get { return GetAllItems<EpsgCoordOpPathItem>(); }
 		}
 
-		public List<string> WordLookupList { get; set; }
+		private readonly ConcurrentDictionary<Type, bool> _hasCodeProperty = new ConcurrentDictionary<Type, bool>();
 
-		public void SetNumberLists(IEnumerable<double> numbers) {
-			var dList = new List<double>();
-			var iList = new List<double>();
-			var sList = new List<double>();
-			foreach(var n in numbers) {
-				List<double> target;
-				unchecked {
-					if ((short) n == n) {
-					    target = sList;
-					}
-					else if ((int) n == n) {
-					    target = iList;
-					}
-					else {
-						target = dList;
-					}
-				}
-				target.Add(n);
-			}
-			NumberLookupDouble = dList;
-			NumberLookupInt = iList;
-			NumberLookupShort = sList;
+		private IList<T> GetAllItems<T>() where T : class {
+			var criteria = Session.CreateCriteria(typeof(T));
+
+			if(_hasCodeProperty.GetOrAdd(typeof(T), x => x.GetProperties().Any(p => p.Name == "Code")))
+				criteria = criteria.AddOrder(Order.Asc("Code"));
+
+			return criteria.SetCacheable(true).List<T>();
 		}
 
-		public List<double> NumberLookupDouble { get; private set; }
-
-		public List<double> NumberLookupInt { get; private set; }
-
-		public List<double> NumberLookupShort { get; private set; }
-
-		public ushort GetNumberIndex(double n) {
-			int i;
-			i = NumberLookupDouble.IndexOf(n);
-			if (i >= 0)
-				return (ushort)i;
-			i = NumberLookupInt.IndexOf(n);
-			if (i >= 0)
-				return (ushort)(0xc000 | i);
-			i = NumberLookupShort.IndexOf(n);
-			if (i >= 0)
-				return (ushort)(0x4000 | i);
-
-			throw new InvalidDataException();
+		public void Dispose() {
+			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
-		public byte[] GenerateWordIndexBytes(string text) {
-			return StringUtils.GenerateWordIndexBytes(this.WordLookupList, text);
+		protected virtual void Dispose(bool disposing) {
+			if(null != Session)
+				Session.Dispose();
+			if(null != SessionFactory)
+				SessionFactory.Dispose();
 		}
 
-		private IList<T> GetAllItems<T>() where T:class {
-			return Session.CreateCriteria(typeof (T)).SetCacheable(true).List<T>();
+		~EpsgRepository() {
+			Dispose(false);
 		}
 
 	}
