@@ -24,9 +24,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Epsg", "src\Pigeoid.Epsg\Pigeoid.Epsg.csproj", "{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8964A867-824D-44EB-857D-41C46AF5910E}"
-	ProjectSection(SolutionItems) = preProject
-		Performance1.psess = Performance1.psess
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Epsg.DbRepository", "build\Pigeoid.Epsg.DbRepository\Pigeoid.Epsg.DbRepository.csproj", "{4D930C82-3FDF-4B55-A57B-6295B4459CD7}"
 EndProject
