@@ -14,7 +14,7 @@ namespace Pigeoid.Ogc
 	{
 
 		private readonly IUom _unit;
-		private readonly IAxis[] _axes;
+		private readonly IList<IAxis> _axes;
 		private readonly IDatumGeodetic _datum;
 
 		/// <summary>
@@ -39,7 +39,7 @@ namespace Pigeoid.Ogc
 
 			_datum = datum;
 			_unit = angularUnit;
-			_axes = null == axes ? new IAxis[0] : axes.ToArray();
+			_axes = Array.AsReadOnly(null == axes ? new IAxis[0] : axes.ToArray());
 		}
 
 		/// <inheritdoc/>
@@ -49,7 +49,7 @@ namespace Pigeoid.Ogc
 		public IUom Unit { get { return _unit; } }
 
 		/// <inheritdoc/>
-		public IEnumerable<IAxis> Axes { get { return _axes.AsEnumerable(); } }
+		public IList<IAxis> Axes { get { return _axes; } }
 
 	}
 }

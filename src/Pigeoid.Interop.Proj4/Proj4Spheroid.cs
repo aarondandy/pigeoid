@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Pigeoid.Uom;
 using Vertesaur;
@@ -15,11 +16,11 @@ namespace Pigeoid.Interop.Proj4
 	{
 
 		private static readonly Unit UomMetre;
-		private static readonly Proj4Spheroid[] Spheroids;
+		private static readonly ReadOnlyCollection<Proj4Spheroid> _spheroids;
 
 		static Proj4Spheroid() {
 			UomMetre = new Unit("meter","length");
-			Spheroids = new[] {
+			_spheroids = new ReadOnlyCollection<Proj4Spheroid>(new[] {
 				new Proj4Spheroid("MERIT","MERIT 1983",new SpheroidEquatorialInvF(6378137.0,298.257)),
 				new Proj4Spheroid("SGS85","Soviet Geodetic System 85",new SpheroidEquatorialInvF(6378136.0,298.257)), 
 				new Proj4Spheroid("GRS80","GRS 1980(IUGG, 1980)",new SpheroidEquatorialInvF(6378137.0,298.257222101)), 
@@ -62,14 +63,14 @@ namespace Pigeoid.Interop.Proj4
 				new Proj4Spheroid("WGS72","WGS 72",new SpheroidEquatorialInvF(6378135.0,298.26)),
 				new Proj4Spheroid("WGS84","WGS 84",new SpheroidEquatorialInvF(6378137.0,298.257223563)),
 				new Proj4Spheroid("sphere","Normal Sphere (r=6370997)", new Sphere(6370997.0))
-			};
+			});
 		}
 
 		/// <summary>
 		/// All Proj4 ellipses.
 		/// </summary>
-		public static IEnumerable<Proj4Spheroid> AllSpheroids {
-			get { return Spheroids.AsEnumerable(); }
+		public static IList<Proj4Spheroid> Spheroids {
+			get { return _spheroids; }
 		}
 
 		/// <summary>
@@ -78,7 +79,7 @@ namespace Pigeoid.Interop.Proj4
 		/// <param name="name">The name or codename to search for.</param>
 		/// <returns>An ellipse; null on failure.</returns>
 		public static Proj4Spheroid GetSpheroid(string name) {
-			return Spheroids.FirstOrDefault(e => e.Code.Equals(name) || e.Name.Equals(name));
+			return _spheroids.FirstOrDefault(e => e.Code.Equals(name) || e.Name.Equals(name));
 		}
 
 		/// <summary>

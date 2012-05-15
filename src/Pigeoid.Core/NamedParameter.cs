@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -55,7 +56,7 @@ namespace Pigeoid
 	public static class NamedParameter
 	{
 
-		private static readonly string[] _genericNames;
+		private static readonly ReadOnlyCollection<string> _genericNames;
 
 		/// <summary>
 		/// Angle from Rectified to Skew Grid.
@@ -167,42 +168,42 @@ namespace Pigeoid
 		public static readonly string NameStandardParallel = "Standard Parallel";
 
 		static NamedParameter() {
-			_genericNames = new[] {
-                NameAngleFromRectifiedToSkewGrid,
-                NameAzimuthOfInitialLine,
-                NameAzimuthOfCenterLine,
-                NameCentralMeridian,
-                NameEastingAtProjectionCenter,
-                NameEastingOfFalseOrigin,
-                NameFalseEasting,
-                NameFalseNorthing,
-                NameLatitudeOfFalseOrigin,
-                NameLatitudeOfFirstStandardParallel,
-                NameLatitudeOfNaturalOrigin,
-                NameLatitudeOfOrigin,
-                NameLatitudeOfProjectionCenter,
-                NameLatitudeOfPseudoStandardParallel,
-                NameLatitudeOfSecondStandardParallel,
-                NameLatitudeOfTrueScale,
-                NameLongitudeOfFalseOrigin,
-                NameLongitudeOfNaturalOrigin,
-                NameLongitudeOfProjectionCenter,
-                NameNorthingAtProjectionCenter,
-                NameNorthingOfFalseOrigin,
-                NameRectifiedGridAngle,
-                NameSatelliteHeight,
-                NameScaleFactorAtNaturalOrigin,
-                NameScaleFactorOnInitialLine,
-                NameScaleFactorOnPseudoStandardLine,
-                NameStandardParallel,
-            };
+			_genericNames = Array.AsReadOnly(new[] {
+				NameAngleFromRectifiedToSkewGrid,
+				NameAzimuthOfInitialLine,
+				NameAzimuthOfCenterLine,
+				NameCentralMeridian,
+				NameEastingAtProjectionCenter,
+				NameEastingOfFalseOrigin,
+				NameFalseEasting,
+				NameFalseNorthing,
+				NameLatitudeOfFalseOrigin,
+				NameLatitudeOfFirstStandardParallel,
+				NameLatitudeOfNaturalOrigin,
+				NameLatitudeOfOrigin,
+				NameLatitudeOfProjectionCenter,
+				NameLatitudeOfPseudoStandardParallel,
+				NameLatitudeOfSecondStandardParallel,
+				NameLatitudeOfTrueScale,
+				NameLongitudeOfFalseOrigin,
+				NameLongitudeOfNaturalOrigin,
+				NameLongitudeOfProjectionCenter,
+				NameNorthingAtProjectionCenter,
+				NameNorthingOfFalseOrigin,
+				NameRectifiedGridAngle,
+				NameSatelliteHeight,
+				NameScaleFactorAtNaturalOrigin,
+				NameScaleFactorOnInitialLine,
+				NameScaleFactorOnPseudoStandardLine,
+				NameStandardParallel,
+			});
 		}
 
 		/// <summary>
 		/// All generic names.
 		/// </summary>
 		public static IEnumerable<string> GenericNames {
-			get { return _genericNames.AsEnumerable(); }
+			get { return _genericNames; }
 		}
 
 	}

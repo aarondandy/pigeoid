@@ -22,7 +22,7 @@ namespace Pigeoid.Contracts
 		/// <summary>
 		/// The axes for the projection.
 		/// </summary>
-		IEnumerable<IAxis> Axes { get; }
+		IList<IAxis> Axes { get; }
 
 	}
 }

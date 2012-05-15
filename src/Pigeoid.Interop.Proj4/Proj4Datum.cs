@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
@@ -16,62 +17,62 @@ namespace Pigeoid.Interop.Proj4
 	public class Proj4Datum : IDatumGeodetic
 	{
 
-		private static readonly Proj4Datum[] Datums;
+		private static readonly ReadOnlyCollection<Proj4Datum> _datums;
 
 		static Proj4Datum() {
-			Datums = new[] {
-                new Proj4Datum("WGS84",Proj4Spheroid.GetSpheroid("WGS84"),Helmert7Transformation.IdentityTransformation),
-                new Proj4Datum(
-                    "GGRS87",Proj4Spheroid.GetSpheroid("GRS80"),
-                    new Helmert7Transformation(new Vector3(-199.87,74.79,246.62))
-                ), 
-                new Proj4Datum(
-                    "NAD83",
-                    Proj4Spheroid.GetSpheroid("GRS80"),
-                    Helmert7Transformation.IdentityTransformation,
-                    matchExplicitly: true
-                ), 
-                new Proj4Datum(
-                    "NAD27",
-                    Proj4Spheroid.GetSpheroid("clrk66"),
-                    null,
-                    matchExplicitly: true
-                ),
-                new Proj4Datum(
-                    "potsdam",Proj4Spheroid.GetSpheroid("bessel"),
-                    new Helmert7Transformation(new Vector3(606.0,23.0,413.0))
-                ),
-                new Proj4Datum(
-                    "carthage",Proj4Spheroid.GetSpheroid("clrk80"),
-                    new Helmert7Transformation(new Vector3(-263.0,6.0,431.0))
-                ),
-                new Proj4Datum(
-                    "hermannskogel",Proj4Spheroid.GetSpheroid("bessel"),
-                    new Helmert7Transformation(new Vector3(653.0,-212.0,449.0))
-                ),
-                new Proj4Datum(
-                    "ire65",Proj4Spheroid.GetSpheroid("mod_airy"),
-                    new Helmert7Transformation(new Vector3(482.530,-130.596,564.557),new Vector3(-1.042,-0.214,-0.631),8.15)
-                ),
-                new Proj4Datum(
-                    "nzgd49",Proj4Spheroid.GetSpheroid("intl"),
-                    new Helmert7Transformation(new Vector3(59.47,-5.04,187.44),new Vector3(0.47,-0.1,1.024),-4.5993),
-                    supported:false,
-                    matchExplicitly:true
-                ),
-                new Proj4Datum(
-                    "OSGB36",Proj4Spheroid.GetSpheroid("airy"),
-                    new Helmert7Transformation(new Vector3(446.448,-125.157,542.060),new Vector3(0.1502,0.2470,0.8421),-20.4894),
-                    supported:false
-                ),
-            };
+			_datums = Array.AsReadOnly(new[]{
+				new Proj4Datum("WGS84", Proj4Spheroid.GetSpheroid("WGS84"), Helmert7Transformation.IdentityTransformation),
+				new Proj4Datum(
+					"GGRS87", Proj4Spheroid.GetSpheroid("GRS80"),
+					new Helmert7Transformation(new Vector3(-199.87, 74.79, 246.62))
+				),
+				new Proj4Datum(
+					"NAD83",
+					Proj4Spheroid.GetSpheroid("GRS80"),
+					Helmert7Transformation.IdentityTransformation,
+					matchExplicitly: true
+				),
+				new Proj4Datum(
+					"NAD27",
+					Proj4Spheroid.GetSpheroid("clrk66"),
+					null,
+					matchExplicitly: true
+				),
+				new Proj4Datum(
+					"potsdam", Proj4Spheroid.GetSpheroid("bessel"),
+					new Helmert7Transformation(new Vector3(606.0, 23.0, 413.0))
+				),
+				new Proj4Datum(
+					"carthage", Proj4Spheroid.GetSpheroid("clrk80"),
+					new Helmert7Transformation(new Vector3(-263.0, 6.0, 431.0))
+				),
+				new Proj4Datum(
+					"hermannskogel", Proj4Spheroid.GetSpheroid("bessel"),
+					new Helmert7Transformation(new Vector3(653.0, -212.0, 449.0))
+				),
+				new Proj4Datum(
+					"ire65", Proj4Spheroid.GetSpheroid("mod_airy"),
+					new Helmert7Transformation(new Vector3(482.530, -130.596, 564.557), new Vector3(-1.042, -0.214, -0.631), 8.15)
+				),
+				new Proj4Datum(
+					"nzgd49", Proj4Spheroid.GetSpheroid("intl"),
+					new Helmert7Transformation(new Vector3(59.47, -5.04, 187.44), new Vector3(0.47, -0.1, 1.024), -4.5993),
+					supported: false,
+					matchExplicitly: true
+				),
+				new Proj4Datum(
+					"OSGB36", Proj4Spheroid.GetSpheroid("airy"),
+					new Helmert7Transformation(new Vector3(446.448, -125.157, 542.060), new Vector3(0.1502, 0.2470, 0.8421), -20.4894),
+					supported: false
+				),
+			});
 		}
 
 		/// <summary>
 		/// All Proj4 datums.
 		/// </summary>
-		public static IEnumerable<Proj4Datum> AllDatums {
-			get { return Datums.AsEnumerable(); }
+		public static IList<Proj4Datum> Datums {
+			get { return _datums; }
 		}
 
 		private readonly string _name;

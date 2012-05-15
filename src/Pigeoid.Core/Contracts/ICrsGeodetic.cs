@@ -20,6 +20,6 @@ namespace Pigeoid.Contracts
 		/// <summary>
 		/// Gets a collection of axes for this CRS.
 		/// </summary>
-		IEnumerable<IAxis> Axes { get; }
+		IList<IAxis> Axes { get; }
 	}
 }

@@ -1,5 +1,6 @@
 ﻿// TODO: source header
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pigeoid.Contracts;
@@ -14,7 +15,7 @@ namespace Pigeoid.Ogc
 
 		private readonly IDatum _datum;
 		private readonly IUom _unit;
-		private readonly IAxis[] _axes;
+		private readonly IList<IAxis> _axes;
 
 		/// <summary>
 		/// Constructs a new local CRS.
@@ -33,7 +34,7 @@ namespace Pigeoid.Ogc
 		) : base(name, authority) {
 			_datum = datum;
 			_unit = unit;
-			_axes = axes ==  null ? new IAxis[0] : axes.ToArray();
+			_axes = Array.AsReadOnly(null == axes ? new IAxis[0] : axes.ToArray());
 		}
 
 		/// <inheritdoc/>
@@ -43,7 +44,7 @@ namespace Pigeoid.Ogc
 		public IUom Unit { get { return _unit; } }
 
 		/// <inheritdoc/>
-		public IEnumerable<IAxis> Axes { get { return _axes.AsEnumerable(); } }
+		public IList<IAxis> Axes { get { return _axes; } }
 
 	}
 }

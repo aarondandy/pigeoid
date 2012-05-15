@@ -17,7 +17,7 @@ namespace Pigeoid.Ogc
 		private readonly ICrsGeodetic _baseCrs;
 		private readonly IUom _unit;
 		private readonly ITransformation _projection;
-		private readonly IAxis[] _axes;
+		private readonly IList<IAxis> _axes;
 
 		/// <summary>
 		/// Constructs a new projected CRS.
@@ -48,7 +48,7 @@ namespace Pigeoid.Ogc
 			_baseCrs = baseCrs;
 			_unit = linearUnit;
 			_projection = projection;
-			_axes = null == axes ? new IAxis[0] : axes.ToArray();
+			_axes = Array.AsReadOnly(null == axes ? new IAxis[0] : axes.ToArray());
 		}
 
 		/// <inheritdoc/>
@@ -67,8 +67,8 @@ namespace Pigeoid.Ogc
 		}
 
 		/// <inheritdoc/>
-		public IEnumerable<IAxis> Axes {
-			get { return _axes.AsEnumerable(); }
+		public IList<IAxis> Axes {
+			get { return _axes; }
 		}
 
 		/// <inheritdoc/>

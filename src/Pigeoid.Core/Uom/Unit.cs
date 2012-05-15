@@ -9,8 +9,7 @@ namespace Pigeoid.Uom
 	/// <summary>
 	/// A unit of measure.
 	/// </summary>
-	public class Unit :
-		IUom
+	public class Unit : IUom
 	{
 		/// <summary>
 		/// The name.
