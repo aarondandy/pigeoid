@@ -6,6 +6,9 @@ using Pigeoid.Contracts;
 
 namespace Pigeoid
 {
+	/// <summary>
+	/// A geographical coordinate with height.
+	/// </summary>
 	public struct GeographicHeightCoord :
 		IGeographicHeightCoord<double>,
 		IEquatable<GeographicHeightCoord>,
@@ -48,7 +51,7 @@ namespace Pigeoid
 		public readonly double Height;
 
 		/// <summary>
-		/// Creates a new geographical coordinate.
+		/// Creates a new geographical coordinate with height.
 		/// </summary>
 		/// <param name="lat">The latitude.</param>
 		/// <param name="lon">The longitude.</param>
@@ -59,6 +62,14 @@ namespace Pigeoid
 			Longitude = lon;
 			Height = h;
 		}
+
+		/// <summary>
+		/// Creates a new geographical coordinate with height.
+		/// </summary>
+		/// <param name="coord">The latitude and longitude.</param>
+		/// <param name="h">The height above the reference surface.</param>
+		public GeographicHeightCoord(GeographicCoord coord, double h)
+			: this(coord.Latitude, coord.Longitude, h) { }
 
 		/// <inheritdoc/>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]

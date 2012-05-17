@@ -3,7 +3,9 @@ using System.Collections.Generic;
 
 namespace Pigeoid.Epsg.Resources
 {
-	internal abstract class EpsgFixedLookupBase<TKey, TValue> : EpsgLookupBase<TKey, TValue>
+	internal abstract class EpsgFixedLookupBase<TKey, TValue> :
+		EpsgLookupBase<TKey, TValue>
+		where TValue : class
 	{
 
 		protected readonly SortedDictionary<TKey, TValue> _lookup;
@@ -19,7 +21,9 @@ namespace Pigeoid.Epsg.Resources
 		}
 
 		public override TValue Get(TKey key) {
-			return _lookup[key];
+			TValue item;
+			_lookup.TryGetValue(key, out item);
+			return item;
 		}
 
 		public override IEnumerable<TKey> Keys {
