@@ -23,6 +23,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 
 		private DataTransmogrifier.EpsgRepository _repository;
 
+		[CLSCompliant(false)]
 		public DataTransmogrifier.EpsgRepository Repository { get { return _repository; }}
 
 		[FixtureSetUp]
