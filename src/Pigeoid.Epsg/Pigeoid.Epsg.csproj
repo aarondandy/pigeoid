@@ -38,6 +38,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Vertesaur.Core, Version=0.5.0.38347, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120522-041924\lib\net40-client\Vertesaur.Core.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\PigeoidAssemblyInfo.cs">
@@ -197,6 +200,9 @@
     <EmbeddedResource Include="Resources\params.txt" />
     <EmbeddedResource Include="Resources\uoms.txt" />
     <EmbeddedResource Include="Resources\words.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

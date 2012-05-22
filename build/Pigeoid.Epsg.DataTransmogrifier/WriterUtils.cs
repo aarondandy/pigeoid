@@ -156,6 +156,28 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			return stringLookup;
 		}
 
+		private static short EncodeDegreeValueToShort(double? v) {
+			return EncodeDegreeValueToShort(v ?? 0);
+		}
+
+		private static short EncodeDegreeValueToShort(double v) {
+			// push in at least twice
+			v *= 100.0;
+			// push up into an integer value
+			while(Math.Abs(Math.Round(v) - v) > 0.000001) {
+				v *= 10.0;
+			}
+			return (short)Math.Round(v);
+		}
+
+		private static double DecodeDegreeValueFromShort(short encoded) {
+			double v = encoded / 100.0;
+			while(v < -180 || v > 180) {
+				v /= 10.0;
+			}
+			return v;
+		}
+
 		public static void WriteAreas(EpsgData data, BinaryWriter dataWriter, BinaryWriter textWriter, BinaryWriter iso2Writer, BinaryWriter iso3Writer) {
 			var stringLookup = WriteTextDictionary(data, textWriter,
 				data.Repository.Areas.Select(x => x.Name)
@@ -167,10 +189,25 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			dataWriter.Write((ushort)data.Repository.Areas.Count);
 			foreach (var area in data.Repository.Areas.OrderBy(x => x.Code)) {
 				dataWriter.Write((ushort)area.Code);
-				dataWriter.Write((short)((area.WestBound ?? 0) * 100));
-				dataWriter.Write((short)((area.EastBound ?? 0) * 100));
-				dataWriter.Write((short)((area.SouthBound ?? 0) * 100));
-				dataWriter.Write((short)((area.NorthBound ?? 0) * 100));
+
+				var encodedWestBound = EncodeDegreeValueToShort(area.WestBound);
+				var encodedEastBound = EncodeDegreeValueToShort(area.EastBound);
+				var encodedSouthBound =EncodeDegreeValueToShort(area.SouthBound);
+				var encodedNorthBound =EncodeDegreeValueToShort(area.NorthBound);
+
+				if (DecodeDegreeValueFromShort(encodedWestBound) != (area.WestBound ?? 0))
+					throw new InvalidOperationException();
+				if (DecodeDegreeValueFromShort(encodedEastBound) != (area.EastBound ?? 0))
+					throw new InvalidOperationException();
+				if (DecodeDegreeValueFromShort(encodedNorthBound) != (area.NorthBound ?? 0))
+					throw new InvalidOperationException();
+				if (DecodeDegreeValueFromShort(encodedSouthBound) != (area.SouthBound ?? 0))
+					throw new InvalidOperationException();
+
+				dataWriter.Write(encodedWestBound);
+				dataWriter.Write(encodedEastBound);
+				dataWriter.Write(encodedSouthBound);
+				dataWriter.Write(encodedNorthBound);
 				dataWriter.Write((ushort)stringLookup[area.Name ?? String.Empty]);
 				//dataWriter.Write((ushort)stringLookup[StringUtils.TrimTrailingPeriod(area.AreaOfUse) ?? String.Empty]);
 				if(!String.IsNullOrWhiteSpace(area.Iso2)) {
