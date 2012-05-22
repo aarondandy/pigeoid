@@ -15,7 +15,7 @@ namespace Pigeoid.Epsg.Resources
 			return ResourceAssembly.GetManifestResourceStream(ResourceBaseName + resourceName);
 		}
 
-		public static BinaryReader CreteBinaryReader(string resourceName) {
+		public static BinaryReader CreateBinaryReader(string resourceName) {
 			return new BinaryReader(CreateStream(resourceName));
 		}
 

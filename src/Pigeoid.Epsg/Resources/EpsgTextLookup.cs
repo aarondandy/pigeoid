@@ -9,16 +9,20 @@ namespace Pigeoid.Epsg.Resources
 	{
 
 		public static string GetString(ushort stringOffset, string wordPointerFile) {
-			using (var reader = EpsgDataResource.CreteBinaryReader(wordPointerFile)) {
-				reader.BaseStream.Seek(stringOffset, SeekOrigin.Begin);
-				var wordIndices = Read7BitArray(reader);
-				return BuildWordString(wordIndices);
+			using (var reader = EpsgDataResource.CreateBinaryReader(wordPointerFile)) {
+				return GetString(stringOffset, reader);
 			}
 		}
 
+		public static string GetString(ushort stringOffset, BinaryReader reader) {
+			reader.BaseStream.Seek(stringOffset, SeekOrigin.Begin);
+			var wordIndices = Read7BitArray(reader);
+			return BuildWordString(wordIndices);
+		}
+
 		private static string BuildWordString(List<int> wordIndices) {
-			using(var datReader = EpsgDataResource.CreteBinaryReader("words.dat"))
-			using(var txtReader = EpsgDataResource.CreteBinaryReader("words.txt")){
+			using(var datReader = EpsgDataResource.CreateBinaryReader("words.dat"))
+			using(var txtReader = EpsgDataResource.CreateBinaryReader("words.txt")){
 				if (wordIndices.Count == 1) {
 					return BuildWordString(wordIndices[0], datReader, txtReader);
 				}
@@ -74,7 +78,7 @@ namespace Pigeoid.Epsg.Resources
 		/// <param name="textSize">The fixed length of the ISO code to read.</param>
 		/// <returns>An ISO name code or <see langword="null"/> if not found.</returns>
 		public static string LookupIsoString(ushort searchCode, string textPathFile, int textSize) {
-			using (var reader = EpsgDataResource.CreteBinaryReader(textPathFile)) {
+			using (var reader = EpsgDataResource.CreateBinaryReader(textPathFile)) {
 				var recordSize = sizeof(ushort) + (textSize * sizeof(byte));
 				var byteLength = reader.BaseStream.Length;
 				var itemCount = (int)byteLength / recordSize;

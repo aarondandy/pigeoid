@@ -1,5 +1,4 @@
-﻿using System;
-using MbUnit.Framework;
+﻿using MbUnit.Framework;
 using Vertesaur;
 
 namespace Pigeoid.Epsg.ResourceData.Test
