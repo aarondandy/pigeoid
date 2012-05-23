@@ -15,14 +15,15 @@ namespace Pigeoid.Epsg
 
 		private const string TxtFileName = "datums.txt";
 
-		private static SortedDictionary<ushort, T> GenerateSimpleLookup<T>(string fileName, Func<ushort,string,T> generate) {
+		private static SortedDictionary<ushort, T> GenerateSimpleLookup<T>(string fileName, Func<ushort,string,EpsgArea,T> generate) {
 			var lookup = new SortedDictionary<ushort, T>();
 			using (var readerTxt = EpsgDataResource.CreateBinaryReader(TxtFileName))
 			using (var readerDat = EpsgDataResource.CreateBinaryReader(fileName)) {
 				while (readerDat.BaseStream.Position < readerDat.BaseStream.Length) {
 					var code = readerDat.ReadUInt16();
 					var name = EpsgTextLookup.GetString(readerDat.ReadUInt16(), readerTxt);
-					lookup.Add(code, generate(code, name));
+					var area = EpsgArea.Get(readerDat.ReadUInt16());
+					lookup.Add(code, generate(code, name, area));
 				}
 			}
 			return lookup;
@@ -35,8 +36,8 @@ namespace Pigeoid.Epsg
 				return new EpsgDatumEngineeringLookup();
 			}
 
-			private static EpsgDatumEngineering Create(ushort code, string name) {
-				return new EpsgDatumEngineering(code,name);
+			private static EpsgDatumEngineering Create(ushort code, string name, EpsgArea area) {
+				return new EpsgDatumEngineering(code, name, area);
 			}
 
 			public EpsgDatumEngineeringLookup() : base(GenerateSimpleLookup("datumegr.dat", Create)) { }
@@ -49,8 +50,8 @@ namespace Pigeoid.Epsg
 				return new EpsgDatumVerticalLookup();
 			}
 
-			private static EpsgDatumVertical Create(ushort code, string name) {
-				return new EpsgDatumVertical(code, name);
+			private static EpsgDatumVertical Create(ushort code, string name, EpsgArea area) {
+				return new EpsgDatumVertical(code, name, area);
 			}
 
 			public EpsgDatumVerticalLookup() : base(GenerateSimpleLookup("datumver.dat",Create)) { }
@@ -59,7 +60,7 @@ namespace Pigeoid.Epsg
 		internal class EpsgDatumGeodeticLookup : EpsgDynamicLookupBase<ushort, EpsgDatumGeodetic>
 		{
 			private const string DatFileName = "datumgeo.dat";
-			private const int RecordDataSize = sizeof(ushort) * 3;
+			private const int RecordDataSize = sizeof(ushort) * 4;
 			private const int RecordSize = sizeof(ushort) + RecordDataSize;
 
 			private static ushort[] GetAllKeys() {
@@ -82,9 +83,10 @@ namespace Pigeoid.Epsg
 					reader.BaseStream.Seek(recordAddress, SeekOrigin.Begin);
 					var code = reader.ReadUInt16();
 					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
+					var area = EpsgArea.Get(reader.ReadUInt16());
 					var spheroid = EpsgEllipsoid.Get(reader.ReadUInt16());
 					var meridian = EpsgPrimeMeridian.Get(reader.ReadUInt16());
-					return new EpsgDatumGeodetic(code, name, spheroid, meridian);
+					return new EpsgDatumGeodetic(code, name, spheroid, meridian, area);
 				}
 			}
 
@@ -150,15 +152,19 @@ namespace Pigeoid.Epsg
 
 		private ushort _code;
 		private string _name;
+		private EpsgArea _area;
 
-		internal EpsgDatum(ushort code, string name) {
+		internal EpsgDatum(ushort code, string name, EpsgArea area) {
 			_code = code;
 			_name = name;
+			_area = area;
 		}
 
 		public int Code { get { return _code; } }
 
 		public string Name { get { return _name; } }
+
+		public EpsgArea Area { get { return _area; } }
 
 		public IAuthorityTag Authority {
 			get { return new EpsgAuthorityTag(_code); }
@@ -170,13 +176,13 @@ namespace Pigeoid.Epsg
 
 	public class EpsgDatumEngineering : EpsgDatum
 	{
-		public EpsgDatumEngineering(ushort code, string name) : base(code,name) { }
+		public EpsgDatumEngineering(ushort code, string name, EpsgArea area) : base(code, name, area) { }
 		public override string Type { get { return "Engineering"; } }
 	}
 
 	public class EpsgDatumVertical : EpsgDatum
 	{
-		public EpsgDatumVertical(ushort code, string name) : base(code, name) { }
+		public EpsgDatumVertical(ushort code, string name, EpsgArea area) : base(code, name, area) { }
 		public override string Type { get { return "Vertical"; } }
 	}
 
@@ -186,8 +192,8 @@ namespace Pigeoid.Epsg
 		private readonly EpsgEllipsoid _spheroid;
 		private readonly EpsgPrimeMeridian _primeMeridian;
 
-		internal EpsgDatumGeodetic(ushort code, string name, EpsgEllipsoid spheroid, EpsgPrimeMeridian primeMeridian)
-			: base(code, name)
+		internal EpsgDatumGeodetic(ushort code, string name, EpsgEllipsoid spheroid, EpsgPrimeMeridian primeMeridian, EpsgArea area)
+			: base(code, name, area)
 		{
 			_spheroid = spheroid;
 			_primeMeridian = primeMeridian;

@@ -20,6 +20,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 				dbItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
+				new Tester((x, y) => x.Area.Code == y.AreaOfUse.Code),
 				new Tester((x, y) => String.Equals(x.Type,y.Type, StringComparison.OrdinalIgnoreCase))
 			);
 
@@ -42,6 +43,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 				dbItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
+				new Tester((x, y) => x.Area.Code == y.AreaOfUse.Code),
 				new Tester((x, y) => String.Equals(x.Type, y.Type, StringComparison.OrdinalIgnoreCase)),
 				new Tester((x, y) => x.PrimeMeridian.Code == y.PrimeMeridian.Code),
 				new Tester((x, y) => x.Spheroid.Code == y.Ellipsoid.Code)

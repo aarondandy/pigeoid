@@ -297,16 +297,19 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 					case "ENGINEERING": {
 						egrWriter.Write((ushort)datum.Code);
 						egrWriter.Write((ushort)(stringLookup[datum.Name]));
+						egrWriter.Write((ushort)datum.AreaOfUse.Code);
 						break;
 					}
 					case "VERTICAL": {
 						verWriter.Write((ushort)datum.Code);
 						verWriter.Write((ushort)(stringLookup[datum.Name]));
+						verWriter.Write((ushort)datum.AreaOfUse.Code);
 						break;
 					}
 					case "GEODETIC": {
 						geoWriter.Write((ushort)datum.Code);
 						geoWriter.Write((ushort)(stringLookup[datum.Name]));
+						geoWriter.Write((ushort)datum.AreaOfUse.Code);
 						geoWriter.Write((ushort)datum.Ellipsoid.Code);
 						geoWriter.Write((ushort)datum.PrimeMeridian.Code);
 						break;
