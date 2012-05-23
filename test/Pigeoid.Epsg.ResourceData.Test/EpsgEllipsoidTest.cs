@@ -19,9 +19,10 @@ namespace Pigeoid.Epsg.ResourceData.Test
 				new Tester((x, y) => x.Name == y.Name),
 				new Tester((x, y) => x.Unit.Code == y.Uom.Code),
 				new Tester((x, y) => x.A == y.SemiMajorAxis),
-				new Tester((x, y) => y.SemiMinorAxis.HasValue
-					? (x.B == y.SemiMinorAxis.Value)
-					: (x.InvF == y.InverseFlattening.Value))
+				new Tester((x, y) => 
+					(y.SemiMinorAxis.HasValue && x.B == y.SemiMinorAxis.Value)
+					|| (y.InverseFlattening.HasValue && x.InvF == y.InverseFlattening.Value)
+				)
 			);
 
 		}

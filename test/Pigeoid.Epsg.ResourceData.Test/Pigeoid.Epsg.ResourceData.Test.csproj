@@ -65,6 +65,7 @@
     </Compile>
     <Compile Include="EpsgAreaTest.cs" />
     <Compile Include="EpsgDataTestBase.cs" />
+    <Compile Include="EpsgDatumTest.cs" />
     <Compile Include="EpsgEllipsoidTest.cs" />
     <Compile Include="EpsgPrimeMeridianTest.cs" />
     <Compile Include="EpsgUomTest.cs" />

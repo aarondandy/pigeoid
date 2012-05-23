@@ -31,12 +31,10 @@ namespace Pigeoid.Epsg
 			}
 
 			private static ISpheroid<double> CreateSpheroid(double semiMajorAxis, double valueB) {
-				if (valueB < semiMajorAxis / 10.0) {
+				if (valueB < semiMajorAxis / 10.0)
 					return new SpheroidEquatorialInvF(semiMajorAxis, valueB);
-				}
-				if (valueB == semiMajorAxis) {
+				if (valueB == semiMajorAxis)
 					return new Sphere(semiMajorAxis);
-				}
 				return new SpheroidEquatorialPolar(semiMajorAxis, valueB);
 			}
 
