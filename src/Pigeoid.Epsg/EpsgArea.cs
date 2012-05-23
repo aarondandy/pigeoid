@@ -52,16 +52,13 @@ namespace Pigeoid.Epsg
 
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					reader.BaseStream.Seek(recordAddress, SeekOrigin.Begin);
+
 					var code = reader.ReadUInt16();
 					var westBound = DecodeDegreeValueFromShort(reader.ReadInt16());
 					var eastBound = DecodeDegreeValueFromShort(reader.ReadInt16());
 					var southBound = DecodeDegreeValueFromShort(reader.ReadInt16());
 					var northBound = DecodeDegreeValueFromShort(reader.ReadInt16());
-					var stringOffset = reader.ReadUInt16();
-
-					var name = stringOffset != UInt16.MaxValue
-						? EpsgTextLookup.GetString(stringOffset, TxtFileName)
-						: String.Empty;
+					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
 
 					return new EpsgArea(
 						code, name,
@@ -81,13 +78,8 @@ namespace Pigeoid.Epsg
 
 		internal static readonly EpsgAreaLookup Lookup = new EpsgAreaLookup();
 
-		[CLSCompliant(false)]
-		public static EpsgArea Get(ushort code) {
-			return Lookup.Get(code);
-		}
-
 		public static EpsgArea Get(int code) {
-			return Get(checked((ushort) code));
+			return Lookup.Get(checked((ushort) code));
 		}
 
 		public static IEnumerable<EpsgArea> Values { get { return Lookup.Values; } }

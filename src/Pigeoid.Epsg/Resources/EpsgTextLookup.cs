@@ -9,12 +9,16 @@ namespace Pigeoid.Epsg.Resources
 	{
 
 		public static string GetString(ushort stringOffset, string wordPointerFile) {
+			if (stringOffset == UInt16.MaxValue)
+				return String.Empty;
 			using (var reader = EpsgDataResource.CreateBinaryReader(wordPointerFile)) {
 				return GetString(stringOffset, reader);
 			}
 		}
 
 		public static string GetString(ushort stringOffset, BinaryReader reader) {
+			if (stringOffset == UInt16.MaxValue)
+				return String.Empty;
 			reader.BaseStream.Seek(stringOffset, SeekOrigin.Begin);
 			var wordIndices = Read7BitArray(reader);
 			return BuildWordString(wordIndices);

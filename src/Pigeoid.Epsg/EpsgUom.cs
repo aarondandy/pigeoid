@@ -1,4 +1,6 @@
-﻿using System;
+﻿// TODO: source header
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Pigeoid.Contracts;
@@ -29,12 +31,9 @@ namespace Pigeoid.Epsg
 				using (var readerDat = EpsgDataResource.CreateBinaryReader(datFileName)) {
 					while (readerDat.BaseStream.Position < readerDat.BaseStream.Length) {
 						var code = readerDat.ReadUInt16();
-						var stringOffset = readerDat.ReadUInt16();
+						var name = EpsgTextLookup.GetString(readerDat.ReadUInt16(), readerTxt);
 						var factorB = numberLookup.Get(readerDat.ReadUInt16());
 						var factorC = numberLookup.Get(readerDat.ReadUInt16());
-						var name = stringOffset != UInt16.MaxValue
-							? EpsgTextLookup.GetString(stringOffset, readerTxt)
-							: String.Empty;
 						lookup.Add(code, new EpsgUom(code, name, typeName, factorB, factorC));
 					}
 				}
@@ -45,13 +44,8 @@ namespace Pigeoid.Epsg
 
 		internal static readonly EpsgUomLookup Lookup = new EpsgUomLookup();
 
-		[CLSCompliant(false)]
-		public static EpsgUom Get(ushort code) {
-			return Lookup.Get(code);
-		}
-
 		public static EpsgUom Get(int code) {
-			return Get(checked((ushort)code));
+			return Lookup.Get(checked((ushort)code));
 		}
 
 		public static IEnumerable<EpsgUom> Values { get { return Lookup.Values; } }
