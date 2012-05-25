@@ -1,8 +1,9 @@
-﻿
+﻿// TODO: source header
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Pigeoid.Contracts;
 using Pigeoid.Epsg.Resources;
 
 namespace Pigeoid.Epsg
@@ -105,6 +106,9 @@ namespace Pigeoid.Epsg
 
 		public CsType Type { get { return _csType; } }
 
+		public IEnumerable<EpsgAxis> Axes { get { return EpsgAxis.Get(_code) ; } }
+
+		public IAuthorityTag Authority { get { return new EpsgAuthorityTag(_code); } }
 
 	}
 }

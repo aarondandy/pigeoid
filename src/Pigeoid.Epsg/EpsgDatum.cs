@@ -1,4 +1,6 @@
-﻿using System;
+﻿// TODO: source header
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,7 +17,9 @@ namespace Pigeoid.Epsg
 
 		private const string TxtFileName = "datums.txt";
 
-		private static SortedDictionary<ushort, T> GenerateSimpleLookup<T>(string fileName, Func<ushort,string,EpsgArea,T> generate) {
+		private static SortedDictionary<ushort, T> GenerateSimpleLookup<T>(
+			string fileName, Func<ushort,string,EpsgArea,T> generate)
+		{
 			var lookup = new SortedDictionary<ushort, T>();
 			using (var readerTxt = EpsgDataResource.CreateBinaryReader(TxtFileName))
 			using (var readerDat = EpsgDataResource.CreateBinaryReader(fileName)) {

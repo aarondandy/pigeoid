@@ -234,13 +234,13 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				.Distinct()
 			);
 
-			var axesData = data.Repository.Axes.OrderBy(x => x.OrderValue).ToLookup(x => x.CoordinateSystem.Code);
+			var axesData = data.Repository.Axes.ToLookup(x => x.CoordinateSystem.Code);
 			int c = axesData.Count();
 			dataWriter.Write((ushort)c);
-			foreach (var axisSet in axesData) {
+			foreach (var axisSet in axesData.OrderBy(x => x.Key)) {
 				dataWriter.Write((ushort)axisSet.Key);
 				dataWriter.Write((byte)axisSet.Count());
-				foreach (var axis in axisSet) {
+				foreach (var axis in axisSet.OrderBy(x => x.OrderValue)) {
 					dataWriter.Write((ushort)axis.Uom.Code);
 					dataWriter.Write((ushort)stringLookup[axis.Name]);
 					dataWriter.Write((ushort)stringLookup[axis.Orientation]);
