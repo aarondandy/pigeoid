@@ -406,7 +406,9 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				}
 				byte dimByte = (byte)cs.Dimension;
 				byte typeDimVal = checked((byte)(typeByte | dimByte));
-				
+				if (cs.Deprecated)
+					typeDimVal |= 128;
+
 				writerData.Write((ushort)cs.Code);
 				writerData.Write((byte)typeDimVal);
 				writerData.Write((ushort)stringLookup[cs.Name]);

@@ -64,6 +64,7 @@
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="EpsgAreaTest.cs" />
+    <Compile Include="EpsgCoordinateSystemTest.cs" />
     <Compile Include="EpsgDataTestBase.cs" />
     <Compile Include="EpsgDatumTest.cs" />
     <Compile Include="EpsgEllipsoidTest.cs" />
