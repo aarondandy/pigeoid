@@ -55,8 +55,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vertesaur.Core, Version=0.5.0.38347, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120522-041924\lib\net40-client\Vertesaur.Core.dll</HintPath>
+    <Reference Include="Vertesaur.Core, Version=0.5.0.29634, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120525-113044\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -65,6 +66,7 @@
     </Compile>
     <Compile Include="EpsgAreaTest.cs" />
     <Compile Include="EpsgCoordinateSystemTest.cs" />
+    <Compile Include="EpsgCoordOpMethodInfoTest.cs" />
     <Compile Include="EpsgDataTestBase.cs" />
     <Compile Include="EpsgDatumTest.cs" />
     <Compile Include="EpsgEllipsoidTest.cs" />

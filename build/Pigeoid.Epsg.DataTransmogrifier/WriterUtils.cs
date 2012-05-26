@@ -375,7 +375,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				.Distinct()
 			);
 
-			int c = data.Repository.PrimeMeridians.Count;
+			int c = data.Repository.CoordinateOperationMethods.Count;
 			writerData.Write((ushort)c);
 			foreach (var opMethod in data.Repository.CoordinateOperationMethods.OrderBy(x => x.Code)) {
 				writerData.Write((ushort)opMethod.Code);

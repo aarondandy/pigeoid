@@ -13,3 +13,4 @@ packages/*
 *.vsp
 *.psess
 build/data
+build/**/data

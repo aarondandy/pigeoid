@@ -11,7 +11,7 @@ using Vertesaur.Contracts;
 namespace Pigeoid.Projection
 {
 	/// <summary>
-	/// A base class for lamber conic conformal projections.
+	/// A base class for lambert conic conformal projections.
 	/// </summary>
 	public abstract class LambertConicConformal :
 		ProjectionBase

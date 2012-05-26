@@ -76,7 +76,9 @@ namespace Pigeoid.Epsg
 		internal static readonly EpsgCoordinateSystemLookup Lookup = new EpsgCoordinateSystemLookup();
 
 		public static EpsgCoordinateSystem Get(int code) {
-			return Lookup.Get(checked((ushort)code));
+			return code >= 0 && code <= UInt16.MaxValue
+				? Lookup.Get(unchecked((ushort)code))
+				: null;
 		}
 
 		public static IEnumerable<EpsgCoordinateSystem> Values { get { return Lookup.Values; } }

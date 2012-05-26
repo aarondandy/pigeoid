@@ -102,7 +102,7 @@
   <ItemGroup>
     <Content Include="..\data\EPSG_v7_9.mdb">
       <Link>EPSG_v7_9.mdb</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

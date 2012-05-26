@@ -10,7 +10,7 @@
 		<VertesaurPackedPath>$(BuildDir)..\..\vertesaur\build\packed</VertesaurPackedPath>
 
         <!-- Package sources used to restore packages. By default will used the registered sources under %APPDATA%\NuGet\NuGet.Config -->
-        <PackageSources>$(VertesaurPackedPath);https://go.microsoft.com/fwlink/?LinkID=206669</PackageSources>
+        <PackageSources></PackageSources>
 
         <!-- Enable the restore command to run before builds -->
         <RestorePackages Condition="$(RestorePackages) == ''">false</RestorePackages>
