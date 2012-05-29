@@ -1,8 +1,8 @@
-﻿using System;
+﻿// TODO: source header
+
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using Pigeoid.Epsg.Resources;
 
 namespace Pigeoid.Epsg
@@ -13,9 +13,10 @@ namespace Pigeoid.Epsg
 		internal class EpsgCoordOpMethodInfoLookup : EpsgDynamicLookupBase<ushort, EpsgCoordOpMethodInfo>
 		{
 			private const string DatFileName = "opmethod.dat";
-			private const int FileHeaderSize = sizeof (ushort);
-			private const int RecordDataSize = sizeof (ushort) + sizeof (byte);
-			private const int RecordSize = sizeof (ushort) + RecordDataSize;
+			private const int FileHeaderSize = sizeof(ushort);
+			private const int RecordDataSize = sizeof(ushort) + sizeof(byte);
+			private const int RecordSize = sizeof(ushort) + RecordDataSize;
+			private const int CodeSize = sizeof(ushort);
 
 			private static ushort[] GetKeys()
 			{
@@ -31,14 +32,12 @@ namespace Pigeoid.Epsg
 
 			public EpsgCoordOpMethodInfoLookup() : base(GetKeys()) { }
 
-			protected override EpsgCoordOpMethodInfo Create(ushort key) {
-				var recordAddress = (GetKeyIndex(key) * RecordSize) + FileHeaderSize;
+			protected override EpsgCoordOpMethodInfo Create(ushort key, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-					reader.BaseStream.Seek(recordAddress, SeekOrigin.Begin);
-					var code = reader.ReadUInt16();
+					reader.BaseStream.Seek((index * RecordSize) + FileHeaderSize + CodeSize, SeekOrigin.Begin);
 					var reverse = reader.ReadByte() == 'B';
 					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), "opmethod.txt");
-					return new EpsgCoordOpMethodInfo(code, name, reverse);
+					return new EpsgCoordOpMethodInfo(key, name, reverse);
 				}
 			}
 

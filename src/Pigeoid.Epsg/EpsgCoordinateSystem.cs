@@ -27,6 +27,7 @@ namespace Pigeoid.Epsg
 			private const int RecordDataSize = sizeof(ushort) + sizeof(byte);
 			private const int RecordSize = sizeof(ushort) + RecordDataSize;
 			private const int HeaderSize = sizeof(ushort);
+			private const int CodeSize = sizeof(ushort);
 
 			private static ushort[] GetAllKeys() {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
@@ -51,16 +52,13 @@ namespace Pigeoid.Epsg
 				}
 			}
 
-			protected override EpsgCoordinateSystem Create(ushort key) {
-				var keyIndex = GetKeyIndex(key);
-				var recordAddress = (keyIndex * RecordSize) + HeaderSize;
+			protected override EpsgCoordinateSystem Create(ushort key, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-					reader.BaseStream.Seek(recordAddress, SeekOrigin.Begin);
-					var code = reader.ReadUInt16();
+					reader.BaseStream.Seek((index * RecordSize) + HeaderSize + CodeSize, SeekOrigin.Begin);
 					var typeData = reader.ReadByte();
 					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), "coordsys.txt");
 					return new EpsgCoordinateSystem(
-						code, name,
+						key, name,
 						dimension: typeData & 3,
 						deprecated: 0 != (typeData & 128),
 						csType: DecodeCsType(typeData)

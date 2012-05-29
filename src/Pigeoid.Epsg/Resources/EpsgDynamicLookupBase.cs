@@ -1,7 +1,8 @@
-﻿using System;
+﻿// TODO: source header
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 
 namespace Pigeoid.Epsg.Resources
@@ -32,14 +33,6 @@ namespace Pigeoid.Epsg.Resources
 			_orderedKeys = orderedKeys;
 		}
 
-		protected int GetKeyIndex(TKey key) {
-			var result = Array.BinarySearch(_orderedKeys, key);
-			if(result < 0)
-				throw new InvalidDataException();
-
-			return result;
-		}
-
 		public override IEnumerable<TValue> Values {
 			get {
 				if(!_fullReadPerformed)
@@ -59,14 +52,15 @@ namespace Pigeoid.Epsg.Resources
 			if (_lookup.TryGetValue(key, out item))
 				return item;
 			// see if we have a key for it
-			if (Array.BinarySearch(_orderedKeys, key) < 0)
+			var i = Array.BinarySearch(_orderedKeys, key);
+			if (i < 0)
 				return default(TValue);
 			// if we do have a key for it, try a get add
 			// we do a GetOrAdd instead of TryAdd just in case somebody beat us to it
-			return _lookup.GetOrAdd(key, Create);
+			return _lookup.GetOrAdd(key, k => Create(k,i));
 		}
 
-		protected abstract TValue Create(TKey key);
+		protected abstract TValue Create(TKey key, int index);
 
 		protected abstract TKey GetKeyForItem(TValue value);
 
@@ -76,10 +70,10 @@ namespace Pigeoid.Epsg.Resources
 				if (_fullReadPerformed)
 					return; // could happen, so we check again to be sure
 
-				foreach (var key in _orderedKeys) {
+				for (int i = 0; i < _orderedKeys.Length; i++) {
 					// if TryAdd used a delegate we could have use that, but we want to only have one reference for each code
 					// call directly on the lookup to avoid another key lookup
-					_lookup.GetOrAdd(key, Create);
+					_lookup.GetOrAdd(_orderedKeys[i], k => Create(k, i));
 				}
 				_fullReadPerformed = true;
 			}

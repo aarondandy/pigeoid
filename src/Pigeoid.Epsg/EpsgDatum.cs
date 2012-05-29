@@ -15,6 +15,7 @@ namespace Pigeoid.Epsg
 	public static class EpsgDatumRepository
 	{
 
+		private const int CodeSize = sizeof(ushort);
 		private const string TxtFileName = "datums.txt";
 
 		private static SortedDictionary<ushort, T> GenerateSimpleLookup<T>(
@@ -80,17 +81,14 @@ namespace Pigeoid.Epsg
 
 			public EpsgDatumGeodeticLookup() : base(GetAllKeys()) { }
 
-			protected override EpsgDatumGeodetic Create(ushort key) {
-				var keyIndex = GetKeyIndex(key);
-				var recordAddress = (keyIndex * RecordSize);
+			protected override EpsgDatumGeodetic Create(ushort key, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-					reader.BaseStream.Seek(recordAddress, SeekOrigin.Begin);
-					var code = reader.ReadUInt16();
+					reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
 					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
 					var area = EpsgArea.Get(reader.ReadUInt16());
 					var spheroid = EpsgEllipsoid.Get(reader.ReadUInt16());
 					var meridian = EpsgPrimeMeridian.Get(reader.ReadUInt16());
-					return new EpsgDatumGeodetic(code, name, spheroid, meridian, area);
+					return new EpsgDatumGeodetic(key, name, spheroid, meridian, area);
 				}
 			}
 

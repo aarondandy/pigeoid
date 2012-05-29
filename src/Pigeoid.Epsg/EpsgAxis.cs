@@ -27,6 +27,7 @@ namespace Pigeoid.Epsg
 			private const string DatFileName = "axis.dat";
 			private const int FileHeaderSize = sizeof(ushort);
 			private const int AxisRecordSize = sizeof(ushort) * 4;
+			private const int CodeSize = sizeof(ushort);
 
 			private class KeyData
 			{
@@ -59,13 +60,12 @@ namespace Pigeoid.Epsg
 				_keyData = keyData;
 			}
 
-			protected override EpsgAxisSet Create(ushort key) {
-				var recordAddress = _keyData.KeyAddress[key];
+			protected override EpsgAxisSet Create(ushort key, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-					reader.BaseStream.Seek(recordAddress, SeekOrigin.Begin);
+					reader.BaseStream.Seek(_keyData.KeyAddress[key] + CodeSize, SeekOrigin.Begin);
 
 					var axisSet = new EpsgAxisSet();
-					axisSet.CsKey = reader.ReadUInt16();
+					axisSet.CsKey = key;
 					axisSet.Axes = new EpsgAxis[reader.ReadByte()];
 					for (int i = 0; i < axisSet.Axes.Length; i++) {
 						var uom = EpsgUom.Get(reader.ReadUInt16());

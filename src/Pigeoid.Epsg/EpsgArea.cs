@@ -23,6 +23,7 @@ namespace Pigeoid.Epsg
 			private const int FileHeaderSize = sizeof(ushort);
 			private const int RecordDataSize = (4 * sizeof(short)) + sizeof(ushort);
 			private const int RecordSize = sizeof(ushort) + RecordDataSize;
+			private const int CodeSize = sizeof(ushort);
 
 			private static ushort[] GetAllKeys() {
 				using(var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
@@ -45,24 +46,18 @@ namespace Pigeoid.Epsg
 				return v;
 			}
 
-			protected override EpsgArea Create(ushort key) {
-				var keyIndex = GetKeyIndex(key);
-				var recordAddress = FileHeaderSize + (keyIndex*RecordSize);
-
+			protected override EpsgArea Create(ushort key, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-					reader.BaseStream.Seek(recordAddress, SeekOrigin.Begin);
-
-					var code = reader.ReadUInt16();
+					reader.BaseStream.Seek((index * RecordSize) + FileHeaderSize + CodeSize, SeekOrigin.Begin);
 					var westBound = DecodeDegreeValueFromShort(reader.ReadInt16());
 					var eastBound = DecodeDegreeValueFromShort(reader.ReadInt16());
 					var southBound = DecodeDegreeValueFromShort(reader.ReadInt16());
 					var northBound = DecodeDegreeValueFromShort(reader.ReadInt16());
 					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
-
 					return new EpsgArea(
-						code, name,
-						EpsgTextLookup.LookupIsoString(code, "iso2.dat", 2),
-						EpsgTextLookup.LookupIsoString(code, "iso3.dat", 3),
+						key, name,
+						EpsgTextLookup.LookupIsoString(key, "iso2.dat", 2),
+						EpsgTextLookup.LookupIsoString(key, "iso3.dat", 3),
 						new LongitudeDegreeRange(westBound, eastBound),
 						new Range(southBound, northBound)
 					);
