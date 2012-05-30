@@ -67,6 +67,7 @@
     <Compile Include="EpsgAreaTest.cs" />
     <Compile Include="EpsgCoordinateSystemTest.cs" />
     <Compile Include="EpsgCoordOpMethodInfoTest.cs" />
+    <Compile Include="EpsgCrsTest.cs" />
     <Compile Include="EpsgDataTestBase.cs" />
     <Compile Include="EpsgDatumTest.cs" />
     <Compile Include="EpsgEllipsoidTest.cs" />

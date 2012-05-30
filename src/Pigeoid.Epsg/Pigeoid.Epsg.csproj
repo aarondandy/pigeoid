@@ -52,6 +52,13 @@
     <Compile Include="EpsgAxis.cs" />
     <Compile Include="EpsgCoordinateSystem.cs" />
     <Compile Include="EpsgCoordOpMethodInfo.cs" />
+    <Compile Include="EpsgCrs.cs" />
+    <Compile Include="EpsgCrsCompound.cs" />
+    <Compile Include="EpsgCrsDatumBased.cs" />
+    <Compile Include="EpsgCrsEngineering.cs" />
+    <Compile Include="EpsgCrsGeodetic.cs" />
+    <Compile Include="EpsgCrsProjected.cs" />
+    <Compile Include="EpsgCrsVertical.cs" />
     <Compile Include="EpsgDatum.cs" />
     <Compile Include="EpsgEllipsoid.cs" />
     <Compile Include="EpsgParameter.cs" />

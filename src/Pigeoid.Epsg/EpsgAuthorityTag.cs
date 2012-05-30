@@ -1,5 +1,6 @@
 ﻿// TODO: source header
 
+using System;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Epsg
@@ -7,8 +8,16 @@ namespace Pigeoid.Epsg
 	/// <summary>
 	/// An EPSG authority tag.
 	/// </summary>
-	public struct EpsgAuthorityTag : IAuthorityTag
+	public struct EpsgAuthorityTag : IAuthorityTag, IEquatable<EpsgAuthorityTag>
 	{
+
+		public static bool operator==(EpsgAuthorityTag a, EpsgAuthorityTag b) {
+			return a.Equals(b);
+		}
+
+		public static bool operator !=(EpsgAuthorityTag a, EpsgAuthorityTag b) {
+			return !a.Equals(b);
+		}
 
 		internal const string EpsgName = "EPSG";
 
@@ -25,5 +34,22 @@ namespace Pigeoid.Epsg
 		public string Name {
 			get { return EpsgName; }
 		}
+
+		public bool Equals(EpsgAuthorityTag other) {
+			return other._code == _code;
+		}
+
+		public override bool Equals(object obj) {
+			return obj is EpsgAuthorityTag && Equals((EpsgAuthorityTag) obj);
+		}
+
+		public override int GetHashCode() {
+			return _code;
+		}
+
+		public override string ToString() {
+			return EpsgName + ':' + _code;
+		}
+
 	}
 }

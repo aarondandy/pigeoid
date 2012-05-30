@@ -497,12 +497,12 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 					default: throw new NotSupportedException();
 				}
 
+				if(kindByte != (byte)'P' && crs.Projection != null) {
+					kindByte = (byte)'P';
+				}
+
 				if(kindByte == (byte)'P') {
-					if(crs.Code >= 0xffffff)
-						throw new InvalidDataException();
-					writerProj.Write((byte)(crs.Code & 0xff));
-					writerProj.Write((byte)((crs.Code >> 8) & 0xff));
-					writerProj.Write((byte)((crs.Code >> 16) & 0xff));
+					writerProj.Write((uint)crs.Code);
 
 					writerProj.Write((ushort)crs.SourceGeographicCrs.Code);
 					writerProj.Write((ushort)crs.Projection.Code);
