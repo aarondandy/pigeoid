@@ -52,7 +52,7 @@ namespace Pigeoid.Epsg
 		public static EpsgCoordOpMethodInfo Get(int code) {
 			return code >= 0 && code <= UInt16.MaxValue
 				? Lookup.Get(unchecked((ushort)code))
-			    : null;
+				: null;
 		}
 
 		public static IEnumerable<EpsgCoordOpMethodInfo> Values { get { return Lookup.Values; } }

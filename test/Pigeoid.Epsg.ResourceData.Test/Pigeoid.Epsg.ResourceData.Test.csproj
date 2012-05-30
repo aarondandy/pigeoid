@@ -70,6 +70,7 @@
     <Compile Include="EpsgDataTestBase.cs" />
     <Compile Include="EpsgDatumTest.cs" />
     <Compile Include="EpsgEllipsoidTest.cs" />
+    <Compile Include="EpsgParameterInfoTest.cs" />
     <Compile Include="EpsgPrimeMeridianTest.cs" />
     <Compile Include="EpsgUomTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -360,7 +360,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				.Distinct()
 			);
 
-			int c = data.Repository.PrimeMeridians.Count;
+			int c = data.Repository.Parameters.Count;
 			writerData.Write((ushort)c);
 			foreach (var parameter in data.Repository.Parameters.OrderBy(x => x.Code)) {
 				writerData.Write((ushort)parameter.Code);

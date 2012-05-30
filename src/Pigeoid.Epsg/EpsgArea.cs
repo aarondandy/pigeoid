@@ -25,7 +25,7 @@ namespace Pigeoid.Epsg
 			private const int RecordSize = sizeof(ushort) + RecordDataSize;
 			private const int CodeSize = sizeof(ushort);
 
-			private static ushort[] GetAllKeys() {
+			private static ushort[] GetKeys() {
 				using(var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					var keys = new ushort[reader.ReadUInt16()];
 					for (int i = 0; i < keys.Length; i++) {
@@ -36,7 +36,7 @@ namespace Pigeoid.Epsg
 				}
 			}
 
-			public EpsgAreaLookup() : base(GetAllKeys()) { }
+			public EpsgAreaLookup() : base(GetKeys()) { }
 
 			private static double DecodeDegreeValueFromShort(short encoded) {
 				double v = encoded / 100.0;

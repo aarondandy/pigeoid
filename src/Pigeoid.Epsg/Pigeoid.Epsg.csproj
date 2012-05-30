@@ -54,6 +54,7 @@
     <Compile Include="EpsgCoordOpMethodInfo.cs" />
     <Compile Include="EpsgDatum.cs" />
     <Compile Include="EpsgEllipsoid.cs" />
+    <Compile Include="EpsgParameter.cs" />
     <Compile Include="EpsgPrimeMeridian.cs" />
     <Compile Include="EpsgUom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
