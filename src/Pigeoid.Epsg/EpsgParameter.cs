@@ -39,7 +39,7 @@ namespace Pigeoid.Epsg
 					return new EpsgParameterInfo(key, name);
 				}
 			}
-
+			
 			protected override ushort GetKeyForItem(EpsgParameterInfo value) {
 				return value._code;
 			}

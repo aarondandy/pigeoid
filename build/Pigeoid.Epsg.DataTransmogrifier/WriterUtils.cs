@@ -423,18 +423,17 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			);
 
 			foreach (var coordOpMethod in data.Repository.CoordinateOperationMethods) {
-				if(coordOpMethod.UsedBy.Count <= 0)
-					continue;
+				var usedBy = coordOpMethod.UsedBy.ToList();
 
 				using(var writerData = paramFileGenerator((ushort)coordOpMethod.Code)) {
-					writerData.Write((byte)coordOpMethod.ParamUse.Count);
 					var paramUses = coordOpMethod.ParamUse.OrderBy(x => x.SortOrder).ToList();
+					writerData.Write((byte)paramUses.Count);
 					foreach (var paramUse in paramUses) {
 						writerData.Write((ushort)paramUse.Parameter.Code);
 						writerData.Write((byte)(paramUse.SignReversal.GetValueOrDefault() ? 0x01 : 0x02));
 					}
-					writerData.Write((ushort)coordOpMethod.UsedBy.Count);
-					foreach(var coordOp in coordOpMethod.UsedBy.OrderBy(x => x.Code)) {
+					writerData.Write((ushort)usedBy.Count);
+					foreach (var coordOp in usedBy.OrderBy(x => x.Code)) {
 						writerData.Write((ushort)coordOp.Code);
 						var paramValues = coordOp.ParameterValues.ToList();
 						foreach (var paramUse in paramUses) {

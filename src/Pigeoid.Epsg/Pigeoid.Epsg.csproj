@@ -220,6 +220,36 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <EmbeddedResource Include="Resources\param1026.dat" />
+    <EmbeddedResource Include="Resources\param1031.dat" />
+    <EmbeddedResource Include="Resources\param1032.dat" />
+    <EmbeddedResource Include="Resources\param1034.dat" />
+    <EmbeddedResource Include="Resources\param1035.dat" />
+    <EmbeddedResource Include="Resources\param1037.dat" />
+    <EmbeddedResource Include="Resources\param1038.dat" />
+    <EmbeddedResource Include="Resources\param1039.dat" />
+    <EmbeddedResource Include="Resources\param1044.dat" />
+    <EmbeddedResource Include="Resources\param9604.dat" />
+    <EmbeddedResource Include="Resources\param9605.dat" />
+    <EmbeddedResource Include="Resources\param9622.dat" />
+    <EmbeddedResource Include="Resources\param9623.dat" />
+    <EmbeddedResource Include="Resources\param9625.dat" />
+    <EmbeddedResource Include="Resources\param9626.dat" />
+    <EmbeddedResource Include="Resources\param9627.dat" />
+    <EmbeddedResource Include="Resources\param9628.dat" />
+    <EmbeddedResource Include="Resources\param9629.dat" />
+    <EmbeddedResource Include="Resources\param9635.dat" />
+    <EmbeddedResource Include="Resources\param9646.dat" />
+    <EmbeddedResource Include="Resources\param9647.dat" />
+    <EmbeddedResource Include="Resources\param9649.dat" />
+    <EmbeddedResource Include="Resources\param9650.dat" />
+    <EmbeddedResource Include="Resources\param9660.dat" />
+    <EmbeddedResource Include="Resources\param9814.dat" />
+    <EmbeddedResource Include="Resources\param9825.dat" />
+    <EmbeddedResource Include="Resources\param9827.dat" />
+    <EmbeddedResource Include="Resources\param9835.dat" />
+    <EmbeddedResource Include="Resources\param9839.dat" />
+    <EmbeddedResource Include="Resources\param9840.dat" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
