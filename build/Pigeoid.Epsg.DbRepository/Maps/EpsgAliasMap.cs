@@ -12,6 +12,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.NamingSystemCode).Column("NAMING_SYSTEM_CODE");
 			Map(x => x.Alias).Column("ALIAS");
 			Table("Alias");
+			ReadOnly();
 		}
 
 	}

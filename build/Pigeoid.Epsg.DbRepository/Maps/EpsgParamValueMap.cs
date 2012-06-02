@@ -14,6 +14,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.NumericValue).Column("PARAMETER_VALUE");
 			Map(x => x.TextValue).Column("PARAM_VALUE_FILE_REF");
 			References(x => x.Uom).Column("UOM_CODE");
+			ReadOnly();
 		}
 
 	}

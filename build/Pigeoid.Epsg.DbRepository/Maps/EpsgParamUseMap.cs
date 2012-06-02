@@ -12,7 +12,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 				.KeyReference(x => x.Parameter, "PARAMETER_CODE");
 			Map(x => x.SortOrder).Column("SORT_ORDER");
 			Map(x => x.SignReversalText).Column("PARAM_SIGN_REVERSAL");
-			
+			ReadOnly();
 		}
 
 	}

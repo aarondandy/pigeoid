@@ -36,5 +36,28 @@ namespace Pigeoid.Epsg.ResourceData.Test
 			}
 			return true;
 		}
+
+		[Test]
+		public void Operation_Param_Values() {
+			foreach(var dbOpMethod in Repository.CoordinateOperationMethods) {
+				var asmOpMethod = EpsgCoordOpMethodInfo.Get(dbOpMethod.Code);
+				Assert.IsNotNull(asmOpMethod);
+				foreach(var dbOperation in dbOpMethod.UsedBy) {
+					var asmParamValues = asmOpMethod.GetOperationParameters(dbOperation.Code);
+					var dbParamValues = dbOperation.ParameterValues.Where(x => x.NumericValue != null || x.TextValue != null).ToList();
+					Assert.AreEqual(dbParamValues.Count, asmParamValues.Count);
+					foreach(var dbParamValue in dbParamValues) {
+						var asmParamValue = asmParamValues.First(x => x.Name == dbParamValue.Parameter.Name);
+						var dbValue = (object)dbParamValue.NumericValue ?? dbParamValue.TextValue;
+						var dbUom = dbParamValue.Uom;
+						Assert.AreEqual(dbValue, asmParamValue.Value);
+						if(null == dbUom)
+							Assert.IsNull(asmParamValue.Unit);
+						else
+							Assert.AreEqual(dbUom.Code, (asmParamValue.Unit as EpsgUom).Code);
+					}
+				}
+			}
+		}
 	}
 }

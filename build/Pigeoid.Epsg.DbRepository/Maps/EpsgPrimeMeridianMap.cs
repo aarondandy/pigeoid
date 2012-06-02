@@ -14,6 +14,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.RevisionDate).Column("REVISION_DATE");
 			Map(x => x.ChangeId).Column("CHANGE_ID");
 			Map(x => x.Deprecated).Column("DEPRECATED");
+			ReadOnly();
 		}
 
 	}

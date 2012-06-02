@@ -19,8 +19,9 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.RevisionDate).Column("REVISION_DATE");
 			Map(x => x.ChangeId).Column("CHANGE_ID");
 			Map(x => x.Deprecated).Column("DEPRECATED");
-			HasMany(x => x.CrsUsage).KeyColumn("AREA_OF_USE_CODE");
+			HasMany(x => x.CrsUsage).KeyColumn("AREA_OF_USE_CODE").ReadOnly();
 			Table("Area");
+			ReadOnly();
 		}
 
 	}

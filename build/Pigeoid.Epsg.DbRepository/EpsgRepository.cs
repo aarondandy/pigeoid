@@ -118,7 +118,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			if(_hasCodeProperty.GetOrAdd(typeof(T), x => x.GetProperties().Any(p => p.Name == "Code")))
 				criteria = criteria.AddOrder(Order.Asc("Code"));
 
-			return criteria.SetCacheable(true).List<T>();
+			return criteria.SetReadOnly(true).SetCacheable(true).List<T>();
 		}
 
 		public void Dispose() {

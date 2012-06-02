@@ -21,8 +21,9 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.ChangeId).Column("CHANGE_ID");
 			Map(x => x.Show).Column("SHOW_CRS");
 			Map(x => x.Deprecated).Column("DEPRECATED");
-			HasMany(x => x.OperationsFrom).KeyColumn("SOURCE_CRS_CODE");
-			HasMany(x => x.OperationsTo).KeyColumn("TARGET_CRS_CODE");
+			HasMany(x => x.OperationsFrom).KeyColumn("SOURCE_CRS_CODE").ReadOnly();
+			HasMany(x => x.OperationsTo).KeyColumn("TARGET_CRS_CODE").ReadOnly();
+			ReadOnly();
 		}
 	}
 }

@@ -37,7 +37,7 @@ namespace Pigeoid.Epsg.Resources
 			get {
 				if(!_fullReadPerformed)
 					SingleFullRead();
-
+				// TODO: should this collection be cached?
 				return _lookup.Values.OrderBy(GetKeyForItem);
 			}
 		}

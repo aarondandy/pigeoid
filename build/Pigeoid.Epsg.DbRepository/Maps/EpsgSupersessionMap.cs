@@ -13,6 +13,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.SupersededBy).Column("SUPERSEDED_BY");
 			Map(x => x.Type).Column("SUPERSESSION_TYPE");
 			Map(x => x.Year).Column("SUPERSESSION_YEAR");
+			ReadOnly();
 		}
 
 	}

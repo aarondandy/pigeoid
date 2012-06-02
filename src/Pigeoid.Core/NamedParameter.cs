@@ -30,9 +30,19 @@ namespace Pigeoid
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		private readonly TValue _value;
 
-		public NamedParameter(string name, TValue value) {
+		/// <summary>
+		/// The optional unit of measure for the parameter value.
+		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private readonly IUom _unit;
+
+		public NamedParameter(string name, TValue value)
+			: this(name, value, null) { }
+
+		public NamedParameter(string name, TValue value, IUom unit) {
 			_name = name;
 			_value = value;
+			_unit = unit;
 		}
 
 		/// <summary>
@@ -47,6 +57,8 @@ namespace Pigeoid
 
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		object INamedParameter.Value { get { return _value; } }
+
+		public IUom Unit { get { return _unit; } }
 
 	}
 

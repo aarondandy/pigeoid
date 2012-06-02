@@ -14,6 +14,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.ObjectCode).Column("OBJECT_CODE");
 			Map(x => x.ReplaceCode).Column("REPLACED_BY");
 			Map(x => x.Reason).Column("DEPRECATION_REASON");
+			ReadOnly();
 		}
 
 	}

@@ -1,10 +1,12 @@
 ﻿// TODO: source header
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
+using Pigeoid.Contracts;
 using Pigeoid.Epsg.Resources;
 
 namespace Pigeoid.Epsg
@@ -52,28 +54,99 @@ namespace Pigeoid.Epsg
 		private class EpsgCoordOpMethodParamInfoLookup
 		{
 
-			private const string ParamTextValueFileName = "params.txt";
+			private class OpParamValueDynamicLookup : EpsgDynamicLookupBase<ushort, OpParamValueInfo>
+			{
 
-			private readonly ushort _coordOpCode;
-			private readonly ReadOnlyCollection<ParamUsage> _paramUsage;
+				private readonly EpsgCoordOpMethodParamInfoLookup _parent;
+				private readonly int _valueDataOffset;
+				private readonly int _opDataSize;
 
-			public EpsgCoordOpMethodParamInfoLookup(ushort coordOpCode) {
-				_coordOpCode = coordOpCode;
-				using (var reader = EpsgDataResource.CreateBinaryReader(ParamDataFileName)) {
-					var paramUsage = new ParamUsage[reader.ReadByte()];
-					for (int i = 0; i < paramUsage.Length; i++) {
-						var paramInfo = EpsgParameterInfo.Get(reader.ReadUInt16());
-						var signRev = 0x01 == reader.ReadByte();
-						paramUsage[i] = new ParamUsage(paramInfo, signRev);
+				internal OpParamValueDynamicLookup(EpsgCoordOpMethodParamInfoLookup parent, ushort[] opCodes)
+					: base(opCodes) {
+					_parent = parent;
+					_valueDataOffset = sizeof(byte) // usage count
+						+ ((sizeof(ushort) + sizeof(byte)) * _parent._paramUsage.Length) // usage data
+						+ sizeof(ushort); // op count
+					_opDataSize = sizeof(ushort) // op code
+						+ ((sizeof(ushort) * 2) * _parent._paramUsage.Length); // values
+				}
+
+				protected override OpParamValueInfo Create(ushort key, int index) {
+					using (var numberLookup = new EpsgNumberLookup())
+					using (var readerTxt = EpsgDataResource.CreateBinaryReader(ParamTextValueFileName))
+					using (var reader = EpsgDataResource.CreateBinaryReader(_parent._paramDatFileName)) {
+						reader.BaseStream.Seek(
+							_valueDataOffset // header and usage data
+							+ (index * _opDataSize) // previous op data
+							+ sizeof(ushort) // current opCode
+							, SeekOrigin.Begin);
+						var paramValues = new List<INamedParameter>(_parent._paramUsage.Length);
+						for (int i = 0; i < _parent._paramUsage.Length; i++) {
+							var valueCode = reader.ReadUInt16();
+							var uomCode = reader.ReadUInt16();
+							if(valueCode != 0xffff) {
+								string paramName = _parent._paramUsage[i].Parameter.Name;
+								var uom = EpsgUom.Get(uomCode);
+								paramValues.Add(
+									((valueCode & 0xc000) == 0x8000)
+									? new NamedParameter<string>(paramName,
+										EpsgTextLookup.GetString((ushort)(valueCode & 0x7fff), readerTxt),
+										uom) as INamedParameter
+									: new NamedParameter<double>(paramName, numberLookup.Get(valueCode), uom)
+								);
+							}
+						}
+						return new OpParamValueInfo(key, paramValues.ToArray());
 					}
-					_paramUsage = Array.AsReadOnly(paramUsage);
+				}
+
+				protected override ushort GetKeyForItem(OpParamValueInfo value) {
+					return (ushort)value.OpCode;
 				}
 			}
 
-			private string ParamDataFileName { get { return "param" + _coordOpCode + ".dat"; } }
+			private const string ParamTextValueFileName = "params.txt";
+			private const int FixedLookupThreshold = 16;
 
-			public ReadOnlyCollection<ParamUsage> ParameterUsage { get { return _paramUsage; } }
+			private readonly ushort _coordOpCode;
+			private readonly ParamUsage[] _paramUsage;
+			private readonly EpsgLookupBase<ushort, OpParamValueInfo> _valueLookup;
+			private readonly string _paramDatFileName;
 
+			public EpsgCoordOpMethodParamInfoLookup(ushort coordOpCode) {
+				_coordOpCode = coordOpCode;
+				_paramDatFileName = "param" + _coordOpCode + ".dat";
+				using (var reader = EpsgDataResource.CreateBinaryReader(_paramDatFileName)) {
+					_paramUsage = new ParamUsage[reader.ReadByte()];
+					for (int i = 0; i < _paramUsage.Length; i++) {
+						var paramInfo = EpsgParameterInfo.Get(reader.ReadUInt16());
+						var signRev = 0x01 == reader.ReadByte();
+						_paramUsage[i] = new ParamUsage(paramInfo, signRev);
+					}
+					var opCount = reader.ReadUInt16();
+					/*if (opCount <= FixedLookupThreshold) {
+						// TODO: for small op lists, use a fixed lookup
+						throw new NotImplementedException();
+					}
+					else*/ {
+						var opCodes = new ushort[opCount];
+						var opSkip = _paramUsage.Length * (sizeof(ushort) * 2);
+						for (int i = 0; i < opCodes.Length; i++) {
+							opCodes[i] = reader.ReadUInt16();
+							reader.BaseStream.Seek(opSkip, SeekOrigin.Current);
+						}
+						_valueLookup = new OpParamValueDynamicLookup(this, opCodes);
+					}
+				}
+			}
+
+			public ReadOnlyCollection<ParamUsage> ParameterUsage { get { return Array.AsReadOnly(_paramUsage); } }
+
+			public OpParamValueInfo GetParameterValueInfo(int operationCode) {
+				return operationCode < 0 || operationCode > UInt16.MaxValue
+					? null
+					: _valueLookup.Get((ushort) operationCode);
+			}
 		}
 
 		public class ParamUsage
@@ -90,6 +163,20 @@ namespace Pigeoid.Epsg
 
 			public bool SignReversal { get { return _signRev; } }
 
+		}
+
+		public class OpParamValueInfo
+		{
+			private readonly ushort _opCode;
+			private readonly INamedParameter[] _values;
+
+			internal OpParamValueInfo(ushort opCode, INamedParameter[] values) {
+				_opCode = opCode;
+				_values = values;
+			}
+
+			public int OpCode { get { return _opCode; }}
+			public ReadOnlyCollection<INamedParameter> Values { get { return Array.AsReadOnly(_values); }}
 		}
 
 		internal static readonly EpsgCoordOpMethodInfoLookup Lookup = new EpsgCoordOpMethodInfoLookup();
@@ -123,7 +210,14 @@ namespace Pigeoid.Epsg
 		public int Code { get { return _code; } }
 		public string Name { get { return _name; } }
 		public bool CanReverse { get { return _canReverse; } }
+
 		public ReadOnlyCollection<ParamUsage> ParameterUsage { get { return _paramData.Value.ParameterUsage; } }
+
+		public ReadOnlyCollection<INamedParameter> GetOperationParameters(int operationCode) {
+			var info = _paramData.Value.GetParameterValueInfo(operationCode);
+			return null == info ? null : info.Values;
+		}
+
 
 	}
 }

@@ -13,6 +13,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			References(x => x.NameObject).Column("COORD_AXIS_NAME_CODE");
 			References(x => x.CoordinateSystem).Column("COORD_SYS_CODE");
 			Table("[Coordinate Axis]");
+			ReadOnly();
 		}
 	}
 }
