@@ -11,40 +11,35 @@ namespace Pigeoid.Epsg
 		IUom
 	{
 
-		internal class EpsgUomLookup : EpsgFixedLookupBase<ushort,EpsgUom>
-		{
+		internal static readonly EpsgFixedLookupBase<ushort, EpsgUom> Lookup;
 
-			private static SortedDictionary<ushort,EpsgUom> GenerateLookup() {
-				var lookup = new SortedDictionary<ushort, EpsgUom>();
-				using (var readerTxt = EpsgDataResource.CreateBinaryReader("uoms.txt"))
-				using (var numberLookup = new EpsgNumberLookup())
-				{
-					PopulateFromFile("uomang.dat", "Angle", readerTxt, numberLookup, lookup);
-					PopulateFromFile("uomlen.dat", "Length", readerTxt, numberLookup, lookup);
-					PopulateFromFile("uomscl.dat", "Scale", readerTxt, numberLookup, lookup);
-				}
-				return lookup;
+		static EpsgUom() {
+			var lookupDictionary = new SortedDictionary<ushort, EpsgUom>();
+			using (var readerTxt = EpsgDataResource.CreateBinaryReader("uoms.txt"))
+			using (var numberLookup = new EpsgNumberLookup()) {
+				PopulateFromFile("uomang.dat", "Angle", readerTxt, numberLookup, lookupDictionary);
+				PopulateFromFile("uomlen.dat", "Length", readerTxt, numberLookup, lookupDictionary);
+				PopulateFromFile("uomscl.dat", "Scale", readerTxt, numberLookup, lookupDictionary);
 			}
-
-			private static void PopulateFromFile(string datFileName, string typeName, BinaryReader readerTxt, EpsgNumberLookup numberLookup, SortedDictionary<ushort, EpsgUom> lookup) {
-				using (var readerDat = EpsgDataResource.CreateBinaryReader(datFileName)) {
-					while (readerDat.BaseStream.Position < readerDat.BaseStream.Length) {
-						var code = readerDat.ReadUInt16();
-						var name = EpsgTextLookup.GetString(readerDat.ReadUInt16(), readerTxt);
-						var factorB = numberLookup.Get(readerDat.ReadUInt16());
-						var factorC = numberLookup.Get(readerDat.ReadUInt16());
-						lookup.Add(code, new EpsgUom(code, name, typeName, factorB, factorC));
-					}
-				}
-			}
-
-			public EpsgUomLookup() : base(GenerateLookup()) { }
+			Lookup = new EpsgFixedLookupBase<ushort, EpsgUom>(lookupDictionary);
 		}
 
-		internal static readonly EpsgUomLookup Lookup = new EpsgUomLookup();
+		private static void PopulateFromFile(string datFileName, string typeName, BinaryReader readerTxt, EpsgNumberLookup numberLookup, SortedDictionary<ushort, EpsgUom> lookupDictionary) {
+			using (var readerDat = EpsgDataResource.CreateBinaryReader(datFileName)) {
+				while (readerDat.BaseStream.Position < readerDat.BaseStream.Length) {
+					var code = readerDat.ReadUInt16();
+					var name = EpsgTextLookup.GetString(readerDat.ReadUInt16(), readerTxt);
+					var factorB = numberLookup.Get(readerDat.ReadUInt16());
+					var factorC = numberLookup.Get(readerDat.ReadUInt16());
+					lookupDictionary.Add(code, new EpsgUom(code, name, typeName, factorB, factorC));
+				}
+			}
+		}
 
 		public static EpsgUom Get(int code) {
-			return Lookup.Get(checked((ushort)code));
+			return code >= 0 && code < ushort.MaxValue
+				? Lookup.Get((ushort) code)
+				: null;
 		}
 
 		public static IEnumerable<EpsgUom> Values { get { return Lookup.Values; } }

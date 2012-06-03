@@ -11,41 +11,36 @@ namespace Pigeoid.Epsg
 	public class EpsgEllipsoid : ISpheroid<double>
 	{
 
-		internal class EpsgEllipsoidLookup : EpsgFixedLookupBase<ushort, EpsgEllipsoid>
-		{
-			private static SortedDictionary<ushort, EpsgEllipsoid> GenerateLookup() {
-				var lookup = new SortedDictionary<ushort, EpsgEllipsoid>();
-				using (var readerTxt = EpsgDataResource.CreateBinaryReader("ellipsoids.txt"))
-				using (var numberLookup = new EpsgNumberLookup())
-				using (var readerDat = EpsgDataResource.CreateBinaryReader("ellipsoids.dat")) {
-					for (int i = readerDat.ReadUInt16(); i > 0; i--) {
-						var code = readerDat.ReadUInt16();
-						var semiMajorAxis = numberLookup.Get(readerDat.ReadUInt16());
-						var valueB = numberLookup.Get(readerDat.ReadUInt16());
-						var name = EpsgTextLookup.GetString(readerDat.ReadUInt16(), readerTxt);
-						var uom = EpsgUom.Get(readerDat.ReadByte() + 9000);
-						lookup.Add(code, new EpsgEllipsoid(code, name, CreateSpheroid(semiMajorAxis, valueB), uom));
-					}
+		internal static readonly EpsgFixedLookupBase<ushort, EpsgEllipsoid> Lookup;
+
+		static EpsgEllipsoid() {
+			var lookupDictionary = new SortedDictionary<ushort, EpsgEllipsoid>();
+			using (var readerTxt = EpsgDataResource.CreateBinaryReader("ellipsoids.txt"))
+			using (var numberLookup = new EpsgNumberLookup())
+			using (var readerDat = EpsgDataResource.CreateBinaryReader("ellipsoids.dat")) {
+				for (int i = readerDat.ReadUInt16(); i > 0; i--) {
+					var code = readerDat.ReadUInt16();
+					var semiMajorAxis = numberLookup.Get(readerDat.ReadUInt16());
+					var valueB = numberLookup.Get(readerDat.ReadUInt16());
+					var name = EpsgTextLookup.GetString(readerDat.ReadUInt16(), readerTxt);
+					var uom = EpsgUom.Get(readerDat.ReadByte() + 9000);
+					lookupDictionary.Add(code, new EpsgEllipsoid(
+						code, name, uom,
+						(valueB == semiMajorAxis)
+							? new Sphere(semiMajorAxis)
+						: (valueB < semiMajorAxis / 10.0)
+							? new SpheroidEquatorialInvF(semiMajorAxis, valueB) as ISpheroid<double>
+						: new SpheroidEquatorialPolar(semiMajorAxis, valueB)
+					));
 				}
-				return lookup;
 			}
-
-			private static ISpheroid<double> CreateSpheroid(double semiMajorAxis, double valueB) {
-				if (valueB < semiMajorAxis / 10.0)
-					return new SpheroidEquatorialInvF(semiMajorAxis, valueB);
-				if (valueB == semiMajorAxis)
-					return new Sphere(semiMajorAxis);
-				return new SpheroidEquatorialPolar(semiMajorAxis, valueB);
-			}
-
-			public EpsgEllipsoidLookup() : base(GenerateLookup()) { }
-
+			Lookup = new EpsgFixedLookupBase<ushort, EpsgEllipsoid>(lookupDictionary);
 		}
 
-		internal static readonly EpsgEllipsoidLookup Lookup = new EpsgEllipsoidLookup();
-
 		public static EpsgEllipsoid Get(int code) {
-			return Lookup.Get(checked((ushort)code));
+			return code >= 0 && code < ushort.MaxValue
+				? Lookup.Get((ushort) code)
+				: null;
 		}
 
 		public static IEnumerable<EpsgEllipsoid> Values { get { return Lookup.Values; } }
@@ -55,7 +50,7 @@ namespace Pigeoid.Epsg
 		private readonly string _name;
 		private readonly EpsgUom _uom;
 
-		private EpsgEllipsoid(ushort code, string name, ISpheroid<double> core, EpsgUom uom) {
+		private EpsgEllipsoid(ushort code, string name, EpsgUom uom, ISpheroid<double> core) {
 			_code = code;
 			_name = name;
 			_core = core;

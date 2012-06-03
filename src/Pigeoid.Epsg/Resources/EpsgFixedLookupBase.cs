@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Pigeoid.Epsg.Resources
 {
-	internal abstract class EpsgFixedLookupBase<TKey, TValue> :
+	internal class EpsgFixedLookupBase<TKey, TValue> :
 		EpsgLookupBase<TKey, TValue>
 		where TValue : class
 	{
@@ -13,7 +13,7 @@ namespace Pigeoid.Epsg.Resources
 		/// <summary>
 		/// Concrete classes must initialize the <c>Lookup</c> field from their constructor.
 		/// </summary>
-		protected EpsgFixedLookupBase(SortedDictionary<TKey, TValue> lookup) {
+		internal EpsgFixedLookupBase(SortedDictionary<TKey, TValue> lookup) {
 			if(null == lookup)
 				throw new ArgumentNullException();
 

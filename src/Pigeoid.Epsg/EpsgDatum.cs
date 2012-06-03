@@ -34,34 +34,6 @@ namespace Pigeoid.Epsg
 			return lookup;
 		}
 
-		internal class EpsgDatumEngineeringLookup : EpsgFixedLookupBase<ushort, EpsgDatumEngineering>
-		{
-
-			public static EpsgDatumEngineeringLookup Create() {
-				return new EpsgDatumEngineeringLookup();
-			}
-
-			private static EpsgDatumEngineering Create(ushort code, string name, EpsgArea area) {
-				return new EpsgDatumEngineering(code, name, area);
-			}
-
-			public EpsgDatumEngineeringLookup() : base(GenerateSimpleLookup("datumegr.dat", Create)) { }
-		}
-
-		internal class EpsgDatumVerticalLookup : EpsgFixedLookupBase<ushort, EpsgDatumVertical>
-		{
-
-			public static EpsgDatumVerticalLookup Create() {
-				return new EpsgDatumVerticalLookup();
-			}
-
-			private static EpsgDatumVertical Create(ushort code, string name, EpsgArea area) {
-				return new EpsgDatumVertical(code, name, area);
-			}
-
-			public EpsgDatumVerticalLookup() : base(GenerateSimpleLookup("datumver.dat",Create)) { }
-		}
-
 		internal class EpsgDatumGeodeticLookup : EpsgDynamicLookupBase<ushort, EpsgDatumGeodetic>
 		{
 			private const string DatFileName = "datumgeo.dat";
@@ -97,26 +69,32 @@ namespace Pigeoid.Epsg
 			}
 		}
 
-		private static readonly Lazy<EpsgDatumEngineeringLookup> _lookupEgr = new Lazy<EpsgDatumEngineeringLookup>(
-			EpsgDatumEngineeringLookup.Create,
+		private static readonly Lazy<EpsgFixedLookupBase<ushort, EpsgDatumEngineering>> _lookupEgr = new Lazy<EpsgFixedLookupBase<ushort, EpsgDatumEngineering>>(
+			() => new EpsgFixedLookupBase<ushort, EpsgDatumEngineering>(GenerateSimpleLookup(
+				"datumegr.dat",
+				(code, name, area) => new EpsgDatumEngineering(code, name, area)
+			)),
 			LazyThreadSafetyMode.ExecutionAndPublication
 		);
 
-		private static readonly Lazy<EpsgDatumVerticalLookup> _lookupVer = new Lazy<EpsgDatumVerticalLookup>(
-			EpsgDatumVerticalLookup.Create,
+		private static readonly Lazy<EpsgFixedLookupBase<ushort, EpsgDatumVertical>> _lookupVer = new Lazy<EpsgFixedLookupBase<ushort, EpsgDatumVertical>>(
+			() => new EpsgFixedLookupBase<ushort, EpsgDatumVertical>(GenerateSimpleLookup(
+				"datumver.dat",
+				(code, name, area) => new EpsgDatumVertical(code, name, area)
+			)),
 			LazyThreadSafetyMode.ExecutionAndPublication
 		);
 
-		internal static EpsgDatumEngineeringLookup LookupEngineering { get { return _lookupEgr.Value; } }
+		internal static EpsgFixedLookupBase<ushort, EpsgDatumEngineering> LookupEngineering { get { return _lookupEgr.Value; } }
 
-		internal static EpsgDatumVerticalLookup LookupVertical { get { return _lookupVer.Value; } }
+		internal static EpsgFixedLookupBase<ushort, EpsgDatumVertical> LookupVertical { get { return _lookupVer.Value; } }
 
 		internal static readonly EpsgDatumGeodeticLookup LookupGeodetic = new EpsgDatumGeodeticLookup();
 
 		public static EpsgDatum Get(int code) {
-			if(code < 0 || code > UInt16.MaxValue)
-				return null;
-			return RawGet((ushort)code);
+			return code >= 0 && code < UInt16.MaxValue
+				? RawGet((ushort) code)
+				: null;
 		}
 
 		private static EpsgDatum RawGet(ushort code) {
@@ -127,9 +105,9 @@ namespace Pigeoid.Epsg
 		}
 
 		public static EpsgDatumGeodetic GetGeodetic(int code) {
-			if (code < 0 || code > UInt16.MaxValue)
-				return null;
-			return LookupGeodetic.Get((ushort)code);
+			return code >= 0 && code < UInt16.MaxValue
+				? LookupGeodetic.Get((ushort) code)
+				: null;
 		}
 
 		public static IEnumerable<EpsgDatum> Values {

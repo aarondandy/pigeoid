@@ -10,33 +10,28 @@ namespace Pigeoid.Epsg
 		IPrimeMeridian
 	{
 
-		internal class EpsgPrimeMeridianLookup : EpsgFixedLookupBase<ushort, EpsgPrimeMeridian>
-		{
-			private static SortedDictionary<ushort,EpsgPrimeMeridian> GenerateLookup() {
-				var lookup = new SortedDictionary<ushort, EpsgPrimeMeridian>();
-				using (var readerTxt = EpsgDataResource.CreateBinaryReader("meridians.txt"))
-				using (var numberLookup = new EpsgNumberLookup())
-				using (var readerDat = EpsgDataResource.CreateBinaryReader("meridians.dat")) {
-					for (int i = readerDat.ReadUInt16(); i > 0; i--) {
-						var code = readerDat.ReadUInt16();
-						var uom = EpsgUom.Get(readerDat.ReadUInt16());
-						var lon = numberLookup.Get(readerDat.ReadUInt16());
-						var name = EpsgTextLookup.GetString(readerDat.ReadByte(), readerTxt);
-						lookup.Add(code, new EpsgPrimeMeridian(code, name, lon, uom));
-					}
+		internal static readonly EpsgFixedLookupBase<ushort, EpsgPrimeMeridian> Lookup;
+
+		static EpsgPrimeMeridian() {
+			var lookupDictionary = new SortedDictionary<ushort, EpsgPrimeMeridian>();
+			using (var readerTxt = EpsgDataResource.CreateBinaryReader("meridians.txt"))
+			using (var numberLookup = new EpsgNumberLookup())
+			using (var readerDat = EpsgDataResource.CreateBinaryReader("meridians.dat")) {
+				for (int i = readerDat.ReadUInt16(); i > 0; i--) {
+					var code = readerDat.ReadUInt16();
+					var uom = EpsgUom.Get(readerDat.ReadUInt16());
+					var lon = numberLookup.Get(readerDat.ReadUInt16());
+					var name = EpsgTextLookup.GetString(readerDat.ReadByte(), readerTxt);
+					lookupDictionary.Add(code, new EpsgPrimeMeridian(code, name, lon, uom));
 				}
-				return lookup;
 			}
-
-			public EpsgPrimeMeridianLookup() : base(GenerateLookup()) { }
-
+			Lookup = new EpsgFixedLookupBase<ushort, EpsgPrimeMeridian>(lookupDictionary);
 		}
 
-
-		internal static readonly EpsgPrimeMeridianLookup Lookup = new EpsgPrimeMeridianLookup();
-
 		public static EpsgPrimeMeridian Get(int code) {
-			return Lookup.Get(checked((ushort)code));
+			return code >= 0 && code < ushort.MaxValue
+				? Lookup.Get((ushort) code)
+				: null;
 		}
 
 		public static IEnumerable<EpsgPrimeMeridian> Values { get { return Lookup.Values; } }
