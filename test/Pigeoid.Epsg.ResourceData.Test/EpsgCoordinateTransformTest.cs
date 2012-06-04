@@ -26,8 +26,8 @@ namespace Pigeoid.Epsg.ResourceData.Test
 				new Tester((x, y) => x.OperationMethodInfo.Code == y.Method.Code),
 				new Tester((x, y) => x.Area.Code == y.Area.Code),
 				new Tester((x, y) => x.Deprecated == y.Deprecated),
-				new Tester((x, y) => x.SourceCrsCode == y.SourceCrs.Code),
-				new Tester((x, y) => x.TargetCrsCode == y.TargetCrs.Code),
+				new Tester((x, y) => x.SourceCrs.Code == y.SourceCrs.Code),
+				new Tester((x, y) => x.TargetCrs.Code == y.TargetCrs.Code),
 				new Tester((x, y) => x.Accuracy == (y.Accuracy ?? 0))
 			);
 
