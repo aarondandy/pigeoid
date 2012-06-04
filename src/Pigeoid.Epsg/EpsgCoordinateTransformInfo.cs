@@ -1,0 +1,33 @@
+﻿// TODO: source header
+
+namespace Pigeoid.Epsg
+{
+
+	public class EpsgCoordinateTransformInfo : EpsgCoordinateOperationInfo
+	{
+
+		private readonly ushort _sourceCrsCode;
+		private readonly ushort _targetCrsCode;
+		private readonly double _accuracy;
+
+		internal EpsgCoordinateTransformInfo(
+			ushort code,
+			ushort sourceCrsCode, ushort targetCrsCode,
+			ushort opMethodCode,
+			double accuracy,
+			ushort areaCode, bool deprecated, string name
+		) : base(code, opMethodCode, areaCode, deprecated, name) {
+			_sourceCrsCode = sourceCrsCode;
+			_targetCrsCode = targetCrsCode;
+			_accuracy = accuracy;
+		}
+
+		public int SourceCrsCode { get { return _sourceCrsCode; } }
+
+		public int TargetCrsCode { get { return _targetCrsCode; } }
+
+		public double Accuracy { get { return _accuracy; } }
+
+	}
+
+}

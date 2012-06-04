@@ -50,7 +50,10 @@
     <Compile Include="EpsgArea.cs" />
     <Compile Include="EpsgAuthorityTag.cs" />
     <Compile Include="EpsgAxis.cs" />
+    <Compile Include="EpsgCoordinateOperation.cs" />
+    <Compile Include="EpsgCoordinateOperationInfoRepository.cs" />
     <Compile Include="EpsgCoordinateSystem.cs" />
+    <Compile Include="EpsgCoordinateTransformInfo.cs" />
     <Compile Include="EpsgCoordOpMethodInfo.cs" />
     <Compile Include="EpsgCrs.cs" />
     <Compile Include="EpsgCrsCompound.cs" />

@@ -29,9 +29,7 @@ namespace Pigeoid.Epsg
 		}
 
 		public static EpsgPrimeMeridian Get(int code) {
-			return code >= 0 && code < ushort.MaxValue
-				? Lookup.Get((ushort) code)
-				: null;
+			return code >= 0 && code < ushort.MaxValue ? Lookup.Get((ushort) code) : null;
 		}
 
 		public static IEnumerable<EpsgPrimeMeridian> Values { get { return Lookup.Values; } }
