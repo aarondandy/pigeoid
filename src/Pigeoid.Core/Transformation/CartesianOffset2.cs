@@ -35,11 +35,7 @@ namespace Pigeoid.Transformation
 		}
 
 		public IEnumerable<Point2> TransformValues(IEnumerable<Point2> values) {
-			return values.Select(v => v.Add(Offset));
-		}
-
-		ITransformation<Point2, Point2> ITransformation<Point2, Point2>.GetInverse() {
-			return GetInverse();
+			return values.Select(Offset.Add);
 		}
 
 		public bool HasInverse {
@@ -49,5 +45,10 @@ namespace Pigeoid.Transformation
 		ITransformation ITransformation.GetInverse() {
 			return GetInverse();
 		}
+
+		ITransformation<Point2, Point2> ITransformation<Point2, Point2>.GetInverse() {
+			return GetInverse();
+		}
+
 	}
 }

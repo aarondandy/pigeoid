@@ -54,12 +54,15 @@
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AuthorityTag.cs" />
+    <Compile Include="ConcatenatedOperation.cs" />
+    <Compile Include="Contracts\IAuthorityBoundEntity.cs" />
     <Compile Include="Contracts\IAuthorityTag.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Contracts\IAxis.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Contracts\IConcatenatedOperation.cs" />
     <Compile Include="Contracts\ICoordinateOperationInfo.cs" />
     <Compile Include="Contracts\ICrs.cs">
       <SubType>Code</SubType>
