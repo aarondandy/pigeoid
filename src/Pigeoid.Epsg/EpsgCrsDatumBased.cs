@@ -62,11 +62,11 @@ namespace Pigeoid.Epsg
 
 		internal static readonly EpsgCrsDatumBasedLookup Lookup = new EpsgCrsDatumBasedLookup();
 
-		public static EpsgCrsDatumBased Get(int code) {
+		public static EpsgCrsDatumBased GetDatumBased(int code) {
 			return Lookup.Get(code);
 		}
 
-		public static IEnumerable<EpsgCrsDatumBased> Values { get { return Lookup.Values; } }
+		public static IEnumerable<EpsgCrsDatumBased> DatumBasedValues { get { return Lookup.Values; } }
 
 		private readonly EpsgCoordinateSystem _cs;
 

@@ -9,17 +9,17 @@ namespace Pigeoid.Epsg
 	{
 
 		public static EpsgCrs Get(int code) {
-			return EpsgCrsDatumBased.Get(code)
-				?? EpsgCrsProjected.Get(code)
-				?? EpsgCrsCompound.Get(code) as EpsgCrs;
+			return EpsgCrsDatumBased.GetDatumBased(code)
+				?? EpsgCrsProjected.GetProjected(code)
+				?? EpsgCrsCompound.GetCompound(code) as EpsgCrs;
 		}
 
 		public static IEnumerable<EpsgCrs> Values {
 			get {
 				return
-					EpsgCrsDatumBased.Values
-					.Concat<EpsgCrs>(EpsgCrsProjected.Values)
-					.Concat<EpsgCrs>(EpsgCrsCompound.Values)
+					EpsgCrsDatumBased.DatumBasedValues
+					.Concat<EpsgCrs>(EpsgCrsProjected.ProjectedValues)
+					.Concat<EpsgCrs>(EpsgCrsCompound.CompoundValues)
 					.OrderBy(x => x.Code);
 			}
 		}

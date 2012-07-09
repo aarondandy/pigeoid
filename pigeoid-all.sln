@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Epsg.ResourceData.T
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Core.Test", "test\Pigeoid.Core.Test\Pigeoid.Core.Test.csproj", "{E598B157-1063-4652-A4BE-DD54E02C23FB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Epsg.ProjectionTest", "test\Pigeoid.Epsg.ProjectionTest\Pigeoid.Epsg.ProjectionTest.csproj", "{5157ED5D-299A-4860-BA03-7AB32BC51371}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -179,6 +181,24 @@ Global
 		{E598B157-1063-4652-A4BE-DD54E02C23FB}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{E598B157-1063-4652-A4BE-DD54E02C23FB}.Release|Win32.ActiveCfg = Release|Any CPU
 		{E598B157-1063-4652-A4BE-DD54E02C23FB}.Release|x86.ActiveCfg = Release|Any CPU
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Debug|Win32.ActiveCfg = Debug|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Debug|x86.ActiveCfg = Debug|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Debug|x86.Build.0 = Debug|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.EpsgData|Any CPU.ActiveCfg = Release|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.EpsgData|Mixed Platforms.ActiveCfg = Release|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.EpsgData|Mixed Platforms.Build.0 = Release|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.EpsgData|Win32.ActiveCfg = Release|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.EpsgData|x86.ActiveCfg = Release|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.EpsgData|x86.Build.0 = Release|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Release|Any CPU.ActiveCfg = Release|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Release|Mixed Platforms.Build.0 = Release|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Release|Win32.ActiveCfg = Release|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Release|x86.ActiveCfg = Release|x86
+		{5157ED5D-299A-4860-BA03-7AB32BC51371}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -192,5 +212,6 @@ Global
 		{4D930C82-3FDF-4B55-A57B-6295B4459CD7} = {F588ACEA-9B25-40DF-BE2F-4CFB44C7147C}
 		{B7373B82-C89A-4015-834A-727175286A1B} = {7E955526-8715-4399-984C-CB96BF2A158B}
 		{E598B157-1063-4652-A4BE-DD54E02C23FB} = {7E955526-8715-4399-984C-CB96BF2A158B}
+		{5157ED5D-299A-4860-BA03-7AB32BC51371} = {7E955526-8715-4399-984C-CB96BF2A158B}
 	EndGlobalSection
 EndGlobal

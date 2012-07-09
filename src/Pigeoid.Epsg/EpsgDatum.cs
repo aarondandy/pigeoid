@@ -130,9 +130,9 @@ namespace Pigeoid.Epsg
 			return EpsgDatumRepository.Get(code);
 		}
 
-		private ushort _code;
-		private string _name;
-		private EpsgArea _area;
+		private readonly ushort _code;
+		private readonly string _name;
+		private readonly EpsgArea _area;
 
 		internal EpsgDatum(ushort code, string name, EpsgArea area) {
 			_code = code;
@@ -156,13 +156,13 @@ namespace Pigeoid.Epsg
 
 	public class EpsgDatumEngineering : EpsgDatum
 	{
-		public EpsgDatumEngineering(ushort code, string name, EpsgArea area) : base(code, name, area) { }
+		internal EpsgDatumEngineering(ushort code, string name, EpsgArea area) : base(code, name, area) { }
 		public override string Type { get { return "Engineering"; } }
 	}
 
 	public class EpsgDatumVertical : EpsgDatum
 	{
-		public EpsgDatumVertical(ushort code, string name, EpsgArea area) : base(code, name, area) { }
+		internal EpsgDatumVertical(ushort code, string name, EpsgArea area) : base(code, name, area) { }
 		public override string Type { get { return "Vertical"; } }
 	}
 

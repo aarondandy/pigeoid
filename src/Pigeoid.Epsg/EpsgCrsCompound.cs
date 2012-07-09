@@ -36,7 +36,7 @@ namespace Pigeoid.Epsg
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
 					var horizontal = EpsgCrs.Get(reader.ReadUInt16());
-					var vertical = (EpsgCrsVertical)EpsgCrsVertical.Get(reader.ReadUInt16());
+					var vertical = (EpsgCrsVertical)EpsgCrsVertical.GetDatumBased(reader.ReadUInt16());
 					var area = EpsgArea.Get(reader.ReadUInt16());
 					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
 					var deprecated = reader.ReadByte() == 0xff;
@@ -52,13 +52,13 @@ namespace Pigeoid.Epsg
 
 		internal static readonly EpsgCrsCompoundLookup Lookup = new EpsgCrsCompoundLookup();
 
-		public static EpsgCrsCompound Get(int code) {
+		public static EpsgCrsCompound GetCompound(int code) {
 			return code >= 0 && code <= UInt16.MaxValue
 				? Lookup.Get((ushort) code)
 				: null;
 		}
 
-		public static IEnumerable<EpsgCrsCompound> Values { get { return Lookup.Values; } }
+		public static IEnumerable<EpsgCrsCompound> CompoundValues { get { return Lookup.Values; } }
 
 		private readonly EpsgCrs _horizontal;
 		private readonly EpsgCrsVertical _vertical;

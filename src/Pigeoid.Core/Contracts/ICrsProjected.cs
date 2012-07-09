@@ -1,7 +1,5 @@
 ﻿// TODO: source header
 
-using Vertesaur.Contracts;
-
 namespace Pigeoid.Contracts
 {
 	/// <summary>
@@ -16,7 +14,7 @@ namespace Pigeoid.Contracts
 		/// <summary>
 		/// The projection operation.
 		/// </summary>
-		ITransformation Projection { get; }
+		ICoordinateOperationInfo Projection { get; }
 
 	}
 }

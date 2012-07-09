@@ -2,18 +2,20 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{B7373B82-C89A-4015-834A-727175286A1B}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{5157ED5D-299A-4860-BA03-7AB32BC51371}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pigeoid.Epsg.ResourceData.Test</RootNamespace>
-    <AssemblyName>Pigeoid.Epsg.ResourceData.Test</AssemblyName>
+    <RootNamespace>Pigeoid.Epsg.ProjectionTest</RootNamespace>
+    <AssemblyName>Pigeoid.Epsg.ProjectionTest</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -21,33 +23,17 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Gallio, Version=3.3.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\mbunit.3.3.454.0\lib\net40\Gallio.dll</HintPath>
-    </Reference>
-    <Reference Include="Gallio40, Version=3.3.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\mbunit.3.3.454.0\lib\net40\Gallio40.dll</HintPath>
-    </Reference>
-    <Reference Include="MbUnit, Version=3.3.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\mbunit.3.3.454.0\lib\net40\MbUnit.dll</HintPath>
-    </Reference>
-    <Reference Include="MbUnit40, Version=3.3.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\mbunit.3.3.454.0\lib\net40\MbUnit40.dll</HintPath>
-    </Reference>
-    <Reference Include="NHamcrest, Version=1.2.1.0, Culture=neutral, PublicKeyToken=31c3ea0b6fcf8c4a, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\NHamcrest.1.2.1\lib\NHamcrest.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -64,26 +50,10 @@
     <Compile Include="..\..\src\PigeoidAssemblyInfo.cs">
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="EpsgAreaTest.cs" />
-    <Compile Include="EpsgCoordinateConversionTest.cs" />
-    <Compile Include="EpsgCoordinateOperationConcatenatedTest.cs" />
-    <Compile Include="EpsgCoordinateSystemTest.cs" />
-    <Compile Include="EpsgCoordinateTransformTest.cs" />
-    <Compile Include="EpsgCoordOpMethodInfoTest.cs" />
-    <Compile Include="EpsgCrsTest.cs" />
-    <Compile Include="EpsgDataTestBase.cs" />
-    <Compile Include="EpsgDatumTest.cs" />
-    <Compile Include="EpsgEllipsoidTest.cs" />
-    <Compile Include="EpsgParameterInfoTest.cs" />
-    <Compile Include="EpsgPrimeMeridianTest.cs" />
-    <Compile Include="EpsgUomTest.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\build\Pigeoid.Epsg.DbRepository\Pigeoid.Epsg.DbRepository.csproj">
-      <Project>{4D930C82-3FDF-4B55-A57B-6295B4459CD7}</Project>
-      <Name>Pigeoid.Epsg.DbRepository</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\Pigeoid.Core\Pigeoid.Core.csproj">
       <Project>{ECDC3D02-067E-4D6F-9DF2-58015EFDAE87}</Project>
       <Name>Pigeoid.Core</Name>

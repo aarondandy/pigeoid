@@ -2,12 +2,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using Pigeoid.Contracts;
 using Pigeoid.Epsg.Resources;
-using Vertesaur;
 
 namespace Pigeoid.Epsg
 {
@@ -25,7 +23,7 @@ namespace Pigeoid.Epsg
 		private class EpsgAxisSetLookup : EpsgDynamicLookupBase<ushort, EpsgAxisSet>
 		{
 			private const string DatFileName = "axis.dat";
-			private const int FileHeaderSize = sizeof(ushort);
+			//private const int FileHeaderSize = sizeof(ushort);
 			private const int AxisRecordSize = sizeof(ushort) * 4;
 			private const int CodeSize = sizeof(ushort);
 
@@ -87,10 +85,10 @@ namespace Pigeoid.Epsg
 
 		}
 
-		private static readonly EpsgAxisSetLookup SetLookup = new EpsgAxisSetLookup();
+		private static readonly EpsgAxisSetLookup _setLookup = new EpsgAxisSetLookup();
 
 		internal static IEnumerable<EpsgAxis> Get(ushort csCode) {
-			var set = SetLookup.Get(csCode);
+			var set = _setLookup.Get(csCode);
 			return set == null
 				? Enumerable.Empty<EpsgAxis>()
 				: Array.AsReadOnly(set.Axes);

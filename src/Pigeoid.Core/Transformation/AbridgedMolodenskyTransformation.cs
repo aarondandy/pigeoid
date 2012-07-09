@@ -14,7 +14,7 @@ namespace Pigeoid.Transformation
 	public class AbridgedMolodenskyTransformation : ITransformation<GeographicHeightCoord>
 	{
 
-		private static readonly double SinOne = Math.Sin(1);
+		private static readonly double _sinOne = Math.Sin(1);
 
 		public readonly Vector3 D;
 		protected readonly double Da;
@@ -48,7 +48,7 @@ namespace Pigeoid.Transformation
 			Da = ta - sa;
 			SeSq = sourceSpheroid.ESquared;
 			Sadfsfda = (sa * df) + (sf * Da);
-			SaSinOne = sa * SinOne;
+			SaSinOne = sa * _sinOne;
 			OneMinusESqsaSinOne = SaSinOne * (1.0 - SeSq);
 			if (0 == OneMinusESqsaSinOne || 0 == SaSinOne)
 				throw new ArgumentException("Invalid spheroid.", "sourceSpheroid");

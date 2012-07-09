@@ -35,7 +35,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgCrsProjected.Values.ToList();
+			var asmItems = EpsgCrsProjected.ProjectedValues.ToList();
 			var dbItems = Repository.Crs
 				//.Where(x => String.Equals(x.Kind,"projected",StringComparison.OrdinalIgnoreCase))
 				.Where(x => String.Equals(x.Kind,"projected",StringComparison.OrdinalIgnoreCase)
@@ -67,7 +67,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgCrsCompound.Values.ToList();
+			var asmItems = EpsgCrsCompound.CompoundValues.ToList();
 			var dbItems = Repository.Crs
 				.Where(x => String.Equals(x.Kind, "compound", StringComparison.OrdinalIgnoreCase))
 				.OrderBy(x => x.Code)
@@ -95,7 +95,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgCrsDatumBased.Values.ToList();
+			var asmItems = EpsgCrsDatumBased.DatumBasedValues.ToList();
 			var dbItems = Repository.Crs
 				.Where(x =>
 					!String.Equals(x.Kind, "compound", StringComparison.OrdinalIgnoreCase)

@@ -44,9 +44,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vertesaur.Core, Version=0.5.0.29634, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Vertesaur.Core, Version=0.5.0.27652, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120525-113044\lib\net40-client\Vertesaur.Core.dll</HintPath>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120708-102145\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -54,7 +54,6 @@
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AuthorityTag.cs" />
-    <Compile Include="ConcatenatedOperation.cs" />
     <Compile Include="Contracts\IAuthorityBoundEntity.cs" />
     <Compile Include="Contracts\IAuthorityTag.cs">
       <SubType>Code</SubType>
@@ -103,6 +102,7 @@
     <Compile Include="Contracts\IPrimeMeridian.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Contracts\ITransformationGenerator.cs" />
     <Compile Include="Contracts\IUom.cs">
       <SubType>Code</SubType>
     </Compile>

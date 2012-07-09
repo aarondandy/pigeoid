@@ -38,9 +38,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vertesaur.Core, Version=0.5.0.29634, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Vertesaur.Core, Version=0.5.0.27652, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120525-113044\lib\net40-client\Vertesaur.Core.dll</HintPath>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120708-102145\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -52,7 +52,9 @@
     <Compile Include="EpsgAxis.cs" />
     <Compile Include="EpsgCoordinateOperationInfo.cs" />
     <Compile Include="EpsgCoordinateOperationConcatenatedInfo.cs" />
+    <Compile Include="EpsgCoordinateOperationInfoBase.cs" />
     <Compile Include="EpsgCoordinateOperationInfoRepository.cs" />
+    <Compile Include="EpsgCoordinateOperationInverse.cs" />
     <Compile Include="EpsgCoordinateSystem.cs" />
     <Compile Include="EpsgCoordinateTransformInfo.cs" />
     <Compile Include="EpsgCoordOpMethodInfo.cs" />
@@ -67,6 +69,7 @@
     <Compile Include="EpsgEllipsoid.cs" />
     <Compile Include="EpsgParameter.cs" />
     <Compile Include="EpsgPrimeMeridian.cs" />
+    <Compile Include="EpsgTransformationGenerator.cs" />
     <Compile Include="EpsgUom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\EpsgDataResource.cs" />

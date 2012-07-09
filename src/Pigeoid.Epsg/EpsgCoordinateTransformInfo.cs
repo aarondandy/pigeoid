@@ -1,7 +1,5 @@
 ﻿// TODO: source header
 
-using System;
-
 namespace Pigeoid.Epsg
 {
 
@@ -24,10 +22,8 @@ namespace Pigeoid.Epsg
 			_accuracy = accuracy;
 		}
 
-		[Obsolete("TODO: maybe remove this?")]
 		public int SourceCrsCode { get { return _sourceCrsCode; } }
 
-		[Obsolete("TODO: maybe remove this?")]
 		public int TargetCrsCode { get { return _targetCrsCode; } }
 
 		public EpsgCrs SourceCrs { get { return EpsgCrs.Get(_sourceCrsCode); } }

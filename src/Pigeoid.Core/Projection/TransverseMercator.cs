@@ -85,7 +85,7 @@ namespace Pigeoid.Projection
 				double rom10 = secLat / v;
 				double rom11 = (secLat / (6 * v * v * v)) * ((v / p) + (2 * tanLat * tanLat));
 				double rom12 = (secLat / (120 * v * v * v * v * v)) * (5 + (28 * tanLat * tanLat) + (24 * tanLat * tanLat * tanLat * tanLat));
-				double rom12a = (secLat / (5040 * v * v * v * v * v * v * v)) *
+				double rom12A = (secLat / (5040 * v * v * v * v * v * v * v)) *
 								(61 + (662 * tanLat * tanLat) + (1320 * tanLat * tanLat * tanLat * tanLat) +
 								 (720 * tanLat * tanLat * tanLat * tanLat * tanLat * tanLat));
 				double de = coord.X - Core.FalseProjectedOffset.X;
@@ -106,7 +106,7 @@ namespace Pigeoid.Projection
 					+ (rom10 * de)
 					- (rom11 * de3)
 					+ (rom12 * de5)
-					- (rom12a * de7)
+					- (rom12A * de7)
 				);
 
 				/*double latp = (Core.MOrigin + ((coord.Y - Core.FalseProjectedOffset.Y) / Core.ScaleFactor)) / Core.MLineCoef1Major;

@@ -16,10 +16,10 @@ namespace Pigeoid
 		IRelatableWithin<LongitudeDegreeRange>
 	{
 
-		private static readonly PeriodicOperations PeriodicOperations;
+		private static readonly PeriodicOperations _periodicOperations;
 
 		static LongitudeDegreeRange() {
-			PeriodicOperations = new PeriodicOperations(-180, 360);
+			_periodicOperations = new PeriodicOperations(-180, 360);
 		}
 
 		/// <summary>
@@ -62,11 +62,11 @@ namespace Pigeoid
 		}
 
 		public double Mid {
-			get { return PeriodicOperations.CalculateMidpoint(Start,End); }
+			get { return _periodicOperations.CalculateMidpoint(Start,End); }
 		}
 
 		public double GetMagnitude() {
-			return PeriodicOperations.Magnitude(Start, End);
+			return _periodicOperations.Magnitude(Start, End);
 		}
 
 		public double GetMagnitudeSquared() {
@@ -75,7 +75,7 @@ namespace Pigeoid
 		}
 
 		public double Distance(double value) {
-			return PeriodicOperations.Distance(Start, End, value);
+			return _periodicOperations.Distance(Start, End, value);
 		}
 
 		public double DistanceSquared(double value) {
@@ -84,23 +84,23 @@ namespace Pigeoid
 		}
 
 		public bool Intersects(double value) {
-			return PeriodicOperations.Intersects(Start, End, value);
+			return _periodicOperations.Intersects(Start, End, value);
 		}
 
 		public bool Intersects(LongitudeDegreeRange r) {
-			return PeriodicOperations.Intersects(Start, End, r.Start, r.End);
+			return _periodicOperations.Intersects(Start, End, r.Start, r.End);
 		}
 
 		public bool Contains(double value) {
-			return PeriodicOperations.Contains(Start, End, value);
+			return _periodicOperations.Contains(Start, End, value);
 		}
 
 		public bool Contains(LongitudeDegreeRange r) {
-			return PeriodicOperations.Contains(Start, End, r.Start, r.End);
+			return _periodicOperations.Contains(Start, End, r.Start, r.End);
 		}
 
 		public bool Within(LongitudeDegreeRange r) {
-			return PeriodicOperations.Contains(r.Start, r.End, Start, End);
+			return _periodicOperations.Contains(r.Start, r.End, Start, End);
 		}
 
 		public bool Equals(LongitudeDegreeRange r) {

@@ -33,8 +33,8 @@ namespace Pigeoid.Projection
 				double cosC = Math.Cos(c);
 				double sinC = Math.Sin(c);
 				double lat = Math.Asin(
-					(cosC * Core.SinLatOrg)
-					+ ((source.Y * sinC * Core.CosLatOrg) / p)
+					(cosC * Core._sinLatOrg)
+					+ ((source.Y * sinC * Core._cosLatOrg) / p)
 				);
 				double lon;
 				if (Core.GeographicOrigin.Latitude == HalfPi)
@@ -44,7 +44,7 @@ namespace Pigeoid.Projection
 				else
 					lon = Core.GeographicOrigin.Longitude + Math.Atan2(
 						source.X * sinC,
-						(p * Core.CosLatOrg * cosC) - (source.Y * Core.SinLatOrg * sinC)
+						(p * Core._cosLatOrg * cosC) - (source.Y * Core._sinLatOrg * sinC)
 					);
 				return new GeographicCoord(lat, lon);
 			}
@@ -53,8 +53,8 @@ namespace Pigeoid.Projection
 
 		public readonly double R;
 		public readonly GeographicCoord GeographicOrigin;
-		private readonly double SinLatOrg;
-		private readonly double CosLatOrg;
+		private readonly double _sinLatOrg;
+		private readonly double _cosLatOrg;
 
 		public LambertAzimuthalEqualAreaSpherical(
 			GeographicCoord geogOrigin,
@@ -67,8 +67,8 @@ namespace Pigeoid.Projection
 				(1.0 - (((1.0 - ESq) / (2.0 * E)) * Math.Log((1.0 - E) / (1.0 + E))))
 				/ 2.0
 			);
-			SinLatOrg = Math.Sin(geogOrigin.Latitude);
-			CosLatOrg = Math.Cos(geogOrigin.Latitude);
+			_sinLatOrg = Math.Sin(geogOrigin.Latitude);
+			_cosLatOrg = Math.Cos(geogOrigin.Latitude);
 		}
 
 
@@ -79,10 +79,10 @@ namespace Pigeoid.Projection
 			double sinLat = Math.Sin(source.Latitude);
 			double rk = R * Math.Sqrt(
 				2.0 /
-				(1.0 + (SinLatOrg * sinLat) + (CosLatOrg * cosDeltaLonCosLat))
+				(1.0 + (_sinLatOrg * sinLat) + (_cosLatOrg * cosDeltaLonCosLat))
 			);
 			double x = rk * cosLat * Math.Sin(deltaLon);
-			double y = rk * ((CosLatOrg * sinLat) - (SinLatOrg * cosDeltaLonCosLat));
+			double y = rk * ((_cosLatOrg * sinLat) - (_sinLatOrg * cosDeltaLonCosLat));
 			return new Point2(x, y);
 		}
 
