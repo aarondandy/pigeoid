@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using MbUnit.Framework;
+using NUnit.Framework;
 
 namespace Pigeoid.Epsg.ResourceData.Test
 {

@@ -1,6 +1,5 @@
 ﻿
-using MbUnit.Framework;
-using Vertesaur;
+using NUnit.Framework;
 
 namespace Pigeoid.Epsg.ResourceData.Test
 {

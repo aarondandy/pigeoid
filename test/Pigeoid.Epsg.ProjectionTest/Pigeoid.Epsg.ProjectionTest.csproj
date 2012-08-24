@@ -13,6 +13,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -41,9 +43,8 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vertesaur.Core, Version=0.5.0.27652, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120708-102145\lib\net40-client\Vertesaur.Core.dll</HintPath>
+    <Reference Include="Vertesaur.Core">
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120823-051507\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -59,7 +60,7 @@
       <Name>Pigeoid.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\Pigeoid.Epsg\Pigeoid.Epsg.csproj">
-      <Project>{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}</Project>
+      <Project>{4db9ee8b-b0a8-4efd-8c2b-c2dfca51a2de}</Project>
       <Name>Pigeoid.Epsg</Name>
     </ProjectReference>
   </ItemGroup>

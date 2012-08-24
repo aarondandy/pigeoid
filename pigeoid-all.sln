@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Core", "src\Pigeoid.Core\Pigeoid.Core.csproj", "{ECDC3D02-067E-4D6F-9DF2-58015EFDAE87}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3BF3752F-F50D-44DF-84C5-10BA1B5ABC22}"

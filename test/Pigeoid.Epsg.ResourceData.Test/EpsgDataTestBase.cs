@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq.Expressions;
-using MbUnit.Framework;
+using NUnit.Framework;
 
 namespace Pigeoid.Epsg.ResourceData.Test
 {
@@ -26,12 +26,12 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[CLSCompliant(false)]
 		public DataTransmogrifier.EpsgRepository Repository { get { return _repository; }}
 
-		[FixtureSetUp]
+		[TestFixtureSetUp]
 		public void FixtureSetUp() {
 			_repository = new DataTransmogrifier.EpsgRepository(new FileInfo("EPSG_v7_9.mdb"));
 		}
 
-		[FixtureTearDown]
+		[TestFixtureTearDown]
 		public void FixtureTearDown() {
 			if (null != _repository)
 				_repository.Dispose();
