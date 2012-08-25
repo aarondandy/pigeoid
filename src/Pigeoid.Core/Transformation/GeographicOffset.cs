@@ -6,14 +6,14 @@ using Vertesaur.Contracts;
 
 namespace Pigeoid.Transformation
 {
-	public class GeographicOffset : ITransformation<GeographicCoord>
+	public class GeographicOffset : ITransformation<GeographicCoordinate>
 	{
 
 		public readonly double DLat;
 		public readonly double DLon;
 
-		public GeographicCoord D {
-			get { return new GeographicCoord(DLat, DLon); }
+		public GeographicCoordinate D {
+			get { return new GeographicCoordinate(DLat, DLon); }
 		}
 
 		public GeographicOffset(double dLat, double dLon) {
@@ -21,27 +21,27 @@ namespace Pigeoid.Transformation
 			DLon = dLon;
 		}
 
-		public GeographicOffset(GeographicCoord d)
+		public GeographicOffset(GeographicCoordinate d)
 			: this(d.Latitude, d.Longitude) { }
 
-		public void TransformValues(GeographicCoord[] values) {
+		public void TransformValues(GeographicCoordinate[] values) {
 			for (int i = 0; i < values.Length; i++)
 				TransformValue(ref values[i]);
 		}
 
-		private void TransformValue(ref GeographicCoord value) {
-			value = new GeographicCoord(value.Latitude + DLat, value.Longitude + DLon);
+		private void TransformValue(ref GeographicCoordinate value) {
+			value = new GeographicCoordinate(value.Latitude + DLat, value.Longitude + DLon);
 		}
 
-		public GeographicCoord TransformValue(GeographicCoord value) {
-			return new GeographicCoord(value.Latitude + DLat, value.Longitude + DLon);
+		public GeographicCoordinate TransformValue(GeographicCoordinate value) {
+			return new GeographicCoordinate(value.Latitude + DLat, value.Longitude + DLon);
 		}
 
-		public IEnumerable<GeographicCoord> TransformValues(IEnumerable<GeographicCoord> values) {
+		public IEnumerable<GeographicCoordinate> TransformValues(IEnumerable<GeographicCoordinate> values) {
 			return values.Select(TransformValue);
 		}
 
-		ITransformation<GeographicCoord, GeographicCoord> ITransformation<GeographicCoord, GeographicCoord>.GetInverse() {
+		ITransformation<GeographicCoordinate, GeographicCoordinate> ITransformation<GeographicCoordinate, GeographicCoordinate>.GetInverse() {
 			return GetInverse();
 		}
 
@@ -49,7 +49,7 @@ namespace Pigeoid.Transformation
 			get { return true; }
 		}
 
-		public ITransformation<GeographicCoord> GetInverse() {
+		public ITransformation<GeographicCoordinate> GetInverse() {
 			return new GeographicOffset(-DLat, -DLon);
 		}
 

@@ -11,12 +11,12 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgCrs.Values;
-			var dbItems = Repository.Crs;
+			var assemblyItems = EpsgCrs.Values;
+			var databaseItems = Repository.Crs;
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
 				new Tester((x, y) => x.Area.Code == y.Area.Code),
@@ -34,8 +34,8 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgCrsProjected.ProjectedValues.ToList();
-			var dbItems = Repository.Crs
+			var assemblyItems = EpsgCrsProjected.ProjectedValues.ToList();
+			var databaseItems = Repository.Crs
 				//.Where(x => String.Equals(x.Kind,"projected",StringComparison.OrdinalIgnoreCase))
 				.Where(x => String.Equals(x.Kind,"projected",StringComparison.OrdinalIgnoreCase)
 					|| x.Projection != null
@@ -44,8 +44,8 @@ namespace Pigeoid.Epsg.ResourceData.Test
 				.ToList();
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
 				new Tester((x, y) => x.Area.Code == y.Area.Code),
@@ -66,15 +66,15 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgCrsCompound.CompoundValues.ToList();
-			var dbItems = Repository.Crs
+			var assemblyItems = EpsgCrsCompound.CompoundValues.ToList();
+			var databaseItems = Repository.Crs
 				.Where(x => String.Equals(x.Kind, "compound", StringComparison.OrdinalIgnoreCase))
 				.OrderBy(x => x.Code)
 				.ToList();
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
 				new Tester((x, y) => x.Area.Code == y.Area.Code),
@@ -94,8 +94,8 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgCrsDatumBased.DatumBasedValues.ToList();
-			var dbItems = Repository.Crs
+			var assemblyItems = EpsgCrsDatumBased.DatumBasedValues.ToList();
+			var databaseItems = Repository.Crs
 				.Where(x =>
 					!String.Equals(x.Kind, "compound", StringComparison.OrdinalIgnoreCase)
 					&&
@@ -107,8 +107,8 @@ namespace Pigeoid.Epsg.ResourceData.Test
 				.ToList();
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
 				new Tester((x, y) => x.Area.Code == y.Area.Code),

@@ -18,36 +18,34 @@ namespace Pigeoid.Projection
 		protected readonly double CentralMeridian;
 		protected readonly double ScaleFactor;
 		protected readonly double Ak;
-		protected readonly double LatLineCoef1;
-		protected readonly double LatLineCoef2;
-		protected readonly double LatLineCoef3;
-		protected readonly double LatLineCoef4;
+		protected readonly double LatLineCoefficient1;
+		protected readonly double LatLineCoefficient2;
+		protected readonly double LatLineCoefficient3;
+		protected readonly double LatLineCoefficient4;
 
 		private readonly string _name;
 
-		private class Inverted : InvertedTransformationBase<Mercator,Point2,GeographicCoord>
+		private class Inverted : InvertedTransformationBase<Mercator,Point2,GeographicCoordinate>
 		{
 
 			public Inverted(Mercator core)
 				: base(core) {
-				if (0 == Core.Ak) {
-					throw new ArgumentException("Core cannot be inverted.");
-				}
+				if (!Core.HasInverse) throw new ArgumentException("Core cannot be inverted.");
 			}
 
-			public override GeographicCoord TransformValue(Point2 coord) {
+			public override GeographicCoordinate TransformValue(Point2 coordinate) {
 				double x =
 					HalfPi
-					- (2.0 * Math.Atan(Math.Pow(Math.E, (Core.FalseProjectedOffset.Y - coord.Y) / Core.Ak)));
-				return new GeographicCoord(
+					- (2.0 * Math.Atan(Math.Pow(Math.E, (Core.FalseProjectedOffset.Y - coordinate.Y) / Core.Ak)));
+				return new GeographicCoordinate(
 					(
 						x
-						+ (Core.LatLineCoef1 * Math.Sin(2.0 * x))
-						+ (Core.LatLineCoef2 * Math.Sin(4.0 * x))
-						+ (Core.LatLineCoef3 * Math.Sin(6.0 * x))
-						+ (Core.LatLineCoef4 * Math.Sin(8.0 * x))
+						+ (Core.LatLineCoefficient1 * Math.Sin(2.0 * x))
+						+ (Core.LatLineCoefficient2 * Math.Sin(4.0 * x))
+						+ (Core.LatLineCoefficient3 * Math.Sin(6.0 * x))
+						+ (Core.LatLineCoefficient4 * Math.Sin(8.0 * x))
 					),
-					((coord.X - Core.FalseProjectedOffset.X) / Core.Ak) + Core.CentralMeridian
+					((coordinate.X - Core.FalseProjectedOffset.X) / Core.Ak) + Core.CentralMeridian
 				);
 			}
 
@@ -60,7 +58,7 @@ namespace Pigeoid.Projection
 		/// <param name="falseProjectedOffset">The false projected offset.</param>
 		/// <param name="spheroid">The spheroid.</param>
 		public Mercator(
-			GeographicCoord geographicOrigin,
+			GeographicCoordinate geographicOrigin,
 			Vector2 falseProjectedOffset,
 			ISpheroid<double> spheroid
 		)
@@ -98,30 +96,32 @@ namespace Pigeoid.Projection
 			double e4 = ESq * ESq;
 			double e6 = e4 * ESq;
 			double e8 = e6 * ESq;
-			LatLineCoef1 = (ESq / 2.0) + (5 / 24.0 * e4) + (e6 / 12.0) + (13.0 / 360.0 * e8);
-			LatLineCoef2 = (7.0 / 48.0 * e4) + (29.0 / 240.0 * e6) + (811.0 / 11520.0 * e8);
-			LatLineCoef3 = (7.0 / 120.0 * e6) + (81.0 / 1120.0 * e8);
-			LatLineCoef4 = (4279 / 161280.0 * e8);
+			LatLineCoefficient1 = (ESq / 2.0) + (5 / 24.0 * e4) + (e6 / 12.0) + (13.0 / 360.0 * e8);
+			LatLineCoefficient2 = (7.0 / 48.0 * e4) + (29.0 / 240.0 * e6) + (811.0 / 11520.0 * e8);
+			LatLineCoefficient3 = (7.0 / 120.0 * e6) + (81.0 / 1120.0 * e8);
+			LatLineCoefficient4 = (4279 / 161280.0 * e8);
 			_name = "Mercator 1SP";
 		}
 
-		public override Point2 TransformValue(GeographicCoord coord) {
-			double eSinLat = E * Math.Sin(coord.Latitude);
+		public override Point2 TransformValue(GeographicCoordinate coordinate) {
+			double eSinLat = E * Math.Sin(coordinate.Latitude);
 			return new Point2(
-				FalseProjectedOffset.X + (Ak * (coord.Longitude - CentralMeridian)),
+				FalseProjectedOffset.X + (Ak * (coordinate.Longitude - CentralMeridian)),
 				FalseProjectedOffset.Y + (Ak * Math.Log(
-					Math.Tan(QuarterPi + (coord.Latitude / 2.0))
+					Math.Tan(QuarterPi + (coordinate.Latitude / 2.0))
 					* Math.Pow((1.0 - eSinLat) / (1.0 + eSinLat), EHalf)
 				))
 			);
 		}
 
-		public override ITransformation<Point2, GeographicCoord> GetInverse() {
+		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
 		}
 
 		public override bool HasInverse {
+// ReSharper disable CompareOfFloatsByEqualityOperator
 			get { return 0 != Ak; }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		public override string Name {
@@ -131,8 +131,10 @@ namespace Pigeoid.Projection
 		public bool Equals(Mercator other) {
 			return !ReferenceEquals(other, null)
 				&& (
+// ReSharper disable CompareOfFloatsByEqualityOperator
 					CentralMeridian == other.CentralMeridian
 					&& ScaleFactor == other.ScaleFactor
+// ReSharper restore CompareOfFloatsByEqualityOperator
 					&& FalseProjectedOffset.Equals(other.FalseProjectedOffset)
 					&& Spheroid.Equals(other.Spheroid)
 				)

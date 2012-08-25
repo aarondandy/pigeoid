@@ -8,7 +8,7 @@ namespace Pigeoid.Epsg
 	public abstract class EpsgCrsDatumBased : EpsgCrs
 	{
 
-		internal class EpsgCrsDatumBasedLookup : EpsgDynamicLookupBase<int, EpsgCrsDatumBased>
+		internal class EpsgCrsDatumBasedLookUp : EpsgDynamicLookUpBase<int, EpsgCrsDatumBased>
 		{
 
 			private const string DatFileName = "crsgeo.dat";
@@ -28,7 +28,7 @@ namespace Pigeoid.Epsg
 				return keys.ToArray();
 			}
 
-			public EpsgCrsDatumBasedLookup() : base(GetKeys()) { }
+			public EpsgCrsDatumBasedLookUp() : base(GetKeys()) { }
 
 			protected override EpsgCrsDatumBased Create(int code, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
@@ -36,7 +36,7 @@ namespace Pigeoid.Epsg
 					var datum = EpsgDatum.Get(reader.ReadUInt16());
 					var cs = EpsgCoordinateSystem.Get(reader.ReadUInt16());
 					var area = EpsgArea.Get(reader.ReadUInt16());
-					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
 					var deprecated = reader.ReadByte() == 0xff;
 					var kind = reader.ReadByte();
 					switch(kind) {
@@ -60,13 +60,13 @@ namespace Pigeoid.Epsg
 
 		}
 
-		internal static readonly EpsgCrsDatumBasedLookup Lookup = new EpsgCrsDatumBasedLookup();
+		internal static readonly EpsgCrsDatumBasedLookUp LookUp = new EpsgCrsDatumBasedLookUp();
 
 		public static EpsgCrsDatumBased GetDatumBased(int code) {
-			return Lookup.Get(code);
+			return LookUp.Get(code);
 		}
 
-		public static IEnumerable<EpsgCrsDatumBased> DatumBasedValues { get { return Lookup.Values; } }
+		public static IEnumerable<EpsgCrsDatumBased> DatumBasedValues { get { return LookUp.Values; } }
 
 		private readonly EpsgCoordinateSystem _cs;
 

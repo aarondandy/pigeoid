@@ -38,30 +38,28 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		}
 
 		protected void AssertMatches(IEnumerable<T1> a, IEnumerable<T2> b, params Tester[] matchTests) {
-			using(var enuma = a.GetEnumerator())
-			using(var enumb = b.GetEnumerator()) {
-				do {
-					if (enuma.MoveNext()) {
-						if (!enumb.MoveNext())
-						{
-							Assert.Fail("First list has more items.");
-							break;
-						}
-					}
-					else {
-						if (enumb.MoveNext())
-							Assert.Fail("First list has fewer items.");
+			using(var aEnumerator = a.GetEnumerator())
+			using(var bEnumerator = b.GetEnumerator())
+			do {
+				var aMoved = aEnumerator.MoveNext();
+				var bMoved = bEnumerator.MoveNext();
+					
+				if(!aMoved || !bMoved)
+				{
+					if (!aMoved && !bMoved)
+						return;
+					if (aMoved)
+						Assert.Fail("First list has more items.");
+					Assert.Fail("Second list has more items.");
+				}
 
-						break;
-					}
+				foreach (var matchTest in matchTests) {
+					var isMatch = matchTest.Test(aEnumerator.Current, bEnumerator.Current);
+					Assert.IsTrue(isMatch, matchTest.Name);
+				}
 
-					foreach (var matchTest in matchTests) {
-						var isMatch = matchTest.Test(enuma.Current, enumb.Current);
-						Assert.IsTrue(isMatch, matchTest.Name);
-					}
-
-				} while (true);
-			}
+			} while (true);
+			
 			
 		}
 

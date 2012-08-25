@@ -25,78 +25,74 @@ namespace Pigeoid.Projection
 		protected readonly double ESecSq9;
 		protected readonly double ESecSq252;
 
-		private class Inverted : InvertedTransformationBase<TransverseMercator,Point2,GeographicCoord>
+		private class Inverted : InvertedTransformationBase<TransverseMercator,Point2,GeographicCoordinate>
 		{
 
 			private readonly double _majorAxisScaleFactor;
 
 			public Inverted(TransverseMercator core)
 				: base(core) {
-				if (
-					0 == Core.ScaleFactor
-					|| 0 == Core.MLineCoef1Major
-					|| 0 == Core.MajorAxis
-					|| 0 == Core.OneMinusESqSqrt
-				) {
+				if (!core.HasInverse)
 					throw new ArgumentException("Core cannot be inverted.");
-				}
+				
 				_majorAxisScaleFactor = Core.MajorAxis * Core.ScaleFactor;
 			}
 
-			public override GeographicCoord TransformValue(Point2 coord) {
-				double n = (Core.MajorAxis - Core.Spheroid.B) / (Core.MajorAxis + Core.Spheroid.B);
-				double n2 = n * n;
-				double n3 = n2 * n;
-				double lat = ((coord.Y - Core.FalseProjectedOffset.Y) / _majorAxisScaleFactor) +
+			public override GeographicCoordinate TransformValue(Point2 coordinate) {
+				var n = (Core.MajorAxis - Core.Spheroid.B) / (Core.MajorAxis + Core.Spheroid.B);
+				var n2 = n * n;
+				var n3 = n2 * n;
+				var lat = ((coordinate.Y - Core.FalseProjectedOffset.Y) / _majorAxisScaleFactor) +
 							 Core.NaturalOrigin.Latitude;
 				double m = 0;
-				double oldm;
 				do {
-					double w = lat - Core.NaturalOrigin.Latitude;
-					double nw = lat + Core.NaturalOrigin.Latitude;
-					double sinW = Math.Sin(w);
-					double cosNW = Math.Cos(nw);
-					double sin2W = Math.Sin(w * 2);
-					double cos2NW = Math.Cos(nw * 2);
-					double sin3W = Math.Sin(w * 3);
-					double cos3NW = Math.Sin(nw * 3);
-					oldm = m;
+					var w = lat - Core.NaturalOrigin.Latitude;
+					var nw = lat + Core.NaturalOrigin.Latitude;
+					var sinW = Math.Sin(w);
+					var cosNw = Math.Cos(nw);
+					var sin2W = Math.Sin(w * 2);
+					var cos2Nw = Math.Cos(nw * 2);
+					var sin3W = Math.Sin(w * 3);
+					var cos3Nw = Math.Sin(nw * 3);
+					var mOld = m;
 					m = Core.Spheroid.B * Core.ScaleFactor * (
 					((1 + n + (5 * n2 / 4.0) + (5 * n3 / 4.0)) * w)
-						- (((3 * n) + (3 * n2) + (21 * n3 / 8.0)) * sinW * cosNW)
-						+ (((15 * n2 / 8.0) + (15 * n3 / 8.0)) * sin2W * cos2NW)
-						- ((35 * n3 / 24.0) * sin3W * cos3NW)
+						- (((3 * n) + (3 * n2) + (21 * n3 / 8.0)) * sinW * cosNw)
+						+ (((15 * n2 / 8.0) + (15 * n3 / 8.0)) * sin2W * cos2Nw)
+						- ((35 * n3 / 24.0) * sin3W * cos3Nw)
 					);
-					if (Math.Abs(coord.Y - Core.FalseProjectedOffset.Y - m) >= .00001 && oldm != m)
-						lat = ((coord.Y - Core.FalseProjectedOffset.Y - m) / _majorAxisScaleFactor) + lat;
-					else
-						break;
+
+// ReSharper disable CompareOfFloatsByEqualityOperator
+					if (!(Math.Abs(coordinate.Y - Core.FalseProjectedOffset.Y - m) >= .00001) || mOld == m) break;
+// ReSharper restore CompareOfFloatsByEqualityOperator
+
+					lat = ((coordinate.Y - Core.FalseProjectedOffset.Y - m)/_majorAxisScaleFactor) + lat;
 				} while (true);
-				double sinLat = Math.Sin(lat);
-				double v = _majorAxisScaleFactor / Math.Sqrt(1.0 - (Core.ESq * sinLat * sinLat));
-				double p = _majorAxisScaleFactor * (1.0 - Core.ESq) * Math.Pow(1.0 - (Core.ESq * sinLat * sinLat), -1.5);
-				double etaSq = (v / p) - 1.0;
-				double tanLat = Math.Tan(lat);
-				double cosLat = Math.Cos(lat);
-				double secLat = 1.0 / cosLat;
-				double rom7 = tanLat / (2.0 * p * v);
-				double rom8 = (tanLat / (24 * p * v * v * v)) * (5 + (3 * tanLat * tanLat) + etaSq - (9 * (tanLat * tanLat) * etaSq));
-				double rom9 = (tanLat / (720 * p * v * v * v * v * v)) * (61 + (90 * tanLat * tanLat) + (45 * tanLat * tanLat * tanLat * tanLat));
-				double rom10 = secLat / v;
-				double rom11 = (secLat / (6 * v * v * v)) * ((v / p) + (2 * tanLat * tanLat));
-				double rom12 = (secLat / (120 * v * v * v * v * v)) * (5 + (28 * tanLat * tanLat) + (24 * tanLat * tanLat * tanLat * tanLat));
-				double rom12A = (secLat / (5040 * v * v * v * v * v * v * v)) *
+				var sinLat = Math.Sin(lat);
+				var v = _majorAxisScaleFactor / Math.Sqrt(1.0 - (Core.ESq * sinLat * sinLat));
+				var p = _majorAxisScaleFactor * (1.0 - Core.ESq) * Math.Pow(1.0 - (Core.ESq * sinLat * sinLat), -1.5);
+				var etaSq = (v / p) - 1.0;
+				var tanLat = Math.Tan(lat);
+				var cosLat = Math.Cos(lat);
+				var secLat = 1.0 / cosLat;
+				var rom7 = tanLat / (2.0 * p * v);
+				var rom8 = (tanLat / (24 * p * v * v * v)) * (5 + (3 * tanLat * tanLat) + etaSq - (9 * (tanLat * tanLat) * etaSq));
+				var rom9 = (tanLat / (720 * p * v * v * v * v * v)) * (61 + (90 * tanLat * tanLat) + (45 * tanLat * tanLat * tanLat * tanLat));
+				var rom10 = secLat / v;
+				var rom11 = (secLat / (6 * v * v * v)) * ((v / p) + (2 * tanLat * tanLat));
+				var rom12 = (secLat / (120 * v * v * v * v * v)) * (5 + (28 * tanLat * tanLat) + (24 * tanLat * tanLat * tanLat * tanLat));
+				var rom12A = (secLat / (5040 * v * v * v * v * v * v * v)) *
 								(61 + (662 * tanLat * tanLat) + (1320 * tanLat * tanLat * tanLat * tanLat) +
 								 (720 * tanLat * tanLat * tanLat * tanLat * tanLat * tanLat));
-				double de = coord.X - Core.FalseProjectedOffset.X;
-				double de2 = de * de;
-				double de3 = de2 * de;
-				double de4 = de2 * de2;
-				double de5 = de4 * de;
-				double de6 = de3 * de3;
-				double de7 = de6 * de;
+				var de = coordinate.X - Core.FalseProjectedOffset.X;
+				var de2 = de * de;
+				var de3 = de2 * de;
+				var de4 = de2 * de2;
+				var de5 = de4 * de;
+				var de6 = de3 * de3;
+				var de7 = de6 * de;
 
-				return new GeographicCoord(
+				return new GeographicCoordinate(
 					lat
 					- (rom7 * de2)
 					+ (rom8 * de4)
@@ -109,16 +105,16 @@ namespace Pigeoid.Projection
 					- (rom12A * de7)
 				);
 
-				/*double latp = (Core.MOrigin + ((coord.Y - Core.FalseProjectedOffset.Y) / Core.ScaleFactor)) / Core.MLineCoef1Major;
+				/*double latp = (Core.MOrigin + ((coordinate.Y - Core.FalseProjectedOffset.Y) / Core.ScaleFactor)) / Core.MLineCoefficient1Major;
 				latp = (
 					latp
-					+ (Core.LatLineCoef1 * System.Math.Sin(2.0 * latp))
-					+ (Core.LatLineCoef2 * System.Math.Sin(4.0 * latp))
-					+ (Core.LatLineCoef3 * System.Math.Sin(6.0 * latp))
-					+ (Core.LatLineCoef4 * System.Math.Sin(8.0 * latp))
+					+ (Core.LatLineCoefficient1 * System.Math.Sin(2.0 * latp))
+					+ (Core.LatLineCoefficient2 * System.Math.Sin(4.0 * latp))
+					+ (Core.LatLineCoefficient3 * System.Math.Sin(6.0 * latp))
+					+ (Core.LatLineCoefficient4 * System.Math.Sin(8.0 * latp))
 				);
 				double lesq = System.Math.Sin(latp); lesq = 1.0 - (lesq * lesq * Core.ESq);
-				double d = ((coord.X - Core.FalseProjectedOffset.X) * System.Math.Sqrt(lesq)) / _majorAxisScaleFactor;
+				double d = ((coordinate.X - Core.FalseProjectedOffset.X) * System.Math.Sqrt(lesq)) / _majorAxisScaleFactor;
 				double d2 = d * d;
 				double cosLatp = System.Math.Cos(latp);
 				double c = Core.ESecSq * cosLatp * cosLatp;
@@ -127,7 +123,7 @@ namespace Pigeoid.Projection
 				t = t * t;
 				return new LatLon(
 					latp - (
-						((lesq) / Core.OneMinusESqSqrt)
+						((lesq) / Core.SquareRootOfOneMinusESq)
 						* d2
 						* (
 							0.5
@@ -184,14 +180,14 @@ namespace Pigeoid.Projection
 		}
 
 		/// <summary>
-		/// Constructs a new transverse mercator projection.
+		/// Constructs a new Transverse Mercator projection.
 		/// </summary>
 		/// <param name="naturalOrigin">The natural origin.</param>
 		/// <param name="falseProjectedOffset">The false projected offset.</param>
 		/// <param name="scaleFactor">The scale factor.</param>
 		/// <param name="spheroid">The spheroid.</param>
 		public TransverseMercator(
-			GeographicCoord naturalOrigin,
+			GeographicCoordinate naturalOrigin,
 			Vector2 falseProjectedOffset,
 			double scaleFactor,
 			ISpheroid<double> spheroid
@@ -206,59 +202,60 @@ namespace Pigeoid.Projection
 			ESecSq252 = 252.0 * ESecSq;
 		}
 
-		public override ITransformation<Point2, GeographicCoord> GetInverse() {
+		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
 		}
 
 		public override bool HasInverse {
+// ReSharper disable CompareOfFloatsByEqualityOperator
 			get { return 0 != ScaleFactor && base.HasInverse; }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		[Obsolete]
-		private static double Arctanh(double x) {
+		private static double ArcTanH(double x) {
 			return Math.Log((1 + x) / (1 - x)) / 2.0;
 		}
 
-		public override Point2 TransformValue(GeographicCoord coord) {
+		public override Point2 TransformValue(GeographicCoordinate coordinate) {
 
-			double ak = MajorAxis * ScaleFactor;
-			double bk = Spheroid.B * ScaleFactor;
-			double n = (MajorAxis - Spheroid.B) / (MajorAxis + Spheroid.B);
-			double n2 = n * n;
-			double n3 = n2 * n;
-			double mLine1Coef = bk * (1 + n + (5.0 * n2 / 4.0) + (5.0 * n3 / 4.0));
-			double mLine2Coef = bk * ((3 * (n + n2)) + (21 * n3 / 8.0));
-			double mLine3Coef = bk * ((15.0 * n2 / 8.0) + (15.0 * n3 / 8.0));
-			double mLine4Coef = bk * (35.0 * n3 / 24.0);
-			double nESq = 1.0 - ESq;
-
-			double eastCoef = Math.Cos(coord.Latitude); // act as cosLat for a bit
-			double cosLat2 = eastCoef * eastCoef;
-			double sinCosLat = Math.Sin(coord.Latitude);
-			double w = 1.0 - (ESq * sinCosLat * sinCosLat);
-			double v = ak / Math.Sqrt(w);
-			double vp = Math.Sqrt(w) / nESq;
-			sinCosLat *= eastCoef; // sinCosLat was recycled
-			double tanLat2 = Math.Tan(coord.Latitude);
+			var ak = MajorAxis * ScaleFactor;
+			var bk = Spheroid.B * ScaleFactor;
+			var n = (MajorAxis - Spheroid.B) / (MajorAxis + Spheroid.B);
+			var n2 = n * n;
+			var n3 = n2 * n;
+			var mLine1Coefficient = bk * (1 + n + (5.0 * n2 / 4.0) + (5.0 * n3 / 4.0));
+			var mLine2Coefficient = bk * ((3 * (n + n2)) + (21 * n3 / 8.0));
+			var mLine3Coefficient = bk * ((15.0 * n2 / 8.0) + (15.0 * n3 / 8.0));
+			var mLine4Coefficient = bk * (35.0 * n3 / 24.0);
+			var nESq = 1.0 - ESq;
+			var eastCoefficient = Math.Cos(coordinate.Latitude); // act as cosLat for a bit
+			var cosLat2 = eastCoefficient * eastCoefficient;
+			var sinCosLat = Math.Sin(coordinate.Latitude);
+			var w = 1.0 - (ESq * sinCosLat * sinCosLat);
+			var v = ak / Math.Sqrt(w);
+			var vp = Math.Sqrt(w) / nESq;
+			sinCosLat *= eastCoefficient; // sinCosLat was recycled
+			var tanLat2 = Math.Tan(coordinate.Latitude);
 			tanLat2 *= tanLat2; // tanLat is not used anymore so just double it up on its own
-			w = coord.Latitude - NaturalOrigin.Latitude; // w was recycled
-			double nw = coord.Latitude + NaturalOrigin.Latitude;
-			double etaSq = coord.Longitude - NaturalOrigin.Longitude; // act as deltaLon for a bit
-			double northCoef = etaSq * etaSq; // act as deltaLon2
-			double cosLatDeltaLon2 = cosLat2 * northCoef;
-			northCoef *= v * sinCosLat; // recycled from deltaLon, as as northCoef
-			eastCoef *= v * etaSq; // recycled cosLat
+			w = coordinate.Latitude - NaturalOrigin.Latitude; // w was recycled
+			var nw = coordinate.Latitude + NaturalOrigin.Latitude;
+			var etaSq = coordinate.Longitude - NaturalOrigin.Longitude; // act as deltaLon for a bit
+			var northCoefficient = etaSq * etaSq; // act as deltaLon2
+			var cosLatDeltaLon2 = cosLat2 * northCoefficient;
+			northCoefficient *= v * sinCosLat; // recycled from deltaLon, as northCoef
+			eastCoefficient *= v * etaSq; // recycled cosLat
 			etaSq = vp - 1.0; // recycled deltaLon
-			double north = (
+			var north = (
 				(
-					(mLine1Coef * w)
-					- (mLine2Coef * Math.Sin(w) * Math.Cos(nw))
-					+ (mLine3Coef * Math.Sin(w * 2.0) * Math.Cos(nw * 2.0))
-					- (mLine4Coef * Math.Sin(w * 3.0) * Math.Cos(nw * 3.0))
+					(mLine1Coefficient * w)
+					- (mLine2Coefficient * Math.Sin(w) * Math.Cos(nw))
+					+ (mLine3Coefficient * Math.Sin(w * 2.0) * Math.Cos(nw * 2.0))
+					- (mLine4Coefficient * Math.Sin(w * 3.0) * Math.Cos(nw * 3.0))
 				)
 				+ FalseProjectedOffset.Y
 				+ (
-					northCoef / 2.0
+					northCoefficient / 2.0
 					* (
 						1
 						+ (
@@ -279,8 +276,8 @@ namespace Pigeoid.Projection
 					)
 				)
 			);
-			double east = FalseProjectedOffset.X + (
-				eastCoef * (
+			var east = FalseProjectedOffset.X + (
+				eastCoefficient * (
 					1
 					+ (
 						cosLatDeltaLon2 / 6.0
@@ -319,7 +316,9 @@ namespace Pigeoid.Projection
 			return !ReferenceEquals(other, null)
 				&& (
 					NaturalOrigin == other.NaturalOrigin
+// ReSharper disable CompareOfFloatsByEqualityOperator
 					&& ScaleFactor == other.ScaleFactor
+// ReSharper restore CompareOfFloatsByEqualityOperator
 					&& FalseProjectedOffset.Equals(other.FalseProjectedOffset)
 					&& Spheroid.Equals(other.Spheroid)
 				)

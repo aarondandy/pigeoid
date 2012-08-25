@@ -29,14 +29,16 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		public static string[] BreakIntoWordParts(string text) {
 			if (null == text)
 				return new string[0];
+
 			var breaks = new List<int>();
 			for (int i = 1; i < text.Length; i++) {
-				bool split = SplitBetween(text[i - 1], text[i]);
+				var split = SplitBetween(text[i - 1], text[i]);
 				if (split) {
 					breaks.Add(i);
 				}
 			}
-			string[] words = new string[breaks.Count + 1];
+
+			var words = new string[breaks.Count + 1];
 			if (0 == breaks.Count) {
 				words[0] = text;
 			}
@@ -74,7 +76,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			return LetterClass.Space; // spaces and other crap tend to be together so just count it as spaces to keep them together
 		}
 
-		public static Dictionary<string, int> BuildWordCountLookup(IEnumerable<string> wordList) {
+		public static Dictionary<string, int> BuildWordCountLookUp(IEnumerable<string> wordList) {
 			var wordCounts = new Dictionary<string, int>();
 			foreach (var word in wordList) {
 				int currentCount;
@@ -88,9 +90,9 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			return wordCounts;
 		}
 
-		public static IEnumerable<int> GenerateWordIndices(List<string> wordLookup, string text) {
+		public static IEnumerable<int> GenerateWordIndices(List<string> wordLookUp, string text) {
 			foreach(var word in BreakIntoWordParts(text)) {
-				var index = wordLookup.IndexOf(word);
+				var index = wordLookUp.IndexOf(word);
 				if(index < 0)
 					throw new InvalidDataException();
 				yield return index;
@@ -98,9 +100,9 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		}
 
 
-		internal static byte[] To7BitArray(IEnumerable<int> nums) {
+		internal static byte[] To7BitArray(IEnumerable<int> numbers) {
 			var data = new List<byte>();
-			foreach (int n in nums) {
+			foreach (int n in numbers) {
 				// Write out an int 7 bits at a time. The high bit of the byte,
 				// when on, tells reader to continue reading more bytes.
 				var v = (uint)n; // support negative numbers
@@ -113,8 +115,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			return data.ToArray();
 		}
 
-		public static byte[] GenerateWordIndexBytes(List<string> wordLookup, string text) {
-			return To7BitArray(GenerateWordIndices(wordLookup, text));
+		public static byte[] GenerateWordIndexBytes(List<string> wordLookUp, string text) {
+			return To7BitArray(GenerateWordIndices(wordLookUp, text));
 		} 
 
 		public static int OverlapIndex(string a, string b) {

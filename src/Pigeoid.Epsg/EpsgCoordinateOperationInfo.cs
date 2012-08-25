@@ -16,7 +16,7 @@ namespace Pigeoid.Epsg
 			_opMethodCode = opMethodCode;
 		}
 
-		public EpsgCoordOpMethodInfo OperationMethodInfo { get { return EpsgCoordOpMethodInfo.Get(_opMethodCode); } }
+		public EpsgCoordinateOperationMethodInfo OperationMethodInfo { get { return EpsgCoordinateOperationMethodInfo.Get(_opMethodCode); } }
 
 		public override IEnumerable<INamedParameter> Parameters {
 			get {

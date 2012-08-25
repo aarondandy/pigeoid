@@ -10,20 +10,22 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgEllipsoid.Values;
-			var dbItems = Repository.Ellipsoids;
+			var assemblyItems = EpsgEllipsoid.Values;
+			var databaseItems = Repository.Ellipsoids;
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
 				new Tester((x, y) => x.Unit.Code == y.Uom.Code),
+// ReSharper disable CompareOfFloatsByEqualityOperator
 				new Tester((x, y) => x.A == y.SemiMajorAxis),
 				new Tester((x, y) => 
 					(y.SemiMinorAxis.HasValue && x.B == y.SemiMinorAxis.Value)
 					|| (y.InverseFlattening.HasValue && x.InvF == y.InverseFlattening.Value)
 				)
+// ReSharper restore CompareOfFloatsByEqualityOperator
 			);
 
 		}

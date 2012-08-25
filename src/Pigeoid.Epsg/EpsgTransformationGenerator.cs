@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using Pigeoid.Contracts;
 using Vertesaur.Contracts;
 using Vertesaur.Search;
@@ -19,16 +18,14 @@ namespace Pigeoid.Epsg
 			public readonly int TotalCount;
 			public readonly double TotalAccuracy;
 
-			public EpsgTransformGraphCost(int totalCount, double totalAccuracy) {
+			private EpsgTransformGraphCost(int totalCount, double totalAccuracy) {
 				TotalCount = totalCount;
 				TotalAccuracy = totalAccuracy;
 			}
 
 			public int CompareTo(EpsgTransformGraphCost other) {
-				var cmp = TotalCount.CompareTo(other.TotalCount);
-				return 0 != cmp
-					? cmp
-					: TotalAccuracy.CompareTo(other.TotalAccuracy);
+				var compareResult = TotalCount.CompareTo(other.TotalCount);
+				return 0 != compareResult ? compareResult : TotalAccuracy.CompareTo(other.TotalAccuracy);
 			}
 
 			public EpsgTransformGraphCost Add(int additionalCount, double additionalAccuracy) {
@@ -49,7 +46,7 @@ namespace Pigeoid.Epsg
 				_toArea = toArea;
 			}
 
-			public bool AreaIntersectionPasses(EpsgArea area) {
+			private bool AreaIntersectionPasses(EpsgArea area) {
 				return null == area
 					|| null == _fromArea
 					|| null == _toArea
@@ -62,33 +59,34 @@ namespace Pigeoid.Epsg
 				var results = new List<DyanmicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>>();
 
 
-				var projNode = node as EpsgCrsProjected;
-				if(null != projNode) {
-					var projOpInfo = projNode.Projection;
-					if(null != projOpInfo) {
+				var projectionNode = node as EpsgCrsProjected;
+				if(null != projectionNode) {
+					var projectionOperationInformation = projectionNode.Projection;
+					if(null != projectionOperationInformation) {
 						results.Add(new DyanmicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>(
-							projNode.BaseCrs, currentCost.Add(1, 0), projOpInfo));
+							projectionNode.BaseCrs, currentCost.Add(1, 0), projectionOperationInformation));
 					}
 				}
 
-				foreach(var projCrs in EpsgCrsProjected.GetProjectionsBasedOn(nodeCode)) {
-					if(!AreaIntersectionPasses(projCrs.Area))
+				foreach(var projectionCoordinateReferenceSystem in EpsgCrsProjected.GetProjectionsBasedOn(nodeCode)) {
+					if(!AreaIntersectionPasses(projectionCoordinateReferenceSystem.Area))
 						continue;
-					var projOpInfo = projCrs.Projection;
-					if(null != projOpInfo && projOpInfo.HasInverse) {
+
+					var projectionOperationInformation = projectionCoordinateReferenceSystem.Projection;
+					if(null != projectionOperationInformation && projectionOperationInformation.HasInverse) {
 						results.Add(new DyanmicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>(
-							projCrs, currentCost.Add(1, 0), projOpInfo.GetInverse()));
+							projectionCoordinateReferenceSystem, currentCost.Add(1, 0), projectionOperationInformation.GetInverse()));
 					}
 				}
 
-				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatendatedForwardReferenced(nodeCode)) {
+				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedForwardReferenced(nodeCode)) {
 					var crs = op.TargetCrs;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
 					results.Add(new DyanmicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>(
 						crs , currentCost.Add(1, 0), op));
 				}
-				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatendatedReverseReferenced(nodeCode)) {
+				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(nodeCode)) {
 					if(!op.HasInverse)
 						continue;
 					var crs = op.SourceCrs;
@@ -135,7 +133,7 @@ namespace Pigeoid.Epsg
 			if(from is EpsgCrs && to is EpsgCrs) {
 				return Generate(from as EpsgCrs, to as EpsgCrs);
 			}
-			// TODO: if one is not an EpsgCrs we should try making it one (but really it should alredy have been... so maybe not)
+			// TODO: if one is not an EpsgCrs we should try making it one (but really it should already have been... so maybe not)
 			// TODO: if one is EpsgCrs and the other is not, we need to find the nearest EpsgCrs along the way and use standard methods to get us there
 			throw new NotImplementedException("Currently only EpsgCrs to EpsgCrs is supported."); // TODO: just return null if we don't know what to do with it?
 		}

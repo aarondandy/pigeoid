@@ -11,7 +11,7 @@ namespace Pigeoid.Epsg
 	public class EpsgCrsProjected : EpsgCrs, ICrsProjected
 	{
 
-		internal class EpsgCrsProjectedLookup : EpsgDynamicLookupBase<int,EpsgCrsProjected>
+		internal class EpsgCrsProjectedLookUp : EpsgDynamicLookUpBase<int,EpsgCrsProjected>
 		{
 			private const string DatFileName = "crsprj.dat";
 			private const string TxtFileName = "crs.txt";
@@ -20,7 +20,7 @@ namespace Pigeoid.Epsg
 			private const int RecordSize = CodeSize + RecordDataSize;
 			private const int RecordIndexSkipSize = RecordDataSize - sizeof(ushort);
 
-			public static EpsgCrsProjectedLookup Create() {
+			public static EpsgCrsProjectedLookUp Create() {
 				var keys = new List<int>();
 				var reverseIndex = new Dictionary<ushort, List<int>>();
 				using(var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
@@ -38,12 +38,12 @@ namespace Pigeoid.Epsg
 						codeList.Add(key);
 					}
 				}
-				return new EpsgCrsProjectedLookup(keys.ToArray(), reverseIndex.ToDictionary(x => x.Key, x => x.Value.ToArray()));
+				return new EpsgCrsProjectedLookUp(keys.ToArray(), reverseIndex.ToDictionary(x => x.Key, x => x.Value.ToArray()));
 			}
 
 			private readonly Dictionary<ushort, int[]> _reverseIndex;
 
-			private EpsgCrsProjectedLookup(int[] keys, Dictionary<ushort, int[]> reverseIndex)
+			private EpsgCrsProjectedLookUp(int[] keys, Dictionary<ushort, int[]> reverseIndex)
 				: base(keys) {
 				_reverseIndex = reverseIndex;
 			}
@@ -61,12 +61,12 @@ namespace Pigeoid.Epsg
 				using(var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
 					var baseCrs = EpsgCrs.Get(reader.ReadUInt16());
-					var projCode = reader.ReadUInt16();
+					var projectionCode = reader.ReadUInt16();
 					var cs = EpsgCoordinateSystem.Get(reader.ReadUInt16());
 					var area = EpsgArea.Get(reader.ReadUInt16());
-					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
 					var deprecated = reader.ReadByte() == 0xff;
-					return new EpsgCrsProjected(code, name, area, deprecated, baseCrs, cs, projCode);
+					return new EpsgCrsProjected(code, name, area, deprecated, baseCrs, cs, projectionCode);
 				}
 			}
 
@@ -75,16 +75,16 @@ namespace Pigeoid.Epsg
 			}
 		}
 
-		internal static readonly EpsgCrsProjectedLookup Lookup = EpsgCrsProjectedLookup.Create();
+		internal static readonly EpsgCrsProjectedLookUp LookUp = EpsgCrsProjectedLookUp.Create();
 
 		public static EpsgCrsProjected GetProjected(int code) {
-			return Lookup.Get(code);
+			return LookUp.Get(code);
 		}
 
-		public static IEnumerable<EpsgCrsProjected> ProjectedValues { get { return Lookup.Values; } }
+		public static IEnumerable<EpsgCrsProjected> ProjectedValues { get { return LookUp.Values; } }
 
 		public static IEnumerable<int> GetProjectionCodesBasedOn(int baseCrsCode) {
-			return Lookup.GetProjectionCodesBasedOn(baseCrsCode) ?? Enumerable.Empty<int>();
+			return LookUp.GetProjectionCodesBasedOn(baseCrsCode) ?? Enumerable.Empty<int>();
 		}
 
 		public static IEnumerable<EpsgCrsProjected> GetProjectionsBasedOn(int baseCrsCode) {

@@ -11,10 +11,10 @@ namespace Pigeoid.Projection
 		LambertConicConformal1Sp
 	{
 
-		private class Inverted : InvertedTransformationBase<LambertConicConformal1SpWest,Point2,GeographicCoord>
+		private class Inverted : InvertedTransformationBase<LambertConicConformal1SpWest,Point2,GeographicCoordinate>
 		{
 
-			private readonly InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoord> _baseInv;
+			private readonly InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoordinate> _baseInv;
 
 			public Inverted(LambertConicConformal1SpWest core)
 				: base(core)
@@ -22,35 +22,35 @@ namespace Pigeoid.Projection
 				_baseInv = core.BaseInverse;
 			}
 
-			public override GeographicCoord TransformValue(Point2 source) {
+			public override GeographicCoordinate TransformValue(Point2 source) {
 				return _baseInv.TransformValue(new Point2(-source.X, source.Y));
 			}
 		}
 
 		public LambertConicConformal1SpWest(
-			GeographicCoord geographiOrigin,
+			GeographicCoordinate geographicOrigin,
 			double originScaleFactor,
 			Vector2 falseProjectedOffset,
 			ISpheroid<double> spheroid
 		)
 			: base(
-			  geographiOrigin,
+			  geographicOrigin,
 			  originScaleFactor,
 			  new Vector2(-falseProjectedOffset.X, falseProjectedOffset.Y),
 			  spheroid
 			) { }
 
-		public override Point2 TransformValue(GeographicCoord coord) {
-			Point2 p = base.TransformValue(coord);
+		public override Point2 TransformValue(GeographicCoordinate coordinate) {
+			Point2 p = base.TransformValue(coordinate);
 			return new Point2(-p.X, p.Y);
 		}
 
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoord> BaseInverse {
-			get { return base.GetInverse() as InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoord>; }
+		private InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoordinate> BaseInverse {
+			get { return base.GetInverse() as InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoordinate>; }
 		}
 
-		public override ITransformation<Point2, GeographicCoord> GetInverse() {
+		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
 		}
 

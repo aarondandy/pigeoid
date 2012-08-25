@@ -10,12 +10,12 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgParameterInfo.Values;
-			var dbItems = Repository.Parameters;
+			var assemblyItems = EpsgParameterInfo.Values;
+			var databaseItems = Repository.Parameters;
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name)
 			);

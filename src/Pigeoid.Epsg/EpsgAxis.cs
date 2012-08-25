@@ -20,7 +20,7 @@ namespace Pigeoid.Epsg
 
 		}
 
-		private class EpsgAxisSetLookup : EpsgDynamicLookupBase<ushort, EpsgAxisSet>
+		private class EpsgAxisSetLookUp : EpsgDynamicLookUpBase<ushort, EpsgAxisSet>
 		{
 			private const string DatFileName = "axis.dat";
 			//private const int FileHeaderSize = sizeof(ushort);
@@ -29,19 +29,19 @@ namespace Pigeoid.Epsg
 
 			private class KeyData
 			{
-				public ushort[] KeyLookup;
+				public ushort[] KeyLookUp;
 				public Dictionary<ushort, ushort> KeyAddress;
 			}
 
 			private static KeyData GetKeyData() {
 				var keyData = new KeyData();
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-					keyData.KeyLookup = new ushort[reader.ReadUInt16()];
-					keyData.KeyAddress = new Dictionary<ushort, ushort>(keyData.KeyLookup.Length);
-					for (int i = 0; i < keyData.KeyLookup.Length; i++) {
+					keyData.KeyLookUp = new ushort[reader.ReadUInt16()];
+					keyData.KeyAddress = new Dictionary<ushort, ushort>(keyData.KeyLookUp.Length);
+					for (int i = 0; i < keyData.KeyLookUp.Length; i++) {
 						var address = (ushort)reader.BaseStream.Position;
 						var key = reader.ReadUInt16();
-						keyData.KeyLookup[i] = key;
+						keyData.KeyLookUp[i] = key;
 						keyData.KeyAddress[key] = address;
 						var axesCount = reader.ReadByte();
 						reader.BaseStream.Seek(axesCount * AxisRecordSize, SeekOrigin.Current);
@@ -52,9 +52,9 @@ namespace Pigeoid.Epsg
 
 			private readonly KeyData _keyData;
 
-			public EpsgAxisSetLookup() : this(GetKeyData()) { }
+			public EpsgAxisSetLookUp() : this(GetKeyData()) { }
 
-			private EpsgAxisSetLookup(KeyData keyData) : base(keyData.KeyLookup) {
+			private EpsgAxisSetLookUp(KeyData keyData) : base(keyData.KeyLookUp) {
 				_keyData = keyData;
 			}
 
@@ -62,15 +62,16 @@ namespace Pigeoid.Epsg
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					reader.BaseStream.Seek(_keyData.KeyAddress[key] + CodeSize, SeekOrigin.Begin);
 
-					var axisSet = new EpsgAxisSet();
-					axisSet.CsKey = key;
-					axisSet.Axes = new EpsgAxis[reader.ReadByte()];
+					var axisSet = new EpsgAxisSet {
+						CsKey = key,
+						Axes = new EpsgAxis[reader.ReadByte()]
+					};
 					for (int i = 0; i < axisSet.Axes.Length; i++) {
 						var uom = EpsgUom.Get(reader.ReadUInt16());
 						using (var textReader = EpsgDataResource.CreateBinaryReader("axis.txt")) {
-							var name = EpsgTextLookup.GetString(reader.ReadUInt16(), textReader);
-							var orientation = EpsgTextLookup.GetString(reader.ReadUInt16(), textReader);
-							var abbreviation = EpsgTextLookup.GetString(reader.ReadUInt16(), textReader);
+							var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
+							var orientation = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
+							var abbreviation = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
 							axisSet.Axes[i] = new EpsgAxis(name,abbreviation,orientation,uom);
 						}
 					}
@@ -85,10 +86,10 @@ namespace Pigeoid.Epsg
 
 		}
 
-		private static readonly EpsgAxisSetLookup _setLookup = new EpsgAxisSetLookup();
+		private static readonly EpsgAxisSetLookUp SetLookUp = new EpsgAxisSetLookUp();
 
 		internal static IEnumerable<EpsgAxis> Get(ushort csCode) {
-			var set = _setLookup.Get(csCode);
+			var set = SetLookUp.Get(csCode);
 			return set == null
 				? Enumerable.Empty<EpsgAxis>()
 				: Array.AsReadOnly(set.Axes);

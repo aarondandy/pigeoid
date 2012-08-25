@@ -25,7 +25,7 @@ namespace Pigeoid.Uom
 		/// Constructs a unit of measure with the given name.
 		/// </summary>
 		/// <param name="name">The name.</param>
-		/// <param name="authority">The authority.</param>
+		/// <param name="type">The unit type.</param>
 		public Unit(string name, string type) {
 			if (String.IsNullOrEmpty(name))
 				throw new ArgumentException("Invalid unit name.","name");

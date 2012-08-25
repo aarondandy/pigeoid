@@ -1,6 +1,7 @@
 ﻿// TODO: source header
 
 using System;
+using System.Globalization;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Epsg
@@ -28,7 +29,7 @@ namespace Pigeoid.Epsg
 		}
 
 		public string Code {
-			get { return _code.ToString(); }
+			get { return _code.ToString(CultureInfo.InvariantCulture); }
 		}
 
 		public string Name {

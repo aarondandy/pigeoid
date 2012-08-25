@@ -10,13 +10,13 @@ namespace Pigeoid.Projection
 	public class ObliqueStereographic : ProjectionBase
 	{
 
-		private class Inverted : InvertedTransformationBase<ObliqueStereographic,Point2,GeographicCoord>
+		private class Inverted : InvertedTransformationBase<ObliqueStereographic,Point2,GeographicCoordinate>
 		{
 
 			public Inverted(ObliqueStereographic core)
 				: base(core) { }
 
-			public override GeographicCoord TransformValue(Point2 source) {
+			public override GeographicCoordinate TransformValue(Point2 source) {
 				throw new NotImplementedException();
 			}
 		}
@@ -25,11 +25,11 @@ namespace Pigeoid.Projection
 		public ObliqueStereographic(ISpheroid<double> spheroid)
 			: base(Vector2.Zero, spheroid) { }
 
-		public override Point2 TransformValue(GeographicCoord source) {
+		public override Point2 TransformValue(GeographicCoordinate source) {
 			throw new NotImplementedException();
 		}
 
-		public override ITransformation<Point2, GeographicCoord> GetInverse() {
+		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
 		}
 

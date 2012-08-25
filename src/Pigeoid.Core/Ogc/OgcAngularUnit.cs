@@ -11,20 +11,20 @@ namespace Pigeoid.Ogc
 	public class OgcAngularUnit : OgcUnitBase
 	{
 
-		private static readonly OgcAngularUnit _defaultRadian = new OgcAngularUnit("Radian", 1);
+		private static readonly OgcAngularUnit DefaultRadianInstance = new OgcAngularUnit("Radian", 1);
 		// TODO: possibly calculate the degree conversion factor from a conversion graph?
-		private static readonly OgcAngularUnit _defaultDegrees = new OgcAngularUnit("Degree", System.Math.PI / 180.0);
+		private static readonly OgcAngularUnit DefaultDegreesInstance = new OgcAngularUnit("Degree", System.Math.PI / 180.0);
 
 		/// <summary>
 		/// This is the OGC reference unit for angular measure.
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public static OgcAngularUnit DefaultRadians { get { return _defaultRadian; } }
+		public static OgcAngularUnit DefaultRadians { get { return DefaultRadianInstance; } }
 		/// <summary>
 		/// The default degree unit factored against radians.
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public static OgcAngularUnit DefaultDegrees { get { return _defaultDegrees; } }
+		public static OgcAngularUnit DefaultDegrees { get { return DefaultDegreesInstance; } }
 
 		/// <summary>
 		/// Constructs a new unit.

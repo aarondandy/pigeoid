@@ -13,14 +13,14 @@ namespace Pigeoid.Ogc
 	public class OgcDatumHorizontal : OgcDatum, IDatumGeodetic
 	{
 		private readonly ISpheroid<double> _spheroid;
-		private readonly IPrimeMeridian _primeMeritidan;
+		private readonly IPrimeMeridian _primeMeridian;
 		private readonly Helmert7Transformation _transformation;
 
 		/// <summary>
 		/// Constructs a horizontal datum.
 		/// </summary>
 		/// <param name="name">The name.</param>
-		/// <param name="spheroid">The spheroid of hte datum.</param>
+		/// <param name="spheroid">The spheroid of the datum.</param>
 		/// <param name="primeMeridian">The prime meridian of the datum.</param>
 		/// <param name="transform">The transformation for conversions to WGS84.</param>
 		/// <param name="authority">The authority.</param>
@@ -36,13 +36,13 @@ namespace Pigeoid.Ogc
 			if (null == spheroid)
 				throw new ArgumentNullException("spheroid");
 
-			_primeMeritidan = primeMeridian;
+			_primeMeridian = primeMeridian;
 			_transformation = transform;
 			_spheroid = spheroid;
 		}
 
 		public IPrimeMeridian PrimeMeridian {
-			get { return _primeMeritidan; }
+			get { return _primeMeridian; }
 		}
 
 		public ISpheroid<double> Spheroid {

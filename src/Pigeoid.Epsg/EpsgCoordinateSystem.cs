@@ -20,7 +20,7 @@ namespace Pigeoid.Epsg
 			Vertical = 4
 		}
 
-		internal class EpsgCoordinateSystemLookup : EpsgDynamicLookupBase<ushort, EpsgCoordinateSystem>
+		internal class EpsgCoordinateSystemLookUp : EpsgDynamicLookUpBase<ushort, EpsgCoordinateSystem>
 		{
 
 			private const string DatFileName = "coordsys.dat";
@@ -40,7 +40,7 @@ namespace Pigeoid.Epsg
 				}
 			}
 
-			public EpsgCoordinateSystemLookup() : base(GetAllKeys()) { }
+			public EpsgCoordinateSystemLookUp() : base(GetAllKeys()) { }
 
 			private static CsType DecodeCsType(byte value) {
 				switch (value & 0x70) {
@@ -56,7 +56,7 @@ namespace Pigeoid.Epsg
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					reader.BaseStream.Seek((index * RecordSize) + HeaderSize + CodeSize, SeekOrigin.Begin);
 					var typeData = reader.ReadByte();
-					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), "coordsys.txt");
+					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), "coordsys.txt");
 					return new EpsgCoordinateSystem(
 						key, name,
 						dimension: typeData & 3,
@@ -71,15 +71,15 @@ namespace Pigeoid.Epsg
 			}
 		}
 
-		internal static readonly EpsgCoordinateSystemLookup Lookup = new EpsgCoordinateSystemLookup();
+		internal static readonly EpsgCoordinateSystemLookUp LookUp = new EpsgCoordinateSystemLookUp();
 
 		public static EpsgCoordinateSystem Get(int code) {
 			return code >= 0 && code <= UInt16.MaxValue
-				? Lookup.Get(unchecked((ushort)code))
+				? LookUp.Get(unchecked((ushort)code))
 				: null;
 		}
 
-		public static IEnumerable<EpsgCoordinateSystem> Values { get { return Lookup.Values; } }
+		public static IEnumerable<EpsgCoordinateSystem> Values { get { return LookUp.Values; } }
 
 		private readonly ushort _code;
 		private readonly int _dimension;

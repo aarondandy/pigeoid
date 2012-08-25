@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pigeoid.Contracts;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Ogc
 {

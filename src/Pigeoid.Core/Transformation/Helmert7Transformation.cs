@@ -30,7 +30,7 @@ namespace Pigeoid.Transformation
 			private readonly Matrix3 _invRot;
 
 			public Inverted(Helmert7Transformation core) : base(core) {
-				if (0 == Core.M)
+				if (!core.HasInverse)
 					throw new ArgumentException("Core cannot be inverted.");
 
 				_invRot = new Matrix3(
@@ -41,16 +41,16 @@ namespace Pigeoid.Transformation
 				_invRot.Invert();
 			}
 
-			public override Point3 TransformValue(Point3 coord) {
-				coord = new Point3(
-					(coord.X - Core.D.X) / Core.M,
-					(coord.Y - Core.D.Y) / Core.M,
-					(coord.Z - Core.D.Z) / Core.M
+			public override Point3 TransformValue(Point3 coordinate) {
+				coordinate = new Point3(
+					(coordinate.X - Core.D.X) / Core.M,
+					(coordinate.Y - Core.D.Y) / Core.M,
+					(coordinate.Z - Core.D.Z) / Core.M
 				);
 				return new Point3(
-					(coord.X * _invRot.E00) + (coord.Y * _invRot.E10) + (coord.Z * _invRot.E20),
-					(coord.X * _invRot.E01) + (coord.Y * _invRot.E11) + (coord.Z * _invRot.E21),
-					(coord.X * _invRot.E02) + (coord.Y * _invRot.E12) + (coord.Z * _invRot.E22)
+					(coordinate.X * _invRot.E00) + (coordinate.Y * _invRot.E10) + (coordinate.Z * _invRot.E20),
+					(coordinate.X * _invRot.E01) + (coordinate.Y * _invRot.E11) + (coordinate.Z * _invRot.E21),
+					(coordinate.X * _invRot.E02) + (coordinate.Y * _invRot.E12) + (coordinate.Z * _invRot.E22)
 				);
 			}
 
@@ -62,16 +62,14 @@ namespace Pigeoid.Transformation
 				return !ReferenceEquals(null, other)
 					&& Core.D.Equals(other.Core.D)
 					&& Core.R.Equals(other.Core.R)
+// ReSharper disable CompareOfFloatsByEqualityOperator
 					&& Core.M == other.Core.M
+// ReSharper restore CompareOfFloatsByEqualityOperator
 				;
 			}
 
 			public override bool Equals(object obj) {
-				return null != obj
-					&& (
-						obj is Inverted && Equals(obj as Inverted)
-					)
-				;
+				return Equals(obj as Inverted);
 			}
 
 		}
@@ -117,20 +115,20 @@ namespace Pigeoid.Transformation
 			M = 1 + (mppm / 1000000.0);
 		}
 
-		private void TransformValue(ref Point3 coord) {
-			coord = new Point3(
-				((coord.X + (coord.Z * R.Y) - (coord.Y * R.Z)) * M) + D.X,
-				((coord.Y + (coord.X * R.Z) - (coord.Z * R.X)) * M) + D.Y,
-				((coord.Z + (coord.Y * R.X) - (coord.X * R.Y)) * M) + D.Z
+		private void TransformValue(ref Point3 coordinate) {
+			coordinate = new Point3(
+				((coordinate.X + (coordinate.Z * R.Y) - (coordinate.Y * R.Z)) * M) + D.X,
+				((coordinate.Y + (coordinate.X * R.Z) - (coordinate.Z * R.X)) * M) + D.Y,
+				((coordinate.Z + (coordinate.Y * R.X) - (coordinate.X * R.Y)) * M) + D.Z
 			);
 		}
 
 
-		public Point3 TransformValue(Point3 coord) {
+		public Point3 TransformValue(Point3 coordinate) {
 			return new Point3(
-				((coord.X + (coord.Z * R.Y) - (coord.Y * R.Z)) * M) + D.X,
-				((coord.Y + (coord.X * R.Z) - (coord.Z * R.X)) * M) + D.Y,
-				((coord.Z + (coord.Y * R.X) - (coord.X * R.Y)) * M) + D.Z
+				((coordinate.X + (coordinate.Z * R.Y) - (coordinate.Y * R.Z)) * M) + D.X,
+				((coordinate.Y + (coordinate.X * R.Z) - (coordinate.Z * R.X)) * M) + D.Y,
+				((coordinate.Z + (coordinate.Y * R.X) - (coordinate.X * R.Y)) * M) + D.Z
 			);
 		}
 
@@ -152,9 +150,9 @@ namespace Pigeoid.Transformation
 			return GetInverse();
 		}
 
-		public bool HasInverse {
-			get { return 0 != M; }
-		}
+// ReSharper disable CompareOfFloatsByEqualityOperator
+		public bool HasInverse { get { return 0 != M; } }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 
 		ITransformation ITransformation.GetInverse() {
 			return GetInverse();
@@ -164,13 +162,14 @@ namespace Pigeoid.Transformation
 			return !ReferenceEquals(null, other)
 				&& D.Equals(other.D)
 				&& R.Equals(other.R)
+// ReSharper disable CompareOfFloatsByEqualityOperator
 				&& M == other.M
+// ReSharper restore CompareOfFloatsByEqualityOperator
 			;
 		}
 
 		public override bool Equals(object obj) {
-			return null != obj
-				&& (obj is Helmert7Transformation && Equals(obj as Helmert7Transformation));
+			return Equals(obj as Helmert7Transformation);
 		}
 
 		public override int GetHashCode() {

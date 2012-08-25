@@ -11,20 +11,21 @@ namespace Pigeoid.Epsg
 	public class EpsgEllipsoid : ISpheroid<double>
 	{
 
-		internal static readonly EpsgFixedLookupBase<ushort, EpsgEllipsoid> Lookup;
+		internal static readonly EpsgFixedLookUpBase<ushort, EpsgEllipsoid> LookUp;
 
 		static EpsgEllipsoid() {
-			var lookupDictionary = new SortedDictionary<ushort, EpsgEllipsoid>();
+			var lookUpDictionary = new SortedDictionary<ushort, EpsgEllipsoid>();
 			using (var readerTxt = EpsgDataResource.CreateBinaryReader("ellipsoids.txt"))
-			using (var numberLookup = new EpsgNumberLookup())
+			using (var numberLookUp = new EpsgNumberLookUp())
 			using (var readerDat = EpsgDataResource.CreateBinaryReader("ellipsoids.dat")) {
 				for (int i = readerDat.ReadUInt16(); i > 0; i--) {
 					var code = readerDat.ReadUInt16();
-					var semiMajorAxis = numberLookup.Get(readerDat.ReadUInt16());
-					var valueB = numberLookup.Get(readerDat.ReadUInt16());
-					var name = EpsgTextLookup.GetString(readerDat.ReadUInt16(), readerTxt);
+					var semiMajorAxis = numberLookUp.Get(readerDat.ReadUInt16());
+					var valueB = numberLookUp.Get(readerDat.ReadUInt16());
+					var name = EpsgTextLookUp.GetString(readerDat.ReadUInt16(), readerTxt);
 					var uom = EpsgUom.Get(readerDat.ReadByte() + 9000);
-					lookupDictionary.Add(code, new EpsgEllipsoid(
+// ReSharper disable CompareOfFloatsByEqualityOperator
+					lookUpDictionary.Add(code, new EpsgEllipsoid(
 						code, name, uom,
 						(valueB == semiMajorAxis)
 							? new Sphere(semiMajorAxis)
@@ -32,18 +33,19 @@ namespace Pigeoid.Epsg
 							? new SpheroidEquatorialInvF(semiMajorAxis, valueB) as ISpheroid<double>
 						: new SpheroidEquatorialPolar(semiMajorAxis, valueB)
 					));
+// ReSharper restore CompareOfFloatsByEqualityOperator
 				}
 			}
-			Lookup = new EpsgFixedLookupBase<ushort, EpsgEllipsoid>(lookupDictionary);
+			LookUp = new EpsgFixedLookUpBase<ushort, EpsgEllipsoid>(lookUpDictionary);
 		}
 
 		public static EpsgEllipsoid Get(int code) {
 			return code >= 0 && code < ushort.MaxValue
-				? Lookup.Get((ushort) code)
+				? LookUp.Get((ushort) code)
 				: null;
 		}
 
-		public static IEnumerable<EpsgEllipsoid> Values { get { return Lookup.Values; } }
+		public static IEnumerable<EpsgEllipsoid> Values { get { return LookUp.Values; } }
 
 		private readonly ushort _code;
 		private readonly ISpheroid<double> _core;

@@ -16,11 +16,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		}
 
 		private static IEnumerable<T> Concat<T>(params IEnumerable<T>[] itemLists) {
-			foreach (var itemList in itemLists) {
-				foreach (var item in itemList) {
-					yield return item;
-				}
-			}
+			return itemLists.SelectMany(itemList => itemList);
 		}
 
 		private static IEnumerable<string> ExtractStrings<T>(IEnumerable<T> objects, params Func<T, string>[] extractions) {
@@ -73,7 +69,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			using (var repository = new EpsgRepository(new FileInfo(dataFilePath))) {
 				var epsgData = new EpsgData(repository);
 
-				epsgData.WordLookupList = StringUtils.BuildWordCountLookup(Concat(
+				epsgData.WordLookUpList = StringUtils.BuildWordCountLookUp(Concat(
 						//ExtractStrings(epsgData.Aliases, o => o.Alias),
 						ExtractStrings(epsgData.Repository.Areas, o => o.Name /*, o => StringUtils.TrimTrailingPeriod(o.AreaOfUse)*/ /*,o => o.Iso2*/ /*,o => o.Iso3*/),
 						ExtractStrings(epsgData.Repository.Axes, o => o.Name, o => o.Orientation, o => o.Abbreviation),
@@ -97,9 +93,9 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				using (var writerIndex = new BinaryWriter(streamIndex))
 				using (var streamText = File.Open(Path.Combine(outFolder, "words.txt"), FileMode.Create))
 				using (var writerText = new BinaryWriter(streamText))
-					WriterUtils.WriteWordLookup(epsgData, writerText, writerIndex);
+					WriterUtils.WriteWordLookUp(epsgData, writerText, writerIndex);
 
-				epsgData.SetNumberLists(NumberUtils.BuildNumberCountLookup(Concat(
+				epsgData.SetNumberLists(NumberUtils.BuildNumberCountLookUp(Concat(
 						//ExtractDoubles(epsgData.Areas, o => o.EastBound, o => o.WestBound, o => o.SouthBound, o => o.NorthBound),
 						ExtractDoubles(epsgData.Repository.CoordinateOperations, o => o.Accuracy),
 						ExtractDoubles(epsgData.Repository.Ellipsoids, o => o.SemiMajorAxis, o => o.SemiMinorAxis, o => o.InverseFlattening),
@@ -117,7 +113,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				using (var writerInt = new BinaryWriter(streamInt))
 				using (var streamShort = File.Open(Path.Combine(outFolder, "numberss.dat"), FileMode.Create))
 				using (var writerShort = new BinaryWriter(streamShort))
-					WriterUtils.WriteNumberLookups(epsgData, writerDouble, writerInt, writerShort);
+					WriterUtils.WriteNumberLookUps(epsgData, writerDouble, writerInt, writerShort);
 
 				using (var streamData = File.Open(Path.Combine(outFolder, "areas.dat"), FileMode.Create))
 				using (var writerData = new BinaryWriter(streamData))
@@ -147,25 +143,25 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				using (var writerText = new BinaryWriter(streamText))
 					WriterUtils.WriteMeridians(epsgData, writerData, writerText);
 
-				using (var streamDataEgr = File.Open(Path.Combine(outFolder, "datumegr.dat"), FileMode.Create))
-				using (var writerDataEgr = new BinaryWriter(streamDataEgr))
-				using (var streamDataVer = File.Open(Path.Combine(outFolder, "datumver.dat"), FileMode.Create))
-				using (var writerDataVer = new BinaryWriter(streamDataVer))
+				using (var streamDataEngineering = File.Open(Path.Combine(outFolder, "datumegr.dat"), FileMode.Create))
+				using (var writerDataEngineering = new BinaryWriter(streamDataEngineering))
+				using (var streamDataVertical = File.Open(Path.Combine(outFolder, "datumver.dat"), FileMode.Create))
+				using (var writerDataVertical = new BinaryWriter(streamDataVertical))
 				using (var streamDataGeo = File.Open(Path.Combine(outFolder, "datumgeo.dat"), FileMode.Create))
 				using (var writerDataGeo = new BinaryWriter(streamDataGeo))
 				using (var streamText = File.Open(Path.Combine(outFolder, "datums.txt"), FileMode.Create))
 				using (var writerText = new BinaryWriter(streamText))
-					WriterUtils.WriteDatums(epsgData, writerDataEgr, writerDataVer, writerDataGeo, writerText);
+					WriterUtils.WriteDatums(epsgData, writerDataEngineering, writerDataVertical, writerDataGeo, writerText);
 
-				using (var streamDataLen = File.Open(Path.Combine(outFolder, "uomlen.dat"), FileMode.Create))
-				using (var writerDataLen = new BinaryWriter(streamDataLen))
-				using (var streamDataAng = File.Open(Path.Combine(outFolder, "uomang.dat"), FileMode.Create))
-				using (var writerDataAng = new BinaryWriter(streamDataAng))
-				using (var streamDataScl = File.Open(Path.Combine(outFolder, "uomscl.dat"), FileMode.Create))
-				using (var writerDataScl = new BinaryWriter(streamDataScl))
+				using (var streamDataLength = File.Open(Path.Combine(outFolder, "uomlen.dat"), FileMode.Create))
+				using (var writerDataLength = new BinaryWriter(streamDataLength))
+				using (var streamDataAngle = File.Open(Path.Combine(outFolder, "uomang.dat"), FileMode.Create))
+				using (var writerDataAngle = new BinaryWriter(streamDataAngle))
+				using (var streamDataScale = File.Open(Path.Combine(outFolder, "uomscl.dat"), FileMode.Create))
+				using (var writerDataScale = new BinaryWriter(streamDataScale))
 				using (var streamText = File.Open(Path.Combine(outFolder, "uoms.txt"), FileMode.Create))
 				using (var writerText = new BinaryWriter(streamText))
-					WriterUtils.WriteUoms(epsgData, writerDataLen, writerDataAng, writerDataScl, writerText);
+					WriterUtils.WriteUnitOfMeasures(epsgData, writerDataLength, writerDataAngle, writerDataScale, writerText);
 
 				using (var streamData = File.Open(Path.Combine(outFolder, "parameters.dat"), FileMode.Create))
 				using (var writerData = new BinaryWriter(streamData))
@@ -183,7 +179,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				using (var writerData = new BinaryWriter(streamData))
 				using (var streamText = File.Open(Path.Combine(outFolder, "coordsys.txt"), FileMode.Create))
 				using (var writerText = new BinaryWriter(streamText))
-					WriterUtils.WriteCoordSystems(epsgData, writerData, writerText);
+					WriterUtils.WriteCoordinateSystems(epsgData, writerData, writerText);
 
 				using (var streamText = File.Open(Path.Combine(outFolder, "params.txt"), FileMode.Create))
 				using (var writerText = new BinaryWriter(streamText))
@@ -197,27 +193,27 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 						)
 					);
 
-				using (var streamDataPrj = File.Open(Path.Combine(outFolder, "crsprj.dat"), FileMode.Create))
-				using (var writerDataPrj = new BinaryWriter(streamDataPrj))
-				using (var streamDataCmp = File.Open(Path.Combine(outFolder, "crscmp.dat"), FileMode.Create))
-				using (var writerDataCmp = new BinaryWriter(streamDataCmp))
+				using (var streamDataProjection = File.Open(Path.Combine(outFolder, "crsprj.dat"), FileMode.Create))
+				using (var writerDataProjection = new BinaryWriter(streamDataProjection))
+				using (var streamDataComposite = File.Open(Path.Combine(outFolder, "crscmp.dat"), FileMode.Create))
+				using (var writerDataComposite = new BinaryWriter(streamDataComposite))
 				using (var streamDataGeo = File.Open(Path.Combine(outFolder, "crsgeo.dat"), FileMode.Create))
 				using (var writerDataGeo = new BinaryWriter(streamDataGeo))
 				using (var streamText = File.Open(Path.Combine(outFolder, "crs.txt"), FileMode.Create))
 				using (var writerText = new BinaryWriter(streamText))
-					WriterUtils.WriteCrs(epsgData, writerText, writerDataPrj, writerDataGeo, writerDataCmp);
+					WriterUtils.WriteCoordinateReferenceSystem(epsgData, writerText, writerDataProjection, writerDataGeo, writerDataComposite);
 
-				using (var streamDataConv = File.Open(Path.Combine(outFolder, "opconv.dat"), FileMode.Create))
-				using (var writerDataConv = new BinaryWriter(streamDataConv))
-				using (var streamDataCat = File.Open(Path.Combine(outFolder, "opcat.dat"), FileMode.Create))
-				using (var writerDataCat = new BinaryWriter(streamDataCat))
-				using (var streamDataTran = File.Open(Path.Combine(outFolder, "optran.dat"), FileMode.Create))
-				using (var writerDataTran = new BinaryWriter(streamDataTran))
+				using (var streamDataConversion = File.Open(Path.Combine(outFolder, "opconv.dat"), FileMode.Create))
+				using (var writerDataConversion = new BinaryWriter(streamDataConversion))
+				using (var streamDataConcat = File.Open(Path.Combine(outFolder, "opcat.dat"), FileMode.Create))
+				using (var writerDataConcat = new BinaryWriter(streamDataConcat))
+				using (var streamDataTransform = File.Open(Path.Combine(outFolder, "optran.dat"), FileMode.Create))
+				using (var writerDataTransform = new BinaryWriter(streamDataTransform))
 				using (var streamDataPath = File.Open(Path.Combine(outFolder, "oppath.dat"), FileMode.Create))
 				using (var writerDataPath = new BinaryWriter(streamDataPath))
 				using (var streamText = File.Open(Path.Combine(outFolder, "op.txt"), FileMode.Create))
 				using (var writerText = new BinaryWriter(streamText))
-					WriterUtils.WriteCoordOps(epsgData, writerText, writerDataConv, writerDataTran, writerDataCat, writerDataPath);
+					WriterUtils.WriteCoordinateOperations(epsgData, writerText, writerDataConversion, writerDataTransform, writerDataConcat, writerDataPath);
 
 			}
 

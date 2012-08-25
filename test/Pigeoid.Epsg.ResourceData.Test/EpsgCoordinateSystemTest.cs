@@ -11,12 +11,12 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgCoordinateSystem.Values;
-			var dbItems = Repository.CoordinateSystems;
+			var assemblyItems = EpsgCoordinateSystem.Values;
+			var databaseItems = Repository.CoordinateSystems;
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
 				new Tester((x, y) => x.Deprecated == y.Deprecated),

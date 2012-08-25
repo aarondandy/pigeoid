@@ -14,14 +14,14 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgCoordinateOperationInfoRepository.ConcatenatedInfos;
-			var dbItems = Repository.CoordinateOperations
+			var assemblyItems = EpsgCoordinateOperationInfoRepository.ConcatenatedInfos;
+			var databaseItems = Repository.CoordinateOperations
 				.Where(x => String.Equals("Concatenated Operation", x.TypeName, StringComparison.OrdinalIgnoreCase))
 				.ToList();
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
 				new Tester((x, y) => x.Area.Code == y.Area.Code),

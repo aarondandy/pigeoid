@@ -38,7 +38,8 @@
     <Reference Include="NHamcrest, Version=1.2.1.0, Culture=neutral, PublicKeyToken=31c3ea0b6fcf8c4a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\NHamcrest.1.2.1\lib\NHamcrest.dll</HintPath>
     </Reference>
-    <Reference Include="nunit.framework">
+    <Reference Include="nunit.framework, Version=2.6.1.12217, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\NUnit.2.6.1\lib\nunit.framework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -62,7 +63,7 @@
     <Compile Include="EpsgCoordinateOperationConcatenatedTest.cs" />
     <Compile Include="EpsgCoordinateSystemTest.cs" />
     <Compile Include="EpsgCoordinateTransformTest.cs" />
-    <Compile Include="EpsgCoordOpMethodInfoTest.cs" />
+    <Compile Include="EpsgCoordinateOperationMethodInfoTest.cs" />
     <Compile Include="EpsgCrsTest.cs" />
     <Compile Include="EpsgDataTestBase.cs" />
     <Compile Include="EpsgDatumTest.cs" />

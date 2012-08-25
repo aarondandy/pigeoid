@@ -42,28 +42,28 @@ namespace Pigeoid.Transformation
 
 	}
 
-	internal abstract class InvertedTransformationBase<TCore, TCoord> :
-		InvertedTransformationBase<TCore, TCoord, TCoord>,
-		ITransformation<TCoord>
-		where TCore : ITransformation<TCoord>
+	internal abstract class InvertedTransformationBase<TCore, TCoordinate> :
+		InvertedTransformationBase<TCore, TCoordinate, TCoordinate>,
+		ITransformation<TCoordinate>
+		where TCore : ITransformation<TCoordinate>
 	{
 
 		protected InvertedTransformationBase(TCore core)
 			: base(core) { }
 
-		public override abstract TCoord TransformValue(TCoord value);
+		public override abstract TCoordinate TransformValue(TCoordinate value);
 
-		public new ITransformation<TCoord> GetInverse() {
-			return base.GetInverse() as ITransformation<TCoord>;
+		public new ITransformation<TCoordinate> GetInverse() {
+			return base.GetInverse() as ITransformation<TCoordinate>;
 		}
 
-		public void TransformValues(TCoord[] values) {
+		public void TransformValues(TCoordinate[] values) {
 			for (int i = 0; i < values.Length; i++) {
 				TransformValue(ref values[i]);
 			}
 		}
 
-		public void TransformValue(ref TCoord value) {
+		public void TransformValue(ref TCoordinate value) {
 			value = TransformValue(value);
 		}
 	}

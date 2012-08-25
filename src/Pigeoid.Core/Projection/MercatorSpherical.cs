@@ -11,7 +11,7 @@ namespace Pigeoid.Projection
 	/// A spherical Mercator projection.
 	/// </summary>
 	public class MercatorSpherical :
-		ITransformation<GeographicCoord, Point2>,
+		ITransformation<GeographicCoordinate, Point2>,
 		IEquatable<MercatorSpherical>
 	{
 		/// <summary>
@@ -27,27 +27,26 @@ namespace Pigeoid.Projection
 		/// </summary>
 		public readonly double Radius;
 
-		private class Inverted : InvertedTransformationBase<MercatorSpherical,Point2,GeographicCoord>
+		private class Inverted : InvertedTransformationBase<MercatorSpherical,Point2,GeographicCoordinate>
 		{
 
 			public Inverted(MercatorSpherical core)
 				: base(core)
 			{
-				if (0 == Core.Radius)
-					throw new ArgumentException("Core cannot be inverted.");
+				if (!Core.HasInverse) throw new ArgumentException("Core cannot be inverted.");
 			}
 
-			public override GeographicCoord TransformValue(Point2 coord) {
-				return new GeographicCoord(
-					(ProjectionBase.HalfPi - (2.0 * Math.Atan(Math.Pow(Math.E, (Core.FalseProjectedOffset.Y - coord.Y) / Core.Radius)))),
-					((coord.X - Core.FalseProjectedOffset.X) / Core.Radius) + Core.OriginLongitude
+			public override GeographicCoordinate TransformValue(Point2 coordinate) {
+				return new GeographicCoordinate(
+					(ProjectionBase.HalfPi - (2.0 * Math.Atan(Math.Pow(Math.E, (Core.FalseProjectedOffset.Y - coordinate.Y) / Core.Radius)))),
+					((coordinate.X - Core.FalseProjectedOffset.X) / Core.Radius) + Core.OriginLongitude
 				);
 			}
 
 		}
 
 		/// <summary>
-		/// Creates a spherical mercator projection.
+		/// Creates a Spherical Mercator projection.
 		/// </summary>
 		/// <param name="falseProjectedOffset">The false projected offset.</param>
 		/// <param name="originLongitude">The origin of longitude.</param>
@@ -61,40 +60,45 @@ namespace Pigeoid.Projection
 			OriginLongitude = originLongitude;
 			Radius = radius;
 		}
+
 		/// <summary>
 		/// Creates a spherical Mercator projection.
 		/// </summary>
 		/// <param name="radius">The radius.</param>
 		public MercatorSpherical(double radius) : this(Vector2.Zero, 0, radius) { }
 
-		public Point2 TransformValue(GeographicCoord coord) {
+		public Point2 TransformValue(GeographicCoordinate coordinate) {
 			return new Point2(
-				FalseProjectedOffset.X + (Radius * (coord.Longitude - OriginLongitude)),
-				FalseProjectedOffset.Y + (Radius * Math.Log(Math.Tan(ProjectionBase.QuarterPi + (coord.Latitude / 2.0))))
+				FalseProjectedOffset.X + (Radius * (coordinate.Longitude - OriginLongitude)),
+				FalseProjectedOffset.Y + (Radius * Math.Log(Math.Tan(ProjectionBase.QuarterPi + (coordinate.Latitude / 2.0))))
 			);
 		}
 
-		public ITransformation<Point2, GeographicCoord> GetInverse() {
+		public ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
 		}
 
 		public bool HasInverse {
+// ReSharper disable CompareOfFloatsByEqualityOperator
 			get { return 0 != Radius; }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		ITransformation ITransformation.GetInverse() {
 			return GetInverse();
 		}
 
-		public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoord> values) {
+		public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values) {
 			return values.Select(TransformValue);
 		}
 
 		public bool Equals(MercatorSpherical other) {
 			return !ReferenceEquals(other, null)
 				&& (
+// ReSharper disable CompareOfFloatsByEqualityOperator
 					OriginLongitude == other.OriginLongitude
 					&& Radius == other.Radius
+// ReSharper restore CompareOfFloatsByEqualityOperator
 					&& FalseProjectedOffset.Equals(other.FalseProjectedOffset)
 				)
 			;

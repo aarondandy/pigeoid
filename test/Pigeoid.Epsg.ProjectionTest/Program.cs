@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Pigeoid.Epsg.ProjectionTest
+﻿namespace Pigeoid.Epsg.ProjectionTest
 {
 	class Program
 	{

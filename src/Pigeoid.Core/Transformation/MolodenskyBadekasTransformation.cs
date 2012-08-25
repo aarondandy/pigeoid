@@ -26,8 +26,7 @@ namespace Pigeoid.Transformation
 			private readonly Matrix3 _invRot;
 
 			public Inverted(MolodenskyBadekasTransformation core) : base(core) {
-				if (0 == Core.M)
-					throw new ArgumentException("Core has no inverse.");
+				if (!Core.HasInverse) throw new ArgumentException("Core has no inverse.");
 
 				_invRot = new Matrix3(
 					1, -Core.R.Z, Core.R.Y,
@@ -37,16 +36,16 @@ namespace Pigeoid.Transformation
 				_invRot.Invert();
 			}
 
-			public override Point3 TransformValue(Point3 coord) {
-				coord = new Point3(
-					(coord.X - Core.D.X - Core.O.X) / Core.M,
-					(coord.Y - Core.D.Y - Core.O.Y) / Core.M,
-					(coord.Z - Core.D.Z - Core.O.Z) / Core.M
+			public override Point3 TransformValue(Point3 coordinate) {
+				coordinate = new Point3(
+					(coordinate.X - Core.D.X - Core.O.X) / Core.M,
+					(coordinate.Y - Core.D.Y - Core.O.Y) / Core.M,
+					(coordinate.Z - Core.D.Z - Core.O.Z) / Core.M
 				);
 				return new Point3(
-					((coord.X * _invRot.E00) + (coord.Y * _invRot.E10) + (coord.Z * _invRot.E20)) + Core.O.X,
-					((coord.X * _invRot.E01) + (coord.Y * _invRot.E11) + (coord.Z * _invRot.E21)) + Core.O.Y,
-					((coord.X * _invRot.E02) + (coord.Y * _invRot.E12) + (coord.Z * _invRot.E22)) + Core.O.Z
+					((coordinate.X * _invRot.E00) + (coordinate.Y * _invRot.E10) + (coordinate.Z * _invRot.E20)) + Core.O.X,
+					((coordinate.X * _invRot.E01) + (coordinate.Y * _invRot.E11) + (coordinate.Z * _invRot.E21)) + Core.O.Y,
+					((coordinate.X * _invRot.E02) + (coordinate.Y * _invRot.E12) + (coordinate.Z * _invRot.E22)) + Core.O.Z
 				);
 			}
 
@@ -72,17 +71,19 @@ namespace Pigeoid.Transformation
 			M = 1 + (mppm / 1000000.0);
 		}
 
-		public Point3 TransformValue(Point3 coord) {
-			coord = new Point3(coord.X - O.X, coord.Y - O.Y, coord.Z - O.Z);
+		public Point3 TransformValue(Point3 coordinate) {
+			coordinate = new Point3(coordinate.X - O.X, coordinate.Y - O.Y, coordinate.Z - O.Z);
 			return new Point3(
-				((coord.X - (coord.Z * R.Y) + (coord.Y * R.Z)) * M) + O.X + D.X,
-				((coord.Y - (coord.X * R.Z) + (coord.Z * R.X)) * M) + O.Y + D.Y,
-				((coord.Z - (coord.Y * R.X) + (coord.X * R.Y)) * M) + O.Z + D.Z
+				((coordinate.X - (coordinate.Z * R.Y) + (coordinate.Y * R.Z)) * M) + O.X + D.X,
+				((coordinate.Y - (coordinate.X * R.Z) + (coordinate.Z * R.X)) * M) + O.Y + D.Y,
+				((coordinate.Z - (coordinate.Y * R.X) + (coordinate.X * R.Y)) * M) + O.Z + D.Z
 			);
 		}
 
 		public bool HasInverse {
+// ReSharper disable CompareOfFloatsByEqualityOperator
 			get { return 0 != M; }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		public ITransformation<Point3> GetInverse() {

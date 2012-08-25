@@ -10,16 +10,18 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgPrimeMeridian.Values;
-			var dbItems = Repository.PrimeMeridians;
+			var assemblyItems = EpsgPrimeMeridian.Values;
+			var databaseItems = Repository.PrimeMeridians;
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
 				new Tester((x, y) => x.Unit.Code == y.Uom.Code),
+// ReSharper disable CompareOfFloatsByEqualityOperator
 				new Tester((x, y) => x.Longitude == y.GreenwichLon)
+// ReSharper restore CompareOfFloatsByEqualityOperator
 			);
 
 		}

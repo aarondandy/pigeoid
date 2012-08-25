@@ -12,7 +12,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		public virtual EpsgCoordinateOperation Operation { get; set; }
 
 		public override bool Equals(object obj) {
-			return base.Equals(obj as EpsgCoordOpPathItem);
+			return Equals(obj as EpsgCoordOpPathItem);
 		}
 
 		public virtual bool Equals(EpsgCoordOpPathItem other) {
@@ -30,7 +30,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		}
 
 		public override string ToString() {
-			return CatCode.ToString() + ':' + Step.ToString();
+			return String.Concat(CatCode, ':', Step);
 		}
 
 	}

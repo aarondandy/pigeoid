@@ -1,6 +1,5 @@
 ﻿// TODO: source header
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pigeoid.Contracts;
@@ -40,14 +39,6 @@ namespace Pigeoid.Epsg
 
 		public override IEnumerable<INamedParameter> Parameters { get { return Enumerable.Empty<INamedParameter>(); } }
 
-		public override bool HasInverse {
-			get {
-				foreach(var step in Steps) {
-					if(!step.HasInverse)
-						return false;
-				}
-				return true;
-			}
-		}
+		public override bool HasInverse { get { return Steps.All(step => step.HasInverse); } }
 	}
 }

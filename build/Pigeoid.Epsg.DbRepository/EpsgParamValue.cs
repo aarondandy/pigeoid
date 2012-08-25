@@ -18,11 +18,11 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		public virtual EpsgUom Uom { get; set; }
 
 		public override string ToString() {
-			return Operation.ToString() + ',' + Method.ToString() + ',' + Parameter.ToString();
+			return String.Concat(Operation, ',', Method, ',', Parameter);
 		}
 
 		public override bool Equals(object obj) {
-			return Equals(obj as EpsgParamUse);
+			return Equals(obj as EpsgParamValue);
 		}
 
 		public virtual bool Equals(EpsgParamValue other) {

@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
 namespace Pigeoid.Epsg.DataTransmogrifier
 {
 	public static class NumberUtils
 	{
 
-		public static Dictionary<double, int> BuildNumberCountLookup(IEnumerable<double> numberList) {
+		public static Dictionary<double, int> BuildNumberCountLookUp(IEnumerable<double> numberList) {
 			var numberCounts = new Dictionary<double, int>();
 			foreach (var number in numberList) {
 				int currentCount;

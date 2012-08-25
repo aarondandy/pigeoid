@@ -48,7 +48,7 @@ namespace Pigeoid.Ogc
 		/// </summary>
 		VerticalGeoidModelDerived = 2005,
 		/// <summary>
-		/// Hydrographic depth datum.
+		/// Hydro-graphic depth datum.
 		/// </summary>
 		VerticalDepth = 2006,
 		/// <summary>

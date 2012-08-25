@@ -10,7 +10,7 @@ using Vertesaur.Contracts;
 namespace Pigeoid.Projection
 {
 	/// <summary>
-	/// A lambert conic conformal projection with 1 standard parallel.
+	/// A Lambert Conic Conformal projection with 1 standard parallel.
 	/// </summary>
 	public class LambertConicConformal1Sp :
 		LambertConicConformal,
@@ -25,33 +25,35 @@ namespace Pigeoid.Projection
 		public readonly double OriginScaleFactor;
 
 		/// <summary>
-		/// Constructs a new lambert conic conformal projection from 1 standard parallel.
+		/// Constructs a new Lambert Conic Conformal projection from 1 standard parallel.
 		/// </summary>
-		/// <param name="geographiOrigin">The geographic origin.</param>
+		/// <param name="geographicOrigin">The geographic origin.</param>
 		/// <param name="originScaleFactor">The scale factor at the origin.</param>
 		/// <param name="falseProjectedOffset">The false projected offset.</param>
 		/// <param name="spheroid">The spheroid.</param>
 		public LambertConicConformal1Sp(
-			GeographicCoord geographiOrigin,
+			GeographicCoordinate geographicOrigin,
 			double originScaleFactor,
 			Vector2 falseProjectedOffset,
 			ISpheroid<double> spheroid
 		)
-			: base(geographiOrigin, falseProjectedOffset, spheroid) {
+			: base(geographicOrigin, falseProjectedOffset, spheroid) {
 			OriginScaleFactor = originScaleFactor;
-			double originParallelSin = Math.Sin(geographiOrigin.Latitude);
-			double eParallelSin = E * originParallelSin;
-			double tOrigin = Math.Tan(QuarterPi - (geographiOrigin.Latitude / 2.0))
+			var originParallelSin = Math.Sin(geographicOrigin.Latitude);
+			var eParallelSin = E * originParallelSin;
+			var tOrigin = Math.Tan(QuarterPi - (geographicOrigin.Latitude / 2.0))
 				/ Math.Pow((1.0 - eParallelSin) / (1.0 + eParallelSin),EHalf);
-			N = Math.Sin(geographiOrigin.Latitude);
-			if (0 == N || Double.IsNaN(N))
-				throw new ArgumentException("Invalid N value.");
+			N = Math.Sin(geographicOrigin.Latitude);
 			
-			F = (Math.Cos(geographiOrigin.Latitude) / Math.Sqrt(1.0 - (ESq * originParallelSin * originParallelSin)))
+// ReSharper disable CompareOfFloatsByEqualityOperator
+			if (0 == N || Double.IsNaN(N)) throw new ArgumentException("Invalid N value.");
+// ReSharper restore CompareOfFloatsByEqualityOperator
+			
+			F = (Math.Cos(geographicOrigin.Latitude) / Math.Sqrt(1.0 - (ESq * originParallelSin * originParallelSin)))
 				/ (N * Math.Pow(tOrigin, N));
 			Af = MajorAxis * F * originScaleFactor;
 			ROrigin = Af * Math.Pow(tOrigin, N);
-			Invn = 1.0 / N;
+			InvN = 1.0 / N;
 			NorthingOffset = falseProjectedOffset.Y + ROrigin;
 		}
 
@@ -71,8 +73,10 @@ namespace Pigeoid.Projection
 		public bool Equals(LambertConicConformal1Sp other) {
 			return !ReferenceEquals(other, null)
 				&& (
-					GeographiOrigin.Equals(other.GeographiOrigin)
+					GeographicOrigin.Equals(other.GeographicOrigin)
+// ReSharper disable CompareOfFloatsByEqualityOperator
 					&& OriginScaleFactor == other.OriginScaleFactor
+// ReSharper restore CompareOfFloatsByEqualityOperator
 					&& FalseProjectedOffset.Equals(other.FalseProjectedOffset)
 					&& Spheroid.Equals(other.Spheroid)
 				)
@@ -85,7 +89,7 @@ namespace Pigeoid.Projection
 		}
 
 		public override int GetHashCode() {
-			return -GeographiOrigin.GetHashCode() ^ OriginScaleFactor.GetHashCode();
+			return -GeographicOrigin.GetHashCode() ^ OriginScaleFactor.GetHashCode();
 		}
 
 	}

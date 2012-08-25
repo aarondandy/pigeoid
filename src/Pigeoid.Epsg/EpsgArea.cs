@@ -15,7 +15,7 @@ namespace Pigeoid.Epsg
 		IRelatableWithin<EpsgArea>
 	{
 
-		internal class EpsgAreaLookup : EpsgDynamicLookupBase<ushort, EpsgArea>
+		internal class EpsgAreaLookUp : EpsgDynamicLookUpBase<ushort, EpsgArea>
 		{
 
 			private const string DatFileName = "areas.dat";
@@ -36,7 +36,7 @@ namespace Pigeoid.Epsg
 				}
 			}
 
-			public EpsgAreaLookup() : base(GetKeys()) { }
+			public EpsgAreaLookUp() : base(GetKeys()) { }
 
 			private static double DecodeDegreeValueFromShort(short encoded) {
 				double v = encoded / 100.0;
@@ -53,11 +53,11 @@ namespace Pigeoid.Epsg
 					var eastBound = DecodeDegreeValueFromShort(reader.ReadInt16());
 					var southBound = DecodeDegreeValueFromShort(reader.ReadInt16());
 					var northBound = DecodeDegreeValueFromShort(reader.ReadInt16());
-					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
 					return new EpsgArea(
 						key, name,
-						EpsgTextLookup.LookupIsoString(key, "iso2.dat", 2),
-						EpsgTextLookup.LookupIsoString(key, "iso3.dat", 3),
+						EpsgTextLookUp.LookUpIsoString(key, "iso2.dat", 2),
+						EpsgTextLookUp.LookUpIsoString(key, "iso3.dat", 3),
 						new LongitudeDegreeRange(westBound, eastBound),
 						new Range(southBound, northBound)
 					);
@@ -70,27 +70,27 @@ namespace Pigeoid.Epsg
 
 		}
 
-		internal static readonly EpsgAreaLookup Lookup = new EpsgAreaLookup();
+		internal static readonly EpsgAreaLookUp LookUp = new EpsgAreaLookUp();
 
 		public static EpsgArea Get(int code) {
-			return Lookup.Get(checked((ushort) code));
+			return LookUp.Get(checked((ushort) code));
 		}
 
-		public static IEnumerable<EpsgArea> Values { get { return Lookup.Values; } }
+		public static IEnumerable<EpsgArea> Values { get { return LookUp.Values; } }
 
 		private readonly ushort _code;
 		private readonly string _iso2;
 		private readonly string _iso3;
 		private readonly string _name;
-		private readonly LongitudeDegreeRange _lonRange;
+		private readonly LongitudeDegreeRange _longitudeRange;
 		private readonly Range _latRange;
 
-		internal EpsgArea(ushort code, string name, string iso2, string iso3, LongitudeDegreeRange lonRange, Range latRange) {
+		internal EpsgArea(ushort code, string name, string iso2, string iso3, LongitudeDegreeRange longitudeRange, Range latRange) {
 			_code = code;
 			_name = name;
 			_iso2 = iso2;
 			_iso3 = iso3;
-			_lonRange = lonRange;
+			_longitudeRange = longitudeRange;
 			_latRange = latRange;
 		}
 
@@ -102,7 +102,7 @@ namespace Pigeoid.Epsg
 
 		public string Iso3 { get { return _iso3; } }
 
-		public LongitudeDegreeRange LongitudeRange { get { return _lonRange; } }
+		public LongitudeDegreeRange LongitudeRange { get { return _longitudeRange; } }
 
 		public Range LatitudeRange { get { return _latRange; } }
 
@@ -111,17 +111,17 @@ namespace Pigeoid.Epsg
 		}
 
 		public bool Intersects(EpsgArea other) {
-			return _lonRange.Intersects(other._lonRange)
+			return _longitudeRange.Intersects(other._longitudeRange)
 				&& _latRange.Intersects(other._latRange);
 		}
 
 		public bool Contains(EpsgArea other) {
-			return _lonRange.Contains(other._lonRange)
+			return _longitudeRange.Contains(other._longitudeRange)
 				&& _latRange.Contains(other._latRange);
 		}
 
 		public bool Within(EpsgArea other) {
-			return _lonRange.Within(other._lonRange)
+			return _longitudeRange.Within(other._longitudeRange)
 				&& _latRange.Within(other._latRange);
 		}
 

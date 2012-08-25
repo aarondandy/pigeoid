@@ -10,7 +10,7 @@ namespace Pigeoid.Epsg
 	public class EpsgCrsCompound : EpsgCrs, ICrsCompound
 	{
 
-		internal class EpsgCrsCompoundLookup : EpsgDynamicLookupBase<ushort,EpsgCrsCompound>
+		internal class EpsgCrsCompoundLookUp : EpsgDynamicLookUpBase<ushort,EpsgCrsCompound>
 		{
 
 			private const string DatFileName = "crscmp.dat";
@@ -30,15 +30,15 @@ namespace Pigeoid.Epsg
 				return keys.ToArray();
 			}
 
-			public EpsgCrsCompoundLookup() : base(GetKeys()) { }
+			public EpsgCrsCompoundLookUp() : base(GetKeys()) { }
 
 			protected override EpsgCrsCompound Create(ushort code, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
 					var horizontal = EpsgCrs.Get(reader.ReadUInt16());
-					var vertical = (EpsgCrsVertical)EpsgCrsVertical.GetDatumBased(reader.ReadUInt16());
+					var vertical = (EpsgCrsVertical)EpsgCrsDatumBased.GetDatumBased(reader.ReadUInt16());
 					var area = EpsgArea.Get(reader.ReadUInt16());
-					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
 					var deprecated = reader.ReadByte() == 0xff;
 					return new EpsgCrsCompound(code, name, area, deprecated, horizontal, vertical);
 				}
@@ -50,15 +50,15 @@ namespace Pigeoid.Epsg
 
 		}
 
-		internal static readonly EpsgCrsCompoundLookup Lookup = new EpsgCrsCompoundLookup();
+		internal static readonly EpsgCrsCompoundLookUp LookUp = new EpsgCrsCompoundLookUp();
 
 		public static EpsgCrsCompound GetCompound(int code) {
 			return code >= 0 && code <= UInt16.MaxValue
-				? Lookup.Get((ushort) code)
+				? LookUp.Get((ushort) code)
 				: null;
 		}
 
-		public static IEnumerable<EpsgCrsCompound> CompoundValues { get { return Lookup.Values; } }
+		public static IEnumerable<EpsgCrsCompound> CompoundValues { get { return LookUp.Values; } }
 
 		private readonly EpsgCrs _horizontal;
 		private readonly EpsgCrsVertical _vertical;

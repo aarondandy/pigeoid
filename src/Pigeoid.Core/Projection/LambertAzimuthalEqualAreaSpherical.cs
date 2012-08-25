@@ -13,7 +13,7 @@ namespace Pigeoid.Projection
 		IEquatable<LambertAzimuthalEqualAreaSpherical>
 	{
 
-		private class Inverted : InvertedTransformationBase<LambertAzimuthalEqualAreaSpherical,Point2,GeographicCoord>
+		private class Inverted : InvertedTransformationBase<LambertAzimuthalEqualAreaSpherical,Point2,GeographicCoordinate>
 		{
 
 			private readonly double _r2;
@@ -24,40 +24,42 @@ namespace Pigeoid.Projection
 				_r2 = core.R * 2.0;
 			}
 
-			public override GeographicCoord TransformValue(Point2 source) {
-				double p = Math.Sqrt((source.X * source.X) + (source.Y * source.Y));
+			public override GeographicCoordinate TransformValue(Point2 source) {
+// ReSharper disable CompareOfFloatsByEqualityOperator
+				var p = Math.Sqrt((source.X * source.X) + (source.Y * source.Y));
 				if (0 == p)
 					return Core.GeographicOrigin;
 
-				double c = 2.0 * Math.Asin(p / (_r2));
-				double cosC = Math.Cos(c);
-				double sinC = Math.Sin(c);
-				double lat = Math.Asin(
+				var c = 2.0 * Math.Asin(p / (_r2));
+				var cosC = Math.Cos(c);
+				var sinC = Math.Sin(c);
+				var lat = Math.Asin(
 					(cosC * Core._sinLatOrg)
 					+ ((source.Y * sinC * Core._cosLatOrg) / p)
 				);
-				double lon;
+				double longitude;
 				if (Core.GeographicOrigin.Latitude == HalfPi)
-					lon = Core.GeographicOrigin.Longitude + Math.Atan2(source.X, -source.Y);
+					longitude = Core.GeographicOrigin.Longitude + Math.Atan2(source.X, -source.Y);
 				else if (Core.GeographicOrigin.Latitude == -HalfPi)
-					lon = Core.GeographicOrigin.Longitude + Math.Atan2(source.X, source.Y);
+					longitude = Core.GeographicOrigin.Longitude + Math.Atan2(source.X, source.Y);
 				else
-					lon = Core.GeographicOrigin.Longitude + Math.Atan2(
+					longitude = Core.GeographicOrigin.Longitude + Math.Atan2(
 						source.X * sinC,
 						(p * Core._cosLatOrg * cosC) - (source.Y * Core._sinLatOrg * sinC)
 					);
-				return new GeographicCoord(lat, lon);
+				return new GeographicCoordinate(lat, longitude);
+// ReSharper restore CompareOfFloatsByEqualityOperator
 			}
 		}
 
 
 		public readonly double R;
-		public readonly GeographicCoord GeographicOrigin;
+		public readonly GeographicCoordinate GeographicOrigin;
 		private readonly double _sinLatOrg;
 		private readonly double _cosLatOrg;
 
 		public LambertAzimuthalEqualAreaSpherical(
-			GeographicCoord geogOrigin,
+			GeographicCoordinate geogOrigin,
 			Vector2 falseOffset,
 			ISpheroid<double> spheroid
 		)
@@ -72,7 +74,7 @@ namespace Pigeoid.Projection
 		}
 
 
-		public override Point2 TransformValue(GeographicCoord source) {
+		public override Point2 TransformValue(GeographicCoordinate source) {
 			double deltaLon = source.Longitude - GeographicOrigin.Longitude;
 			double cosLat = Math.Cos(source.Latitude);
 			double cosDeltaLonCosLat = Math.Cos(deltaLon) * cosLat;
@@ -90,7 +92,7 @@ namespace Pigeoid.Projection
 			get { return true; }
 		}
 
-		public override ITransformation<Point2, GeographicCoord> GetInverse() {
+		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
 		}
 

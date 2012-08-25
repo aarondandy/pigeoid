@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Linq;
 using Pigeoid.Contracts;
 
 namespace Pigeoid
@@ -66,7 +65,9 @@ namespace Pigeoid
 	public static class NamedParameter
 	{
 
-		private static readonly ReadOnlyCollection<string> _genericNames;
+		private static readonly ReadOnlyCollection<string> GenericNamesCoreList;
+
+		// TODO: I don't know if exposed properties for the names is the best idea.
 
 		/// <summary>
 		/// Angle from Rectified to Skew Grid.
@@ -178,7 +179,7 @@ namespace Pigeoid
 		public static readonly string NameStandardParallel = "Standard Parallel";
 
 		static NamedParameter() {
-			_genericNames = Array.AsReadOnly(new[] {
+			GenericNamesCoreList = Array.AsReadOnly(new[] {
 				NameAngleFromRectifiedToSkewGrid,
 				NameAzimuthOfInitialLine,
 				NameAzimuthOfCenterLine,
@@ -205,7 +206,7 @@ namespace Pigeoid
 				NameScaleFactorAtNaturalOrigin,
 				NameScaleFactorOnInitialLine,
 				NameScaleFactorOnPseudoStandardLine,
-				NameStandardParallel,
+				NameStandardParallel
 			});
 		}
 
@@ -213,7 +214,7 @@ namespace Pigeoid
 		/// All generic names.
 		/// </summary>
 		public static IEnumerable<string> GenericNames {
-			get { return _genericNames; }
+			get { return GenericNamesCoreList; }
 		}
 
 	}

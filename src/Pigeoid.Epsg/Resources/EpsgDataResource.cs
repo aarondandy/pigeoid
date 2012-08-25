@@ -8,11 +8,11 @@ namespace Pigeoid.Epsg.Resources
 	internal static class EpsgDataResource
 	{
 
-		private static readonly string _resourceBaseName = typeof(EpsgDataResource).Namespace + '.';
-		private static readonly Assembly _resourceAssembly = typeof(EpsgDataResource).Assembly;
+		private static readonly string ResourceBaseName = typeof(EpsgDataResource).Namespace + '.';
+		private static readonly Assembly ResourceAssembly = typeof(EpsgDataResource).Assembly;
 
 		public static Stream CreateStream(string resourceName) {
-			return _resourceAssembly.GetManifestResourceStream(_resourceBaseName + resourceName);
+			return ResourceAssembly.GetManifestResourceStream(ResourceBaseName + resourceName);
 		}
 
 		public static BinaryReader CreateBinaryReader(string resourceName) {

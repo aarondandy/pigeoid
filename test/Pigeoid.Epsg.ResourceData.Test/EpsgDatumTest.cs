@@ -11,11 +11,11 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgDatum.Values;
+			var assemblyItems = EpsgDatum.Values;
 			var dbItems = Repository.Datums;
 
 			AssertMatches(
-				asmItems,
+				assemblyItems,
 				dbItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
@@ -34,11 +34,11 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgDatum.Values.OfType<EpsgDatumGeodetic>();
+			var assemblyItems = EpsgDatum.Values.OfType<EpsgDatumGeodetic>();
 			var dbItems = Repository.Datums.Where(x => String.Equals("Geodetic",x.Type,StringComparison.OrdinalIgnoreCase));
 
 			AssertMatches(
-				asmItems,
+				assemblyItems,
 				dbItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),

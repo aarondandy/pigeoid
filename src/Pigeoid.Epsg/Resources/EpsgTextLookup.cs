@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Pigeoid.Epsg.Resources
 {
-	internal static class EpsgTextLookup
+	internal static class EpsgTextLookUp
 	{
 
 		public static string GetString(ushort stringOffset, string wordPointerFile) {
@@ -81,7 +81,7 @@ namespace Pigeoid.Epsg.Resources
 		/// <param name="textPathFile">The resource file to search within.</param>
 		/// <param name="textSize">The fixed length of the ISO code to read.</param>
 		/// <returns>An ISO name code or <see langword="null"/> if not found.</returns>
-		public static string LookupIsoString(ushort searchCode, string textPathFile, int textSize) {
+		public static string LookUpIsoString(ushort searchCode, string textPathFile, int textSize) {
 			using (var reader = EpsgDataResource.CreateBinaryReader(textPathFile)) {
 				var recordSize = sizeof(ushort) + (textSize * sizeof(byte));
 				var byteLength = reader.BaseStream.Length;

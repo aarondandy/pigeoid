@@ -10,7 +10,7 @@ namespace Pigeoid.Epsg
 	public class EpsgCoordinateOperationInfoRepository
 	{
 
-		internal class EpsgCoordinateConversionInfoLookup : EpsgDynamicLookupBase<ushort, EpsgCoordinateOperationInfo>
+		internal class EpsgCoordinateConversionInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgCoordinateOperationInfo>
 		{
 			private const string DatFileName = "opconv.dat";
 			private const string TxtFileName = "op.txt";
@@ -29,7 +29,7 @@ namespace Pigeoid.Epsg
 				return keys.ToArray();
 			}
 
-			public EpsgCoordinateConversionInfoLookup() : base(GetKeys()) { }
+			public EpsgCoordinateConversionInfoLookUp() : base(GetKeys()) { }
 
 			protected override EpsgCoordinateOperationInfo Create(ushort code, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
@@ -37,7 +37,7 @@ namespace Pigeoid.Epsg
 					var opMethodCode = reader.ReadUInt16();
 					var areaCode = reader.ReadUInt16();
 					var deprecated = reader.ReadByte() != 0;
-					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
 					return new EpsgCoordinateOperationInfo(code, opMethodCode, areaCode, deprecated, name);
 				}
 			}
@@ -48,7 +48,7 @@ namespace Pigeoid.Epsg
 
 		}
 
-		internal class EpsgCoordinateTransformInfoLookup : EpsgDynamicLookupBase<ushort, EpsgCoordinateTransformInfo>
+		internal class EpsgCoordinateTransformInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgCoordinateTransformInfo>
 		{
 
 			private const string DatFileName = "optran.dat";
@@ -58,63 +58,64 @@ namespace Pigeoid.Epsg
 			private const int CodeSize = sizeof(ushort);
 			private const int RecordSize = CodeSize + RecordDataSize;
 
-			public static EpsgCoordinateTransformInfoLookup Create() {
-				var forwardLookup = new Dictionary<ushort, List<ushort>>();
-				var reverseLookup = new Dictionary<ushort, List<ushort>>();
+			public static EpsgCoordinateTransformInfoLookUp Create() {
+				var forwardLookUp = new Dictionary<ushort, List<ushort>>();
+				var reverseLookUp = new Dictionary<ushort, List<ushort>>();
 				var keys = new List<ushort>();
-				List<ushort> lookupTargets;
-				using(var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-					while(reader.BaseStream.Position < reader.BaseStream.Length) {
-						var key = reader.ReadUInt16();
-						var sourceCrsCode = reader.ReadUInt16();
-						var targetCrsCode = reader.ReadUInt16();
-						reader.BaseStream.Seek(RecordDataIndexSkipSize, SeekOrigin.Current);
 
-						keys.Add(key);
+				using(var reader = EpsgDataResource.CreateBinaryReader(DatFileName))
+				while(reader.BaseStream.Position < reader.BaseStream.Length) {
+					var key = reader.ReadUInt16();
+					var sourceCrsCode = reader.ReadUInt16();
+					var targetCrsCode = reader.ReadUInt16();
+					reader.BaseStream.Seek(RecordDataIndexSkipSize, SeekOrigin.Current);
 
-						if(!forwardLookup.TryGetValue(sourceCrsCode, out lookupTargets)) {
-							lookupTargets = new List<ushort>();
-							forwardLookup.Add(sourceCrsCode, lookupTargets);
-						}
-						lookupTargets.Add(key);
+					keys.Add(key);
 
-						if(!reverseLookup.TryGetValue(targetCrsCode, out lookupTargets)) {
-							lookupTargets = new List<ushort>();
-							reverseLookup.Add(targetCrsCode, lookupTargets);
-						}
-						lookupTargets.Add(key);
+					List<ushort> lookUpTargets;
+					if(!forwardLookUp.TryGetValue(sourceCrsCode, out lookUpTargets)) {
+						lookUpTargets = new List<ushort>();
+						forwardLookUp.Add(sourceCrsCode, lookUpTargets);
 					}
+					lookUpTargets.Add(key);
+
+					if(!reverseLookUp.TryGetValue(targetCrsCode, out lookUpTargets)) {
+						lookUpTargets = new List<ushort>();
+						reverseLookUp.Add(targetCrsCode, lookUpTargets);
+					}
+					lookUpTargets.Add(key);
 				}
-				return new EpsgCoordinateTransformInfoLookup(
+
+				return new EpsgCoordinateTransformInfoLookUp(
 					keys.ToArray(),
-					forwardLookup.ToDictionary(x => x.Key, x => x.Value.ToArray()),
-					reverseLookup.ToDictionary(x => x.Key, x => x.Value.ToArray())
+					forwardLookUp.ToDictionary(x => x.Key, x => x.Value.ToArray()),
+					reverseLookUp.ToDictionary(x => x.Key, x => x.Value.ToArray())
 				);
 			}
 
-			private readonly Dictionary<ushort, ushort[]> _forwardLookup;
-			private readonly Dictionary<ushort, ushort[]> _reverseLookup;
+			private readonly Dictionary<ushort, ushort[]> _forwardLookUp;
+			private readonly Dictionary<ushort, ushort[]> _reverseLookUp;
 
-			private EpsgCoordinateTransformInfoLookup(
+			private EpsgCoordinateTransformInfoLookUp(
 				ushort[] keys,
-				Dictionary<ushort, ushort[]> forwardLookup,
-				Dictionary<ushort, ushort[]> reverseLookup
+				Dictionary<ushort, ushort[]> forwardLookUp,
+				Dictionary<ushort, ushort[]> reverseLookUp
 			) : base(keys) {
-				_forwardLookup = forwardLookup;
-				_reverseLookup = reverseLookup;
+				_forwardLookUp = forwardLookUp;
+				_reverseLookUp = reverseLookUp;
 			}
 
 			protected override EpsgCoordinateTransformInfo Create(ushort code, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName))
-				using (var numberLookup = new EpsgNumberLookup()) {
+				using (var numberLookUp = new EpsgNumberLookUp()) {
 					reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
 					var sourceCrsCode = reader.ReadUInt16();
 					var targetCrsCode = reader.ReadUInt16();
 					var opMethodCode = reader.ReadUInt16();
-					var accuracy = numberLookup.Get(reader.ReadUInt16());
+					var accuracy = numberLookUp.Get(reader.ReadUInt16());
 					var areaCode = reader.ReadUInt16();
 					var deprecated = reader.ReadByte() != 0;
-					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
 					return new EpsgCoordinateTransformInfo(
 						code, sourceCrsCode, targetCrsCode, opMethodCode,
 						accuracy, areaCode, deprecated, name);
@@ -125,7 +126,7 @@ namespace Pigeoid.Epsg
 				ushort[] data;
 				return sourceCode >= 0
 					&& sourceCode <= ushort.MaxValue
-					&& _forwardLookup.TryGetValue((ushort)sourceCode, out data)
+					&& _forwardLookUp.TryGetValue((ushort)sourceCode, out data)
 					? Array.AsReadOnly(data)
 					: null;
 			}
@@ -134,7 +135,7 @@ namespace Pigeoid.Epsg
 				ushort[] data;
 				return targetCode >= 0
 					&& targetCode <= ushort.MaxValue
-					&& _reverseLookup.TryGetValue((ushort)targetCode, out data)
+					&& _reverseLookUp.TryGetValue((ushort)targetCode, out data)
 					? Array.AsReadOnly(data)
 					: null;
 			}
@@ -145,7 +146,7 @@ namespace Pigeoid.Epsg
 
 		}
 
-		internal class EpsgCoordinateOperationConcatenatedInfoLookup : EpsgDynamicLookupBase<ushort, EpsgCoordinateOperationConcatenatedInfo>
+		internal class EpsgCoordinateOperationConcatenatedInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgCoordinateOperationConcatenatedInfo>
 		{
 			private const string DatFileName = "opcat.dat";
 			private const string PathFileName = "oppath.dat";
@@ -155,9 +156,9 @@ namespace Pigeoid.Epsg
 			private const int CodeSize = sizeof(ushort);
 			private const int RecordSize = CodeSize + RecordDataSize;
 
-			internal static EpsgCoordinateOperationConcatenatedInfoLookup Create() {
-				var forwardLookup = new Dictionary<ushort, List<ushort>>();
-				var reverseLookup = new Dictionary<ushort, List<ushort>>();
+			internal static EpsgCoordinateOperationConcatenatedInfoLookUp Create() {
+				var forwardLookUp = new Dictionary<ushort, List<ushort>>();
+				var reverseLookUp = new Dictionary<ushort, List<ushort>>();
 				var keys = new List<ushort>();
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					while(reader.BaseStream.Position < reader.BaseStream.Length) {
@@ -168,37 +169,37 @@ namespace Pigeoid.Epsg
 
 						keys.Add(key);
 
-						List<ushort> lookupTargets;
-						if(!forwardLookup.TryGetValue(sourceCrsCode, out lookupTargets)) {
-							lookupTargets = new List<ushort>();
-							forwardLookup.Add(sourceCrsCode, lookupTargets);
+						List<ushort> lookUpTargets;
+						if(!forwardLookUp.TryGetValue(sourceCrsCode, out lookUpTargets)) {
+							lookUpTargets = new List<ushort>();
+							forwardLookUp.Add(sourceCrsCode, lookUpTargets);
 						}
-						lookupTargets.Add(key);
+						lookUpTargets.Add(key);
 
-						if(!reverseLookup.TryGetValue(targetCrsCode, out lookupTargets)) {
-							lookupTargets = new List<ushort>();
-							reverseLookup.Add(targetCrsCode, lookupTargets);
+						if(!reverseLookUp.TryGetValue(targetCrsCode, out lookUpTargets)) {
+							lookUpTargets = new List<ushort>();
+							reverseLookUp.Add(targetCrsCode, lookUpTargets);
 						}
-						lookupTargets.Add(key);
+						lookUpTargets.Add(key);
 					}
 				}
-				return new EpsgCoordinateOperationConcatenatedInfoLookup(
+				return new EpsgCoordinateOperationConcatenatedInfoLookUp(
 					keys.ToArray(),
-					forwardLookup.ToDictionary(x => x.Key, x => x.Value.ToArray()),
-					reverseLookup.ToDictionary(x => x.Key, x => x.Value.ToArray())
+					forwardLookUp.ToDictionary(x => x.Key, x => x.Value.ToArray()),
+					reverseLookUp.ToDictionary(x => x.Key, x => x.Value.ToArray())
 				);
 			}
 
-			private readonly Dictionary<ushort, ushort[]> _forwardLookup;
-			private readonly Dictionary<ushort, ushort[]> _reverseLookup;
+			private readonly Dictionary<ushort, ushort[]> _forwardLookUp;
+			private readonly Dictionary<ushort, ushort[]> _reverseLookUp;
 
-			private EpsgCoordinateOperationConcatenatedInfoLookup(
+			private EpsgCoordinateOperationConcatenatedInfoLookUp(
 				ushort[] keys,
-				Dictionary<ushort, ushort[]> forwardLookup,
-				Dictionary<ushort, ushort[]> reverseLookup
+				Dictionary<ushort, ushort[]> forwardLookUp,
+				Dictionary<ushort, ushort[]> reverseLookUp
 			) : base(keys) {
-				_forwardLookup = forwardLookup;
-				_reverseLookup = reverseLookup;
+				_forwardLookUp = forwardLookUp;
+				_reverseLookUp = reverseLookUp;
 			}
 
 			protected override EpsgCoordinateOperationConcatenatedInfo Create(ushort code, int index) {
@@ -208,7 +209,7 @@ namespace Pigeoid.Epsg
 					var targetCrsCode = reader.ReadUInt16();
 					var areaCode = reader.ReadUInt16();
 					var deprecated = reader.ReadByte() != 0;
-					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
 					var stepCodes = new ushort[reader.ReadByte()];
 					var stepFileOffset = reader.ReadUInt16();
 					using (var readerPath = EpsgDataResource.CreateBinaryReader(PathFileName)) {
@@ -228,7 +229,7 @@ namespace Pigeoid.Epsg
 				ushort[] data;
 				return sourceCode >= 0
 					&& sourceCode <= ushort.MaxValue
-					&& _forwardLookup.TryGetValue((ushort)sourceCode, out data)
+					&& _forwardLookUp.TryGetValue((ushort)sourceCode, out data)
 					? Array.AsReadOnly(data)
 					: null;
 			}
@@ -237,7 +238,7 @@ namespace Pigeoid.Epsg
 				ushort[] data;
 				return targetCode >= 0
 					&& targetCode <= ushort.MaxValue
-					&& _reverseLookup.TryGetValue((ushort)targetCode, out data)
+					&& _reverseLookUp.TryGetValue((ushort)targetCode, out data)
 					? Array.AsReadOnly(data)
 					: null;
 			}
@@ -248,20 +249,20 @@ namespace Pigeoid.Epsg
 
 		}
 
-		internal static readonly EpsgCoordinateTransformInfoLookup TransformLookup = EpsgCoordinateTransformInfoLookup.Create();
-		internal static readonly EpsgCoordinateConversionInfoLookup ConversionLookup = new EpsgCoordinateConversionInfoLookup();
-		internal static readonly EpsgCoordinateOperationConcatenatedInfoLookup ConcatenatedLookup = EpsgCoordinateOperationConcatenatedInfoLookup.Create();
+		internal static readonly EpsgCoordinateTransformInfoLookUp TransformLookUp = EpsgCoordinateTransformInfoLookUp.Create();
+		internal static readonly EpsgCoordinateConversionInfoLookUp ConversionLookUp = new EpsgCoordinateConversionInfoLookUp();
+		internal static readonly EpsgCoordinateOperationConcatenatedInfoLookUp ConcatenatedLookUp = EpsgCoordinateOperationConcatenatedInfoLookUp.Create();
 
 		public static EpsgCoordinateTransformInfo GetTransformInfo(int code) {
-			return code >= 0 && code < UInt16.MaxValue ? TransformLookup.Get((ushort)code) : null;
+			return code >= 0 && code < UInt16.MaxValue ? TransformLookUp.Get((ushort)code) : null;
 		}
 
 		public static EpsgCoordinateOperationInfo GetConversionInfo(int code) {
-			return code >= 0 && code < UInt16.MaxValue ? ConversionLookup.Get((ushort) code) : null;
+			return code >= 0 && code < UInt16.MaxValue ? ConversionLookUp.Get((ushort) code) : null;
 		}
 
 		public static EpsgCoordinateOperationConcatenatedInfo GetConcatenatedInfo(int code) {
-			return code >= 0 && code < UInt16.MaxValue ? ConcatenatedLookup.Get((ushort) code) : null;
+			return code >= 0 && code < UInt16.MaxValue ? ConcatenatedLookUp.Get((ushort) code) : null;
 		}
 
 		/// <summary>
@@ -273,37 +274,38 @@ namespace Pigeoid.Epsg
 			if(code < 0 || code >= UInt16.MaxValue)
 				return null;
 			var codeShort = (ushort) code;
-			return TransformLookup.Get(codeShort)
-				?? ConversionLookup.Get(codeShort);
+			return TransformLookUp.Get(codeShort)
+				?? ConversionLookUp.Get(codeShort);
 		}
 
-		public static IEnumerable<EpsgCoordinateTransformInfo> TransformInfos { get { return TransformLookup.Values; } }
+		public static IEnumerable<EpsgCoordinateTransformInfo> TransformInfos { get { return TransformLookUp.Values; } }
+
 		public static IEnumerable<EpsgCoordinateTransformInfo> GetTransformForwardReferenced(int sourceCode) {
-			var ids = TransformLookup.GetForwardReferencedOperationCodes(sourceCode);
+			var ids = TransformLookUp.GetForwardReferencedOperationCodes(sourceCode);
 			return null != ids
-				? ids.Select(id => TransformLookup.Get(id))
+				? ids.Select(id => TransformLookUp.Get(id))
 				: Enumerable.Empty<EpsgCoordinateTransformInfo>();
 		}
 		public static IEnumerable<EpsgCoordinateTransformInfo> GetTransformReverseReferenced(int targetCode) {
-			var ids = TransformLookup.GetReverseReferencedOperationCodes(targetCode);
+			var ids = TransformLookUp.GetReverseReferencedOperationCodes(targetCode);
 			return null != ids
-				? ids.Select(id => TransformLookup.Get(id))
+				? ids.Select(id => TransformLookUp.Get(id))
 				: Enumerable.Empty<EpsgCoordinateTransformInfo>();
 		}
 
-		public static IEnumerable<EpsgCoordinateOperationInfo> ConversionInfos { get { return ConversionLookup.Values; } }
+		public static IEnumerable<EpsgCoordinateOperationInfo> ConversionInfos { get { return ConversionLookUp.Values; } }
 
-		public static IEnumerable<EpsgCoordinateOperationConcatenatedInfo> ConcatenatedInfos { get { return ConcatenatedLookup.Values; } }
-		public static IEnumerable<EpsgCoordinateOperationConcatenatedInfo> GetConcatendatedForwardReferenced(int sourceCode) {
-			var ids = ConcatenatedLookup.GetForwardReferencedOperationCodes(sourceCode);
+		public static IEnumerable<EpsgCoordinateOperationConcatenatedInfo> ConcatenatedInfos { get { return ConcatenatedLookUp.Values; } }
+		public static IEnumerable<EpsgCoordinateOperationConcatenatedInfo> GetConcatenatedForwardReferenced(int sourceCode) {
+			var ids = ConcatenatedLookUp.GetForwardReferencedOperationCodes(sourceCode);
 			return null != ids
-				? ids.Select(id => ConcatenatedLookup.Get(id))
+				? ids.Select(id => ConcatenatedLookUp.Get(id))
 				: Enumerable.Empty<EpsgCoordinateOperationConcatenatedInfo>();
 		}
-		public static IEnumerable<EpsgCoordinateOperationConcatenatedInfo> GetConcatendatedReverseReferenced(int targetCode) {
-			var ids = ConcatenatedLookup.GetReverseReferencedOperationCodes(targetCode);
+		public static IEnumerable<EpsgCoordinateOperationConcatenatedInfo> GetConcatenatedReverseReferenced(int targetCode) {
+			var ids = ConcatenatedLookUp.GetReverseReferencedOperationCodes(targetCode);
 			return null != ids
-				? ids.Select(id => ConcatenatedLookup.Get(id))
+				? ids.Select(id => ConcatenatedLookUp.Get(id))
 				: Enumerable.Empty<EpsgCoordinateOperationConcatenatedInfo>();
 		}
 

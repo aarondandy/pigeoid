@@ -2,7 +2,7 @@
 
 namespace Pigeoid.Epsg.Resources
 {
-	internal abstract class EpsgLookupBase<TKey, TValue>
+	internal abstract class EpsgLookUpBase<TKey, TValue>
 	{
 
 		public abstract TValue Get(TKey key);

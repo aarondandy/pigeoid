@@ -1,7 +1,10 @@
 ﻿// TODO: source header
 
+using System;
+
 namespace Pigeoid.Interop
 {
+	[Obsolete("Not sure that this class is a good idea.")]
 	public static class CoordinateOperationStandardNames
 	{
 

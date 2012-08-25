@@ -22,7 +22,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		}
 
 		public override string ToString() {
-			return Method.ToString() + ',' + Parameter.ToString();
+			return String.Concat(Method,',',Parameter);
 		}
 
 		public override bool Equals(object obj) {

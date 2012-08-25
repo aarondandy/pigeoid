@@ -15,31 +15,34 @@ namespace Pigeoid.Projection
 
 		private const double ThetaOffset = 0.00014204313635987739;
 
-		private class Inverted : InvertedTransformationBase<LambertConicConformalBelgium,Point2,GeographicCoord>
+		private class Inverted : InvertedTransformationBase<LambertConicConformalBelgium,Point2,GeographicCoordinate>
 		{
 
 			public Inverted(LambertConicConformalBelgium core)
 				: base(core) {
-				if (0 == Core.Af || 0 == Core.N)
+				if (!Core.HasInverse)
 					throw new ArgumentException("Core cannot be inverted.");
 			}
 
-			public override GeographicCoord TransformValue(Point2 coord) {
-				double eastingComponent = coord.X - Core.FalseProjectedOffset.X;
-				double northingComponent = Core.NorthingOffset - coord.Y;
-				double t = Math.Sqrt((eastingComponent * eastingComponent) + (northingComponent * northingComponent));
-				t = Math.Pow(((Core.N < 0) ? -t : t) / Core.Af, Core.Invn);
-				double lat = HalfPi;
+			public override GeographicCoordinate TransformValue(Point2 coordinate) {
+				var eastingComponent = coordinate.X - Core.FalseProjectedOffset.X;
+				var northingComponent = Core.NorthingOffset - coordinate.Y;
+				var t = Math.Sqrt((eastingComponent * eastingComponent) + (northingComponent * northingComponent));
+				t = Math.Pow(((Core.N < 0) ? -t : t) / Core.Af, Core.InvN);
+				var lat = HalfPi;
 				for (int i = 0; i < 8; i++) {
-					double temp = Core.E * Math.Sin(lat);
+					var temp = Core.E * Math.Sin(lat);
 					temp = HalfPi - (2.0 * Math.Atan(t * Math.Pow((1 - temp) / (1 + temp), Core.EHalf)));
-					if (temp == lat)
-						break;
+					
+// ReSharper disable CompareOfFloatsByEqualityOperator
+					if (temp == lat) break;
+// ReSharper restore CompareOfFloatsByEqualityOperator
+					
 					lat = temp;
 				}
-				return new GeographicCoord(
+				return new GeographicCoordinate(
 					lat,
-					((Math.Atan(eastingComponent / northingComponent) + ThetaOffset) / Core.N) + Core.GeographiOrigin.Longitude
+					((Math.Atan(eastingComponent / northingComponent) + ThetaOffset) / Core.N) + Core.GeographicOrigin.Longitude
 				);
 			}
 
@@ -54,7 +57,7 @@ namespace Pigeoid.Projection
 		/// <param name="falseProjectedOffset">The false projected offset.</param>
 		/// <param name="spheroid">The spheroid.</param>
 		public LambertConicConformalBelgium(
-			GeographicCoord geographicOrigin,
+			GeographicCoordinate geographicOrigin,
 			double firstParallel,
 			double secondParallel,
 			Vector2 falseProjectedOffset,
@@ -62,21 +65,23 @@ namespace Pigeoid.Projection
 		)
 			: base(geographicOrigin, firstParallel, secondParallel, falseProjectedOffset, spheroid) { }
 
-		public override ITransformation<Point2, GeographicCoord> GetInverse() {
+		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
 		}
 
 		public override bool HasInverse {
+// ReSharper disable CompareOfFloatsByEqualityOperator
 			get { return 0 != Af && 0 != N; }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
-		public override Point2 TransformValue(GeographicCoord coord) {
-			double r = E * Math.Sin(coord.Latitude);
+		public override Point2 TransformValue(GeographicCoordinate coordinate) {
+			var r = E * Math.Sin(coordinate.Latitude);
 			r = Af * Math.Pow(
-				Math.Tan(QuarterPi - (coord.Latitude / 2.0)) / Math.Pow((1.0 - r) / (1.0 + r), EHalf),
+				Math.Tan(QuarterPi - (coordinate.Latitude / 2.0)) / Math.Pow((1.0 - r) / (1.0 + r), EHalf),
 				N
 			);
-			double theta = (N * (coord.Longitude - GeographiOrigin.Longitude)) - ThetaOffset;
+			var theta = (N * (coordinate.Longitude - GeographicOrigin.Longitude)) - ThetaOffset;
 			return new Point2(
 				FalseProjectedOffset.X + (r * Math.Sin(theta)),
 				NorthingOffset - (r * Math.Cos(theta))

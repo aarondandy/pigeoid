@@ -11,10 +11,10 @@ namespace Pigeoid.Transformation
 	/// <summary>
 	/// An abridged Molodensky transformation.
 	/// </summary>
-	public class AbridgedMolodenskyTransformation : ITransformation<GeographicHeightCoord>
+	public class AbridgedMolodenskyTransformation : ITransformation<GeographicHeightCoordinate>
 	{
 
-		private static readonly double _sinOne = Math.Sin(1);
+		private static readonly double SinOne = Math.Sin(1);
 
 		public readonly Vector3 D;
 		protected readonly double Da;
@@ -48,76 +48,80 @@ namespace Pigeoid.Transformation
 			Da = ta - sa;
 			SeSq = sourceSpheroid.ESquared;
 			Sadfsfda = (sa * df) + (sf * Da);
-			SaSinOne = sa * _sinOne;
+			SaSinOne = sa * SinOne;
 			OneMinusESqsaSinOne = SaSinOne * (1.0 - SeSq);
-			if (0 == OneMinusESqsaSinOne || 0 == SaSinOne)
-				throw new ArgumentException("Invalid spheroid.", "sourceSpheroid");
+			
+// ReSharper disable CompareOfFloatsByEqualityOperator
+			if (0 == OneMinusESqsaSinOne || 0 == SaSinOne) throw new ArgumentException("Invalid spheroid.", "sourceSpheroid");
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
-		public GeographicHeightCoord TransformValue(GeographicHeightCoord coord) {
-			double sinLats = Math.Sin(coord.Latitude);
-			double sinLatsSq = sinLats * sinLats;
-			double cosLats = Math.Cos(coord.Latitude);
-			double sinLons = Math.Sin(coord.Longitude);
-			double cosLons = Math.Cos(coord.Longitude);
-			double c = 1.0 - (SeSq * sinLatsSq);
-			double cSq = Math.Sqrt(c);
-			double dxdy = (D.X * cosLons) + (D.Y * sinLons);
-			return new GeographicHeightCoord(
-				coord.Latitude + (
+		public GeographicHeightCoordinate TransformValue(GeographicHeightCoordinate coordinate) {
+			var sinLatitude = Math.Sin(coordinate.Latitude);
+			var sinLatitudeSquared = sinLatitude * sinLatitude;
+			var cosLatitude = Math.Cos(coordinate.Latitude);
+			var sinLongitude = Math.Sin(coordinate.Longitude);
+			var cosLongitude = Math.Cos(coordinate.Longitude);
+			var c = 1.0 - (SeSq * sinLatitudeSquared);
+			var cSq = Math.Sqrt(c);
+			var dxdy = (D.X * cosLongitude) + (D.Y * sinLongitude);
+			return new GeographicHeightCoordinate(
+				coordinate.Latitude + (
 					(
 						(
-							(D.Z * cosLats)
-							+ (Sadfsfda * Math.Sin(2.0 * coord.Latitude))
-							- (sinLats * dxdy)
+							(D.Z * cosLatitude)
+							+ (Sadfsfda * Math.Sin(2.0 * coordinate.Latitude))
+							- (sinLatitude * dxdy)
 						)
 						* c * cSq
 					)
 					/ OneMinusESqsaSinOne
 				),
-				coord.Longitude + (
+				coordinate.Longitude + (
 					(
-						((D.Y * cosLons) - (D.X * sinLons))
+						((D.Y * cosLongitude) - (D.X * sinLongitude))
 						* cSq
 					)
-					/ (cosLats * SaSinOne)
+					/ (cosLatitude * SaSinOne)
 				),
-				coord.Height + (
-					+(cosLats * dxdy)
-					+ (D.Z * sinLats)
-					+ (Sadfsfda * sinLatsSq)
+				coordinate.Height + (
+					+(cosLatitude * dxdy)
+					+ (D.Z * sinLatitude)
+					+ (Sadfsfda * sinLatitudeSquared)
 					- Da
 				)
 			);
 		}
 
-		public void TransformValues(GeographicHeightCoord[] values) {
+		public void TransformValues(GeographicHeightCoordinate[] values) {
 			for (int i = 0; i < values.Length; i++) {
 				TransformValue(ref values[i]);
 			}
 		}
 
-		private void TransformValue(ref GeographicHeightCoord value) {
+		private void TransformValue(ref GeographicHeightCoordinate value) {
 			value = TransformValue(value);
 		}
 
-		public ITransformation<GeographicHeightCoord> GetInverse() {
+		public ITransformation<GeographicHeightCoordinate> GetInverse() {
 			return new AbridgedMolodenskyTransformation(D.GetNegative(), TargetSpheroid, SourceSpheroid);
 		}
 
 		public bool HasInverse {
+// ReSharper disable CompareOfFloatsByEqualityOperator
 			get { return (0 != TargetSpheroid.A && 0 != (1.0 - TargetSpheroid.ESquared)); }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		ITransformation ITransformation.GetInverse() {
 			return GetInverse();
 		}
 
-		ITransformation<GeographicHeightCoord, GeographicHeightCoord> ITransformation<GeographicHeightCoord, GeographicHeightCoord>.GetInverse() {
+		ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate>.GetInverse() {
 			return GetInverse();
 		}
 
-		public IEnumerable<GeographicHeightCoord> TransformValues(IEnumerable<GeographicHeightCoord> values) {
+		public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
 			return values.Select(TransformValue);
 		}
 

@@ -12,10 +12,10 @@ namespace Pigeoid.Projection
 		TransverseMercator
 	{
 
-		private class Inverted : InvertedTransformationBase<TransverseMercatorSouth,Point2,GeographicCoord>
+		private class Inverted : InvertedTransformationBase<TransverseMercatorSouth,Point2,GeographicCoordinate>
 		{
 
-			private readonly InvertedTransformationBase<TransverseMercator,Point2,GeographicCoord> _baseInv;
+			private readonly InvertedTransformationBase<TransverseMercator,Point2,GeographicCoordinate> _baseInv;
 
 			public Inverted(TransverseMercatorSouth core)
 				: base(core)
@@ -23,13 +23,13 @@ namespace Pigeoid.Projection
 				_baseInv = core.BaseInverse;
 			}
 
-			public override GeographicCoord TransformValue(Point2 source) {
+			public override GeographicCoordinate TransformValue(Point2 source) {
 				return _baseInv.TransformValue(new Point2(-source.X, -source.Y));
 			}
 		}
 
 		public TransverseMercatorSouth(
-			GeographicCoord naturalOrigin,
+			GeographicCoordinate naturalOrigin,
 			Vector2 falseProjectedOffset,
 			double scaleFactor,
 			ISpheroid<double> spheroid
@@ -41,17 +41,17 @@ namespace Pigeoid.Projection
 				spheroid
 			) { }
 
-		public override Point2 TransformValue(GeographicCoord coord) {
-			var p = base.TransformValue(coord);
+		public override Point2 TransformValue(GeographicCoordinate coordinate) {
+			var p = base.TransformValue(coordinate);
 			return new Point2(-p.X, -p.Y);
 		}
 
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private InvertedTransformationBase<TransverseMercator,Point2,GeographicCoord> BaseInverse {
-			get { return base.GetInverse() as InvertedTransformationBase<TransverseMercator,Point2,GeographicCoord>; }
+		private InvertedTransformationBase<TransverseMercator,Point2,GeographicCoordinate> BaseInverse {
+			get { return base.GetInverse() as InvertedTransformationBase<TransverseMercator,Point2,GeographicCoordinate>; }
 		}
 
-		public override ITransformation<Point2, GeographicCoord> GetInverse() {
+		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
 		}
 

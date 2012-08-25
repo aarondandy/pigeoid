@@ -20,24 +20,23 @@ namespace Pigeoid.Projection
 		/// <summary>
 		/// The inverse of a hyperbolic Cassini Soldner projection.
 		/// </summary>
-		private class Inverted : InvertedTransformationBase<HyperbolicCassiniSoldner,Point2,GeographicCoord>
+		private class Inverted : InvertedTransformationBase<HyperbolicCassiniSoldner,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(HyperbolicCassiniSoldner core)
-				: base(core) {
-				if (0 == Core.MajorAxis || 0 == Core.OneMinusESq)
+			public Inverted(HyperbolicCassiniSoldner core) : base(core) {
+				if (!core.HasInverse)
 					throw new ArgumentException("Core cannot be inverted.");
 			}
 
-			public override GeographicCoord TransformValue(Point2 coord) {
-				double latp = Core.NaturalOrigin.Latitude + ((coord.Y - Core.FalseProjectedOffset.Y) / 315320.0);
-				double tanLatp = Math.Tan(latp);
-				double t = tanLatp * tanLatp;
-				double lesq = Math.Sin(latp); lesq = 1.0 - (Core.ESq * lesq * lesq);
-				double d = ((coord.X - Core.FalseProjectedOffset.X) * Math.Sqrt(lesq)) / Core.MajorAxis;
-				double d2 = d * d;
-				double s = (1.0 + (3.0 * t)) * d2;
-				return new GeographicCoord(
+			public override GeographicCoordinate TransformValue(Point2 coordinate) {
+				var latp = Core.NaturalOrigin.Latitude + ((coordinate.Y - Core.FalseProjectedOffset.Y) / 315320.0);
+				var tanLatp = Math.Tan(latp);
+				var t = tanLatp * tanLatp;
+				var lesq = Math.Sin(latp); lesq = 1.0 - (Core.ESq * lesq * lesq);
+				var d = ((coordinate.X - Core.FalseProjectedOffset.X) * Math.Sqrt(lesq)) / Core.MajorAxis;
+				var d2 = d * d;
+				var s = (1.0 + (3.0 * t)) * d2;
+				return new GeographicCoordinate(
 					latp - (((lesq * tanLatp) / Core.OneMinusESq) * d2 * (0.5 - (s / 24))),
 					Core.NaturalOrigin.Longitude + (
 						(d - (t * d2 * d * ((1.0 / 3.0) + (s / 15.0))))
@@ -55,7 +54,7 @@ namespace Pigeoid.Projection
 		/// <param name="falseProjectedOffset">The false projected offset.</param>
 		/// <param name="spheroid">The spheroid.</param>
 		public HyperbolicCassiniSoldner(
-			GeographicCoord naturalOrigin,
+			GeographicCoordinate naturalOrigin,
 			Vector2 falseProjectedOffset,
 			ISpheroid<double> spheroid
 		)
@@ -64,24 +63,26 @@ namespace Pigeoid.Projection
 			OneMinusESqMajorAxisSq6 = OneMinusESq * MajorAxis * MajorAxis * 6.0;
 		}
 
-		public override ITransformation<Point2, GeographicCoord> GetInverse() {
+		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
 		}
 
 		public override bool HasInverse {
-			get { return 0 != MajorAxis && 0 != OneMinusESq; }
+// ReSharper disable CompareOfFloatsByEqualityOperator
+			get { return base.HasInverse && 0 != OneMinusESq; }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
-		public override Point2 TransformValue(GeographicCoord coord) {
-			double c = Math.Cos(coord.Latitude);
-			double a = (coord.Longitude - NaturalOrigin.Longitude) * c;
+		public override Point2 TransformValue(GeographicCoordinate coordinate) {
+			var c = Math.Cos(coordinate.Latitude);
+			var a = (coordinate.Longitude - NaturalOrigin.Longitude) * c;
 			c = (ESecSq * c * c);
-			double tanLat = Math.Tan(coord.Latitude);
-			double t = tanLat * tanLat;
-			double a2 = a * a;
-			double lesq = Math.Sin(coord.Latitude); lesq = 1.0 - (ESq * lesq * lesq);
-			double v = MajorAxis / Math.Sqrt(lesq);
-			double x =
+			var tanLat = Math.Tan(coordinate.Latitude);
+			var t = tanLat * tanLat;
+			var a2 = a * a;
+			var lesq = Math.Sin(coordinate.Latitude); lesq = 1.0 - (ESq * lesq * lesq);
+			var v = MajorAxis / Math.Sqrt(lesq);
+			var x =
 				v * (a - (a2 * a * t * (
 					(1.0 / 6.0)
 					+ ((8.0 - t + (8.0 * c)) * a2 / 120.0)
@@ -94,10 +95,10 @@ namespace Pigeoid.Projection
 				FalseProjectedOffset.Y + (
 					(
 						MajorAxis * (
-							(MLineCoef1 * coord.Latitude)
-							- (MLineCoef2 * Math.Sin(2.0 * coord.Latitude))
-							+ (MLineCoef3 * Math.Sin(4.0 * coord.Latitude))
-							- (MLineCoef4 * Math.Sin(6.0 * coord.Latitude))
+							(MLineCoefficient1 * coordinate.Latitude)
+							- (MLineCoefficient2 * Math.Sin(2.0 * coordinate.Latitude))
+							+ (MLineCoefficient3 * Math.Sin(4.0 * coordinate.Latitude))
+							- (MLineCoefficient4 * Math.Sin(6.0 * coordinate.Latitude))
 						)
 					)
 					- MOrigin

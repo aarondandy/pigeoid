@@ -11,7 +11,7 @@ using Vertesaur.Contracts;
 namespace Pigeoid.Projection
 {
 	/// <summary>
-	/// A base class for lambert conic conformal projections.
+	/// A base class for Lambert Conic Conformal projections.
 	/// </summary>
 	public abstract class LambertConicConformal :
 		ProjectionBase
@@ -22,32 +22,32 @@ namespace Pigeoid.Projection
 		/// <summary>
 		/// The geographic origin of the projection.
 		/// </summary>
-		public readonly GeographicCoord GeographiOrigin;
+		public readonly GeographicCoordinate GeographicOrigin;
 		protected double Af;
 		protected double N;
 		protected double F;
 		protected double ROrigin;
-		protected double Invn;
+		protected double InvN;
 		protected double NorthingOffset;
 
-		private class Inverted : InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoord>
+		private class Inverted : InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoordinate>
 		{
 
 			public Inverted(LambertConicConformal core)
 				: base(core)
 			{
-				if (0 == Core.Af || 0 == Core.N)
+				if (!core.HasInverse)
 					throw new ArgumentException("Core cannot be inverted.");
 			}
 
-			public override GeographicCoord TransformValue(Point2 coord) {
-				double eastingComponent = coord.X - Core.FalseProjectedOffset.X;
-				double northingComponent = Core.NorthingOffset - coord.Y;
-				double t = Math.Sqrt((eastingComponent * eastingComponent) + (northingComponent * northingComponent));
-				t = Math.Pow(((Core.N < 0) ? -t : t) / Core.Af, Core.Invn);
-				double lat = HalfPi;
+			public override GeographicCoordinate TransformValue(Point2 coordinate) {
+				var eastingComponent = coordinate.X - Core.FalseProjectedOffset.X;
+				var northingComponent = Core.NorthingOffset - coordinate.Y;
+				var t = Math.Sqrt((eastingComponent * eastingComponent) + (northingComponent * northingComponent));
+				t = Math.Pow(((Core.N < 0) ? -t : t) / Core.Af, Core.InvN);
+				var lat = HalfPi;
 				for (int i = 0; i < 8; i++) {
-					double temp = Core.E * Math.Sin(lat);
+					var temp = Core.E * Math.Sin(lat);
 					temp = HalfPi - (
 						2.0 * Math.Atan(
 							t
@@ -57,38 +57,40 @@ namespace Pigeoid.Projection
 							)
 						)
 					);
-					if (temp == lat) {
-						break;
-					}
+
+// ReSharper disable CompareOfFloatsByEqualityOperator
+					if (temp == lat) break;
+// ReSharper restore CompareOfFloatsByEqualityOperator
+						
 					lat = temp;
 				}
-				return new GeographicCoord(
+				return new GeographicCoordinate(
 					lat,
 					(Math.Atan(eastingComponent / northingComponent) / Core.N)
-						+ Core.GeographiOrigin.Longitude
+						+ Core.GeographicOrigin.Longitude
 				);
 			}
 
 		}
 
 		protected LambertConicConformal(
-			GeographicCoord geographiOrigin,
+			GeographicCoordinate geographicOrigin,
 			Vector2 falseProjectedOffset,
 			ISpheroid<double> spheroid
 		)
 			: base(falseProjectedOffset, spheroid)
 		{
-			GeographiOrigin = geographiOrigin;
+			GeographicOrigin = geographicOrigin;
 		}
 
-		public override Point2 TransformValue(GeographicCoord coord) {
-			double r = E * Math.Sin(coord.Latitude);
+		public override Point2 TransformValue(GeographicCoordinate coordinate) {
+			double r = E * Math.Sin(coordinate.Latitude);
 			r = Af * Math.Pow(
 				(
 					Math.Tan(
 						QuarterPi
 						-
-						(coord.Latitude / 2.0)
+						(coordinate.Latitude / 2.0)
 					)
 					/
 					Math.Pow(
@@ -98,18 +100,20 @@ namespace Pigeoid.Projection
 				),
 				N
 			);
-			double theta = N * (coord.Longitude - GeographiOrigin.Longitude);
+			double theta = N * (coordinate.Longitude - GeographicOrigin.Longitude);
 			double x = FalseProjectedOffset.X + (r * Math.Sin(theta));
 			double y = NorthingOffset - (r * Math.Cos(theta));
 			return new Point2(x, y);
 		}
 
-		public override ITransformation<Point2, GeographicCoord> GetInverse() {
+		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
 		}
 
 		public override bool HasInverse {
+// ReSharper disable CompareOfFloatsByEqualityOperator
 			get { return 0 != Af && 0 != N; }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		public override string Name {
@@ -120,8 +124,8 @@ namespace Pigeoid.Projection
 			return base.GetParameters()
 				.Concat(new INamedParameter[]
                     {
-                        new NamedParameter<double>(NamedParameter.NameLatitudeOfNaturalOrigin,GeographiOrigin.Latitude), 
-                        new NamedParameter<double>(NamedParameter.NameLongitudeOfNaturalOrigin,GeographiOrigin.Longitude)
+                        new NamedParameter<double>(NamedParameter.NameLatitudeOfNaturalOrigin,GeographicOrigin.Latitude), 
+                        new NamedParameter<double>(NamedParameter.NameLongitudeOfNaturalOrigin,GeographicOrigin.Longitude)
                     }
 				)
 			;

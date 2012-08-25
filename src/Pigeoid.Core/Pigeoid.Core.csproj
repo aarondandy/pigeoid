@@ -96,8 +96,8 @@
     <Compile Include="Contracts\IDatumGeodetic.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\IGeographicCoord.cs" />
-    <Compile Include="Contracts\IGeographicHeightCoord.cs" />
+    <Compile Include="Contracts\IGeographicCoordinate.cs" />
+    <Compile Include="Contracts\IGeographicHeightCoordinate.cs" />
     <Compile Include="Contracts\INamedParameter.cs" />
     <Compile Include="Contracts\IPrimeMeridian.cs">
       <SubType>Code</SubType>
@@ -106,8 +106,8 @@
     <Compile Include="Contracts\IUom.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GeographicCoord.cs" />
-    <Compile Include="GeographicHeightCoord.cs" />
+    <Compile Include="GeographicCoordinate.cs" />
+    <Compile Include="GeographicHeightCoordinate.cs" />
     <Compile Include="Interop\CoordinateOperationStandardNames.cs" />
     <Compile Include="LongitudeDegreeRange.cs" />
     <Compile Include="NamedParameter.cs" />
@@ -164,7 +164,6 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(ProjectDir)..\..\build\NuGet.targets" />
-
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

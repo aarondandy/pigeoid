@@ -12,7 +12,7 @@ namespace Pigeoid.Projection
 	/// <summary>
 	/// Projection base class.
 	/// </summary>
-	public abstract class ProjectionBase : ITransformation<GeographicCoord, Point2>
+	public abstract class ProjectionBase : ITransformation<GeographicCoordinate, Point2>
 	{
 		internal const double QuarterPi = Math.PI / 4.0;
 		internal const double HalfPi = Math.PI / 2.0;
@@ -45,13 +45,13 @@ namespace Pigeoid.Projection
 			EHalf = E / 2.0;
 		}
 
-		public abstract Point2 TransformValue(GeographicCoord source);
+		public abstract Point2 TransformValue(GeographicCoordinate source);
 
-		public virtual IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoord> values) {
+		public virtual IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values) {
 			return values.Select(TransformValue);
 		}
 
-		public abstract ITransformation<Point2, GeographicCoord> GetInverse();
+		public abstract ITransformation<Point2, GeographicCoordinate> GetInverse();
 
 		public abstract bool HasInverse { get; }
 

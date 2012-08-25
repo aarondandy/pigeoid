@@ -16,7 +16,7 @@ namespace Pigeoid.Transformation
 		public readonly Vector3 D;
 
 		/// <summary>
-		/// Constructs a new geocentric translation opartation.
+		/// Constructs a new geocentric translation operation.
 		/// </summary>
 		/// <param name="d"></param>
 		public GeocentricTranslation(Vector3 d) {

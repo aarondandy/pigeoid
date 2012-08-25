@@ -15,12 +15,12 @@ namespace Pigeoid.Interop.Proj4
 		IEquatable<ISpheroid<double>>
 	{
 
-		private static readonly Unit UomMetre;
-		private static readonly ReadOnlyCollection<Proj4Spheroid> _spheroids;
+		private static readonly Unit UomMeter;
+		private static readonly ReadOnlyCollection<Proj4Spheroid> DefaultSpheroids;
 
 		static Proj4Spheroid() {
-			UomMetre = new Unit("meter","length");
-			_spheroids = new ReadOnlyCollection<Proj4Spheroid>(new[] {
+			UomMeter = new Unit("meter","length");
+			DefaultSpheroids = new ReadOnlyCollection<Proj4Spheroid>(new[] {
 				new Proj4Spheroid("MERIT","MERIT 1983",new SpheroidEquatorialInvF(6378137.0,298.257)),
 				new Proj4Spheroid("SGS85","Soviet Geodetic System 85",new SpheroidEquatorialInvF(6378136.0,298.257)), 
 				new Proj4Spheroid("GRS80","GRS 1980(IUGG, 1980)",new SpheroidEquatorialInvF(6378137.0,298.257222101)), 
@@ -70,7 +70,7 @@ namespace Pigeoid.Interop.Proj4
 		/// All Proj4 ellipses.
 		/// </summary>
 		public static IList<Proj4Spheroid> Spheroids {
-			get { return _spheroids; }
+			get { return DefaultSpheroids; }
 		}
 
 		/// <summary>
@@ -79,17 +79,17 @@ namespace Pigeoid.Interop.Proj4
 		/// <param name="name">The name or codename to search for.</param>
 		/// <returns>An ellipse; null on failure.</returns>
 		public static Proj4Spheroid GetSpheroid(string name) {
-			return _spheroids.FirstOrDefault(e => e.Code.Equals(name) || e.Name.Equals(name));
+			return DefaultSpheroids.FirstOrDefault(e => e.Code.Equals(name) || e.Name.Equals(name));
 		}
 
 		/// <summary>
 		/// The length unit of measure used for all Proj4 ellipses.
 		/// </summary>
 		/// <remarks>
-		/// The length unit for Proj4 ellipses is metres.
+		/// The length unit for Proj4 ellipses is meters.
 		/// </remarks>
 		public static Unit LengthUom {
-			get { return UomMetre; }
+			get { return UomMeter; }
 		}
 
 		private readonly string _code;

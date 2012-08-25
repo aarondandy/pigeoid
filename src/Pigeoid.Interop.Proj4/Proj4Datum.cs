@@ -3,7 +3,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 using Vertesaur;
@@ -17,10 +16,10 @@ namespace Pigeoid.Interop.Proj4
 	public class Proj4Datum : IDatumGeodetic
 	{
 
-		private static readonly ReadOnlyCollection<Proj4Datum> _datums;
+		private static readonly ReadOnlyCollection<Proj4Datum> DefaultDatums;
 
 		static Proj4Datum() {
-			_datums = Array.AsReadOnly(new[]{
+			DefaultDatums = Array.AsReadOnly(new[]{
 				new Proj4Datum("WGS84", Proj4Spheroid.GetSpheroid("WGS84"), Helmert7Transformation.IdentityTransformation),
 				new Proj4Datum(
 					"GGRS87", Proj4Spheroid.GetSpheroid("GRS80"),
@@ -64,7 +63,7 @@ namespace Pigeoid.Interop.Proj4
 					"OSGB36", Proj4Spheroid.GetSpheroid("airy"),
 					new Helmert7Transformation(new Vector3(446.448, -125.157, 542.060), new Vector3(0.1502, 0.2470, 0.8421), -20.4894),
 					supported: false
-				),
+				)
 			});
 		}
 
@@ -72,7 +71,7 @@ namespace Pigeoid.Interop.Proj4
 		/// All Proj4 datums.
 		/// </summary>
 		public static IList<Proj4Datum> Datums {
-			get { return _datums; }
+			get { return DefaultDatums; }
 		}
 
 		private readonly string _name;
@@ -85,7 +84,7 @@ namespace Pigeoid.Interop.Proj4
 		/// Constructs a new Proj4 datum object.
 		/// </summary>
 		/// <param name="name">The Proj4 datum name.</param>
-		/// <param name="ellipse">The ellipse for this datum.</param>
+		/// <param name="spheroid">The ellipse for this datum.</param>
 		/// <param name="toWgs84">A transformation to WGS84.</param>
 		/// <param name="supported">Indicates if this datum is supported by Proj4.</param>
 		/// <param name="matchExplicitly">Indicated is this datum must be matched explicitly by name only.</param>

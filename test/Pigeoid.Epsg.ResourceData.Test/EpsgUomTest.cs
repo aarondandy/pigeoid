@@ -10,16 +10,18 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgUom.Values;
-			var dbItems = Repository.Uoms;
+			var assemblyItems = EpsgUom.Values;
+			var databaseItems = Repository.Uoms;
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
+// ReSharper disable CompareOfFloatsByEqualityOperator
 				new Tester((x, y) => x.FactorB == (y.FactorB ?? 0)),
 				new Tester((x, y) => x.FactorC == (y.FactorC ?? 0)),
+// ReSharper restore CompareOfFloatsByEqualityOperator
 				new Tester((x, y) => String.Equals(x.Type, y.Type, StringComparison.OrdinalIgnoreCase))
 			);
 

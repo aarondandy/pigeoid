@@ -6,43 +6,42 @@ using Pigeoid.Epsg.Resources;
 
 namespace Pigeoid.Epsg
 {
-	public class EpsgPrimeMeridian :
-		IPrimeMeridian
+	public class EpsgPrimeMeridian : IPrimeMeridian
 	{
 
-		internal static readonly EpsgFixedLookupBase<ushort, EpsgPrimeMeridian> Lookup;
+		internal static readonly EpsgFixedLookUpBase<ushort, EpsgPrimeMeridian> LookUp;
 
 		static EpsgPrimeMeridian() {
-			var lookupDictionary = new SortedDictionary<ushort, EpsgPrimeMeridian>();
+			var lookUpDictionary = new SortedDictionary<ushort, EpsgPrimeMeridian>();
 			using (var readerTxt = EpsgDataResource.CreateBinaryReader("meridians.txt"))
-			using (var numberLookup = new EpsgNumberLookup())
+			using (var numberLookUp = new EpsgNumberLookUp())
 			using (var readerDat = EpsgDataResource.CreateBinaryReader("meridians.dat")) {
 				for (int i = readerDat.ReadUInt16(); i > 0; i--) {
 					var code = readerDat.ReadUInt16();
 					var uom = EpsgUom.Get(readerDat.ReadUInt16());
-					var lon = numberLookup.Get(readerDat.ReadUInt16());
-					var name = EpsgTextLookup.GetString(readerDat.ReadByte(), readerTxt);
-					lookupDictionary.Add(code, new EpsgPrimeMeridian(code, name, lon, uom));
+					var longitude = numberLookUp.Get(readerDat.ReadUInt16());
+					var name = EpsgTextLookUp.GetString(readerDat.ReadByte(), readerTxt);
+					lookUpDictionary.Add(code, new EpsgPrimeMeridian(code, name, longitude, uom));
 				}
 			}
-			Lookup = new EpsgFixedLookupBase<ushort, EpsgPrimeMeridian>(lookupDictionary);
+			LookUp = new EpsgFixedLookUpBase<ushort, EpsgPrimeMeridian>(lookUpDictionary);
 		}
 
 		public static EpsgPrimeMeridian Get(int code) {
-			return code >= 0 && code < ushort.MaxValue ? Lookup.Get((ushort) code) : null;
+			return code >= 0 && code < ushort.MaxValue ? LookUp.Get((ushort) code) : null;
 		}
 
-		public static IEnumerable<EpsgPrimeMeridian> Values { get { return Lookup.Values; } }
+		public static IEnumerable<EpsgPrimeMeridian> Values { get { return LookUp.Values; } }
 
 		private readonly ushort _code;
 		private readonly EpsgUom _uom;
-		private readonly double _lon;
+		private readonly double _longitude;
 		private readonly string _name;
 
-		private EpsgPrimeMeridian(ushort code, string name, double lon, EpsgUom uom) {
+		private EpsgPrimeMeridian(ushort code, string name, double longitude, EpsgUom uom) {
 			_code = code;
 			_uom = uom;
-			_lon = lon;
+			_longitude = longitude;
 			_name = name;
 		}
 
@@ -55,7 +54,7 @@ namespace Pigeoid.Epsg
 		}
 
 		public double Longitude {
-			get { return _lon; }
+			get { return _longitude; }
 		}
 
 		public EpsgUom Unit {

@@ -11,13 +11,13 @@ namespace Pigeoid.Ogc
 	public class OgcLinearUnit : OgcUnitBase
 	{
 
-		private static readonly OgcLinearUnit _defaultMeter = new OgcLinearUnit("meter", 1);
+		private static readonly OgcLinearUnit DefaultMeterUnit = new OgcLinearUnit("meter", 1);
 
 		/// <summary>
 		/// The default OGC reference unit for length measures.
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		public static OgcLinearUnit DefaultMeter { get { return _defaultMeter; } }
+		public static OgcLinearUnit DefaultMeter { get { return DefaultMeterUnit; } }
 
 		/// <summary>
 		/// Constructs a new unit.

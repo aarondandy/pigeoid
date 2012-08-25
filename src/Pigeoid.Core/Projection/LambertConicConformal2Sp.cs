@@ -10,7 +10,7 @@ using Vertesaur.Contracts;
 namespace Pigeoid.Projection
 {
 	/// <summary>
-	/// A lambert conic conformal projection with 2 standard parallels.
+	/// A Lambert Conic Conformal projection with 2 standard parallels.
 	/// </summary>
 	public class LambertConicConformal2Sp :
 		LambertConicConformal,
@@ -29,52 +29,53 @@ namespace Pigeoid.Projection
 		public readonly double SecondParallel;
 
 		/// <summary>
-		/// Constructs a new lambert conic conformal projection from 2 standard parallels.
+		/// Constructs a new Lambert Conic Conformal projection from 2 standard parallels.
 		/// </summary>
-		/// <param name="geographiOrigin">The geographic origin.</param>
+		/// <param name="geographicOrigin">The geographic origin.</param>
 		/// <param name="firstParallel">The first parallel.</param>
 		/// <param name="secondParallel">The second parallel.</param>
 		/// <param name="falseProjectedOffset">The false projected offset.</param>
 		/// <param name="spheroid">The spheroid.</param>
 		public LambertConicConformal2Sp(
-			GeographicCoord geographiOrigin,
+			GeographicCoordinate geographicOrigin,
 			double firstParallel,
 			double secondParallel,
 			Vector2 falseProjectedOffset,
 			ISpheroid<double> spheroid
 		)
-			: base(geographiOrigin, falseProjectedOffset, spheroid)
+			: base(geographicOrigin, falseProjectedOffset, spheroid)
 		{
 			FirstParallel = firstParallel;
 			SecondParallel = secondParallel;
-			double firstParallelSin = Math.Sin(firstParallel);
-			double eFirstParallelSin = E * firstParallelSin;
-			double secondParallelSin = Math.Sin(secondParallel);
-			double eSecondParallelSin = E * secondParallelSin;
-			double eOriginParallelSin = E * Math.Sin(geographiOrigin.Latitude);
-			double mFirst =
+			var firstParallelSin = Math.Sin(firstParallel);
+			var eFirstParallelSin = E * firstParallelSin;
+			var secondParallelSin = Math.Sin(secondParallel);
+			var eSecondParallelSin = E * secondParallelSin;
+			var eOriginParallelSin = E * Math.Sin(geographicOrigin.Latitude);
+			var mFirst =
 				Math.Cos(firstParallel)
 				/ Math.Sqrt(1.0 - (ESq * firstParallelSin * firstParallelSin));
-			double mSecond =
+			var mSecond =
 				Math.Cos(secondParallel)
 				/ Math.Sqrt(1.0 - (ESq * secondParallelSin * secondParallelSin));
-			double tFirst =
+			var tFirst =
 				Math.Tan(QuarterPi - (firstParallel / 2.0))
 				/ Math.Pow((1.0 - eFirstParallelSin) / (1.0 + eFirstParallelSin),EHalf);
-			double tSecond =
+			var tSecond =
 				Math.Tan(QuarterPi - (secondParallel / 2.0))
 				/ Math.Pow((1.0 - eSecondParallelSin) / (1.0 + eSecondParallelSin), EHalf);
 			N =
 				(Math.Log(mFirst) - Math.Log(mSecond))
 				/ (Math.Log(tFirst) - Math.Log(tSecond));
 
-			if (0 == N || Double.IsNaN(N))
-				throw new ArgumentException("Invalid N value.");
+// ReSharper disable CompareOfFloatsByEqualityOperator
+			if (0 == N || Double.IsNaN(N)) throw new ArgumentException("Invalid N value.");
+// ReSharper restore CompareOfFloatsByEqualityOperator
 
 			F = mFirst / (N * Math.Pow(tFirst, N));
 			Af = MajorAxis * F;
-			double tOrigin =
-				Math.Tan(QuarterPi - (geographiOrigin.Latitude / 2.0))
+			var tOrigin =
+				Math.Tan(QuarterPi - (geographicOrigin.Latitude / 2.0))
 				/ Math.Pow((1.0 - eOriginParallelSin) / (1.0 + eOriginParallelSin),EHalf);
 			ROrigin = MajorAxis * F * Math.Pow(tOrigin, N);
 
@@ -87,7 +88,7 @@ namespace Pigeoid.Projection
 				N
 			);*/
 
-			Invn = 1.0 / N;
+			InvN = 1.0 / N;
 			NorthingOffset = falseProjectedOffset.Y + ROrigin;
 		}
 
@@ -97,22 +98,21 @@ namespace Pigeoid.Projection
 
 		public override IEnumerable<INamedParameter> GetParameters() {
 			return base.GetParameters()
-				.Concat(new INamedParameter[]
-                    {
-                        new NamedParameter<double>(NamedParameter.NameLatitudeOfFirstStandardParallel,FirstParallel), 
-                        new NamedParameter<double>(NamedParameter.NameLatitudeOfSecondStandardParallel,SecondParallel),
-                    }
-				)
-			;
+				.Concat(new INamedParameter[]{
+					new NamedParameter<double>(NamedParameter.NameLatitudeOfFirstStandardParallel, FirstParallel), 
+					new NamedParameter<double>(NamedParameter.NameLatitudeOfSecondStandardParallel, SecondParallel)
+				});
 		}
 
 
 		public bool Equals(LambertConicConformal2Sp other) {
 			return !ReferenceEquals(other, null)
 				&& (
-					GeographiOrigin.Equals(other.GeographiOrigin)
+					GeographicOrigin.Equals(other.GeographicOrigin)
+// ReSharper disable CompareOfFloatsByEqualityOperator
 					&& FirstParallel == other.FirstParallel
 					&& SecondParallel == other.SecondParallel
+// ReSharper restore CompareOfFloatsByEqualityOperator
 					&& FalseProjectedOffset.Equals(other.FalseProjectedOffset)
 					&& Spheroid.Equals(other.Spheroid)
 				)

@@ -59,7 +59,7 @@
     <Compile Include="EpsgCoordinateOperationInverse.cs" />
     <Compile Include="EpsgCoordinateSystem.cs" />
     <Compile Include="EpsgCoordinateTransformInfo.cs" />
-    <Compile Include="EpsgCoordOpMethodInfo.cs" />
+    <Compile Include="EpsgCoordinateOperationMethodInfo.cs" />
     <Compile Include="EpsgCrs.cs" />
     <Compile Include="EpsgCrsCompound.cs" />
     <Compile Include="EpsgCrsDatumBased.cs" />

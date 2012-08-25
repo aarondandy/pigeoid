@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Pigeoid.Epsg.Resources
 {
-	internal class EpsgNumberLookup : IDisposable
+	internal class EpsgNumberLookUp : IDisposable
 	{
 
 		public static double ReadNumber(ushort index, BinaryReader reader) {
@@ -15,7 +15,7 @@ namespace Pigeoid.Epsg.Resources
 		private readonly BinaryReader _intReader;
 		private readonly BinaryReader _shortReader;
 
-		public EpsgNumberLookup() {
+		public EpsgNumberLookUp() {
 			_doubleReader = EpsgDataResource.CreateBinaryReader("numbersd.dat");
 			_intReader = EpsgDataResource.CreateBinaryReader("numbersi.dat");
 			_shortReader = EpsgDataResource.CreateBinaryReader("numberss.dat");

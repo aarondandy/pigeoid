@@ -7,12 +7,12 @@ using System.Linq;
 
 namespace Pigeoid.Epsg.Resources
 {
-	internal abstract class EpsgDynamicLookupBase<TKey, TValue> :
-		EpsgLookupBase<TKey, TValue>
+	internal abstract class EpsgDynamicLookUpBase<TKey, TValue> :
+		EpsgLookUpBase<TKey, TValue>
 		where TValue : class
 	{
 
-		private readonly ConcurrentDictionary<TKey, TValue> _lookup;
+		private readonly ConcurrentDictionary<TKey, TValue> _lookUp;
 		private readonly TKey[] _orderedKeys;
 
 		private bool _fullReadPerformed;
@@ -21,13 +21,13 @@ namespace Pigeoid.Epsg.Resources
 		/// <summary>
 		/// Concrete classes must initialize the <c>AllOrderedKeys</c> field from their constructor.
 		/// </summary>
-		protected EpsgDynamicLookupBase(TKey[] orderedKeys) {
+		protected EpsgDynamicLookUpBase(TKey[] orderedKeys) {
 			if(null == orderedKeys)
 				throw new ArgumentNullException();
 
 			// TODO: ONLY if in debug, make sure the keys are ordered?
 
-			_lookup = new ConcurrentDictionary<TKey, TValue>();
+			_lookUp = new ConcurrentDictionary<TKey, TValue>();
 			_fullReadPerformed = false;
 			_fullReadMutex = new object();
 			_orderedKeys = orderedKeys;
@@ -38,7 +38,7 @@ namespace Pigeoid.Epsg.Resources
 				if(!_fullReadPerformed)
 					SingleFullRead();
 				// TODO: should this collection be cached?
-				return _lookup.Values.OrderBy(GetKeyForItem);
+				return _lookUp.Values.OrderBy(GetKeyForItem);
 			}
 		}
 
@@ -49,7 +49,7 @@ namespace Pigeoid.Epsg.Resources
 		public override TValue Get(TKey key) {
 			// try to find the item
 			TValue item;
-			if (_lookup.TryGetValue(key, out item))
+			if (_lookUp.TryGetValue(key, out item))
 				return item;
 			// see if we have a key for it
 			var i = Array.BinarySearch(_orderedKeys, key);
@@ -57,7 +57,7 @@ namespace Pigeoid.Epsg.Resources
 				return default(TValue);
 			// if we do have a key for it, try a get add
 			// we do a GetOrAdd instead of TryAdd just in case somebody beat us to it
-			return _lookup.GetOrAdd(key, k => Create(k,i));
+			return _lookUp.GetOrAdd(key, k => Create(k,i));
 		}
 
 		protected abstract TValue Create(TKey key, int index);
@@ -72,8 +72,10 @@ namespace Pigeoid.Epsg.Resources
 
 				for (int i = 0; i < _orderedKeys.Length; i++) {
 					// if TryAdd used a delegate we could have use that, but we want to only have one reference for each code
-					// call directly on the lookup to avoid another key lookup
-					_lookup.GetOrAdd(_orderedKeys[i], k => Create(k, i));
+					// call directly on the look-up to avoid another key look-up
+					var key = _orderedKeys[i];
+					var localIndex = i;
+					_lookUp.GetOrAdd(key, k => Create(k, localIndex));
 				}
 				_fullReadPerformed = true;
 			}

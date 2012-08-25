@@ -13,14 +13,14 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgCoordinateOperationInfoRepository.TransformInfos;
-			var dbItems = Repository.CoordinateOperations
+			var assemblyItems = EpsgCoordinateOperationInfoRepository.TransformInfos;
+			var databaseItems = Repository.CoordinateOperations
 				.Where(x => String.Equals("Transformation", x.TypeName, StringComparison.OrdinalIgnoreCase))
 				.ToList();
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
 				new Tester((x, y) => x.OperationMethodInfo.Code == y.Method.Code),
@@ -28,7 +28,9 @@ namespace Pigeoid.Epsg.ResourceData.Test
 				new Tester((x, y) => x.Deprecated == y.Deprecated),
 				new Tester((x, y) => x.SourceCrs.Code == y.SourceCrs.Code),
 				new Tester((x, y) => x.TargetCrs.Code == y.TargetCrs.Code),
+// ReSharper disable CompareOfFloatsByEqualityOperator
 				new Tester((x, y) => x.Accuracy == (y.Accuracy ?? 0))
+// ReSharper restore CompareOfFloatsByEqualityOperator
 			);
 
 		}

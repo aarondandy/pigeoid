@@ -15,49 +15,48 @@ namespace Pigeoid.Projection
 	/// </summary>
 	public class CassiniSoldner : ProjectionBase, IEquatable<CassiniSoldner>
 	{
-		protected readonly GeographicCoord NaturalOrigin;
-		protected readonly double MLineCoef1;
-		protected readonly double MLineCoef2;
-		protected readonly double MLineCoef3;
-		protected readonly double MLineCoef4;
-		protected readonly double MLineCoef1Major;
-		protected readonly double LatLineCoef1;
-		protected readonly double LatLineCoef2;
-		protected readonly double LatLineCoef3;
-		protected readonly double LatLineCoef4;
+		protected readonly GeographicCoordinate NaturalOrigin;
+		protected readonly double MLineCoefficient1;
+		protected readonly double MLineCoefficient2;
+		protected readonly double MLineCoefficient3;
+		protected readonly double MLineCoefficient4;
+		protected readonly double MLineCoefficient1Major;
+		protected readonly double LatLineCoefficient1;
+		protected readonly double LatLineCoefficient2;
+		protected readonly double LatLineCoefficient3;
+		protected readonly double LatLineCoefficient4;
 		protected readonly double MOrigin;
 		protected readonly double MOriginYOffset;
 		protected readonly double OneMinusESq;
 		protected readonly double ESecSq;
-		protected readonly double OneMinusESqSqrt;
+		protected readonly double SquareRootOfOneMinusESq;
 
-		private class Inverted : InvertedTransformationBase<CassiniSoldner,Point2,GeographicCoord>
+		private class Inverted : InvertedTransformationBase<CassiniSoldner,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(CassiniSoldner core)
-				: base(core) {
-				if (0 == Core.MLineCoef1Major || 0 == Core.MajorAxis || 0 == Core.OneMinusESqSqrt)
+			public Inverted(CassiniSoldner core) : base(core) {
+				if(!core.HasInverse)
 					throw new ArgumentException("Core cannot be inverted.");
 			}
 
-			public override GeographicCoord TransformValue(Point2 coord) {
-				double latp = (Core.MOriginYOffset + coord.Y) / Core.MLineCoef1Major;
+			public override GeographicCoordinate TransformValue(Point2 coordinate) {
+				var latp = (Core.MOriginYOffset + coordinate.Y) / Core.MLineCoefficient1Major;
 				latp = (
 					latp
-					+ (Core.LatLineCoef1 * Math.Sin(2.0 * latp))
-					+ (Core.LatLineCoef2 * Math.Sin(4.0 * latp))
-					+ (Core.LatLineCoef3 * Math.Sin(6.0 * latp))
-					+ (Core.LatLineCoef4 * Math.Sin(8.0 * latp))
+					+ (Core.LatLineCoefficient1 * Math.Sin(2.0 * latp))
+					+ (Core.LatLineCoefficient2 * Math.Sin(4.0 * latp))
+					+ (Core.LatLineCoefficient3 * Math.Sin(6.0 * latp))
+					+ (Core.LatLineCoefficient4 * Math.Sin(8.0 * latp))
 				);
-				double tanLatp = Math.Tan(latp);
-				double t = tanLatp * tanLatp;
-				double lesq = Math.Sin(latp); lesq = 1.0 - (lesq * lesq * Core.ESq);
-				double d = ((coord.X - Core.FalseProjectedOffset.X) * Math.Sqrt(lesq)) / Core.MajorAxis;
-				double d2 = d * d;
-				double s = (1.0 + (3.0 * t)) * d2;
-				return new GeographicCoord(
+				var tanLatp = Math.Tan(latp);
+				var t = tanLatp * tanLatp;
+				var lesq = Math.Sin(latp); lesq = 1.0 - (lesq * lesq * Core.ESq);
+				var d = ((coordinate.X - Core.FalseProjectedOffset.X) * Math.Sqrt(lesq)) / Core.MajorAxis;
+				var d2 = d * d;
+				var s = (1.0 + (3.0 * t)) * d2;
+				return new GeographicCoordinate(
 					latp - (
-						((lesq * tanLatp) / Core.OneMinusESqSqrt)
+						((lesq * tanLatp) / Core.SquareRootOfOneMinusESq)
 						* d2 * (0.5 - (s / 24.0))
 					),
 					Core.NaturalOrigin.Longitude + (
@@ -76,7 +75,7 @@ namespace Pigeoid.Projection
 		/// <param name="falseProjectedOffset">The false projected offset.</param>
 		/// <param name="spheroid">The spheroid.</param>
 		public CassiniSoldner(
-			GeographicCoord naturalOrigin,
+			GeographicCoordinate naturalOrigin,
 			Vector2 falseProjectedOffset,
 			ISpheroid<double> spheroid
 		) : base(falseProjectedOffset, spheroid) {
@@ -84,38 +83,38 @@ namespace Pigeoid.Projection
 
 			double e4 = ESq * ESq;
 			double e6 = e4 * ESq;
-			MLineCoef1 = 1.0 - (ESq / 4.0) - (3.0 * e4 / 64.0) - (5.0 * e6 / 256.0);
-			MLineCoef1Major = MLineCoef1 * MajorAxis;
-			MLineCoef2 = (3.0 * ESq / 8.0) + (3.0 * e4 / 32.0) + (45.0 * e6 / 1024.0);
-			MLineCoef3 = (15.0 * e4 / 256.0) + (45.0 * e6 / 1024.0);
-			MLineCoef4 = (35.0 * e6 / 3072.0);
+			MLineCoefficient1 = 1.0 - (ESq / 4.0) - (3.0 * e4 / 64.0) - (5.0 * e6 / 256.0);
+			MLineCoefficient1Major = MLineCoefficient1 * MajorAxis;
+			MLineCoefficient2 = (3.0 * ESq / 8.0) + (3.0 * e4 / 32.0) + (45.0 * e6 / 1024.0);
+			MLineCoefficient3 = (15.0 * e4 / 256.0) + (45.0 * e6 / 1024.0);
+			MLineCoefficient4 = (35.0 * e6 / 3072.0);
 			MOrigin = MajorAxis * (
-				(MLineCoef1 * naturalOrigin.Latitude)
-				- (MLineCoef2 * Math.Sin(2.0 * naturalOrigin.Latitude))
-				+ (MLineCoef3 * Math.Sin(4.0 * naturalOrigin.Latitude))
-				- (MLineCoef4 * Math.Sin(6.0 * naturalOrigin.Latitude))
+				(MLineCoefficient1 * naturalOrigin.Latitude)
+				- (MLineCoefficient2 * Math.Sin(2.0 * naturalOrigin.Latitude))
+				+ (MLineCoefficient3 * Math.Sin(4.0 * naturalOrigin.Latitude))
+				- (MLineCoefficient4 * Math.Sin(6.0 * naturalOrigin.Latitude))
 			);
 			MOriginYOffset = MOrigin - falseProjectedOffset.Y;
 			OneMinusESq = (1.0 - ESq);
 			ESecSq = spheroid.ESecondSquared;
-			OneMinusESqSqrt = Math.Sqrt(OneMinusESq);
-			double ep = (1.0 - OneMinusESqSqrt) / (1.0 + OneMinusESqSqrt);
+			SquareRootOfOneMinusESq = Math.Sqrt(OneMinusESq);
+			double ep = (1.0 - SquareRootOfOneMinusESq) / (1.0 + SquareRootOfOneMinusESq);
 			double ep2 = ep * ep;
 			double ep3 = ep2 * ep;
 			double ep4 = ep3 * ep;
-			LatLineCoef1 = (3.0 * ep / 2.0) - (27.0 * ep3 / 32.0);
-			LatLineCoef2 = (21.0 * ep2 / 16.0) - (55.0 * ep4 / 32.0);
-			LatLineCoef3 = (151.0 * ep3 / 96.0)/* - (1097.0 * ep4 / 512.0)*/;
-			LatLineCoef4 = (1097 * ep4 / 512);
+			LatLineCoefficient1 = (3.0 * ep / 2.0) - (27.0 * ep3 / 32.0);
+			LatLineCoefficient2 = (21.0 * ep2 / 16.0) - (55.0 * ep4 / 32.0);
+			LatLineCoefficient3 = (151.0 * ep3 / 96.0)/* - (1097.0 * ep4 / 512.0)*/;
+			LatLineCoefficient4 = (1097 * ep4 / 512);
 		}
 
-		public override Point2 TransformValue(GeographicCoord coord) {
-			double v = Math.Sin(coord.Latitude);
+		public override Point2 TransformValue(GeographicCoordinate coordinate) {
+			double v = Math.Sin(coordinate.Latitude);
 			v = MajorAxis / Math.Sqrt(1.0 - (ESq * v * v));
-			double c = Math.Cos(coord.Latitude);
-			double a = (coord.Longitude - NaturalOrigin.Longitude) * c;
+			double c = Math.Cos(coordinate.Latitude);
+			double a = (coordinate.Longitude - NaturalOrigin.Longitude) * c;
 			c = ESecSq * c * c;
-			double tanLat = Math.Tan(coord.Latitude);
+			double tanLat = Math.Tan(coordinate.Latitude);
 			double t = tanLat * tanLat;
 			double a2 = a * a;
 
@@ -123,10 +122,10 @@ namespace Pigeoid.Projection
 				v * ( a - (((t * a * a2) * (20.0 + (a2 * (8.0 + (8.0 * c) - t)))) / 120.0))
 			);
 			double m = MajorAxis * (
-				(MLineCoef1 * coord.Latitude)
-				- (MLineCoef2 * Math.Sin(2.0 * coord.Latitude))
-				+ (MLineCoef3 * Math.Sin(4.0 * coord.Latitude))
-				- (MLineCoef4 * Math.Sin(6.0 * coord.Latitude))
+				(MLineCoefficient1 * coordinate.Latitude)
+				- (MLineCoefficient2 * Math.Sin(2.0 * coordinate.Latitude))
+				+ (MLineCoefficient3 * Math.Sin(4.0 * coordinate.Latitude))
+				- (MLineCoefficient4 * Math.Sin(6.0 * coordinate.Latitude))
 			);
 			double x =
 				m
@@ -160,10 +159,10 @@ namespace Pigeoid.Projection
 				FalseProjectedOffset.Y + (
 					(
 						MajorAxis * (
-							(MLineCoef1 * coord.Lat)
-							- (MLineCoef2 * System.Math.Sin(2.0 * coord.Lat))
-							+ (MLineCoef3 * System.Math.Sin(4.0 * coord.Lat))
-							- (MLineCoef4 * System.Math.Sin(6.0 * coord.Lat))
+							(MLineCoefficient1 * coordinate.Lat)
+							- (MLineCoefficient2 * System.Math.Sin(2.0 * coordinate.Lat))
+							+ (MLineCoefficient3 * System.Math.Sin(4.0 * coordinate.Lat))
+							- (MLineCoefficient4 * System.Math.Sin(6.0 * coordinate.Lat))
 						)
 					)
 					- MOrigin + (
@@ -184,15 +183,17 @@ namespace Pigeoid.Projection
 			);*/
 		}
 
-		public override ITransformation<Point2, GeographicCoord> GetInverse() {
+		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
 		}
 
 		public override bool HasInverse {
 			get {
-				return 0 != MLineCoef1Major
+// ReSharper disable CompareOfFloatsByEqualityOperator
+				return 0 != MLineCoefficient1Major
 					&& 0 != MajorAxis
-					&& 0 != OneMinusESqSqrt;
+					&& 0 != SquareRootOfOneMinusESq;
+// ReSharper restore CompareOfFloatsByEqualityOperator
 			}
 		}
 

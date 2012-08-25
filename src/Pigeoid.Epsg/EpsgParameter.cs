@@ -10,7 +10,7 @@ namespace Pigeoid.Epsg
 	public class EpsgParameterInfo
 	{
 
-		internal class EpsgParameterInfoLookup : EpsgDynamicLookupBase<ushort, EpsgParameterInfo>
+		internal class EpsgParameterInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgParameterInfo>
 		{
 			private const string DatFileName = "parameters.dat";
 			private const string TxtFileName = "parameters.txt";
@@ -30,12 +30,12 @@ namespace Pigeoid.Epsg
 				}
 			}
 
-			public EpsgParameterInfoLookup() : base(GetKeys()) { }
+			public EpsgParameterInfoLookUp() : base(GetKeys()) { }
 
 			protected override EpsgParameterInfo Create(ushort key, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					reader.BaseStream.Seek((index * RecordSize) + FileHeaderSize + CodeSize, SeekOrigin.Begin);
-					var name = EpsgTextLookup.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
 					return new EpsgParameterInfo(key, name);
 				}
 			}
@@ -45,13 +45,13 @@ namespace Pigeoid.Epsg
 			}
 		}
 
-		internal static readonly EpsgParameterInfoLookup Lookup = new EpsgParameterInfoLookup();
+		internal static readonly EpsgParameterInfoLookUp LookUp = new EpsgParameterInfoLookUp();
 
 		public static EpsgParameterInfo Get(int code) {
-			return Lookup.Get(checked((ushort)code));
+			return LookUp.Get(checked((ushort)code));
 		}
 
-		public static IEnumerable<EpsgParameterInfo> Values { get { return Lookup.Values; } }
+		public static IEnumerable<EpsgParameterInfo> Values { get { return LookUp.Values; } }
 
 		private readonly ushort _code;
 		private readonly string _name;

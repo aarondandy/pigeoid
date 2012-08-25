@@ -16,10 +16,10 @@ namespace Pigeoid
 		IRelatableWithin<LongitudeDegreeRange>
 	{
 
-		private static readonly PeriodicOperations _periodicOperations;
+		private static readonly PeriodicOperations DefaultPeriodicOperations;
 
 		static LongitudeDegreeRange() {
-			_periodicOperations = new PeriodicOperations(-180, 360);
+			DefaultPeriodicOperations = new PeriodicOperations(-180, 360);
 		}
 
 		/// <summary>
@@ -62,11 +62,11 @@ namespace Pigeoid
 		}
 
 		public double Mid {
-			get { return _periodicOperations.CalculateMidpoint(Start,End); }
+			get { return DefaultPeriodicOperations.CalculateMidpoint(Start,End); }
 		}
 
 		public double GetMagnitude() {
-			return _periodicOperations.Magnitude(Start, End);
+			return DefaultPeriodicOperations.Magnitude(Start, End);
 		}
 
 		public double GetMagnitudeSquared() {
@@ -75,7 +75,7 @@ namespace Pigeoid
 		}
 
 		public double Distance(double value) {
-			return _periodicOperations.Distance(Start, End, value);
+			return DefaultPeriodicOperations.Distance(Start, End, value);
 		}
 
 		public double DistanceSquared(double value) {
@@ -84,31 +84,35 @@ namespace Pigeoid
 		}
 
 		public bool Intersects(double value) {
-			return _periodicOperations.Intersects(Start, End, value);
+			return DefaultPeriodicOperations.Intersects(Start, End, value);
 		}
 
 		public bool Intersects(LongitudeDegreeRange r) {
-			return _periodicOperations.Intersects(Start, End, r.Start, r.End);
+			return DefaultPeriodicOperations.Intersects(Start, End, r.Start, r.End);
 		}
 
 		public bool Contains(double value) {
-			return _periodicOperations.Contains(Start, End, value);
+			return DefaultPeriodicOperations.Contains(Start, End, value);
 		}
 
 		public bool Contains(LongitudeDegreeRange r) {
-			return _periodicOperations.Contains(Start, End, r.Start, r.End);
+			return DefaultPeriodicOperations.Contains(Start, End, r.Start, r.End);
 		}
 
 		public bool Within(LongitudeDegreeRange r) {
-			return _periodicOperations.Contains(r.Start, r.End, Start, End);
+			return DefaultPeriodicOperations.Contains(r.Start, r.End, Start, End);
 		}
 
 		public bool Equals(LongitudeDegreeRange r) {
+// ReSharper disable CompareOfFloatsByEqualityOperator
 			return Start == r.Start && End == r.End;
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		public bool Equals(double v) {
+// ReSharper disable CompareOfFloatsByEqualityOperator
 			return Start == v && End == v;
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		public override bool Equals(object obj) {

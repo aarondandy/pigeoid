@@ -13,14 +13,14 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var asmItems = EpsgCoordinateOperationInfoRepository.ConversionInfos;
-			var dbItems = Repository.CoordinateOperations
+			var assemblyItems = EpsgCoordinateOperationInfoRepository.ConversionInfos;
+			var databaseItems = Repository.CoordinateOperations
 				.Where(x => String.Equals("Conversion", x.TypeName, StringComparison.OrdinalIgnoreCase))
 				.ToList();
 
 			AssertMatches(
-				asmItems,
-				dbItems,
+				assemblyItems,
+				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
 				new Tester((x, y) => x.OperationMethodInfo.Code == y.Method.Code),
