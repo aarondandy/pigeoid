@@ -76,6 +76,19 @@ namespace Pigeoid.Projection
 		}
 
 		public override Point2 TransformValue(GeographicCoordinate coordinate) {
+
+			var r = E * Math.Sin(coordinate.Latitude);
+			r = Af * Math.Pow(
+				Math.Tan(QuarterPi - (coordinate.Latitude / 2.0))
+				/ Math.Pow((1.0 - r) / (1.0 + r), EHalf),
+				N
+			);
+			var theta = (N * (coordinate.Longitude - GeographicOrigin.Longitude)) - ThetaOffset;
+			return new Point2(
+				FalseProjectedOffset.X + (r * Math.Sin(theta)),
+				NorthingOffset - (r * Math.Cos(theta))
+			);
+			/*
 			var r = E * Math.Sin(coordinate.Latitude);
 			r = Af * Math.Pow(
 				Math.Tan(QuarterPi - (coordinate.Latitude / 2.0)) / Math.Pow((1.0 - r) / (1.0 + r), EHalf),
@@ -85,7 +98,7 @@ namespace Pigeoid.Projection
 			return new Point2(
 				FalseProjectedOffset.X + (r * Math.Sin(theta)),
 				NorthingOffset - (r * Math.Cos(theta))
-			);
+			);*/
 		}
 
 	}

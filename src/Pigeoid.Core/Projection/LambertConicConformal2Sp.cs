@@ -74,19 +74,13 @@ namespace Pigeoid.Projection
 
 			F = mFirst / (N * Math.Pow(tFirst, N));
 			Af = MajorAxis * F;
-			var tOrigin =
-				Math.Tan(QuarterPi - (geographicOrigin.Latitude / 2.0))
-				/ Math.Pow((1.0 - eOriginParallelSin) / (1.0 + eOriginParallelSin),EHalf);
-			ROrigin = MajorAxis * F * Math.Pow(tOrigin, N);
 
-			/*ROrigin = Af * System.Math.Pow(
-					System.Math.Tan(System.Math.Max(0, QuarterPi - (geographiOrigin.Lat / 2.0))) / System.Math.Pow(
-						(1.0 - eOriginParallelSin) / (1.0 + eOriginParallelSin),
-						EHalf
-					)
-				,
+			var tOrigin = Math.Tan(QuarterPi - (geographicOrigin.Latitude / 2.0))
+				/ Math.Pow((1.0 - eOriginParallelSin) / (1.0 + eOriginParallelSin), EHalf);
+			ROrigin = Math.Pow(
+				Math.Max(0, tOrigin),
 				N
-			);*/
+			) * Af;
 
 			InvN = 1.0 / N;
 			NorthingOffset = falseProjectedOffset.Y + ROrigin;

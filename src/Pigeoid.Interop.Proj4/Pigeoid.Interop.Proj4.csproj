@@ -42,8 +42,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vertesaur.Core">
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120823-051507\lib\net40-client\Vertesaur.Core.dll</HintPath>
+    <Reference Include="Vertesaur.Core, Version=0.5.0.14985, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120827-031932\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
