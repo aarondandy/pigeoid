@@ -13,8 +13,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<TransverseMercatorZoned,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(TransverseMercatorZoned core)
-				: base(core) { }
+			public Inverted(TransverseMercatorZoned core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 source) {
 				throw new NotImplementedException();

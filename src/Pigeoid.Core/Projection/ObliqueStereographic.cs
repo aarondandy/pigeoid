@@ -13,8 +13,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<ObliqueStereographic,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(ObliqueStereographic core)
-				: base(core) { }
+			public Inverted(ObliqueStereographic core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 source) {
 				throw new NotImplementedException();

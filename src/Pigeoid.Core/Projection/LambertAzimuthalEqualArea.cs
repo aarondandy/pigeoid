@@ -14,8 +14,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<LambertAzimuthalEqualArea,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(LambertAzimuthalEqualArea core)
-				: base(core) { }
+			public Inverted(LambertAzimuthalEqualArea core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 source) {
 				throw new NotImplementedException();

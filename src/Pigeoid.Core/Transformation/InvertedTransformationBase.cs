@@ -1,5 +1,6 @@
 ﻿// TODO: source header
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Vertesaur.Contracts;
@@ -14,6 +15,8 @@ namespace Pigeoid.Transformation
 		private readonly TCore _core;
 
 		protected InvertedTransformationBase(TCore core) {
+			if (!core.HasInverse)
+				throw new ArgumentException("Core cannot be inverted.");
 			_core = core;
 		}
 

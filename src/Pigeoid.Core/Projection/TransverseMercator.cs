@@ -41,11 +41,7 @@ namespace Pigeoid.Projection
 
 			private readonly double _majorAxisScaleFactor;
 
-			public Inverted(TransverseMercator core)
-				: base(core) {
-				if (!core.HasInverse)
-					throw new ArgumentException("Core cannot be inverted.");
-				
+			public Inverted(TransverseMercator core) : base(core) {
 				_majorAxisScaleFactor = Core.MajorAxis * Core.ScaleFactor;
 			}
 

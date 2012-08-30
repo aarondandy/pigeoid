@@ -133,11 +133,13 @@
     <Compile Include="Projection\HyperbolicCassiniSoldner.cs" />
     <Compile Include="Projection\LambertAzimuthalEqualArea.cs" />
     <Compile Include="Projection\LambertAzimuthalEqualAreaSpherical.cs" />
+    <Compile Include="Projection\LambertConicBase.cs" />
     <Compile Include="Projection\LambertConicConformal.cs" />
     <Compile Include="Projection\LambertConicConformal1Sp.cs" />
     <Compile Include="Projection\LambertConicConformal1SpWest.cs" />
     <Compile Include="Projection\LambertConicConformal2Sp.cs" />
     <Compile Include="Projection\LambertConicConformalBelgium.cs" />
+    <Compile Include="Projection\LambertConicNearConformal.cs" />
     <Compile Include="Projection\Mercator.cs" />
     <Compile Include="Projection\MercatorSpherical.cs" />
     <Compile Include="Projection\ObliqueStereographic.cs" />

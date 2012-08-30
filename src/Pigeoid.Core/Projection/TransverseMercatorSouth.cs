@@ -17,9 +17,7 @@ namespace Pigeoid.Projection
 
 			private readonly InvertedTransformationBase<TransverseMercator,Point2,GeographicCoordinate> _baseInv;
 
-			public Inverted(TransverseMercatorSouth core)
-				: base(core)
-			{
+			public Inverted(TransverseMercatorSouth core) : base(core) {
 				_baseInv = core.BaseInverse;
 			}
 

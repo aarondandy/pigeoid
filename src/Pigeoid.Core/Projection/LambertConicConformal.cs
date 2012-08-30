@@ -13,16 +13,11 @@ namespace Pigeoid.Projection
 	/// <summary>
 	/// A base class for Lambert Conic Conformal projections.
 	/// </summary>
-	public abstract class LambertConicConformal :
-		ProjectionBase
+	public abstract class LambertConicConformal : LambertConicBase
 	{
 
 		internal const string DefaultName = "Lambert Conformal Conic";
 
-		/// <summary>
-		/// The geographic origin of the projection.
-		/// </summary>
-		public readonly GeographicCoordinate GeographicOrigin;
 		protected double Af;
 		protected double N;
 		protected double F;
@@ -33,12 +28,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(LambertConicConformal core)
-				: base(core)
-			{
-				if (!core.HasInverse)
-					throw new ArgumentException("Core cannot be inverted.");
-			}
+			public Inverted(LambertConicConformal core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 coordinate) {
 				var eastingComponent = coordinate.X - Core.FalseProjectedOffset.X;
@@ -76,15 +66,12 @@ namespace Pigeoid.Projection
 		protected LambertConicConformal(
 			GeographicCoordinate geographicOrigin,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
-		)
-			: base(falseProjectedOffset, spheroid)
-		{
-			GeographicOrigin = geographicOrigin;
-		}
+			ISpheroid<double> spheroid)
+		: base(geographicOrigin, falseProjectedOffset, spheroid)
+		{ }
 
 		public override Point2 TransformValue(GeographicCoordinate coordinate) {
-			double r = E * Math.Sin(coordinate.Latitude);
+			var r = E * Math.Sin(coordinate.Latitude);
 			r = Af * Math.Pow(
 				(
 					Math.Tan(
@@ -100,10 +87,11 @@ namespace Pigeoid.Projection
 				),
 				N
 			);
-			double theta = N * (coordinate.Longitude - GeographicOrigin.Longitude);
-			double x = FalseProjectedOffset.X + (r * Math.Sin(theta));
-			double y = NorthingOffset - (r * Math.Cos(theta));
-			return new Point2(x, y);
+			var theta = N * (coordinate.Longitude - GeographicOrigin.Longitude);
+			return new Point2(
+				(Math.Sin(theta) * r) + FalseProjectedOffset.X,
+				NorthingOffset - (Math.Cos(theta) * r)
+			);
 		}
 
 		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {

@@ -18,11 +18,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<LambertConicConformalBelgium,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(LambertConicConformalBelgium core)
-				: base(core) {
-				if (!Core.HasInverse)
-					throw new ArgumentException("Core cannot be inverted.");
-			}
+			public Inverted(LambertConicConformalBelgium core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 coordinate) {
 				var eastingComponent = coordinate.X - Core.FalseProjectedOffset.X;

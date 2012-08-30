@@ -50,6 +50,7 @@
     <Compile Include="..\..\src\PigeoidAssemblyInfo.cs">
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="LambertConicNearConformalTest.cs" />
     <Compile Include="Projection\CassiniSoldnerTest.cs" />
     <Compile Include="Projection\HyperbolicCassiniSoldnerTest.cs" />
     <Compile Include="Projection\LambertConicConformal2SpTest.cs" />

@@ -16,9 +16,7 @@ namespace Pigeoid.Projection
 
 			private readonly InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoordinate> _baseInv;
 
-			public Inverted(LambertConicConformal1SpWest core)
-				: base(core)
-			{
+			public Inverted(LambertConicConformal1SpWest core) : base(core) {
 				_baseInv = core.BaseInverse;
 			}
 

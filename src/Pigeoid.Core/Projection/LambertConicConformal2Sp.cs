@@ -75,12 +75,13 @@ namespace Pigeoid.Projection
 			F = mFirst / (N * Math.Pow(tFirst, N));
 			Af = MajorAxis * F;
 
-			var tOrigin = Math.Tan(QuarterPi - (geographicOrigin.Latitude / 2.0))
+			ROrigin = Math.Tan(QuarterPi - (geographicOrigin.Latitude / 2.0))
 				/ Math.Pow((1.0 - eOriginParallelSin) / (1.0 + eOriginParallelSin), EHalf);
-			ROrigin = Math.Pow(
-				Math.Max(0, tOrigin),
-				N
-			) * Af;
+
+			// ReSharper disable CompareOfFloatsByEqualityOperator
+			if (0 <= ROrigin)
+				ROrigin = Math.Pow(ROrigin, N) * Af;
+			// ReSharper restore CompareOfFloatsByEqualityOperator
 
 			InvN = 1.0 / N;
 			NorthingOffset = falseProjectedOffset.Y + ROrigin;

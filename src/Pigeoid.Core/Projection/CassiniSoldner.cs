@@ -34,10 +34,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<CassiniSoldner,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(CassiniSoldner core) : base(core) {
-				if(!core.HasInverse)
-					throw new ArgumentException("Core cannot be inverted.");
-			}
+			public Inverted(CassiniSoldner core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 coordinate) {
 				var latp = (Core.MOriginYOffset + coordinate.Y) / Core.MLineCoefficient1Major;

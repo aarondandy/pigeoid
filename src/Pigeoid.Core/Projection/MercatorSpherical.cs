@@ -30,11 +30,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<MercatorSpherical,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(MercatorSpherical core)
-				: base(core)
-			{
-				if (!Core.HasInverse) throw new ArgumentException("Core cannot be inverted.");
-			}
+			public Inverted(MercatorSpherical core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 coordinate) {
 				return new GeographicCoordinate(

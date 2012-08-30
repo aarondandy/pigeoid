@@ -18,9 +18,7 @@ namespace Pigeoid.Projection
 
 			private readonly double _r2;
 
-			public Inverted(LambertAzimuthalEqualAreaSpherical core)
-				: base(core)
-			{
+			public Inverted(LambertAzimuthalEqualAreaSpherical core) : base(core) {
 				_r2 = core.R * 2.0;
 			}
 
