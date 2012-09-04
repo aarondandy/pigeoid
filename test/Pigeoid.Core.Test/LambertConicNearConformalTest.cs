@@ -9,7 +9,7 @@ namespace Pigeoid.Core.Test
 	{
 
 		[Test]
-		public void Epsg_1_4_2_Test()
+		public void Epsg_1_3_1_5_Test()
 		{
 			var projection = new LambertConicNearConformal(
 				new GeographicCoordinate(0.604756586, 0.651880476),
@@ -27,7 +27,7 @@ namespace Pigeoid.Core.Test
 		}
 
 		[Test]
-		public void Epsg_1_4_2_Inverse_Test()
+		public void Epsg_1_3_1_5_Inverse_Test()
 		{
 			var projection = new LambertConicNearConformal(
 				new GeographicCoordinate(0.604756586, 0.651880476),

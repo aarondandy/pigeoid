@@ -53,6 +53,7 @@
     <Compile Include="LambertConicNearConformalTest.cs" />
     <Compile Include="Projection\CassiniSoldnerTest.cs" />
     <Compile Include="Projection\HyperbolicCassiniSoldnerTest.cs" />
+    <Compile Include="Projection\KrovakTest.cs" />
     <Compile Include="Projection\LambertConicConformal2SpTest.cs" />
     <Compile Include="Projection\LambertConicConformalBelgium2SpTest.cs" />
     <Compile Include="Projection\MercatorSphericalTest.cs" />
