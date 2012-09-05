@@ -46,5 +46,75 @@ namespace Pigeoid.Core.Test.Projection
 			Assert.AreEqual(0, projection.TransformValue(new Point2(0, 0)).Latitude, 0.001); // 0 degrees
 		}
 
+		[Test]
+		public void EpsgExample_1_3_3_1_Test()
+		{
+			var projection = new Mercator(
+				1.91986218,
+				0.997,
+				new Vector2(3900000, 900000),
+				new SpheroidEquatorialInvF(6377397.155, 299.15281)
+			);
+			var input = new GeographicCoordinate(-0.05235988, 2.09439510);
+			var expected = new Point2(5009726.58, 569150.82);
+
+			var result = projection.TransformValue(input);
+
+			Assert.AreEqual(expected.X, result.X, 0.03);
+			Assert.AreEqual(expected.Y, result.Y, 0.02);
+		}
+
+		[Test]
+		public void EpsgExample_1_3_3_1_InverseTest()
+		{
+			var projection = new Mercator(
+				1.91986218,
+				0.997,
+				new Vector2(3900000, 900000),
+				new SpheroidEquatorialInvF(6377397.155, 299.15281)
+			);
+			var expected = new GeographicCoordinate(-0.05235988, 2.09439510);
+			var input = new Point2(5009726.58, 569150.82);
+
+			var result = projection.GetInverse().TransformValue(input);
+
+			Assert.AreEqual(expected.Latitude, result.Latitude, 0.000000003);
+			Assert.AreEqual(expected.Longitude, result.Longitude, 0.000000005);
+		}
+
+		[Test]
+		public void EpsgExample_1_3_3_2_Test()
+		{
+			var projection = new Mercator(
+				new GeographicCoordinate(0.73303829, 0.89011792), 
+				new Vector2(0, 0),
+				new SpheroidEquatorialInvF(6378245, 298.3)
+			);
+			var input = new GeographicCoordinate(0.9250245, 0.9250245);
+			var expected = new Point2(165704.29, 5171848.07);
+
+			var result = projection.TransformValue(input);
+
+			Assert.AreEqual(expected.X, result.X, 0.03);
+			Assert.AreEqual(expected.Y, result.Y, 0.05);
+		}
+
+		[Test]
+		public void EpsgExample_1_3_3_2_InverseTest()
+		{
+			var projection = new Mercator(
+				new GeographicCoordinate(0.73303829, 0.89011792),
+				new Vector2(0, 0),
+				new SpheroidEquatorialInvF(6378245, 298.3)
+			);
+			var expected = new GeographicCoordinate(0.9250245, 0.9250245);
+			var input = new Point2(165704.29, 5171848.07);
+
+			var result = projection.GetInverse().TransformValue(input);
+
+			Assert.AreEqual(expected.Latitude, result.Latitude, 0.000000006);
+			Assert.AreEqual(expected.Longitude, result.Longitude, 0.000000005);
+		}
+
 	}
 }

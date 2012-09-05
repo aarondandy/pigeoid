@@ -132,6 +132,9 @@
     <Compile Include="Projection\CassiniSoldner.cs" />
     <Compile Include="Projection\HyperbolicCassiniSoldner.cs" />
     <Compile Include="Projection\Krovak.cs" />
+    <Compile Include="Projection\KrovakModified.cs" />
+    <Compile Include="Projection\KrovakModifiedNorth.cs" />
+    <Compile Include="Projection\KrovakNorth.cs" />
     <Compile Include="Projection\LambertAzimuthalEqualArea.cs" />
     <Compile Include="Projection\LambertAzimuthalEqualAreaSpherical.cs" />
     <Compile Include="Projection\LambertConicBase.cs" />
@@ -145,6 +148,7 @@
     <Compile Include="Projection\MercatorSpherical.cs" />
     <Compile Include="Projection\ObliqueStereographic.cs" />
     <Compile Include="Projection\PolarStereographic.cs" />
+    <Compile Include="Projection\PopularVizualisationPseudoMercator.cs" />
     <Compile Include="Projection\ProjectionBase.cs" />
     <Compile Include="Projection\TransverseMercator.cs" />
     <Compile Include="Projection\TransverseMercatorSouth.cs" />

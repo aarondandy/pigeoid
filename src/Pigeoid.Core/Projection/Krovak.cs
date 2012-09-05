@@ -11,7 +11,7 @@ namespace Pigeoid.Projection
 	public class Krovak : ProjectionBase
 	{
 		
-		private class Inverse : InvertedTransformationBase<Krovak, Point2, GeographicCoordinate>
+		internal class Inverse : InvertedTransformationBase<Krovak, Point2, GeographicCoordinate>
 		{
 
 			public Inverse(Krovak core) : base(core)
@@ -68,8 +68,6 @@ namespace Pigeoid.Projection
 
 			}
 		}
-
-		private const double QuarterPi = Math.PI/4.0;
 
 		protected readonly GeographicCoordinate GeographicOrigin;
 		protected readonly double LatitudeOfPseudoStandardParallel;

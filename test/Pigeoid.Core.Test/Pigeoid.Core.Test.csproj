@@ -58,6 +58,7 @@
     <Compile Include="Projection\LambertConicConformalBelgium2SpTest.cs" />
     <Compile Include="Projection\MercatorSphericalTest.cs" />
     <Compile Include="Projection\MercatorTest.cs" />
+    <Compile Include="Projection\PopularVisualizationPseudoMercatorTest.cs" />
     <Compile Include="Projection\TransverseMercatorTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transformation\AbridgedMolodenskyTransformationTest.cs" />

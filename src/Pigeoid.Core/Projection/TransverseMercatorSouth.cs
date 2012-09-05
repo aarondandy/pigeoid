@@ -22,7 +22,7 @@ namespace Pigeoid.Projection
 			}
 
 			public override GeographicCoordinate TransformValue(Point2 source) {
-				return _baseInv.TransformValue(new Point2(-source.X, -source.Y));
+				return _baseInv.TransformValue(new Point2(-source.Y, -source.X));
 			}
 		}
 
@@ -41,7 +41,7 @@ namespace Pigeoid.Projection
 
 		public override Point2 TransformValue(GeographicCoordinate coordinate) {
 			var p = base.TransformValue(coordinate);
-			return new Point2(-p.X, -p.Y);
+			return new Point2(-p.Y, -p.X);
 		}
 
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
