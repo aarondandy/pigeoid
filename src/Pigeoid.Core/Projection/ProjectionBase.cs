@@ -24,7 +24,7 @@ namespace Pigeoid.Projection
 		/// <summary>
 		/// The false projected offset.
 		/// </summary>
-		public readonly Vector2 FalseProjectedOffset;
+		public Vector2 FalseProjectedOffset;
 		/// <summary>
 		/// The spheroid.
 		/// </summary>

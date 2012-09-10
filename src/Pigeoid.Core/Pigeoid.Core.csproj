@@ -130,11 +130,13 @@
     <Compile Include="Ogc\OgcUnitBase.cs" />
     <Compile Include="Ogc\OgcOrientationType.cs" />
     <Compile Include="Projection\CassiniSoldner.cs" />
+    <Compile Include="Projection\HotineObliqueMercator.cs" />
     <Compile Include="Projection\HyperbolicCassiniSoldner.cs" />
     <Compile Include="Projection\Krovak.cs" />
     <Compile Include="Projection\KrovakModified.cs" />
     <Compile Include="Projection\KrovakModifiedNorth.cs" />
     <Compile Include="Projection\KrovakNorth.cs" />
+    <Compile Include="Projection\LabordeObliqueMercator.cs" />
     <Compile Include="Projection\LambertAzimuthalEqualArea.cs" />
     <Compile Include="Projection\LambertAzimuthalEqualAreaSpherical.cs" />
     <Compile Include="Projection\LambertConicBase.cs" />
