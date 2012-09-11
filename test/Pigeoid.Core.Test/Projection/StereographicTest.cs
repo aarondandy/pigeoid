@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using Pigeoid.Projection;
+using System;
 using Vertesaur;
 
 namespace Pigeoid.Core.Test.Projection
@@ -66,7 +67,8 @@ namespace Pigeoid.Core.Test.Projection
 		public void EpsgExample_1_3_7_2_B()
 		{
 			var projection = new PolarStereographicB(
-				new GeographicCoordinate(-1.239183769, 1.221730476),
+				new GeographicCoordinate(-Math.PI/2.0, 1.221730476),
+				-1.239183769,
 				new Vector2(6000000.00, 6000000.00),
 				new SpheroidEquatorialInvF(6378137, 298.2572236)
 			);
@@ -83,7 +85,8 @@ namespace Pigeoid.Core.Test.Projection
 		public void EpsgExample_1_3_7_2_B_Inverse()
 		{
 			var projection = new PolarStereographicB(
-				new GeographicCoordinate(-1.239183769, 1.221730476),
+				new GeographicCoordinate(-Math.PI / 2.0, 1.221730476),
+				-1.239183769,
 				new Vector2(6000000.00, 6000000.00),
 				new SpheroidEquatorialInvF(6378137, 298.2572236)
 			);
@@ -100,7 +103,8 @@ namespace Pigeoid.Core.Test.Projection
 		public void EpsgExample_1_3_7_2_C()
 		{
 			var projection = new PolarStereographicC(
-				new GeographicCoordinate(-1.169370599, 2.443460953),
+				new GeographicCoordinate(-Math.PI / 2.0, 2.443460953),
+				-1.169370599,
 				new Vector2(300000.00, 200000.00),
 				new SpheroidEquatorialInvF(6378388, 297)
 			);
@@ -117,7 +121,8 @@ namespace Pigeoid.Core.Test.Projection
 		public void EpsgExample_1_3_7_2_C_Inverse()
 		{
 			var projection = new PolarStereographicC(
-				new GeographicCoordinate(-1.169370599, 2.443460953),
+				new GeographicCoordinate(-Math.PI / 2.0, 2.443460953),
+				-1.169370599,
 				new Vector2(300000.00, 200000.00),
 				new SpheroidEquatorialInvF(6378388, 297)
 			);

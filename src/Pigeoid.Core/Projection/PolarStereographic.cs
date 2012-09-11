@@ -21,25 +21,45 @@ namespace Pigeoid.Projection
 	{
 		protected readonly double Mf;
 
-		public PolarStereographicB(GeographicCoordinate geographicOrigin, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
+		public PolarStereographicB(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
 			: base(geographicOrigin, falseProjectedOffset, spheroid)
 		{
-			var sinLat = Math.Sin(GeographicOrigin.Latitude);
-			var cosLat = Math.Cos(GeographicOrigin.Latitude);
+			var sinLat = Math.Sin(standardParallel);
+			var cosLat = Math.Cos(standardParallel);
 			var eSinLat = E * sinLat;
-
-			var tf = Math.Tan(QuarterPi + (GeographicOrigin.Latitude/2.0))
-				        /Math.Pow((1 + eSinLat)/(1 - eSinLat), EHalf);
-			Mf = cosLat/Math.Sqrt(1 - (ESq*sinLat*sinLat));
-			ScaleFactor = Mf*CrazyEValue/(2*tf);
+			double tf;
+			if (Math.Abs(Math.Abs(standardParallel) - HalfPi) > Double.Epsilon)
+			{
+				if (IsNorth)
+				{
+					tf = Math.Tan(QuarterPi - (standardParallel/2.0))
+						*Math.Pow((1 + eSinLat)/(1 - eSinLat), EHalf);
+				}
+				else
+				{
+					tf = Math.Tan(QuarterPi + (standardParallel/2.0))
+						/Math.Pow((1 + eSinLat)/(1 - eSinLat), EHalf);
+				}
+				Mf = cosLat / Math.Sqrt(1 - (ESq * sinLat * sinLat));
+				ScaleFactor = Mf * CrazyEValue / (2 * tf);
+				// t * 2.0 * MajorAxis * ScaleFactor / CrazyEValue
+			}
+			else
+			{
+				tf = 1.0;
+				Mf = cosLat / Math.Sqrt(1 - (ESq * sinLat * sinLat));
+				ScaleFactor = 1.0;
+				// t * 2.0 * MajorAxis / CrazyEValue;
+			}
+			
 
 		}
 	}
 
 	public class PolarStereographicC : PolarStereographicB
 	{
-		public PolarStereographicC(GeographicCoordinate geographicOrigin, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
-			: base(geographicOrigin, falseProjectedOffset, spheroid)
+		public PolarStereographicC(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
+			: base(geographicOrigin, standardParallel, falseProjectedOffset, spheroid)
 		{
 			var pf = Mf * MajorAxis;
 			FalseProjectedOffset = new Vector2(FalseProjectedOffset.X, (IsNorth ? pf : -pf) + FalseProjectedOffset.Y);

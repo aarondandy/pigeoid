@@ -10,17 +10,17 @@ namespace Pigeoid.GoldData
 	{
 
 		[Test]
-		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_09.csv", 0, 0)]
-		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_09a.csv", 0, 0)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_09.csv", 0.00001, 0.000000001)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_09a.csv", 0.00001, 0.000000001)]
 		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_09b.csv", 0.0000006, 0.000000001)]
-		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_10.csv", 0, 0)]
-		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_11.csv", 0, 0)]
-		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_11a.csv", 0, 0)]
-		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_11b.csv", 0, 0)]
-		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_12.csv", 0, 0)]
-		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_12a.csv", 0, 0)]
-		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_13.csv", 0, 0)]
-		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_13a.csv", 0, 0)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_10.csv", 0.000001, 0.000000001)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_11.csv", 0.00001, 0.000000001)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_11a.csv", 0.00001, 0.000000001)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_11b.csv", 0.00001, 0.000000001)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_12.csv", 0.00001, 0.000000001)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_12a.csv", 0.00001, 0.000000001)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_13.csv", 0.00001, 0.000000001)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_13a.csv", 0.00001, 0.000000001)]
 		public void Test(string geoResourceName, string prjResourceName, double projectDelta, double unprojectDelta)
 		{
 			var latLonData = GoldData.GetReadyReader(geoResourceName);
@@ -45,18 +45,21 @@ namespace Pigeoid.GoldData
 			}
 			else
 			{
-
+				var latSp = Double.Parse(prjData["LATITUDE OF TRUE SCALE"])*Math.PI/180.0;
+				var originLat = latSp < 0 ? -Math.PI/2.0 : Math.PI/2.0;
 				projection = new PolarStereographicB(
 					new GeographicCoordinate(
-						Double.Parse(prjData["LATITUDE OF TRUE SCALE"]) * Math.PI / 180.0,
+						originLat,
 						Double.Parse(prjData["LONGITUDE DOWN FROM POLE"])*Math.PI/180.0
 					),
+					latSp,
  					new Vector2(
 						Double.Parse(prjData["FALSE EASTING"]),
 						Double.Parse(prjData["FALSE NORTHING"])
 					), 
 					spheroid
 				);
+				;
 			}
 
 			var inverse = projection.GetInverse();
