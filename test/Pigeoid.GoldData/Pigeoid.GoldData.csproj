@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C6EAB9F1-4132-4878-BAA2-535354A68899}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Pigeoid.GoldData</RootNamespace>
+    <AssemblyName>Pigeoid.GoldData</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework">
+      <HintPath>..\..\packages\NUnit.2.6.1\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Vertesaur.Core">
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120827-031932\lib\net40-client\Vertesaur.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\src\PigeoidAssemblyInfo.cs">
+      <Link>Properties\PigeoidAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="GeoTransGoldDataReader.cs" />
+    <Compile Include="GeoTransGoldDataReaderTest.cs" />
+    <Compile Include="GoldData.cs" />
+    <Compile Include="LambertConicConformal1SpTest.cs" />
+    <Compile Include="LambertConicConformal2SpTest.cs" />
+    <Compile Include="MercatorTest.cs" />
+    <Compile Include="NeysTest.cs" />
+    <Compile Include="PolarStereoTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Data\Wgs84\Lat_Lon.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_14.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_14a.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_15.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_16.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_16a.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_17.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_18.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_19.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_20.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_21.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_22.csv" />
+    <EmbeddedResource Include="Data\Wgs84\LCC_23.csv" />
+    <EmbeddedResource Include="Data\Wgs84\Lon_Lat.csv" />
+    <EmbeddedResource Include="Data\Wgs84\Mercator_5.csv" />
+    <EmbeddedResource Include="Data\Wgs84\Mercator_5a.csv" />
+    <EmbeddedResource Include="Data\Wgs84\Mercator_6.csv" />
+    <EmbeddedResource Include="Data\Wgs84\Mercator_7.csv" />
+    <EmbeddedResource Include="Data\Wgs84\Mercator_8.csv" />
+    <EmbeddedResource Include="Data\Wgs84\Mercator_8a.csv" />
+    <EmbeddedResource Include="Data\Wgs84\Mercator_8b.csv" />
+    <EmbeddedResource Include="Data\Wgs84\Ney_24.csv" />
+    <EmbeddedResource Include="Data\Wgs84\Ney_25.csv" />
+    <EmbeddedResource Include="Data\Wgs84\PolarStereo_09.csv" />
+    <EmbeddedResource Include="Data\Wgs84\PolarStereo_09a.csv" />
+    <EmbeddedResource Include="Data\Wgs84\PolarStereo_09b.csv" />
+    <EmbeddedResource Include="Data\Wgs84\PolarStereo_10.csv" />
+    <EmbeddedResource Include="Data\Wgs84\PolarStereo_11.csv" />
+    <EmbeddedResource Include="Data\Wgs84\PolarStereo_11a.csv" />
+    <EmbeddedResource Include="Data\Wgs84\PolarStereo_11b.csv" />
+    <EmbeddedResource Include="Data\Wgs84\PolarStereo_12.csv" />
+    <EmbeddedResource Include="Data\Wgs84\PolarStereo_12a.csv" />
+    <EmbeddedResource Include="Data\Wgs84\PolarStereo_13.csv" />
+    <EmbeddedResource Include="Data\Wgs84\PolarStereo_13a.csv" />
+    <EmbeddedResource Include="Data\Wgs84\TransMerc_26.csv" />
+    <EmbeddedResource Include="Data\Wgs84\TransMerc_26a.csv" />
+    <EmbeddedResource Include="Data\Wgs84\TransMerc_27.csv" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Pigeoid.Core\Pigeoid.Core.csproj">
+      <Project>{ECDC3D02-067E-4D6F-9DF2-58015EFDAE87}</Project>
+      <Name>Pigeoid.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

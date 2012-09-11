@@ -148,6 +148,7 @@
     <Compile Include="Projection\LambertConicNearConformal.cs" />
     <Compile Include="Projection\Mercator.cs" />
     <Compile Include="Projection\MercatorSpherical.cs" />
+    <Compile Include="Projection\NeysProjection.cs" />
     <Compile Include="Projection\ObliqueStereographic.cs" />
     <Compile Include="Projection\PolarStereographic.cs" />
     <Compile Include="Projection\PopularVizualisationPseudoMercator.cs" />

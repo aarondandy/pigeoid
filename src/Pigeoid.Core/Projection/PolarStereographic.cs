@@ -27,10 +27,12 @@ namespace Pigeoid.Projection
 			var sinLat = Math.Sin(GeographicOrigin.Latitude);
 			var cosLat = Math.Cos(GeographicOrigin.Latitude);
 			var eSinLat = E * sinLat;
-			var tf = Math.Tan(QuarterPi + (GeographicOrigin.Latitude / 2.0))
-				/ Math.Pow((1 + eSinLat) / (1 - eSinLat), EHalf);
-			Mf = cosLat / Math.Sqrt(1 - (ESq * sinLat * sinLat));
-			ScaleFactor = Mf * CrazyEValue / (2 * tf);
+
+			var tf = Math.Tan(QuarterPi + (GeographicOrigin.Latitude/2.0))
+				        /Math.Pow((1 + eSinLat)/(1 - eSinLat), EHalf);
+			Mf = cosLat/Math.Sqrt(1 - (ESq*sinLat*sinLat));
+			ScaleFactor = Mf*CrazyEValue/(2*tf);
+
 		}
 	}
 
@@ -101,18 +103,28 @@ namespace Pigeoid.Projection
 		protected double ScaleFactor;
 		protected readonly bool IsNorth;
 		protected readonly double CrazyEValue;
+		protected readonly double TwoMajorAxis;
+		protected readonly double TopScale;
 
 		public PolarStereographic(GeographicCoordinate geographicOrigin, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
 			: base(falseProjectedOffset, spheroid)
 		{
+			TwoMajorAxis = MajorAxis*2.0;
 			GeographicOrigin = geographicOrigin;
 			IsNorth = geographicOrigin.Latitude > 0;
+			var onePlusESq = 1 + ESq;
+			var oneMinusESq = 1 - ESq;
+			TopScale = Math.Sqrt(Math.Pow(onePlusESq, onePlusESq) * Math.Pow(oneMinusESq, oneMinusESq));
+
 			CrazyEValue = Math.Sqrt(
 				Math.Pow(1 + E, 1 + E)
 				* Math.Pow(1 - E, 1 - E)
 			);
 
 			ScaleFactor = 1.0;
+
+
+
 		}
 
 		public override Point2 TransformValue(GeographicCoordinate source)
