@@ -4,6 +4,7 @@ using System;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
+using Vertesaur.Periodic;
 
 namespace Pigeoid.Projection
 {
@@ -27,9 +28,11 @@ namespace Pigeoid.Projection
 			var sinLat = Math.Sin(standardParallel);
 			var cosLat = Math.Cos(standardParallel);
 			var eSinLat = E * sinLat;
-			double tf;
+			Mf = cosLat / Math.Sqrt(1 - (ESq * sinLat * sinLat));
+
 			if (Math.Abs(Math.Abs(standardParallel) - HalfPi) > Double.Epsilon)
 			{
+				double tf;
 				if (IsNorth)
 				{
 					tf = Math.Tan(QuarterPi - (standardParallel/2.0))
@@ -40,16 +43,11 @@ namespace Pigeoid.Projection
 					tf = Math.Tan(QuarterPi + (standardParallel/2.0))
 						/Math.Pow((1 + eSinLat)/(1 - eSinLat), EHalf);
 				}
-				Mf = cosLat / Math.Sqrt(1 - (ESq * sinLat * sinLat));
 				ScaleFactor = Mf * CrazyEValue / (2 * tf);
-				// t * 2.0 * MajorAxis * ScaleFactor / CrazyEValue
 			}
 			else
 			{
-				tf = 1.0;
-				Mf = cosLat / Math.Sqrt(1 - (ESq * sinLat * sinLat));
 				ScaleFactor = 1.0;
-				// t * 2.0 * MajorAxis / CrazyEValue;
 			}
 			
 
@@ -97,17 +95,23 @@ namespace Pigeoid.Projection
 				var t = p*Core.CrazyEValue/(2.0*Core.MajorAxis*Core.ScaleFactor);
 				var chi = 2.0*Math.Atan(t);
 				var lon = Core.GeographicOrigin.Longitude;
-				if (Core.IsNorth)
+
+				if (dx == 0 && dy == 0)
 				{
-					chi = HalfPi - chi;
-					if(0 != dx)
-						lon += Math.Atan2(dx, -dy);
+					return Core.GeographicOrigin;
 				}
 				else
 				{
-					chi = chi - HalfPi;
-					if(0 != dx)
+					if (Core.IsNorth)
+					{
+						chi = HalfPi - chi;
+						lon += Math.Atan2(dx, -dy);
+					}
+					else
+					{
+						chi = chi - HalfPi;
 						lon += Math.Atan2(dx, dy);
+					}
 				}
 
 				var lat = chi
@@ -115,9 +119,12 @@ namespace Pigeoid.Projection
 					+ (Coefficient2 * Math.Sin(4 * chi))
 					+ (Coefficient3 * Math.Sin(6 * chi))
 					+ (Coefficient4 * Math.Sin(8 * chi));
-				return new GeographicCoordinate(lat, lon);
+				lon = LongitudePeriod.Fix(lon);
+				return new GeographicCoordinate(lat,lon);
 			}
 		}
+
+		private static readonly PeriodicOperations LongitudePeriod = new PeriodicOperations(-Math.PI, Math.PI * 2.0);
 
 		protected readonly GeographicCoordinate GeographicOrigin;
 		protected double ScaleFactor;
@@ -130,7 +137,10 @@ namespace Pigeoid.Projection
 			: base(falseProjectedOffset, spheroid)
 		{
 			TwoMajorAxis = MajorAxis*2.0;
-			GeographicOrigin = geographicOrigin;
+			GeographicOrigin = new GeographicCoordinate(
+				geographicOrigin.Latitude,
+				LongitudePeriod.Fix(geographicOrigin.Longitude)
+			);
 			IsNorth = geographicOrigin.Latitude > 0;
 			var onePlusESq = 1 + ESq;
 			var oneMinusESq = 1 - ESq;
@@ -142,9 +152,6 @@ namespace Pigeoid.Projection
 			);
 
 			ScaleFactor = 1.0;
-
-
-
 		}
 
 		public override Point2 TransformValue(GeographicCoordinate source)
@@ -153,7 +160,7 @@ namespace Pigeoid.Projection
 			var halfLat = source.Latitude/2.0;
 			var sinLat = Math.Sin(source.Latitude);
 			var eSinLat = E*sinLat;
-
+			
 			if(IsNorth)
 			{
 				var t = Math.Tan(QuarterPi - halfLat)
