@@ -6,30 +6,30 @@ using Vertesaur;
 namespace Pigeoid.GoldData
 {
 	[TestFixture]
-	public class NeysTest
+	public class TransverseMercatorTest
 	{
 
-		[Ignore]
 		[Test]
-		[TestCase("Wgs84.Lat_Lon.csv","Wgs84.Ney_24.csv",800000,0.2)] // terrible!
-		[TestCase("Wgs84.Lat_Lon.csv","Wgs84.Ney_25.csv",900000,0.2)] // terrible!!!
-		public void Test(string geoResourceName, string neyResourceName, double projectDelta, double unprojectDelta)
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.TransMerc_26.csv", 0.009, 0.0000001)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.TransMerc_26a.csv", 0.009, 0.0000001)]
+		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.TransMerc_27.csv", 0.04, 0.0000001)]
+		public void Test(string geoResourceName, string prjResourceName, double projectDelta, double unprojectDelta)
 		{
 			var latLonData = GoldData.GetReadyReader(geoResourceName);
-			var prjData = GoldData.GetReadyReader(neyResourceName);
+			var prjData = GoldData.GetReadyReader(prjResourceName);
 
-
-			var projection = new NeysProjection(
+			var spheroid = GoldData.GenerateSpheroid(prjData["DATUM"]);
+			var projection = new TransverseMercator(
 				new GeographicCoordinate(
 					Double.Parse(prjData["ORIGIN LATITUDE"]) * Math.PI / 180.0,
 					Double.Parse(prjData["CENTRAL MERIDIAN"]) * Math.PI / 180.0
 				),
-				Double.Parse(prjData["STANDARD PARALLEL ONE"]) * Math.PI / 180.0,
-				new Vector2(
+ 				new Vector2(
 					Double.Parse(prjData["FALSE EASTING"]),
 					Double.Parse(prjData["FALSE NORTHING"])
 				),
-				GoldData.GenerateSpheroid(prjData["DATUM"])
+				Double.Parse(prjData["SCALE FACTOR"]),
+				spheroid
 			);
 
 			var inverse = projection.GetInverse();

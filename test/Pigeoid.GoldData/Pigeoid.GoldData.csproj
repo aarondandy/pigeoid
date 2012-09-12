@@ -57,6 +57,7 @@
     <Compile Include="NeysTest.cs" />
     <Compile Include="PolarStereoTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TransverseMercatorTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Data\Wgs84\Lat_Lon.csv" />

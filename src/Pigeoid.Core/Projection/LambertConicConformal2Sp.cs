@@ -28,6 +28,17 @@ namespace Pigeoid.Projection
 		/// </summary>
 		public readonly double SecondParallel;
 
+		private static double CalculateTValue(double parallel, double sinParallel, double power)
+		{
+			return Math.Tan(QuarterPi - (parallel / 2.0))
+				/ Math.Pow((1.0 - sinParallel) / (1.0 + sinParallel), power);
+		}
+
+		private static double CalculateMValue(double parallel, double sinParallel, double eSquared)
+		{
+			return Math.Cos(parallel) / Math.Sqrt(1.0 - (eSquared * sinParallel * sinParallel));
+		}
+
 		/// <summary>
 		/// Constructs a new Lambert Conic Conformal projection from 2 standard parallels.
 		/// </summary>
@@ -48,24 +59,12 @@ namespace Pigeoid.Projection
 			FirstParallel = firstParallel;
 			SecondParallel = secondParallel;
 			var firstParallelSin = Math.Sin(firstParallel);
-			var eFirstParallelSin = E * firstParallelSin;
 			var secondParallelSin = Math.Sin(secondParallel);
-			var eSecondParallelSin = E * secondParallelSin;
-			var eOriginParallelSin = E * Math.Sin(geographicOrigin.Latitude);
-			var mFirst =
-				Math.Cos(firstParallel)
-				/ Math.Sqrt(1.0 - (ESq * firstParallelSin * firstParallelSin));
-			var mSecond =
-				Math.Cos(secondParallel)
-				/ Math.Sqrt(1.0 - (ESq * secondParallelSin * secondParallelSin));
-			var tFirst =
-				Math.Tan(QuarterPi - (firstParallel / 2.0))
-				/ Math.Pow((1.0 - eFirstParallelSin) / (1.0 + eFirstParallelSin),EHalf);
-			var tSecond =
-				Math.Tan(QuarterPi - (secondParallel / 2.0))
-				/ Math.Pow((1.0 - eSecondParallelSin) / (1.0 + eSecondParallelSin), EHalf);
-			N =
-				(Math.Log(mFirst) - Math.Log(mSecond))
+			var mFirst = CalculateMValue(firstParallel, firstParallelSin, ESq);
+			var mSecond = CalculateMValue(secondParallel, secondParallelSin, ESq);
+			var tFirst = CalculateTValue(firstParallel, E * firstParallelSin, EHalf);
+			var tSecond = CalculateTValue(secondParallel, E * secondParallelSin, EHalf);
+			N = (Math.Log(mFirst) - Math.Log(mSecond))
 				/ (Math.Log(tFirst) - Math.Log(tSecond));
 
 // ReSharper disable CompareOfFloatsByEqualityOperator
@@ -75,8 +74,7 @@ namespace Pigeoid.Projection
 			F = mFirst / (N * Math.Pow(tFirst, N));
 			Af = MajorAxis * F;
 
-			ROrigin = Math.Tan(QuarterPi - (geographicOrigin.Latitude / 2.0))
-				/ Math.Pow((1.0 - eOriginParallelSin) / (1.0 + eOriginParallelSin), EHalf);
+			ROrigin = CalculateTValue(geographicOrigin.Latitude, Math.Sin(geographicOrigin.Latitude) * E, EHalf);
 
 			// ReSharper disable CompareOfFloatsByEqualityOperator
 			if (0 <= ROrigin)

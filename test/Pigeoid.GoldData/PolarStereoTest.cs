@@ -30,7 +30,7 @@ namespace Pigeoid.GoldData
 			PolarStereographic projection;
 			if(null != prjData["SCALE FACTOR"])
 			{
-				projection = new PolarStereographicA(
+				projection = new PolarStereographic(
 					new GeographicCoordinate(
 						Math.PI / 2.0,
 						Double.Parse(prjData["LONGITUDE DOWN FROM POLE"]) * Math.PI / 180.0
@@ -47,7 +47,7 @@ namespace Pigeoid.GoldData
 			{
 				var latSp = Double.Parse(prjData["LATITUDE OF TRUE SCALE"])*Math.PI/180.0;
 				var originLat = latSp < 0 ? -Math.PI/2.0 : Math.PI/2.0;
-				projection = new PolarStereographicB(
+				projection = PolarStereographic.CreateFromStandardParallel(
 					new GeographicCoordinate(
 						originLat,
 						Double.Parse(prjData["LONGITUDE DOWN FROM POLE"])*Math.PI/180.0

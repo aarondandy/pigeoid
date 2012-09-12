@@ -84,10 +84,8 @@ namespace Pigeoid.Epsg.Resources
 		public static string LookUpIsoString(ushort searchCode, string textPathFile, int textSize) {
 			using (var reader = EpsgDataResource.CreateBinaryReader(textPathFile)) {
 				var recordSize = sizeof(ushort) + (textSize * sizeof(byte));
-				var byteLength = reader.BaseStream.Length;
-				var itemCount = (int)byteLength / recordSize;
-				int minIndex = 0;
-				int maxIndex = itemCount - 1;
+				var minIndex = 0;
+				var maxIndex = ((int)reader.BaseStream.Length / recordSize) - 1;
 				while(minIndex <= maxIndex) {
 					var midIndex = (minIndex + maxIndex) / 2;
 					reader.BaseStream.Seek(midIndex*recordSize, SeekOrigin.Begin);

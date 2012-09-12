@@ -78,8 +78,8 @@ namespace Pigeoid.Projection
 		) : base(falseProjectedOffset, spheroid) {
 			NaturalOrigin = naturalOrigin;
 
-			double e4 = ESq * ESq;
-			double e6 = e4 * ESq;
+			var e4 = ESq * ESq;
+			var e6 = e4 * ESq;
 			MLineCoefficient1 = 1.0 - (ESq / 4.0) - (3.0 * e4 / 64.0) - (5.0 * e6 / 256.0);
 			MLineCoefficient1Major = MLineCoefficient1 * MajorAxis;
 			MLineCoefficient2 = (3.0 * ESq / 8.0) + (3.0 * e4 / 32.0) + (45.0 * e6 / 1024.0);
@@ -95,10 +95,10 @@ namespace Pigeoid.Projection
 			OneMinusESq = (1.0 - ESq);
 			ESecSq = spheroid.ESecondSquared;
 			SquareRootOfOneMinusESq = Math.Sqrt(OneMinusESq);
-			double ep = (1.0 - SquareRootOfOneMinusESq) / (1.0 + SquareRootOfOneMinusESq);
-			double ep2 = ep * ep;
-			double ep3 = ep2 * ep;
-			double ep4 = ep3 * ep;
+			var ep = (1.0 - SquareRootOfOneMinusESq) / (1.0 + SquareRootOfOneMinusESq);
+			var ep2 = ep * ep;
+			var ep3 = ep2 * ep;
+			var ep4 = ep3 * ep;
 			LatLineCoefficient1 = (3.0 * ep / 2.0) - (27.0 * ep3 / 32.0);
 			LatLineCoefficient2 = (21.0 * ep2 / 16.0) - (55.0 * ep4 / 32.0);
 			LatLineCoefficient3 = (151.0 * ep3 / 96.0)/* - (1097.0 * ep4 / 512.0)*/;
@@ -106,30 +106,30 @@ namespace Pigeoid.Projection
 		}
 
 		public override Point2 TransformValue(GeographicCoordinate coordinate) {
-			double v = Math.Sin(coordinate.Latitude);
+			var v = Math.Sin(coordinate.Latitude);
 			v = MajorAxis / Math.Sqrt(1.0 - (ESq * v * v));
-			double c = Math.Cos(coordinate.Latitude);
-			double a = (coordinate.Longitude - NaturalOrigin.Longitude) * c;
+			var c = Math.Cos(coordinate.Latitude);
+			var a = (coordinate.Longitude - NaturalOrigin.Longitude) * c;
 			c = ESecSq * c * c;
-			double tanLat = Math.Tan(coordinate.Latitude);
-			double t = tanLat * tanLat;
-			double a2 = a * a;
+			var tanLat = Math.Tan(coordinate.Latitude);
+			var t = tanLat * tanLat;
+			var a2 = a * a;
 
-			double east = FalseProjectedOffset.X + (
+			var east = FalseProjectedOffset.X + (
 				v * ( a - (((t * a * a2) * (20.0 + (a2 * (8.0 + (8.0 * c) - t)))) / 120.0))
 			);
-			double m = MajorAxis * (
+			var m = MajorAxis * (
 				(MLineCoefficient1 * coordinate.Latitude)
 				- (MLineCoefficient2 * Math.Sin(2.0 * coordinate.Latitude))
 				+ (MLineCoefficient3 * Math.Sin(4.0 * coordinate.Latitude))
 				- (MLineCoefficient4 * Math.Sin(6.0 * coordinate.Latitude))
 			);
-			double x =
+			var x =
 				m
 				- MOrigin
 				+ ((v * tanLat * a2 * (12 + (a2 * (5.0 - t + (6.0 * c))))) / 24.0)
 			;
-			double north = FalseProjectedOffset.Y + x;
+			var north = FalseProjectedOffset.Y + x;
 
 			return new Point2(east, north);
 

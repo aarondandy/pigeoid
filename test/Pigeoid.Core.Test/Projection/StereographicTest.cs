@@ -30,7 +30,7 @@ namespace Pigeoid.Core.Test.Projection
 		[Test]
 		public void EpsgExample_1_3_7_2_A()
 		{
-			var projection = new PolarStereographicA(
+			var projection = new PolarStereographic(
 				new GeographicCoordinate(1.570796327, 0),
 				0.994,
 				new Vector2(2000000.00, 2000000.00),
@@ -48,7 +48,7 @@ namespace Pigeoid.Core.Test.Projection
 		[Test]
 		public void EpsgExample_1_3_7_2_A_Inverse()
 		{
-			var projection = new PolarStereographicA(
+			var projection = new PolarStereographic(
 				new GeographicCoordinate(1.570796327, 0),
 				0.994,
 				new Vector2(2000000.00, 2000000.00),
@@ -66,7 +66,7 @@ namespace Pigeoid.Core.Test.Projection
 		[Test]
 		public void EpsgExample_1_3_7_2_B()
 		{
-			var projection = new PolarStereographicB(
+			var projection = PolarStereographic.CreateFromStandardParallel(
 				new GeographicCoordinate(-Math.PI/2.0, 1.221730476),
 				-1.239183769,
 				new Vector2(6000000.00, 6000000.00),
@@ -84,7 +84,7 @@ namespace Pigeoid.Core.Test.Projection
 		[Test]
 		public void EpsgExample_1_3_7_2_B_Inverse()
 		{
-			var projection = new PolarStereographicB(
+			var projection = PolarStereographic.CreateFromStandardParallel(
 				new GeographicCoordinate(-Math.PI / 2.0, 1.221730476),
 				-1.239183769,
 				new Vector2(6000000.00, 6000000.00),
@@ -102,7 +102,7 @@ namespace Pigeoid.Core.Test.Projection
 		[Test]
 		public void EpsgExample_1_3_7_2_C()
 		{
-			var projection = new PolarStereographicC(
+			var projection = PolarStereographic.CreateFromStandardParallelAndFalseOffsetAtOrigin(
 				new GeographicCoordinate(-Math.PI / 2.0, 2.443460953),
 				-1.169370599,
 				new Vector2(300000.00, 200000.00),
@@ -120,7 +120,7 @@ namespace Pigeoid.Core.Test.Projection
 		[Test]
 		public void EpsgExample_1_3_7_2_C_Inverse()
 		{
-			var projection = new PolarStereographicC(
+			var projection = PolarStereographic.CreateFromStandardParallelAndFalseOffsetAtOrigin(
 				new GeographicCoordinate(-Math.PI / 2.0, 2.443460953),
 				-1.169370599,
 				new Vector2(300000.00, 200000.00),

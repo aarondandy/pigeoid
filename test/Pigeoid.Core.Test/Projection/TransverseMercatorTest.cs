@@ -19,10 +19,13 @@ namespace Pigeoid.Core.Test.Projection
 				new SpheroidEquatorialInvF(6377563.396, 299.32496)
 			);
 
-			var projected = projection.TransformValue(new GeographicCoordinate(0.88139127, 0.00872665));
+			var input = new GeographicCoordinate(0.88139127, 0.00872665);
+			var expected = new Point2(577274.99, 69740.50);
 
-			Assert.AreEqual(577274.99, projected.X, 0.08);
-			Assert.AreEqual(69740.50, projected.Y, 0.005);
+			var result = projection.TransformValue(input);
+
+			Assert.AreEqual(expected.X, result.X, 0.03);
+			Assert.AreEqual(expected.Y, result.Y, 0.002);
 		}
 
 		[Test]
@@ -35,10 +38,13 @@ namespace Pigeoid.Core.Test.Projection
 				new SpheroidEquatorialInvF(6377563.396, 299.32496)
 			);
 
-			var unProjected = projection.GetInverse().TransformValue(new Point2(577274.99, 69740.50));
+			var input = new Point2(577274.99, 69740.50);
+			var expected = new GeographicCoordinate(0.88139127, 0.00872665);
 
-			Assert.AreEqual(0.88139127, unProjected.Latitude, 0.0000000008);
-			Assert.AreEqual(0.00872665, unProjected.Longitude, 0.000000008);
+			var result = projection.GetInverse().TransformValue(input);
+
+			Assert.AreEqual(expected.Latitude, result.Latitude, 0.00000000004);
+			Assert.AreEqual(expected.Longitude, result.Longitude, 0.000000008);
 		}
 
 		[Test]

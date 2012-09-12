@@ -7,139 +7,96 @@ using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
+using Vertesaur.Periodic;
 
 namespace Pigeoid.Projection
 {
 	/// <summary>
 	/// A transverse Mercator projection.
 	/// </summary>
-	public class TransverseMercator :
-		CassiniSoldner,
-		IEquatable<TransverseMercator>
+	public class TransverseMercator : ProjectionBase
 	{
-
-		protected readonly double ScaleFactor;
-		protected readonly double ESecSq58;
-		protected readonly double ESecSq330;
-		protected readonly double ESecSq8;
-		protected readonly double ESecSq9;
-		protected readonly double ESecSq252;
-		protected readonly double OneMinusESquared;
-		protected readonly double Ak;
-		protected readonly double Bk;
-		protected readonly double Line1Coefficient;
-		protected readonly double Line2Coefficient;
-		protected readonly double Line3Coefficient;
-		protected readonly double Line4Coefficient;
-		protected readonly double Line1CoefficientScaled;
-		protected readonly double Line2CoefficientScaled;
-		protected readonly double Line3CoefficientScaled;
-		protected readonly double Line4CoefficientScaled;
 
 		private class Inverted : InvertedTransformationBase<TransverseMercator,Point2,GeographicCoordinate>
 		{
 
-			private readonly double _majorAxisScaleFactor;
+			//private readonly double _majorAxisScaleFactor;
+			protected readonly double InverseCoefficient1;
+			protected readonly double InverseCoefficient2;
+			protected readonly double InverseCoefficient3;
+			protected readonly double InverseCoefficient4;
+			protected readonly double PrimaryScaleFactor;
 
 			public Inverted(TransverseMercator core) : base(core) {
-				_majorAxisScaleFactor = Core.MajorAxis * Core.ScaleFactor;
+				var n = Core.Spheroid.F / (2.0 - Core.Spheroid.F);
+				var n2 = n * n;
+				var n3 = n2 * n;
+				var n4 = n3 * n;
+				InverseCoefficient1 = (n/2.0) - (n2*2.0/3.0) + (n3*37.0/96.0) - (n4/360.0);
+				InverseCoefficient2 = (n2/48.0) + (n3/15.0) - (n4*437.0/1440.0);
+				InverseCoefficient3 = (n3*17.0/480.0) - (n4*37.0/840.0);
+				InverseCoefficient4 = (n4*4397/161280.0);
+				PrimaryScaleFactor = Core.ValueB*Core.ScaleFactor;
 			}
 
-			public override GeographicCoordinate TransformValue(Point2 coordinate) {
-				var lat = (
+			public override GeographicCoordinate TransformValue(Point2 coordinate)
+			{
+				var n = (coordinate.X - Core.FalseProjectedOffset.X)
+					/ PrimaryScaleFactor;
+				var c = (
 					(coordinate.Y - Core.FalseProjectedOffset.Y)
-					/ _majorAxisScaleFactor
-				) + Core.NaturalOrigin.Latitude;
-				double m = 0.0;
-				for(int i =0; i < 20; i++){
-					var w = lat - Core.NaturalOrigin.Latitude;
-					var nw = lat + Core.NaturalOrigin.Latitude;
-					var mOld = m;
+					+ (Core.ScaleFactor * Core.MOrigin)
+				) / PrimaryScaleFactor;
 
-					m = (
-						(w * Core.Line1Coefficient)
-						- (Math.Sin(w) * Math.Cos(nw) * Core.Line2Coefficient)
-						+ (Math.Sin(w * 2) * Math.Cos(nw * 2) * Core.Line3Coefficient)
-						- (Math.Sin(w * 3) * Math.Sin(nw * 3) * Core.Line4Coefficient)
-					) * Core.Bk;
+				var n1 = Math.Cos(c * 2.0) * Math.Sinh(n * 2.0) * InverseCoefficient1;
+				var n2 = Math.Cos(c * 4.0) * Math.Sinh(n * 4.0) * InverseCoefficient2;
+				var n3 = Math.Cos(c * 6.0) * Math.Sinh(n * 6.0) * InverseCoefficient3;
+				var n4 = Math.Cos(c * 8.0) * Math.Sinh(n * 8.0) * InverseCoefficient4;
+				var n0 = n - n1 - n2 - n3 - n4;
 
-// ReSharper disable CompareOfFloatsByEqualityOperator
-					if (mOld == m || Math.Abs(coordinate.Y - Core.FalseProjectedOffset.Y - m) < .00001) break;
-// ReSharper restore CompareOfFloatsByEqualityOperator
+				var c1 = Math.Sin(c * 2.0) * Math.Cosh(n * 2.0) * InverseCoefficient1;
+				var c2 = Math.Sin(c * 4.0) * Math.Cosh(n * 4.0) * InverseCoefficient2;
+				var c3 = Math.Sin(c * 6.0) * Math.Cosh(n * 6.0) * InverseCoefficient3;
+				var c4 = Math.Sin(c * 8.0) * Math.Cosh(n * 8.0) * InverseCoefficient4;
+				var c0 = c - c1 - c2 - c3 - c4;
 
-					lat = ((coordinate.Y - Core.FalseProjectedOffset.Y - m)/_majorAxisScaleFactor) + lat;
+				var beta = Math.Asin(Math.Sin(c0)/Math.Cosh(n0));
+				var qPrime = ArcSinH(Math.Tan(beta));
+				var q = qPrime;
+				for (int i = 0; i < 16; i++)
+				{
+					var oldQ = q;
+					q = qPrime + (Core.E*ArcTanH(Core.E * Math.Tanh(q)));
+					if (q == oldQ) break;
 				}
-				var sinLatSquared = Math.Sin(lat);
-				sinLatSquared = sinLatSquared * sinLatSquared;
-
-				var p = 1.0 - (Core.ESq * sinLatSquared); // used here as oneMinusESquaredAndSinLatSquared
-				
-				var v = _majorAxisScaleFactor / Math.Sqrt(p);
-				var v2 = v*v;
-				var v4 = v2*v2;
-				var v5 = v4*v;
-
-				p = _majorAxisScaleFactor * (1.0 - Core.ESq) * Math.Pow(p, -1.5); // this is the true use of 'p'
-				var pv = p*v;
-				var etaSq = (v / p) - 1.0;
-				var tanLat = Math.Tan(lat);
-				var tanLat2 = tanLat*tanLat;
-				var tanLat4 = tanLat2*tanLat2;
-				var cosLat = Math.Cos(lat);
-				var secLat = 1.0 / cosLat;
-
-				var de = coordinate.X - Core.FalseProjectedOffset.X;
-				var de2 = de * de;
-				var de3 = de2 * de;
-				var de4 = de3 * de;
-				var de6 = de4 * de2;
 
 				return new GeographicCoordinate(
-					lat
-					- (
-						(tanLat / (pv * 2.0))
-						* de2
-					)
-					+ (
-						(tanLat / (pv * v2 * 24.0))
-						* (
-							(((etaSq * -9.0) + 3.0) * tanLat2)
-							+ etaSq + 5
-						)
-						* de4
-					)
-					- (
-						(tanLat / (pv * v4 * 720.0))
-						* ((tanLat2 * 90.0) + (tanLat4 * 45.0) + 61.0)
-						* de6
-					)
-					,
-					Core.NaturalOrigin.Longitude
-					+ (secLat / v * de)
-					- (
-						(secLat / (v2 * v * 6.0))
-						* ((v / p) + (tanLat2 * 2.0))
-						* de3
-					)
-					+ (
-						(secLat / (v5 * 120.0))
-						* ((tanLat2 * 28.0) + (tanLat4 * 24.0) + 5.0)
-						* de4 * de
-					)
-					- (
-						(
-							+(tanLat2 * 662.0)
-							+ (tanLat4 * 1320.0)
-							+ (tanLat4 * tanLat2 * 720.0)
-							+ 61.0
-						)
-						* (secLat / (v5 * v2 * 5040.0))
-						* de6 * de
-					)
+					Math.Atan(Math.Sinh(q)),
+					Core.NaturalOrigin.Longitude + Math.Asin(Math.Tanh(n0) / Math.Cos(beta))
 				);
+
 			}
 
 		}
+
+		private static double ArcSinH(double x)
+		{
+			return Math.Log(Math.Sqrt((x*x) + 1) + x);
+		}
+
+		private static double ArcTanH(double x)
+		{
+			return Math.Log((1 + x)/(1 - x))/2.0;
+		}
+
+		protected readonly double MOrigin;
+		protected readonly double ScaleFactor;
+		protected readonly GeographicCoordinate NaturalOrigin;
+		protected readonly double ValueB;
+		protected readonly double Coefficient1;
+		protected readonly double Coefficient2;
+		protected readonly double Coefficient3;
+		protected readonly double Coefficient4;
 
 		/// <summary>
 		/// Constructs a new Transverse Mercator projection.
@@ -153,29 +110,56 @@ namespace Pigeoid.Projection
 			Vector2 falseProjectedOffset,
 			double scaleFactor,
 			ISpheroid<double> spheroid
-		) : base(naturalOrigin, falseProjectedOffset, spheroid)
+		) : base(falseProjectedOffset, spheroid)
 		{
+			NaturalOrigin = naturalOrigin;
 			ScaleFactor = scaleFactor;
-			ESecSq58 = 58.0 * ESecSq;
-			ESecSq330 = 330.0 * ESecSq;
-			ESecSq8 = 8.0 * ESecSq;
-			ESecSq9 = 9.0 * ESecSq;
-			ESecSq252 = 252.0 * ESecSq;
-			OneMinusESquared = 1.0 - ESq;
-			Ak = MajorAxis*ScaleFactor;
-			Bk = Spheroid.B*ScaleFactor;
-			var n = (MajorAxis - Spheroid.B) / (MajorAxis + Spheroid.B);
-			var n2 = n * n;
-			var n3 = n2 * n;
+			var n = Spheroid.F/(2.0 - Spheroid.F);
+			var n2 = n*n;
+			var n3 = n2*n;
+			var n4 = n3*n;
 
-			Line1Coefficient = (5.0 / 4.0 * n2) + (5.0 / 4.0 * n3) + n + 1.0;
-			Line2Coefficient = ((n + n2) * 3.0) + (21 / 8.0 * n3);
-			Line3Coefficient = (15.0 / 8.0 * n2) + (15.0 / 8.0 * n3);
-			Line4Coefficient = 35.0 / 24.0 * n3;
-			Line1CoefficientScaled = Line1Coefficient * Bk;
-			Line2CoefficientScaled = Line2Coefficient * Bk;
-			Line3CoefficientScaled = Line3Coefficient * Bk;
-			Line4CoefficientScaled = Line4Coefficient * Bk;
+			ValueB = (Spheroid.A / (1 + n)) * (1 + (n * n / 4.0) + (n * n * n * n / 64.0));
+			Coefficient1 = (n / 2.0) - (n2 * 2.0 / 3.0) + (n3 * 5.0 / 16.0) + (n4 * 41.0 / 180.0);
+			Coefficient2 = (n2 * 13.0 / 48.0) - (n3 * 3.0 / 5.0) + (n4 * 557.0 / 1440.0);
+			Coefficient3 = (n3 * 61.0 / 240.0) - (n4 * 103 / 140);
+			Coefficient4 = n4 * 49561.0 / 161280.0;
+
+			if (naturalOrigin.Latitude == 0)
+				MOrigin = 0;
+			else if (naturalOrigin.Latitude == HalfPi)
+				MOrigin = ValueB * HalfPi;
+			else if (naturalOrigin.Latitude == -HalfPi)
+				MOrigin = ValueB * -HalfPi;
+			else if(Math.Abs(Math.Asin(naturalOrigin.Latitude) - HalfPi) < 0.00000000001)
+			{
+				var e2 = ESq;
+				var e4 = e2*e2;
+				var e6 = e4*e2;
+				var eCoefficient1 = 1 - (e2/4.0) - (e4*3.0/64.0) - (e6*5.0/256.0);
+				var eCoefficient2 = (e2*3.0/8.0) + (e4*3.0/32.0) + (e6*45.0/1024.0);
+				var eCoefficient4 = (e4*15.0/256.0) + (e6*45.0/1024.0);
+				var eCoefficient6 = (e6*35.0/3072.0);
+				MOrigin = (
+					(naturalOrigin.Latitude * eCoefficient1)
+					- (Math.Sin(naturalOrigin.Latitude * 2.0) * eCoefficient2)
+					+ (Math.Sin(naturalOrigin.Latitude * 4.0) * eCoefficient4)
+					- (Math.Sin(naturalOrigin.Latitude * 6.0) * eCoefficient6)
+				) * Spheroid.A;
+			}
+			else
+			{
+				var qOrigin = ArcSinH(Math.Tan(naturalOrigin.Latitude))
+					- (E * ArcTanH(E * Math.Sin(naturalOrigin.Latitude)));
+				var betaOrigin = Math.Atan(Math.Sinh(qOrigin));
+				var goo0 = Math.Asin(Math.Sin(betaOrigin)); // betaOrigin?
+				var goo1 = Coefficient1 * Math.Sin(2 * goo0);
+				var goo2 = Coefficient2 * Math.Sin(4 * goo0);
+				var goo3 = Coefficient3 * Math.Sin(6 * goo0);
+				var goo4 = Coefficient4 * Math.Sin(8 * goo0);
+				MOrigin = (goo0 + goo1 + goo2 + goo3 + goo4) * ValueB;
+			}
+			
 		}
 
 		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
@@ -184,71 +168,36 @@ namespace Pigeoid.Projection
 
 		public override bool HasInverse {
 // ReSharper disable CompareOfFloatsByEqualityOperator
-			get { return 0 != ScaleFactor && base.HasInverse; }
+			get { return true; }
 // ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
-		public override Point2 TransformValue(GeographicCoordinate coordinate) {
-			var eastCoefficient = Math.Cos(coordinate.Latitude); // act as cosLat for a bit
-			var cosLat2 = eastCoefficient * eastCoefficient;
-			var sinCosLat = Math.Sin(coordinate.Latitude);
-			var w = 1.0 - (sinCosLat * sinCosLat * ESq);
-			var v = Ak / Math.Sqrt(w);
-			var vp = Math.Sqrt(w) / OneMinusESquared;
-			sinCosLat *= eastCoefficient; // sinCosLat was recycled
-			var tanLat2 = Math.Tan(coordinate.Latitude);
-			tanLat2 *= tanLat2; // tanLat is not used anymore so just double it up on its own
-			w = coordinate.Latitude - NaturalOrigin.Latitude; // w was recycled
-			var nw = coordinate.Latitude + NaturalOrigin.Latitude;
-			var etaSq = coordinate.Longitude - NaturalOrigin.Longitude; // act as deltaLon for a bit
-			var northCoefficient = etaSq * etaSq; // act as deltaLon2
-			var cosLatDeltaLon2 = cosLat2 * northCoefficient;
-			northCoefficient *= v * sinCosLat; // recycled from deltaLon, as northCoef
-			eastCoefficient *= v * etaSq; // recycled cosLat
-			etaSq = vp - 1.0; // recycled deltaLon
-			return new Point2(
-				(
-					(
-						(
-							(
-								(
-									(
-										((tanLat2 - 18.0) * tanLat2)
-										+ (((58.0 * tanLat2) - 14.0) * etaSq)
-										+ 5
-									) * cosLatDeltaLon2 / 20.0
-								) + vp - tanLat2
-							) * cosLatDeltaLon2 / 6.0
-						) + 1
-					) * eastCoefficient
-				) + FalseProjectedOffset.X
-				,
-				(
-					(
-						(w * Line1CoefficientScaled)
-						- (Math.Sin(w) * Math.Cos(nw) * Line2CoefficientScaled)
-						+ (Math.Sin(w * 2.0) * Math.Cos(nw * 2.0) * Line3CoefficientScaled)
-						- (Math.Sin(w * 3.0) * Math.Cos(nw * 3.0) * Line4CoefficientScaled)
-					)
-					+ (
-						(
-							(
-								(
-									(
-										(
-											(
-												(tanLat2 - 58.0)
-												* tanLat2
-											) + 61
-										) * cosLatDeltaLon2 / 30.0
-									) + (9 * etaSq) - tanLat2 + 5
-								) * cosLatDeltaLon2 / 12.0
-							) + 1
-						) * northCoefficient / 2.0
-					)
-					+ FalseProjectedOffset.Y
-				)
+		public override Point2 TransformValue(GeographicCoordinate coordinate)
+		{
+			var q = ArcSinH(Math.Tan(coordinate.Latitude))
+				- (ArcTanH(Math.Sin(coordinate.Latitude)*E)*E);
+			var beta = Math.Atan(Math.Sinh(q));
+			var n0 = ArcTanH(
+				Math.Cos(beta)
+				* Math.Sin(coordinate.Longitude - NaturalOrigin.Longitude)
 			);
+			var c0 = Math.Asin(Math.Sin(beta)*Math.Cosh(n0));
+			var n1 = Math.Cos(c0*2.0)*Math.Sinh(n0*2.0)*Coefficient1;
+			var n2 = Math.Cos(c0*4.0)*Math.Sinh(n0*4.0)*Coefficient2;
+			var n3 = Math.Cos(c0*6.0)*Math.Sinh(n0*6.0)*Coefficient3;
+			var n4 = Math.Cos(c0*8.0)*Math.Sinh(n0*8.0)*Coefficient4;
+			var n = n0 + n1 + n2 + n3 + n4;
+			var c1 = Math.Sin(c0 * 2.0) * Math.Cosh(n0 * 2.0) * Coefficient1;
+			var c2 = Math.Sin(c0 * 4.0) * Math.Cosh(n0 * 4.0) * Coefficient2;
+			var c3 = Math.Sin(c0 * 6.0) * Math.Cosh(n0 * 6.0) * Coefficient3;
+			var c4 = Math.Sin(c0 * 8.0) * Math.Cosh(n0 * 8.0) * Coefficient4;
+			var c = c0 + c1 + c2 + c3 + c4;
+
+			return new Point2(
+				(ScaleFactor * ValueB * n) + FalseProjectedOffset.X,
+				(((ValueB * c) - MOrigin) * ScaleFactor) + FalseProjectedOffset.Y
+			);
+
 		}
 
 		public override string Name {
@@ -257,34 +206,13 @@ namespace Pigeoid.Projection
 
 		public override IEnumerable<INamedParameter> GetParameters() {
 			return base.GetParameters().Concat(
-				new INamedParameter[] {
-                    new NamedParameter<double>(NamedParameter.NameScaleFactorAtNaturalOrigin,ScaleFactor)
-                }
+				new INamedParameter[]
+					{
+						
+					}
 			);
 		}
 
-
-		public bool Equals(TransverseMercator other) {
-			return !ReferenceEquals(other, null)
-				&& (
-					NaturalOrigin == other.NaturalOrigin
-// ReSharper disable CompareOfFloatsByEqualityOperator
-					&& ScaleFactor == other.ScaleFactor
-// ReSharper restore CompareOfFloatsByEqualityOperator
-					&& FalseProjectedOffset.Equals(other.FalseProjectedOffset)
-					&& Spheroid.Equals(other.Spheroid)
-				)
-			;
-		}
-
-		public override bool Equals(object obj) {
-			return null != obj
-				&& (ReferenceEquals(this, obj) || Equals(obj as TransverseMercator));
-		}
-
-		public override int GetHashCode() {
-			return FalseProjectedOffset.GetHashCode() ^ ScaleFactor.GetHashCode();
-		}
 
 	}
 }

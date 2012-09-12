@@ -9,71 +9,18 @@ using Vertesaur.Periodic;
 namespace Pigeoid.Projection
 {
 
-	public class PolarStereographicA : PolarStereographic
-	{
-		public PolarStereographicA(GeographicCoordinate geographicOrigin, double scaleFactor, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
-			: base(geographicOrigin, falseProjectedOffset, spheroid)
-		{
-			ScaleFactor = scaleFactor;
-		}
-	}
-
-	public class PolarStereographicB : PolarStereographic
-	{
-		protected readonly double Mf;
-
-		public PolarStereographicB(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
-			: base(geographicOrigin, falseProjectedOffset, spheroid)
-		{
-			var sinLat = Math.Sin(standardParallel);
-			var cosLat = Math.Cos(standardParallel);
-			var eSinLat = E * sinLat;
-			Mf = cosLat / Math.Sqrt(1 - (ESq * sinLat * sinLat));
-
-			if (Math.Abs(Math.Abs(standardParallel) - HalfPi) > Double.Epsilon)
-			{
-				double tf;
-				if (IsNorth)
-				{
-					tf = Math.Tan(QuarterPi - (standardParallel/2.0))
-						*Math.Pow((1 + eSinLat)/(1 - eSinLat), EHalf);
-				}
-				else
-				{
-					tf = Math.Tan(QuarterPi + (standardParallel/2.0))
-						/Math.Pow((1 + eSinLat)/(1 - eSinLat), EHalf);
-				}
-				ScaleFactor = Mf * CrazyEValue / (2 * tf);
-			}
-			else
-			{
-				ScaleFactor = 1.0;
-			}
-			
-
-		}
-	}
-
-	public class PolarStereographicC : PolarStereographicB
-	{
-		public PolarStereographicC(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
-			: base(geographicOrigin, standardParallel, falseProjectedOffset, spheroid)
-		{
-			var pf = Mf * MajorAxis;
-			FalseProjectedOffset = new Vector2(FalseProjectedOffset.X, (IsNorth ? pf : -pf) + FalseProjectedOffset.Y);
-		}
-	}
-
-	public abstract class PolarStereographic : ProjectionBase
+	public class PolarStereographic : ProjectionBase
 	{
 
 		private class Inverse : InvertedTransformationBase<PolarStereographic, Point2, GeographicCoordinate>
 		{
 
-			private readonly double Coefficient1;
-			private readonly double Coefficient2;
-			private readonly double Coefficient3;
-			private readonly double Coefficient4;
+			private readonly double _coefficient1;
+			private readonly double _coefficient2;
+			private readonly double _coefficient3;
+			private readonly double _coefficient4;
+			private readonly double _scaleValue;
+			private readonly Func<Point2, GeographicCoordinate> _transform; 
 
 			public Inverse(PolarStereographic core) : base(core)
 			{
@@ -81,104 +28,190 @@ namespace Pigeoid.Projection
 				var e4 = e2 * e2;
 				var e6 = e4*e2;
 				var e8 = e6*e2;
-				Coefficient1 = (e2/2) + (e4*5.0/24.0) + (e6/12) + (e8*12.0/360.0);
-				Coefficient2 = (e4*7.0/48.0) + (e6*29.0/240.0) + (e8*811/11520);
-				Coefficient3 = (e6*7.0/120.0) + (e8*81/1120);
-				Coefficient4 = e8*4279.0/161280.0;
+				_coefficient1 = (e2/2) + (e4*5.0/24.0) + (e6/12) + (e8*12.0/360.0);
+				_coefficient2 = (e4*7.0/48.0) + (e6*29.0/240.0) + (e8*811/11520);
+				_coefficient3 = (e6*7.0/120.0) + (e8*81/1120);
+				_coefficient4 = e8*4279.0/161280.0;
+				_scaleValue = Core.CrazyEValue/(2.0*Core.MajorAxis*Core.ScaleFactor);
+				if (IsNorth(Core.GeographicOrigin.Latitude))
+					_transform = TransformValueNorth;
+				else
+					_transform = TransformValueSouth;
+			}
+
+			private GeographicCoordinate TransformValueNorth(Point2 value)
+			{
+				var dx = value.X - Core.FalseProjectedOffset.X;
+				var dy = value.Y - Core.FalseProjectedOffset.Y;
+				// ReSharper disable CompareOfFloatsByEqualityOperator
+				if (dx == 0 && dy == 0)
+					return Core.GeographicOrigin;
+				// ReSharper restore CompareOfFloatsByEqualityOperator
+
+				var chi = HalfPi - (
+					Math.Atan(
+						Math.Sqrt(
+							(dx * dx)
+							+ (dy * dy)
+						) * _scaleValue
+					) * 2.0
+				);
+
+				return new GeographicCoordinate(
+					chi
+						+ (_coefficient1 * Math.Sin(2 * chi))
+						+ (_coefficient2 * Math.Sin(4 * chi))
+						+ (_coefficient3 * Math.Sin(6 * chi))
+						+ (_coefficient4 * Math.Sin(8 * chi)),
+					LongitudePeriod.Fix(
+						Math.Atan2(dx, -dy)
+						+ Core.GeographicOrigin.Longitude)
+				);
+			}
+
+			private GeographicCoordinate TransformValueSouth(Point2 value)
+			{
+				var dx = value.X - Core.FalseProjectedOffset.X;
+				var dy = value.Y - Core.FalseProjectedOffset.Y;
+				// ReSharper disable CompareOfFloatsByEqualityOperator
+				if (dx == 0 && dy == 0)
+					return Core.GeographicOrigin;
+				// ReSharper restore CompareOfFloatsByEqualityOperator
+
+				var chi = (
+					Math.Atan(
+						Math.Sqrt(
+							(dx * dx)
+							+ (dy * dy)
+						) * _scaleValue
+					)
+					* 2.0
+				) - HalfPi;
+				return new GeographicCoordinate(
+					chi
+						+ (_coefficient1 * Math.Sin(2 * chi))
+						+ (_coefficient2 * Math.Sin(4 * chi))
+						+ (_coefficient3 * Math.Sin(6 * chi))
+						+ (_coefficient4 * Math.Sin(8 * chi)),
+					LongitudePeriod.Fix(
+						Math.Atan2(dx, dy)
+						+ Core.GeographicOrigin.Longitude)
+				);
 			}
 
 			public override GeographicCoordinate TransformValue(Point2 value)
 			{
-				var dx = value.X - Core.FalseProjectedOffset.X;
-				var dy = value.Y - Core.FalseProjectedOffset.Y;
-				var p = Math.Sqrt((dx*dx) + (dy*dy));
-				var t = p*Core.CrazyEValue/(2.0*Core.MajorAxis*Core.ScaleFactor);
-				var chi = 2.0*Math.Atan(t);
-				var lon = Core.GeographicOrigin.Longitude;
-
-				if (dx == 0 && dy == 0)
-				{
-					return Core.GeographicOrigin;
-				}
-				else
-				{
-					if (Core.IsNorth)
-					{
-						chi = HalfPi - chi;
-						lon += Math.Atan2(dx, -dy);
-					}
-					else
-					{
-						chi = chi - HalfPi;
-						lon += Math.Atan2(dx, dy);
-					}
-				}
-
-				var lat = chi
-					+ (Coefficient1 * Math.Sin(2 * chi))
-					+ (Coefficient2 * Math.Sin(4 * chi))
-					+ (Coefficient3 * Math.Sin(6 * chi))
-					+ (Coefficient4 * Math.Sin(8 * chi));
-				lon = LongitudePeriod.Fix(lon);
-				return new GeographicCoordinate(lat,lon);
+				return _transform(value);
 			}
 		}
 
 		private static readonly PeriodicOperations LongitudePeriod = new PeriodicOperations(-Math.PI, Math.PI * 2.0);
 
+		public static PolarStereographic CreateFromStandardParallel(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
+		{
+			var sinLat = Math.Sin(standardParallel);
+			var mf = Math.Cos(standardParallel) / Math.Sqrt(1 - (spheroid.ESquared * sinLat * sinLat));
+
+			var scaleFactor = 1.0;
+			if (Math.Abs(Math.Abs(standardParallel) - HalfPi) > Double.Epsilon)
+			{
+				var e = spheroid.E;
+				var eSinLat = e * sinLat;
+				var eHalf = e / 2.0;
+				double tf;
+				if (IsNorth(geographicOrigin.Latitude))
+				{
+					tf = Math.Tan(QuarterPi - (standardParallel / 2.0))
+						* Math.Pow((1 + eSinLat) / (1 - eSinLat), eHalf);
+				}
+				else
+				{
+					tf = Math.Tan(QuarterPi + (standardParallel / 2.0))
+						/ Math.Pow((1 + eSinLat) / (1 - eSinLat), eHalf);
+				}
+				scaleFactor = CalculateCrazyEValue(e) * mf / (2 * tf);
+			}
+			return new PolarStereographic(geographicOrigin, scaleFactor, falseProjectedOffset, spheroid);
+		}
+
+		public static PolarStereographic CreateFromStandardParallelAndFalseOffsetAtOrigin(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffsetAtOrigin, ISpheroid<double> spheroid)
+		{
+			var sinLat = Math.Sin(standardParallel);
+			var mf = Math.Cos(standardParallel) / Math.Sqrt(1 - (spheroid.ESquared * sinLat * sinLat));
+			
+			var pf = mf * spheroid.A;
+			if (!IsNorth(geographicOrigin.Latitude))
+				pf = -pf;
+
+			return CreateFromStandardParallel(
+				geographicOrigin,
+				standardParallel,
+				new Vector2(
+					falseProjectedOffsetAtOrigin.X,
+					pf + falseProjectedOffsetAtOrigin.Y
+				),
+				spheroid
+			);
+		}
+
+		private static double CalculateCrazyEValue(double e)
+		{
+			return Math.Sqrt(Math.Pow(1 + e, 1 + e)*Math.Pow(1 - e, 1 - e));
+		}
+
+		private static bool IsNorth(double latitude)
+		{
+			return latitude > 0;
+		}
+
 		protected readonly GeographicCoordinate GeographicOrigin;
 		protected double ScaleFactor;
-		protected readonly bool IsNorth;
+		
 		protected readonly double CrazyEValue;
-		protected readonly double TwoMajorAxis;
-		protected readonly double TopScale;
+		protected readonly double CoefficientT;
+		private readonly Func<GeographicCoordinate, Point2> _transform; 
 
-		public PolarStereographic(GeographicCoordinate geographicOrigin, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
+		public PolarStereographic(GeographicCoordinate geographicOrigin, double scaleFactor, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
 			: base(falseProjectedOffset, spheroid)
 		{
-			TwoMajorAxis = MajorAxis*2.0;
-			GeographicOrigin = new GeographicCoordinate(
-				geographicOrigin.Latitude,
-				LongitudePeriod.Fix(geographicOrigin.Longitude)
-			);
-			IsNorth = geographicOrigin.Latitude > 0;
-			var onePlusESq = 1 + ESq;
-			var oneMinusESq = 1 - ESq;
-			TopScale = Math.Sqrt(Math.Pow(onePlusESq, onePlusESq) * Math.Pow(oneMinusESq, oneMinusESq));
+			ScaleFactor = scaleFactor;
+			GeographicOrigin = geographicOrigin;
+			CrazyEValue = CalculateCrazyEValue(E);
+			CoefficientT = MajorAxis * 2.0 * ScaleFactor / CrazyEValue;
 
-			CrazyEValue = Math.Sqrt(
-				Math.Pow(1 + E, 1 + E)
-				* Math.Pow(1 - E, 1 - E)
-			);
+			_transform = IsNorth(geographicOrigin.Latitude)
+				? (Func<GeographicCoordinate, Point2>) TransformValueNorth
+				: TransformValueSouth;
+		}
 
-			ScaleFactor = 1.0;
+		private Point2 TransformValueNorth(GeographicCoordinate source)
+		{
+			var theta = source.Longitude - GeographicOrigin.Longitude;
+			var eSinLat = Math.Sin(source.Latitude) * E;
+			var r = Math.Tan(QuarterPi - (source.Latitude / 2.0))
+					* Math.Pow((1 + eSinLat) / (1 - eSinLat), EHalf)
+					* CoefficientT;
+			var de = r * Math.Sin(theta);
+			var dn = r * Math.Cos(theta);
+			return new Point2(de + FalseProjectedOffset.X, FalseProjectedOffset.Y - dn);
+		}
+
+		private Point2 TransformValueSouth(GeographicCoordinate source)
+		{
+			var theta = source.Longitude - GeographicOrigin.Longitude;
+			var eSinLat = Math.Sin(source.Latitude) * E;
+			var r = (
+					Math.Tan((source.Latitude / 2.0) + QuarterPi)
+					/ Math.Pow((1 + eSinLat) / (1 - eSinLat), EHalf)
+				) * CoefficientT;
+			var de = r * Math.Sin(theta);
+			var dn = r * Math.Cos(theta);
+			return new Point2(de + FalseProjectedOffset.X, dn + FalseProjectedOffset.Y);
 		}
 
 		public override Point2 TransformValue(GeographicCoordinate source)
 		{
-			var theta = source.Longitude - GeographicOrigin.Longitude;
-			var halfLat = source.Latitude/2.0;
-			var sinLat = Math.Sin(source.Latitude);
-			var eSinLat = E*sinLat;
-			
-			if(IsNorth)
-			{
-				var t = Math.Tan(QuarterPi - halfLat)
-					* Math.Pow((1 + eSinLat) / (1 - eSinLat), EHalf);
-				var p = t * 2.0 * MajorAxis * ScaleFactor / CrazyEValue;
-				var de = p * Math.Sin(theta);
-				var dn = p * Math.Cos(theta);
-				return new Point2(de + FalseProjectedOffset.X, FalseProjectedOffset.Y - dn);
-			}
-			else
-			{
-				var t = Math.Tan(QuarterPi + halfLat)
-					/ Math.Pow((1 + eSinLat) / (1 - eSinLat), EHalf);
-				var p = t * 2.0 * MajorAxis * ScaleFactor / CrazyEValue;
-				var de = p * Math.Sin(theta);
-				var dn = p * Math.Cos(theta);
-				return new Point2(de + FalseProjectedOffset.X, dn + FalseProjectedOffset.Y);
-			}
+			return _transform(source);
 		}
 
 		public override ITransformation<Point2, GeographicCoordinate> GetInverse()
@@ -191,9 +224,9 @@ namespace Pigeoid.Projection
 			get { return "Polar Stereographic"; }
 		}
 
-		public override bool HasInverse
-		{
-			get { return 0 != MajorAxis && 0 != ScaleFactor; }
-		}
+// ReSharper disable CompareOfFloatsByEqualityOperator
+		public override bool HasInverse { get { return 0 != MajorAxis && 0 != ScaleFactor; } }
+// ReSharper restore CompareOfFloatsByEqualityOperator
+
 	}
 }
