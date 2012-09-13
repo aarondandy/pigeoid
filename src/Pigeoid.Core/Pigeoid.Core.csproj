@@ -44,9 +44,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vertesaur.Core, Version=0.5.0.40785, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Vertesaur.Core, Version=0.5.0.15078, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120912-054314\lib\net40-client\Vertesaur.Core.dll</HintPath>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120912-032239\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -173,7 +173,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(ProjectDir)..\..\build\NuGet.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -206,10 +206,7 @@ namespace Pigeoid.Projection
 
 		public override IEnumerable<INamedParameter> GetParameters() {
 			return base.GetParameters().Concat(
-				new INamedParameter[]
-					{
-						
-					}
+				new INamedParameter[] { }
 			);
 		}
 

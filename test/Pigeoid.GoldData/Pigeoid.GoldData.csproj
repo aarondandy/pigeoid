@@ -9,10 +9,11 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Pigeoid.GoldData</RootNamespace>
     <AssemblyName>Pigeoid.GoldData</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -43,7 +44,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Vertesaur.Core">
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120912-054314\lib\net40-client\Vertesaur.Core.dll</HintPath>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120912-032239\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

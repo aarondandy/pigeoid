@@ -9,9 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{3BF3752F-F50
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{F588ACEA-9B25-40DF-BE2F-4CFB44C7147C}"
-	ProjectSection(SolutionItems) = preProject
-		build\NuGet.targets = build\NuGet.targets
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{7E955526-8715-4399-984C-CB96BF2A158B}"
 EndProject
@@ -34,13 +31,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Epsg.ProjectionTest", "test\Pigeoid.Epsg.ProjectionTest\Pigeoid.Epsg.ProjectionTest.csproj", "{5157ED5D-299A-4860-BA03-7AB32BC51371}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.GoldData", "test\Pigeoid.GoldData\Pigeoid.GoldData.csproj", "{C6EAB9F1-4132-4878-BAA2-535354A68899}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{5BA7DF65-2856-4E89-A353-43D55881C60E}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

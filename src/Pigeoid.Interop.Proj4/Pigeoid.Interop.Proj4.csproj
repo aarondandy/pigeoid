@@ -43,7 +43,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="Vertesaur.Core">
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120912-054314\lib\net40-client\Vertesaur.Core.dll</HintPath>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120912-032239\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
