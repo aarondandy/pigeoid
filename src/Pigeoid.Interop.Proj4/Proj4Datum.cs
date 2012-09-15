@@ -134,6 +134,10 @@ namespace Pigeoid.Interop.Proj4
 			get { return _name; }
 		}
 
+		public string Type {
+			get { return "Geodetic"; }
+		}
+
 		public bool IsTransformableToWgs84 {
 			get { return null != _toWgs84; }
 		}

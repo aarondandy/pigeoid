@@ -4,5 +4,8 @@ namespace Pigeoid.Contracts
 {
 	public interface IDatum
 	{
+
+		string Type { get; }
+
 	}
 }

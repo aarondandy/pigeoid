@@ -10,7 +10,7 @@ namespace Pigeoid.Ogc
 	public class OgcDatum : OgcNamedAuthorityBoundEntity, IDatum
     {
 
-        private readonly OgcDatumType _datumType;
+        private readonly OgcDatumType _ogcType;
         /// <summary>
         /// Constructs a local datum.
         /// </summary>
@@ -19,13 +19,14 @@ namespace Pigeoid.Ogc
         /// <param name="authority">The authority.</param>
         public OgcDatum(string name, OgcDatumType type, IAuthorityTag authority) : base(name, authority)
         {
-            _datumType = type;
+            _ogcType = type;
         }
 
-        public OgcDatumType DatumType
-        {
-            get { return _datumType; }
-        }
+		public OgcDatumType OgcType { get { return _ogcType; } }
+
+		public string Type {
+			get { return _ogcType.ToString(); }
+		}
 
     }
 }

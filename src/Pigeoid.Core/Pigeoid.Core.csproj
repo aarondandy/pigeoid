@@ -129,6 +129,11 @@
     <Compile Include="Ogc\OgcSpheroid.cs" />
     <Compile Include="Ogc\OgcUnitBase.cs" />
     <Compile Include="Ogc\OgcOrientationType.cs" />
+    <Compile Include="Ogc\WktKeyword.cs" />
+    <Compile Include="Ogc\WktOptions.cs" />
+    <Compile Include="Ogc\WktReader.cs" />
+    <Compile Include="Ogc\WktSerializer.cs" />
+    <Compile Include="Ogc\WktWriter.cs" />
     <Compile Include="Projection\CassiniSoldner.cs" />
     <Compile Include="Projection\HotineObliqueMercator.cs" />
     <Compile Include="Projection\HyperbolicCassiniSoldner.cs" />
