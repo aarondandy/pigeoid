@@ -70,6 +70,7 @@
     <Compile Include="Transformation\GeographicGeocentricTransformationTest.cs" />
     <Compile Include="Transformation\Helmert7TransformTest.cs" />
     <Compile Include="Transformation\MolodenskyBadekasTransformationTest.cs" />
+    <Compile Include="WktTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config">

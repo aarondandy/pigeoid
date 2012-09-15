@@ -22,6 +22,7 @@ namespace Pigeoid.Ogc
 			if(null == reader)
 				throw new ArgumentNullException("reader");
 
+			_reader = reader;
 			Options = options ?? new WktOptions();
 		}
 
@@ -103,7 +104,7 @@ namespace Pigeoid.Ogc
 			while(IsValidForDoubleValue) {
 				builder.Append(Current);
 				if(!MoveNext()) {
-					return null;
+					break;
 				}
 			}
 			double value;
@@ -185,8 +186,7 @@ namespace Pigeoid.Ogc
 			if (names.Length < 2)
 				return null;
 
-			throw new NotImplementedException();
-			//return _authFacs.CreateAuthorityTag(names[0], names[1]) ?? new OgcAuthorityTag(names[0], names[1]);
+			return Options.CreateAuthority(names[0], names[1]);
 		}
 
 		public INamedParameter ReadParameterFromParams() {
@@ -340,7 +340,7 @@ namespace Pigeoid.Ogc
 			}
 		}
 
-		private object ReadEntity() {
+		public object ReadEntity() {
 			if (!SkipWhiteSpace()) {
 				return null;
 			}

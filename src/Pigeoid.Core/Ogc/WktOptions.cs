@@ -145,5 +145,8 @@ namespace Pigeoid.Ogc
 			return OgcDatumType.None;
 		}
 
+		public virtual IAuthorityTag CreateAuthority(string name, string code) {
+			return new AuthorityTag(name, code);
+		}
 	}
 }
