@@ -101,7 +101,10 @@ namespace Pigeoid.Ogc
 		}
 
 		public virtual string GetEntityName(object entity) {
-			throw new NotImplementedException();
+			if (entity is ICoordinateOperationInfo)
+				return (entity as ICoordinateOperationInfo).Name;
+
+			throw new NotSupportedException();
 		}
 
 		public virtual IAuthorityTag GetAuthorityTag(object entity) {

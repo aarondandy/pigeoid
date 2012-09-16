@@ -215,8 +215,7 @@ namespace Pigeoid.Ogc
 			if (String.IsNullOrEmpty(name))
 				return null;
 
-			var nonNameParameters = allParams.Skip(1).Cast<INamedParameter>();
-			throw new NotImplementedException(); // return new OgcCoordinateOperationInfo(name, parms);
+			return new CoordinateOperationInfo(name, allParams.Skip(1).Cast<INamedParameter>());
 		}
 
 		public object ReadConcatMtFromParams() {

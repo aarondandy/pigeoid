@@ -53,7 +53,7 @@
     <Compile Include="EpsgAuthorityTag.cs" />
     <Compile Include="EpsgAxis.cs" />
     <Compile Include="EpsgCoordinateOperationInfo.cs" />
-    <Compile Include="EpsgCoordinateOperationConcatenatedInfo.cs" />
+    <Compile Include="EpsgConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="EpsgCoordinateOperationInfoBase.cs" />
     <Compile Include="EpsgCoordinateOperationInfoRepository.cs" />
     <Compile Include="EpsgCoordinateOperationInverse.cs" />

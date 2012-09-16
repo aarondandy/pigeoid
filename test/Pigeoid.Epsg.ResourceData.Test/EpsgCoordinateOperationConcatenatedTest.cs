@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgCoordinateOperationConcatenatedTest : EpsgDataTestBase<EpsgCoordinateOperationConcatenatedInfo, DataTransmogrifier.EpsgCoordinateOperation>
+	public class EpsgCoordinateOperationConcatenatedTest : EpsgDataTestBase<EpsgConcatenatedCoordinateOperationInfo, DataTransmogrifier.EpsgCoordinateOperation>
 	{
 
 		[Test]

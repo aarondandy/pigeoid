@@ -146,7 +146,7 @@ namespace Pigeoid.Epsg
 
 		}
 
-		internal class EpsgCoordinateOperationConcatenatedInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgCoordinateOperationConcatenatedInfo>
+		internal class EpsgCoordinateOperationConcatenatedInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgConcatenatedCoordinateOperationInfo>
 		{
 			private const string DatFileName = "opcat.dat";
 			private const string PathFileName = "oppath.dat";
@@ -202,7 +202,7 @@ namespace Pigeoid.Epsg
 				_reverseLookUp = reverseLookUp;
 			}
 
-			protected override EpsgCoordinateOperationConcatenatedInfo Create(ushort code, int index) {
+			protected override EpsgConcatenatedCoordinateOperationInfo Create(ushort code, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
 					var sourceCrsCode = reader.ReadUInt16();
@@ -218,7 +218,7 @@ namespace Pigeoid.Epsg
 							stepCodes[i] = readerPath.ReadUInt16();
 						}
 					}
-					return new EpsgCoordinateOperationConcatenatedInfo(
+					return new EpsgConcatenatedCoordinateOperationInfo(
 						code, sourceCrsCode, targetCrsCode, areaCode,
 						deprecated, name, stepCodes
 					);
@@ -243,7 +243,7 @@ namespace Pigeoid.Epsg
 					: null;
 			}
 
-			protected override ushort GetKeyForItem(EpsgCoordinateOperationConcatenatedInfo value) {
+			protected override ushort GetKeyForItem(EpsgConcatenatedCoordinateOperationInfo value) {
 				return (ushort)value.Code;
 			}
 
@@ -261,7 +261,7 @@ namespace Pigeoid.Epsg
 			return code >= 0 && code < UInt16.MaxValue ? ConversionLookUp.Get((ushort) code) : null;
 		}
 
-		public static EpsgCoordinateOperationConcatenatedInfo GetConcatenatedInfo(int code) {
+		public static EpsgConcatenatedCoordinateOperationInfo GetConcatenatedInfo(int code) {
 			return code >= 0 && code < UInt16.MaxValue ? ConcatenatedLookUp.Get((ushort) code) : null;
 		}
 
@@ -295,18 +295,18 @@ namespace Pigeoid.Epsg
 
 		public static IEnumerable<EpsgCoordinateOperationInfo> ConversionInfos { get { return ConversionLookUp.Values; } }
 
-		public static IEnumerable<EpsgCoordinateOperationConcatenatedInfo> ConcatenatedInfos { get { return ConcatenatedLookUp.Values; } }
-		public static IEnumerable<EpsgCoordinateOperationConcatenatedInfo> GetConcatenatedForwardReferenced(int sourceCode) {
+		public static IEnumerable<EpsgConcatenatedCoordinateOperationInfo> ConcatenatedInfos { get { return ConcatenatedLookUp.Values; } }
+		public static IEnumerable<EpsgConcatenatedCoordinateOperationInfo> GetConcatenatedForwardReferenced(int sourceCode) {
 			var ids = ConcatenatedLookUp.GetForwardReferencedOperationCodes(sourceCode);
 			return null != ids
 				? ids.Select(id => ConcatenatedLookUp.Get(id))
-				: Enumerable.Empty<EpsgCoordinateOperationConcatenatedInfo>();
+				: Enumerable.Empty<EpsgConcatenatedCoordinateOperationInfo>();
 		}
-		public static IEnumerable<EpsgCoordinateOperationConcatenatedInfo> GetConcatenatedReverseReferenced(int targetCode) {
+		public static IEnumerable<EpsgConcatenatedCoordinateOperationInfo> GetConcatenatedReverseReferenced(int targetCode) {
 			var ids = ConcatenatedLookUp.GetReverseReferencedOperationCodes(targetCode);
 			return null != ids
 				? ids.Select(id => ConcatenatedLookUp.Get(id))
-				: Enumerable.Empty<EpsgCoordinateOperationConcatenatedInfo>();
+				: Enumerable.Empty<EpsgConcatenatedCoordinateOperationInfo>();
 		}
 
 	}

@@ -16,6 +16,8 @@ namespace Pigeoid.Ogc
 			_options = options ?? new WktOptions();
 		}
 
+        public WktOptions Options { get { return _options; }}
+
 		/// <summary>
 		/// Parse WKT entities from the <paramref name="reader"/>.
 		/// </summary>

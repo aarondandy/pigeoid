@@ -54,6 +54,7 @@
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AuthorityTag.cs" />
+    <Compile Include="ConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IAuthorityBoundEntity.cs" />
     <Compile Include="Contracts\IAuthorityTag.cs">
       <SubType>Code</SubType>
@@ -106,6 +107,8 @@
     <Compile Include="Contracts\IUom.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="CoordinateOperationInfo.cs" />
+    <Compile Include="CoordinateOperationInfoInverse.cs" />
     <Compile Include="GeographicCoordinate.cs" />
     <Compile Include="GeographicHeightCoordinate.cs" />
     <Compile Include="Interop\CoordinateOperationStandardNames.cs" />

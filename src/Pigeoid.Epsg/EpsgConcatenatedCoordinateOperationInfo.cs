@@ -6,7 +6,7 @@ using Pigeoid.Contracts;
 
 namespace Pigeoid.Epsg
 {
-	public class EpsgCoordinateOperationConcatenatedInfo : EpsgCoordinateOperationInfoBase
+	public class EpsgConcatenatedCoordinateOperationInfo : EpsgCoordinateOperationInfoBase
 	{
 
 		private readonly ushort _sourceCrsCode;
@@ -14,7 +14,7 @@ namespace Pigeoid.Epsg
 
 		private readonly ushort[] _stepCodes;
 
-		internal EpsgCoordinateOperationConcatenatedInfo(
+		internal EpsgConcatenatedCoordinateOperationInfo(
 			ushort code, ushort sourceCrsCode, ushort targetCrsCode,
 			ushort areaCode, bool deprecated, string name,
 			ushort[] stepCodes
