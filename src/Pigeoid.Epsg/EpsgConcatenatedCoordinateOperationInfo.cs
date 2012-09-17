@@ -6,7 +6,7 @@ using Pigeoid.Contracts;
 
 namespace Pigeoid.Epsg
 {
-	public class EpsgConcatenatedCoordinateOperationInfo : EpsgCoordinateOperationInfoBase
+	public class EpsgConcatenatedCoordinateOperationInfo : EpsgCoordinateOperationInfoBase, IConcatenatedCoordinateOperationInfo
 	{
 
 		private readonly ushort _sourceCrsCode;
@@ -33,9 +33,14 @@ namespace Pigeoid.Epsg
 
 		public EpsgCrs TargetCrs { get { return EpsgCrs.Get(_targetCrsCode); } }
 
-		public IEnumerable<EpsgCoordinateOperationInfo> Steps { get {
-			return _stepCodes.Select(x => EpsgCoordinateOperationInfoRepository.GetOperationInfo(x));
-		}}
+		public IEnumerable<EpsgCoordinateOperationInfo> Steps {
+			get{
+				return _stepCodes
+					.Select(x => EpsgCoordinateOperationInfoRepository.GetOperationInfo(x));
+			}
+		}
+
+		IEnumerable<ICoordinateOperationInfo> IConcatenatedCoordinateOperationInfo.Steps { get { return Steps; } }
 
 		public override IEnumerable<INamedParameter> Parameters { get { return Enumerable.Empty<INamedParameter>(); } }
 

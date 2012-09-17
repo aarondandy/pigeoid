@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Pigeoid.Contracts;
 using Pigeoid.Ogc;
-using Pigeoid.Transformation;
-using Vertesaur;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Core.Test
 {
 	[TestFixture]
-	public class WktTest
+	public class WktParseTest
 	{
+
 		public readonly WktSerializer Default = new WktSerializer();
 
 		[Test]
@@ -54,8 +51,8 @@ namespace Pigeoid.Core.Test
 		}
 
 		[Test]
-		[TestCase("PARAMETER[\"Abc\",56]","Abc",56.0)]
-		[TestCase(" pArAmEtEr\n[ \"D_e_F\"\t,+45.6e-2\n]\n","D e F", 45.6e-2)]
+		[TestCase("PARAMETER[\"Abc\",56]", "Abc", 56.0)]
+		[TestCase(" pArAmEtEr\n[ \"D_e_F\"\t,+45.6e-2\n]\n", "D e F", 45.6e-2)]
 		[TestCase(" pArAmEtEr\n[ \"ghi\"\t,\"a\nb\"]\n", "ghi", "a\nb")]
 		public void ParseNamedParameterTest(string input, string expecgtedName, object expectedValue) {
 			var result = Default.Parse(input) as INamedParameter;
@@ -65,8 +62,7 @@ namespace Pigeoid.Core.Test
 		}
 
 		[Test]
-		public void ParseParamMathTransformTestA()
-		{
+		public void ParseParamMathTransformTestA() {
 			const string input = "PARAM_MT[\"abc\",PARAMETER[\"ABC\",56],PARAMETER[\"DEF\",+45.6E-2]]";
 
 			var coordinateOperationInfo = Default.Parse(input) as ICoordinateOperationInfo;
@@ -82,8 +78,7 @@ namespace Pigeoid.Core.Test
 		}
 
 		[Test]
-		public void ParseParamMathTransformTestB()
-		{
+		public void ParseParamMathTransformTestB() {
 			const string input = " PARAM_MT [\t\"abc\",pArAmEtEr\n[ \"DeF\"\t,+45.6e2\n]\t]\n";
 
 			var coordinateOperationInfo = Default.Parse(input) as ICoordinateOperationInfo;
@@ -97,68 +92,45 @@ namespace Pigeoid.Core.Test
 		}
 
 		[Test]
-		public void SerializePrettyConcatMathTransformTest() {
-			var input = new ConcatenatedCoordinateOperationInfo(
-				new ICoordinateOperationInfo[] {
-					new CoordinateOperationInfo(
-						"Helmert 7 Parameter Transformation",
-						new INamedParameter[]{
-							new NamedParameter<double>("dx",1),
-							new NamedParameter<double>("dy",2),
-							new NamedParameter<double>("dz",3),
-							new NamedParameter<double>("rx",4),
-							new NamedParameter<double>("ry",5),
-							new NamedParameter<double>("rz",6),
-							new NamedParameter<double>("m", 7)
-						}
-					),
-					new CoordinateOperationInfo(
-						"Ellipsoid To Geocentric",
-						new INamedParameter[]{
-							new NamedParameter<double>("semi major", 6378137),
-							new NamedParameter<double>("semi minor", 6356752.31414035)
-						}
-					),
-					new CoordinateOperationInfo(
-						"Ellipsoid_To_Geocentric",
-						new INamedParameter[]{
-							new NamedParameter<double>("semi_major", 6378206.4),
-							new NamedParameter<double>("semi_minor", 6356583.8)
-						}
-					), 
-				}
-			);
-			var expected = String.Format(
-				"CONCAT_MT[{0}" +
-				"\tPARAM_MT[\"Helmert_7_Parameter_Transformation\",{0}" +
-				"\t\tPARAMETER[\"dx\",1],{0}" +
-				"\t\tPARAMETER[\"dy\",2],{0}" +
-				"\t\tPARAMETER[\"dz\",3],{0}" +
-				"\t\tPARAMETER[\"rx\",4],{0}" +
-				"\t\tPARAMETER[\"ry\",5],{0}" +
-				"\t\tPARAMETER[\"rz\",6],{0}" +
-				"\t\tPARAMETER[\"m\",7]{0}" +
-				"\t],{0}" +
-				"\tPARAM_MT[\"Ellipsoid_To_Geocentric\",{0}" +
-				"\t\tPARAMETER[\"semi_major\",6378137],{0}" +
-				"\t\tPARAMETER[\"semi_minor\",6356752.31414035]{0}" +
-				"\t],{0}" +
-				"\tINVERSE_MT[{0}" +
-				"\t\tPARAM_MT[\"Ellipsoid_To_Geocentric\",{0}" +
-				"\t\t\tPARAMETER[\"semi_major\",6378206.4],{0}" +
-				"\t\t\tPARAMETER[\"semi_minor\",6356583.8]{0}" +
-				"\t\t]{0}" +
-				"\t]{0}" +
-				"]",
-				Environment.NewLine
+		public void ParseConcatMathTransformTest() {
+
+			const string input =
+				" CONCAT_MT    ["
+				+ "PARAM_MT[\"abc\",PARAMETER[\"ABC\",56],PARAMETER[\"DEF\",+45.6E-2]]"
+				+ "\n,\t"
+				+ " PARAM_MT [\t\"def\",pArAmEtEr\n[ \"DeF\"\t,+45.6e2\n]\t]\n"
+				+ "\t]";
+
+			var result = Default.Parse(input) as IConcatenatedCoordinateOperationInfo;
+
+			Assert.IsNotNull(result);
+			Assert.AreEqual(2, result.Steps.Count());
+			Assert.AreEqual("abc", result.Steps.First().Name);
+			Assert.AreEqual(
+				4560,
+				(result.Steps.Skip(1).First())
+				.Parameters
+				.First()
+				.Value
 			);
 
-			Assert.Inconclusive();
+		}
 
-			/*
-			var aDefault = aPretty.Replace(Environment.NewLine, "").Replace("\t", "");
-			Assert.AreEqual(aDefault, Default.Serialize(a));
-			Assert.AreEqual(aPretty, Pretty.Serialize(a));*/
+		[Test]
+		public void InverseTransformTest() {
+
+			const string testString = "InverSE_Mt [\tPARAM_MT[\"abc\",PARAMETER[\"def\",123]\n]\n]";
+
+			var result = Default.Parse(testString) as ICoordinateOperationInfo;
+
+			Assert.IsNotNull(result);
+			Assert.IsTrue(result.HasInverse);
+
+			var core = result.GetInverse();
+			Assert.AreEqual("abc", core.Name);
+			Assert.AreEqual(1, core.Parameters.Count());
+			Assert.AreEqual(123, core.Parameters.First().Value);
+
 		}
 
 	}

@@ -219,9 +219,7 @@ namespace Pigeoid.Ogc
 		}
 
 		public object ReadConcatMtFromParams() {
-			var all = ReadParams();
-			//return new CoordinateOperationConcatenated(all.Cast<ITransformation>());
-			throw new NotImplementedException();
+			return new ConcatenatedCoordinateOperationInfo(ReadParams().Cast<ICoordinateOperationInfo>());
 		}
 
 		public object ReadInverseFromParams() {

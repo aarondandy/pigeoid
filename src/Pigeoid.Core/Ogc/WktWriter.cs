@@ -51,8 +51,7 @@ namespace Pigeoid.Ogc
 
 		public void WriteQuoted(string text) {
 			WriteQuote();
-			if (null != text)
-			{
+			if (null != text){
 				// TODO: some way to escape quotes within here?
 				_writer.Write(text);
 			}
@@ -61,6 +60,11 @@ namespace Pigeoid.Ogc
 
 		public void WriteComma() {
 			_writer.Write(',');
+		}
+
+		private void WritePrettyNewLineWithIndentation(){
+			WriteNewline();
+			WriteIndentation();
 		}
 
 		public void WriteIndentation() {
@@ -122,13 +126,59 @@ namespace Pigeoid.Ogc
 		}
 
 		public void Write(ICoordinateOperationInfo entity) {
-			Write(WktKeyword.ParamMt);
+
+			if (entity is IConcatenatedCoordinateOperationInfo) {
+				Write(entity as IConcatenatedCoordinateOperationInfo);
+			}
+			else {
+				if (entity.IsInverseOfDefinition && entity.HasInverse){
+					Write(WktKeyword.InverseMt);
+					WriteOpenParenthesis();
+
+					Indent();
+					if (Options.Pretty)
+						WritePrettyNewLineWithIndentation();
+
+					Write(entity.GetInverse());
+				}
+				else{
+					Write(WktKeyword.ParamMt);
+					WriteOpenParenthesis();
+					WriteQuoted((entity.Name ?? String.Empty).Replace(' ', '_'));
+					WriteComma();
+
+					Indent();
+					if (Options.Pretty)
+						WritePrettyNewLineWithIndentation();
+
+					Write(entity.Parameters);
+				}
+
+				UnIndent();
+				if (Options.Pretty)
+					WritePrettyNewLineWithIndentation();
+
+				WriteCloseParenthesis();
+			}
+		}
+
+		public void Write(IConcatenatedCoordinateOperationInfo entity){
+			Write(WktKeyword.ConcatMt);
 			WriteOpenParenthesis();
-			WriteQuoted((entity.Name ?? String.Empty).Replace(' ', '_'));
+			
 			Indent();
-			Write(entity.Parameters);
+			if(Options.Pretty)
+				WritePrettyNewLineWithIndentation();
+
+			var items = entity.Steps.ToList();
+			if (items.Count > 0) {
+				WriteEntityCollection(items, Write);
+			}
+
 			UnIndent();
-			WriteNewline();
+			if (Options.Pretty)
+				WritePrettyNewLineWithIndentation();
+
 			WriteCloseParenthesis();
 		}
 
@@ -136,7 +186,6 @@ namespace Pigeoid.Ogc
 			Write(WktKeyword.Spheroid);
 			WriteOpenParenthesis();
 			Indent();
-			WriteNewline();
 			WriteQuoted(Options.GetEntityName(entity));
 			WriteComma();
 			WriteValue(entity.A);
@@ -145,11 +194,9 @@ namespace Pigeoid.Ogc
 			var authorityTag = Options.GetAuthorityTag(entity);
 			if (null != authorityTag) {
 				WriteComma();
-				WriteNewline();
 				Write(authorityTag);
 			}
 			UnIndent();
-			WriteNewline();
 			WriteCloseParenthesis();
 		}
 
@@ -157,18 +204,15 @@ namespace Pigeoid.Ogc
 			Write(WktKeyword.PrimeMeridian);
 			WriteOpenParenthesis();
 			Indent();
-			WriteNewline();
 			WriteQuoted(Options.GetEntityName(entity));
 			WriteComma();
 			WriteValue(entity.Longitude);
 			var authorityTag = Options.GetAuthorityTag(entity);
 			if (null != authorityTag) {
 				WriteComma();
-				WriteNewline();
 				Write(authorityTag);
 			}
 			UnIndent();
-			WriteNewline();
 			WriteCloseParenthesis();
 		}
 
@@ -192,7 +236,7 @@ namespace Pigeoid.Ogc
 		}
 
 		public void Write(IDatum entity) {
-			var keyword = WktKeyword.Datum;
+			WktKeyword keyword;
 			ISpheroid<double> spheroid = null;
 			Helmert7Transformation toWgs84 = null;
 			var ogcDatumType = Options.ToDatumType(entity.Type);
@@ -204,6 +248,7 @@ namespace Pigeoid.Ogc
 				keyword = WktKeyword.VerticalDatum;
 			}
 			else {
+				keyword = WktKeyword.Datum;
 				if (entity is IDatumGeodetic) {
 					spheroid = (entity as IDatumGeodetic).Spheroid;
 				}
@@ -219,7 +264,6 @@ namespace Pigeoid.Ogc
 			Write(keyword);
 			WriteOpenParenthesis();
 			Indent();
-			WriteNewline();
 			WriteQuoted(Options.GetEntityName(entity));
 			if (keyword != WktKeyword.Datum) {
 				WriteComma();
@@ -228,21 +272,17 @@ namespace Pigeoid.Ogc
 
 			if (null != spheroid) {
 				WriteComma();
-				WriteNewline();
 				Write(spheroid);
 			}
 			if (null != toWgs84) {
 				WriteComma();
-				WriteNewline();
 				Write(toWgs84);
 			}
 			if (null != authorityTag) {
 				WriteComma();
-				WriteNewline();
 				Write(authorityTag);
 			}
 			UnIndent();
-			WriteNewline();
 			WriteCloseParenthesis();
 		}
 
@@ -255,19 +295,6 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		/*public void Write(ICoordinateOperationConcatenated entities) {
-			Write(WktKeyword.ConcatMt);
-			WriteOpenParenthesis();
-			throw new NotImplementedException(); // var items = (entities as IEnumerable<ICoordinateOperation>).ToList();
-			if (items.Count > 0) {
-				Indent();
-				WriteEntityCollection(items, Write);
-				UnIndent();
-			}
-			WriteNewline();
-			WriteCloseParenthesis();
-		}*/
-
 		public void Write(ITransformation entity) {
 			var info = entity as ICoordinateOperationInfo;
 			if (null == info && entity.HasInverse) {
@@ -276,10 +303,8 @@ namespace Pigeoid.Ogc
 					Write(WktKeyword.InverseMt);
 					WriteOpenParenthesis();
 					Indent();
-					WriteNewline();
 					Write(info);
 					UnIndent();
-					WriteNewline();
 					WriteCloseParenthesis();
 					return;
 				}
@@ -357,26 +382,22 @@ namespace Pigeoid.Ogc
 			Write(keyword);
 			WriteOpenParenthesis();
 			Indent();
-			WriteNewline();
 			WriteQuoted(Options.GetEntityName(entity));
 
 			if (null != coordinateOperation) {
 				WriteComma();
-				WriteNewline();
 				Write(coordinateOperation);
 			}
 
 			if (null != coordinateReferenceSystems) {
 				foreach (var crs in coordinateReferenceSystems) {
 					WriteComma();
-					WriteNewline();
 					Write(crs);
 				}
 			}
 
 			if (null != projection) {
 				WriteComma();
-				WriteNewline();
 				Write(WktKeyword.Projection);
 				WriteOpenParenthesis();
 				WriteQuoted((Options.GetEntityName(projection) ?? String.Empty).Replace(' ', '_'));
@@ -384,9 +405,7 @@ namespace Pigeoid.Ogc
 				if (null != projectionAuthorityTag) {
 					Indent();
 					WriteComma();
-					WriteNewline();
 					Write(projectionAuthorityTag);
-					WriteNewline();
 					UnIndent();
 				}
 				WriteCloseParenthesis();
@@ -403,31 +422,26 @@ namespace Pigeoid.Ogc
 				if (null != namedParams) {
 					foreach (var namedParam in namedParams) {
 						WriteComma();
-						WriteNewline();
 						Write(namedParam);
 					}
 				}
 			}
 			if (null != datum) {
 				WriteComma();
-				WriteNewline();
 				Write(datum);
 				if (null != primeMeridian) {
 					WriteComma();
-					WriteNewline();
 					Write(primeMeridian);
 				}
 			}
 			if (null != unit) {
 				WriteComma();
-				WriteNewline();
 				Write(unit);
 			}
 
 			if (null != axes) {
 				foreach (var axis in axes) {
 					WriteComma();
-					WriteNewline();
 					Write(axis);
 				}
 			}
@@ -435,12 +449,10 @@ namespace Pigeoid.Ogc
 			var authorityTag = Options.GetAuthorityTag(entity);
 			if (null != authorityTag) {
 				WriteComma();
-				WriteNewline();
 				Write(authorityTag);
 			}
 
 			UnIndent();
-			WriteNewline();
 			WriteCloseParenthesis();
 		}
 
@@ -448,7 +460,6 @@ namespace Pigeoid.Ogc
 			Write(WktKeyword.Unit);
 			WriteOpenParenthesis();
 			Indent();
-			WriteNewline();
 
 			WriteQuoted(entity.Name);
 			WriteComma();
@@ -457,11 +468,9 @@ namespace Pigeoid.Ogc
 			var authorityTag = Options.GetAuthorityTag(entity);
 			if (null != authorityTag) {
 				WriteComma();
-				WriteNewline();
 				Write(authorityTag);
 			}
 			UnIndent();
-			WriteNewline();
 			WriteCloseParenthesis();
 		}
 
@@ -476,10 +485,38 @@ namespace Pigeoid.Ogc
 				write(enumerator.Current);
 				while(enumerator.MoveNext()) {
 					WriteComma();
-					WriteNewline();
+
+					if(Options.Pretty)
+						WritePrettyNewLineWithIndentation();
+
 					write(enumerator.Current);
 				}
 			}
+		}
+
+		public void WriteEntity(object entity) {
+			if (null == entity)
+				WriteValue(entity);
+			else if(entity is IAuthorityTag)
+				Write(entity as IAuthorityTag);
+			else if(entity is INamedParameter)
+				Write(entity as INamedParameter);
+			else if(entity is ICoordinateOperationInfo)
+				Write(entity as ICoordinateOperationInfo);
+			else if(entity is ICrs)
+				Write(entity as ICrs);
+			else if(entity is ISpheroid<double>)
+				Write(entity as ISpheroid<double>);
+			else if(entity is IPrimeMeridian)
+				Write(entity as IPrimeMeridian);
+			else if(entity is IUom)
+				Write(entity as IUom);
+			else if(entity is IDatum)
+				Write(entity as IDatum);
+			else if(entity is IAxis)
+				Write(entity as IAxis);
+			else
+				throw new NotSupportedException("Entity type not supported.");
 		}
 
 		public void Indent() {
@@ -489,6 +526,7 @@ namespace Pigeoid.Ogc
 		public void UnIndent() {
 			_indent--;
 		}
+
 
 	}
 }

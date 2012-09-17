@@ -62,6 +62,7 @@
     <Compile Include="Contracts\IAxis.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Contracts\IConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IConcatenatedOperation.cs" />
     <Compile Include="Contracts\ICoordinateOperationInfo.cs" />
     <Compile Include="Contracts\ICrs.cs">

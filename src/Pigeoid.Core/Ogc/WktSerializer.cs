@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text;
 
 namespace Pigeoid.Ogc
 {
@@ -24,7 +25,7 @@ namespace Pigeoid.Ogc
 		/// <param name="reader">The reader.</param>
 		/// <returns>A WKT entity.</returns>
 		public object Parse(TextReader reader) {
-			var wktReader = new WktReader(reader, _options);
+			var wktReader = new WktReader(reader, Options);
 			return wktReader.MoveNext()
 				? wktReader.ReadEntity()
 				: null;
@@ -39,6 +40,19 @@ namespace Pigeoid.Ogc
 			using (var sr = new StringReader(wkText)) {
 				return Parse(sr);
 			}
+		}
+
+		public void Serialize(object entity,TextWriter writer){
+			var wktWriter = new WktWriter(writer, Options);
+			wktWriter.WriteEntity(entity);
+		}
+
+		public string Serialize(object entity){
+			var builder = new StringBuilder();
+			using(var writer = new StringWriter(builder)){
+				Serialize(entity, writer);
+			}
+			return builder.ToString();
 		}
 
 	}

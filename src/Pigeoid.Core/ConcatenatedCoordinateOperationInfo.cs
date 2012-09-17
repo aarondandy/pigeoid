@@ -1,22 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Pigeoid.Contracts;
 
 namespace Pigeoid
 {
-	public class ConcatenatedCoordinateOperationInfo : ICoordinateOperationInfo
+	public class ConcatenatedCoordinateOperationInfo : IConcatenatedCoordinateOperationInfo
 	{
 
-		private readonly ICoordinateOperationInfo[] _coordinateOperations;
+		private class Inverse : IConcatenatedCoordinateOperationInfo {
 
-		public ConcatenatedCoordinateOperationInfo(IEnumerable<ICoordinateOperationInfo> coordinateOperations)
-		{
+			private readonly ConcatenatedCoordinateOperationInfo _core;
+
+			public Inverse(ConcatenatedCoordinateOperationInfo core){
+				_core = core;
+			}
+
+			public IEnumerable<ICoordinateOperationInfo> Steps{
+				get { return _core.Steps.Reverse().Select(x => x.GetInverse()); }
+			}
+
+			string ICoordinateOperationInfo.Name { get { return "Inverse " + ((ICoordinateOperationInfo)_core).Name; } }
+
+			IEnumerable<INamedParameter> ICoordinateOperationInfo.Parameters { get { return ((ICoordinateOperationInfo)_core).Parameters; } }
+
+			public bool HasInverse { get { return true; } }
+
+			public ICoordinateOperationInfo GetInverse() { return _core; }
+
+			public bool IsInverseOfDefinition{ get { return true; } }
+
+		}
+
+		private readonly ReadOnlyCollection<ICoordinateOperationInfo> _coordinateOperations;
+
+		public ConcatenatedCoordinateOperationInfo(IEnumerable<ICoordinateOperationInfo> coordinateOperations) {
 			if(null == coordinateOperations)
 				throw new ArgumentNullException("coordinateOperations");
 
-			_coordinateOperations = coordinateOperations.ToArray();
-			if(_coordinateOperations.Length == 0)
+			_coordinateOperations = Array.AsReadOnly(coordinateOperations.ToArray());
+			if(_coordinateOperations.Count == 0)
 				throw new ArgumentException("coordinateOperations must have at least one element", "coordinateOperations");
 		}
 
@@ -33,7 +57,16 @@ namespace Pigeoid
 		}
 
 		public ICoordinateOperationInfo GetInverse() {
-			return new ConcatenatedCoordinateOperationInfo(_coordinateOperations.Reverse().Select(x => x.GetInverse()));
+			return new Inverse(this);
 		}
+
+		public IEnumerable<ICoordinateOperationInfo> Steps {
+			get { return _coordinateOperations; }
+		}
+
+		public bool IsInverseOfDefinition {
+			get { return false; }
+		}
+
 	}
 }

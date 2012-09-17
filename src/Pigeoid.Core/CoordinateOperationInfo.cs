@@ -8,10 +8,11 @@ namespace Pigeoid
 	public class CoordinateOperationInfo : ICoordinateOperationInfo
 	{
 
-		public CoordinateOperationInfo(string name, IEnumerable<INamedParameter> parameters = null)
+		public CoordinateOperationInfo(string name, IEnumerable<INamedParameter> parameters = null, bool hasInverse = false)
 		{
 			Name = name;
 			Parameters = null == parameters ? new List<INamedParameter>() : parameters.ToList();
+			HasInverse = hasInverse;
 		}
 
 		public string Name { get; protected set; }
@@ -29,6 +30,8 @@ namespace Pigeoid
 
 			throw new InvalidOperationException("Operation does not have an inverse.");
 		}
+
+		public bool IsInverseOfDefinition { get { return false; } }
 
 	}
 

@@ -1,5 +1,4 @@
-﻿
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Pigeoid.Contracts
 {
@@ -26,6 +25,11 @@ namespace Pigeoid.Contracts
 		/// </summary>
 		/// <returns>An operation.</returns>
 		ICoordinateOperationInfo GetInverse();
+
+		/// <summary>
+		/// Flag is set when this represents the inverse of a well defined coordinate operation.
+		/// </summary>
+		bool IsInverseOfDefinition { get; }
 
 	}
 }

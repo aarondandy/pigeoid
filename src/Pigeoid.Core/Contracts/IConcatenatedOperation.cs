@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Contracts
 {
+
+	[Obsolete("Maybe this should be in Vertesaur?")]
 	public interface IConcatenatedOperation : ITransformation
 	{
 		IEnumerable<ITransformation> Transformations { get; }

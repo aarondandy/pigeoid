@@ -35,6 +35,11 @@ namespace Pigeoid.Epsg
 
 			throw new InvalidOperationException("Operation does not have an inverse.");
 		}
+
+		public bool IsInverseOfDefinition {
+			get { return false; }
+		}
+
 	}
 
 }

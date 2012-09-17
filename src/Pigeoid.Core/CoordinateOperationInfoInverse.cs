@@ -24,6 +24,8 @@ namespace Pigeoid
 		public bool HasInverse { get { return true; } }
 
 		public ICoordinateOperationInfo GetInverse() { return Core; }
+
+		public bool IsInverseOfDefinition { get { return true; } }
 	}
 
 }
