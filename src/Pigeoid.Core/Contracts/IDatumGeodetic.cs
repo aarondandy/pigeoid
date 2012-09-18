@@ -17,7 +17,7 @@ namespace Pigeoid.Contracts
 		/// <summary>
 		/// The prime meridian.
 		/// </summary>
-		IPrimeMeridian PrimeMeridian { get; }
+		IPrimeMeridianInfo PrimeMeridian { get; }
 	}
 
 }

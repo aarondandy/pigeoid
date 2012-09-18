@@ -6,7 +6,7 @@ using Pigeoid.Epsg.Resources;
 
 namespace Pigeoid.Epsg
 {
-	public class EpsgPrimeMeridian : IPrimeMeridian
+	public class EpsgPrimeMeridian : IPrimeMeridianInfo
 	{
 
 		internal static readonly EpsgFixedLookUpBase<ushort, EpsgPrimeMeridian> LookUp;
@@ -61,7 +61,7 @@ namespace Pigeoid.Epsg
 			get { return _uom; }
 		}
 
-		IUom IPrimeMeridian.Unit {
+		IUom IPrimeMeridianInfo.Unit {
 			get { return _uom; }
 		}
 

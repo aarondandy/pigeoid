@@ -9,7 +9,7 @@ namespace Pigeoid.Ogc
 	/// </summary>
 	public class OgcPrimeMeridian :
 		OgcNamedAuthorityBoundEntity,
-		IPrimeMeridian
+		IPrimeMeridianInfo
 	{
 		private readonly double _longitude;
 		private readonly IUom _unit;

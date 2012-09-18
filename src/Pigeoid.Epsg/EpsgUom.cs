@@ -7,8 +7,7 @@ using Pigeoid.Epsg.Resources;
 
 namespace Pigeoid.Epsg
 {
-	public class EpsgUom :
-		IUom
+	public class EpsgUom : IUom, IAuthorityBoundEntity
 	{
 
 		internal static readonly EpsgFixedLookUpBase<ushort, EpsgUom> LookUp;

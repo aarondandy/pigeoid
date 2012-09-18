@@ -8,7 +8,7 @@ namespace Pigeoid.Ogc
 	/// <summary>
 	/// A spheroid.
 	/// </summary>
-	public class OgcSpheroid : OgcNamedAuthorityBoundEntity, ISpheroid<double>
+	public class OgcSpheroid : OgcNamedAuthorityBoundEntity, ISpheroidInfo
 	{
 		/// <summary>
 		/// The spheroid data this OGC spheroid is based on.
@@ -26,11 +26,11 @@ namespace Pigeoid.Ogc
 			Spheroid = spheroid;
 		}
 
-		double ISpheroid<double>.A {
+		public double A {
 			get { return Spheroid.A; }
 		}
 
-		double ISpheroid<double>.B {
+		public double B {
 			get { return Spheroid.B; }
 		}
 
@@ -38,7 +38,7 @@ namespace Pigeoid.Ogc
 			get { return Spheroid.F; }
 		}
 
-		double ISpheroid<double>.InvF {
+		public double InvF {
 			get { return Spheroid.InvF; }
 		}
 

@@ -8,7 +8,7 @@ using Vertesaur.Contracts;
 
 namespace Pigeoid.Epsg
 {
-	public class EpsgEllipsoid : ISpheroid<double>
+	public class EpsgEllipsoid : ISpheroidInfo
 	{
 
 		internal static readonly EpsgFixedLookUpBase<ushort, EpsgEllipsoid> LookUp;

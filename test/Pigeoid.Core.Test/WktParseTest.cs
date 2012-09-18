@@ -3,6 +3,7 @@ using System.Linq;
 using NUnit.Framework;
 using Pigeoid.Contracts;
 using Pigeoid.Ogc;
+using Vertesaur.Contracts;
 
 namespace Pigeoid.Core.Test
 {
@@ -117,19 +118,112 @@ namespace Pigeoid.Core.Test
 		}
 
 		[Test]
-		public void InverseTransformTest() {
-
+		public void ParseInverseTransformTest() {
 			const string testString = "InverSE_Mt [\tPARAM_MT[\"abc\",PARAMETER[\"def\",123]\n]\n]";
 
 			var result = Default.Parse(testString) as ICoordinateOperationInfo;
 
 			Assert.IsNotNull(result);
 			Assert.IsTrue(result.HasInverse);
+			Assert.IsTrue(result.IsInverseOfDefinition);
 
 			var core = result.GetInverse();
 			Assert.AreEqual("abc", core.Name);
 			Assert.AreEqual(1, core.Parameters.Count());
 			Assert.AreEqual(123, core.Parameters.First().Value);
+		}
+
+		[Test]
+		public void ParsePassThroughTransformTest() {
+			const string testString = "PASSTHROUGH_MT[2,PASSTHROUGH_MT[3,PARAM_MT[\"dookie\"]]]";
+
+			var passThrough = Default.Parse(testString) as IPassThroughCoordinateOperationInfo;
+			Assert.IsNotNull(passThrough);
+			Assert.AreEqual(2, passThrough.FirstAffectedOrdinate);
+
+			var passThrough2 = passThrough.Steps.First() as IPassThroughCoordinateOperationInfo;
+			Assert.IsNotNull(passThrough2);
+			Assert.AreEqual(3, passThrough2.FirstAffectedOrdinate);
+
+			var coordinateOperation = passThrough2.Steps.First();
+			Assert.IsNotNull(coordinateOperation);
+			Assert.AreEqual("dookie", coordinateOperation.Name);
+		}
+
+		[Test]
+		public void ParseMercatorSample() {
+			const string input =
+@"PARAM_MT[""Mercator_2SP"",
+    PARAMETER[""semi_major"",6370997.0],
+    PARAMETER[""semi_minor"",6370997.0], 
+    PARAMETER[""central_meridian"",180.0], 
+    PARAMETER[""false_easting"",-500000.0], 
+    PARAMETER[""false_northing"",-1000000.0], 
+    PARAMETER[""standard parallel 1"",60.0]
+]";
+			var result = Default.Parse(input) as ICoordinateOperationInfo;
+			Assert.IsNotNull(result);
+			var operationParameters = result.Parameters.ToArray();
+
+			Assert.AreEqual(6, operationParameters.Length);
+			Assert.AreEqual("semi major", operationParameters[0].Name);
+			Assert.AreEqual(6370997.0, operationParameters[0].Value);
+			Assert.AreEqual("semi minor", operationParameters[1].Name);
+			Assert.AreEqual(6370997.0, operationParameters[1].Value);
+			Assert.AreEqual("central meridian", operationParameters[2].Name);
+			Assert.AreEqual(180.0, operationParameters[2].Value);
+			Assert.AreEqual("false easting", operationParameters[3].Name);
+			Assert.AreEqual(-500000.0, operationParameters[3].Value);
+			Assert.AreEqual("false northing", operationParameters[4].Name);
+			Assert.AreEqual(-1000000.0, operationParameters[4].Value);
+			Assert.AreEqual("standard parallel 1", operationParameters[5].Name);
+			Assert.AreEqual(60.0, operationParameters[5].Value);
+		}
+
+		[Test]
+		public void ParseSpheroidTest() {
+			const string input = @"SPHEROID[
+""Airy 1830"",6377563.396,299.3249646,
+AUTHORITY[""EPSG"",""7001""]
+]";
+			var result = Default.Parse(input) as ISpheroidInfo;
+			Assert.IsNotNull(result);
+			Assert.AreEqual("Airy 1830", result.Name);
+			Assert.AreEqual(6377563.396, result.A);
+			Assert.AreEqual(299.3249646, result.InvF);
+			Assert.IsNotNull(result.Authority);
+			Assert.AreEqual("EPSG", result.Authority.Name);
+			Assert.AreEqual("7001", result.Authority.Code);
+		}
+
+		[Test]
+		public void ParsePrimeMeridianTest() {
+			const string input = @"PRIMEM[""Greenwich"",123,AUTHORITY[""EPSG"",""8901""]]";
+			var result = Default.Parse(input) as IPrimeMeridianInfo;
+			Assert.IsNotNull(result);
+			Assert.AreEqual("Greenwich", result.Name);
+			Assert.AreEqual(123, result.Longitude);
+			Assert.AreEqual("EPSG", result.Authority.Name);
+			Assert.AreEqual("8901", result.Authority.Code);
+		}
+
+		[Test]
+		public void ParseUnitTest() {
+
+			const string input = @"UNIT[""metre"",1,AUTHORITY[""EPSG"",""9001""]]";
+
+			var result = Default.Parse(input) as IUom;
+
+			Assert.IsNotNull(result);
+			Assert.AreEqual("metre", result.Name);
+
+			if (result is OgcUnitBase) {
+				Assert.AreEqual(1, ((OgcUnitBase)result).Factor);
+			}
+			
+			Assert.IsNotNull(result as IAuthorityBoundEntity);
+			Assert.AreEqual("EPSG", (result as IAuthorityBoundEntity).Authority.Name);
+			Assert.AreEqual("9001", (result as IAuthorityBoundEntity).Authority.Code);
 
 		}
 

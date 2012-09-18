@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
@@ -15,7 +17,16 @@ namespace Pigeoid.Ogc
 			Pretty = false;
 			ThrowOnError = false;
 			CultureInfo = null;
+			SpheroidAuthorityResolvers = new List<Func<IAuthorityTag, ISpheroidInfo>>();
+			UomAuthorityResolvers = new List<Func<IAuthorityTag, IUom>>();
+			PrimeMeridianAuthorityResolvers = new List<Func<IAuthorityTag, IPrimeMeridianInfo>>();
 		}
+
+		public List<Func<IAuthorityTag, ISpheroidInfo>> SpheroidAuthorityResolvers { get; private set; }
+
+		public List<Func<IAuthorityTag, IUom>> UomAuthorityResolvers { get; private set; }
+
+		public List<Func<IAuthorityTag, IPrimeMeridianInfo>> PrimeMeridianAuthorityResolvers { get; private set; } 
 
 		public bool Pretty { get; set; }
 
@@ -85,7 +96,7 @@ namespace Pigeoid.Ogc
 		}
 
 		public virtual bool IsValidForDoubleValue(char c) {
-			if(IsWhiteSpace(c))
+			if(IsWhiteSpace(c) || IsComma(c))
 				return false;
 			
 			if(IsDigit(c) || '+' == c || '-' == c || 'e' == c || 'E' == c || '.' == c || ',' == c)
@@ -103,12 +114,19 @@ namespace Pigeoid.Ogc
 		public virtual string GetEntityName(object entity) {
 			if (entity is ICoordinateOperationInfo)
 				return (entity as ICoordinateOperationInfo).Name;
+			if (entity is ISpheroidInfo)
+				return (entity as ISpheroidInfo).Name;
+			if (entity is IPrimeMeridianInfo)
+				return (entity as IPrimeMeridianInfo).Name;
 
 			throw new NotSupportedException();
 		}
 
 		public virtual IAuthorityTag GetAuthorityTag(object entity) {
-			throw new NotImplementedException();
+			if (entity is IAuthorityBoundEntity)
+				return (entity as IAuthorityBoundEntity).Authority;
+
+			throw new NotSupportedException();
 		}
 
 		public virtual bool IsLocalDatum(OgcDatumType type) {
@@ -150,6 +168,37 @@ namespace Pigeoid.Ogc
 
 		public virtual IAuthorityTag CreateAuthority(string name, string code) {
 			return new AuthorityTag(name, code);
+		}
+
+		public virtual ISpheroidInfo CreateSpheroidFromAuthority(IAuthorityTag authority) {
+			if (null == authority || null == SpheroidAuthorityResolvers || 0 == SpheroidAuthorityResolvers.Count)
+				return null;
+
+			return SpheroidAuthorityResolvers
+				.Select(resolver => resolver(authority))
+				.FirstOrDefault(result => null != result);
+		}
+
+		public virtual IUom CreateUomFromAuthority(IAuthorityTag authorityTag) {
+			if (null == authorityTag || null == UomAuthorityResolvers || 0 == UomAuthorityResolvers.Count)
+				return null;
+
+			return UomAuthorityResolvers
+				.Select(resolver => resolver(authorityTag))
+				.FirstOrDefault(result => null != result);
+		}
+
+		public OgcAngularUnit GetAngularUnit(string name) {
+			return null;
+		}
+
+		public IPrimeMeridianInfo CreatePrimeMeridianFromAuthority(IAuthorityTag authorityTag) {
+			if (null == authorityTag || null == PrimeMeridianAuthorityResolvers || 0 == PrimeMeridianAuthorityResolvers.Count)
+				return null;
+
+			return PrimeMeridianAuthorityResolvers
+				.Select(resolver => resolver(authorityTag))
+				.FirstOrDefault(result => null != result);
 		}
 	}
 }

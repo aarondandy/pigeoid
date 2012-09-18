@@ -101,9 +101,11 @@
     <Compile Include="Contracts\IGeographicCoordinate.cs" />
     <Compile Include="Contracts\IGeographicHeightCoordinate.cs" />
     <Compile Include="Contracts\INamedParameter.cs" />
-    <Compile Include="Contracts\IPrimeMeridian.cs">
+    <Compile Include="Contracts\IPassthroughCoordinateOperationInfo.cs" />
+    <Compile Include="Contracts\IPrimeMeridianInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Contracts\ISpheroidInfo.cs" />
     <Compile Include="Contracts\ITransformationGenerator.cs" />
     <Compile Include="Contracts\IUom.cs">
       <SubType>Code</SubType>
@@ -129,6 +131,7 @@
     <Compile Include="Ogc\OgcAxis.cs" />
     <Compile Include="Ogc\OgcLinearUnit.cs" />
     <Compile Include="Ogc\OgcNamedAuthorityBoundEntity.cs" />
+    <Compile Include="Ogc\OgcPassThroughCoordinateOperationInfo.cs" />
     <Compile Include="Ogc\OgcPrimeMeridian.cs" />
     <Compile Include="Ogc\OgcSpheroid.cs" />
     <Compile Include="Ogc\OgcUnitBase.cs" />

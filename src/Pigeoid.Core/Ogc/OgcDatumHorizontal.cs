@@ -13,7 +13,7 @@ namespace Pigeoid.Ogc
 	public class OgcDatumHorizontal : OgcDatum, IDatumGeodetic
 	{
 		private readonly ISpheroid<double> _spheroid;
-		private readonly IPrimeMeridian _primeMeridian;
+		private readonly IPrimeMeridianInfo _primeMeridian;
 		private readonly Helmert7Transformation _transformation;
 
 		/// <summary>
@@ -27,7 +27,7 @@ namespace Pigeoid.Ogc
 		public OgcDatumHorizontal(
 			string name,
 			ISpheroid<double> spheroid,
-			IPrimeMeridian primeMeridian,
+			IPrimeMeridianInfo primeMeridian,
 			Helmert7Transformation transform,
 			IAuthorityTag authority
 		)
@@ -41,7 +41,7 @@ namespace Pigeoid.Ogc
 			_spheroid = spheroid;
 		}
 
-		public IPrimeMeridian PrimeMeridian {
+		public IPrimeMeridianInfo PrimeMeridian {
 			get { return _primeMeridian; }
 		}
 

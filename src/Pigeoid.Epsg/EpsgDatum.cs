@@ -191,7 +191,7 @@ namespace Pigeoid.Epsg
 			get { return _spheroid; }
 		}
 
-		IPrimeMeridian IDatumGeodetic.PrimeMeridian {
+		IPrimeMeridianInfo IDatumGeodetic.PrimeMeridian {
 			get { return _primeMeridian; }
 		}
 

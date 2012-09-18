@@ -115,7 +115,7 @@ namespace Pigeoid.Interop.Proj4
 		/// </remarks>
 		public bool MatchExplicitly { get { return _matchExplicitly; } }
 
-		IPrimeMeridian IDatumGeodetic.PrimeMeridian {
+		IPrimeMeridianInfo IDatumGeodetic.PrimeMeridian {
 			get { throw new NotImplementedException(); }
 		}
 

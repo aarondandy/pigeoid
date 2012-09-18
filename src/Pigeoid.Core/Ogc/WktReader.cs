@@ -223,31 +223,24 @@ namespace Pigeoid.Ogc
 		}
 
 		public object ReadInverseFromParams() {
-			var allParams = ReadParams().Cast<object>().ToArray();
-			if (allParams.Length != 1)
-				return null;
-			//return new CoordinateOperationInverse(allParams[0]);
-			throw new NotImplementedException();
+			var allParams = ReadParams().Cast<ICoordinateOperationInfo>().ToArray();
+			return allParams.Length == 1
+				? allParams[0].GetInverse()
+				: null;
 		}
 
 		public object ReadPassThroughFromParams() {
 			var allParams = ReadParams();
 			var index = Convert.ToInt32(
 				allParams.First(o => null != o && (o is int || o is double)));
-			/*return allParams.Length > 1
-				? new OgcPassthroughOperation(
-					index,
-					allParams
-						.Skip(1)
-						.OfType<ITransformation>()
-						.FirstOrDefault()
-				)
-				: null
-			;*/
-			throw new NotImplementedException();
+
+			return new OgcPassThroughCoordinateOperationInfo(
+				allParams.Skip(1).First() as ICoordinateOperationInfo,
+				index
+			);
 		}
 
-		public ISpheroid<double> ReadSpheroidFromParams() {
+		public ISpheroidInfo ReadSpheroidFromParams() {
 			var allParams = ReadParams();
 			if (allParams == null || allParams.Length < 3) 
 				return null;
@@ -258,36 +251,36 @@ namespace Pigeoid.Ogc
 			var authority = allParams.Length > 3
 				? allParams[3] as IAuthorityTag
 				: null;
+
 			var spheroid = new SpheroidEquatorialInvF(majorAxis, inverseF);
-			/*return
-				(String.IsNullOrEmpty(name) && null == authority)
-				? spheroid
-				: (
-					_authFacs.CreateSpheroid(authority)
-					?? new OgcSpheroid(spheroid, name, authority)
-				)
-			;*/
-			throw new NotImplementedException();
+			return Options.CreateSpheroidFromAuthority(authority)
+				?? new OgcSpheroid(spheroid, name, authority);
 		}
 
-		public IPrimeMeridian ReadPrimeMFromParams(IUom angularUnit = null) {
-			/*angularUnit = angularUnit
-				?? _uomGraph.GetUnit("angle", "degree")
-			;*/
-			throw new NotImplementedException();
+		private OgcAngularUnit GenerateDegreeUnit() {
+			return new OgcAngularUnit(
+				"degree",
+				0.0174532925199433,
+				new AuthorityTag("EPSG","9101")
+			);
+		}
+
+		public IPrimeMeridianInfo ReadPrimeMeridianFromParams(IUom angularUnit = null) {
+			angularUnit = angularUnit
+				?? Options.GetAngularUnit("degree")
+				?? GenerateDegreeUnit();
 
 			var all = ReadParams();
 			if (all == null || all.Length < 2) {
 				return null;
 			}
 			var name = all[0] as string;
-			var lon = Convert.ToDouble(all[1]);
-			var auth = all.Length > 2 ? all[2] as IAuthorityTag : null;
-			/*return
-				_authFacs.CreatePrimeMeridian(auth)
-				?? new OgcPrimeMeridian(name, lon, angularUnit, auth)
-			;*/
-			throw new NotImplementedException();
+			var longitude = Convert.ToDouble(all[1]);
+			var authorityTag = all.Length > 2 ? all[2] as IAuthorityTag : null;
+			return
+				Options.CreatePrimeMeridianFromAuthority(authorityTag)
+				?? new OgcPrimeMeridian(name, longitude, angularUnit, authorityTag)
+			;
 		}
 
 		public IUom ReadUnitFromParams(bool isLength = true) {
@@ -296,21 +289,17 @@ namespace Pigeoid.Ogc
 				return null;
 			}
 			var name = all[0] as string;
-			var fac = Convert.ToDouble(all[1]);
-			var auth = all.Length > 2 ? all[2] as IAuthorityTag : null;
-			/*return
-				_authFacs.CreateUom(auth)
-				?? (
-					isLength
-					? (IUom)new OgcLinearUnit(name, fac, auth)
-					: new OgcAngularUnit(name, fac, auth)
-				)
-			;*/
-			throw new NotImplementedException();
+			var factor = Convert.ToDouble(all[1]);
+			var authorityTag = all.Length > 2 ? all[2] as IAuthorityTag : null;
+			return Options.CreateUomFromAuthority(authorityTag) ?? (
+				isLength
+					? (IUom)new OgcLinearUnit(name, factor, authorityTag)
+					: new OgcAngularUnit(name, factor, authorityTag)
+			);
 		}
 
 		public object ReadObject() {
-			WktKeyword keyword = ReadKeyword();
+			var keyword = ReadKeyword();
 			if (WktKeyword.Invalid == keyword) { return null; }
 			if (!ReadOpenBracket()) { return null; }
 			switch (keyword) {
@@ -329,7 +318,7 @@ namespace Pigeoid.Ogc
 				case WktKeyword.Spheroid:
 					return ReadSpheroidFromParams();
 				case WktKeyword.PrimeMeridian:
-					return ReadPrimeMFromParams();
+					return ReadPrimeMeridianFromParams();
 				case WktKeyword.Unit:
 					return ReadUnitFromParams();
 				default:

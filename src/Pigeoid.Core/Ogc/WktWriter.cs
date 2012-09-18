@@ -200,7 +200,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(IPrimeMeridian entity) {
+		public void Write(IPrimeMeridianInfo entity) {
 			Write(WktKeyword.PrimeMeridian);
 			WriteOpenParenthesis();
 			Indent();
@@ -295,6 +295,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
+		[Obsolete]
 		public void Write(ITransformation entity) {
 			var info = entity as ICoordinateOperationInfo;
 			if (null == info && entity.HasInverse) {
@@ -320,7 +321,7 @@ namespace Pigeoid.Ogc
 		public void Write(ICrs entity) {
 			var keyword = WktKeyword.Invalid;
 			IDatum datum = null;
-			IPrimeMeridian primeMeridian = null;
+			IPrimeMeridianInfo primeMeridian = null;
 			IUom unit = null;
 			IEnumerable<IAxis> axes = null;
 			IEnumerable<ICrs> coordinateReferenceSystems = null;
@@ -507,14 +508,16 @@ namespace Pigeoid.Ogc
 				Write(entity as ICrs);
 			else if(entity is ISpheroid<double>)
 				Write(entity as ISpheroid<double>);
-			else if(entity is IPrimeMeridian)
-				Write(entity as IPrimeMeridian);
+			else if(entity is IPrimeMeridianInfo)
+				Write(entity as IPrimeMeridianInfo);
 			else if(entity is IUom)
 				Write(entity as IUom);
 			else if(entity is IDatum)
 				Write(entity as IDatum);
 			else if(entity is IAxis)
 				Write(entity as IAxis);
+			else if(entity is Helmert7Transformation)
+				Write(entity as Helmert7Transformation);
 			else
 				throw new NotSupportedException("Entity type not supported.");
 		}

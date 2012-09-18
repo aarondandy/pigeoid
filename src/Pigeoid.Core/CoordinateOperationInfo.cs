@@ -8,7 +8,11 @@ namespace Pigeoid
 	public class CoordinateOperationInfo : ICoordinateOperationInfo
 	{
 
-		public CoordinateOperationInfo(string name, IEnumerable<INamedParameter> parameters = null, bool hasInverse = false)
+		public CoordinateOperationInfo(string name) : this(name,null) { }
+
+		public CoordinateOperationInfo(string name, IEnumerable<INamedParameter> parameters) : this(name, parameters, true) { }
+
+		public CoordinateOperationInfo(string name, IEnumerable<INamedParameter> parameters, bool hasInverse)
 		{
 			Name = name;
 			Parameters = null == parameters ? new List<INamedParameter>() : parameters.ToList();

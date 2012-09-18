@@ -5,7 +5,7 @@ namespace Pigeoid.Contracts
 	/// <summary>
 	/// A prime meridian.
 	/// </summary>
-	public interface IPrimeMeridian
+	public interface IPrimeMeridianInfo : IAuthorityBoundEntity
 	{
 		/// <summary>
 		/// The longitude of the prime meridian.
@@ -15,6 +15,9 @@ namespace Pigeoid.Contracts
 		/// The unit of measure for the longitude.
 		/// </summary>
 		IUom Unit { get; }
+
+		string Name { get; }
+
 	}
 	
 }
