@@ -344,6 +344,27 @@ namespace Pigeoid.Ogc
 			);
 		}
 
+		public ICrsVertical ReadVerticalCsFromParams() {
+			var allParams = ReadParams();
+			var authority = allParams.OfType<IAuthorityTag>().FirstOrDefault();
+			var crs = Options.GetCrs(authority) as ICrsVertical;
+			if (null != crs)
+				return crs;
+
+			var name = allParams.OfType<string>().FirstOrDefault();
+			var datum = allParams.OfType<IDatum>().FirstOrDefault();
+			var uom = allParams.OfType<IUom>().FirstOrDefault();
+			var axis = allParams.OfType<IAxis>().FirstOrDefault();
+
+			return new OgcCrsVertical(
+				name,
+				datum,
+				uom,
+				axis,
+				authority
+			);
+		}
+
 		private IDatumGeodetic AttemptDatumPrimeMeridianCorrection(IDatumGeodetic datum, IPrimeMeridianInfo primeMeridian) {
 			var datumAuthority = Options.GetAuthorityTag(datum);
 			var authoritativeDatum = null == datumAuthority ? null : Options.GetDatum(datumAuthority) as IDatumGeodetic;
@@ -458,6 +479,21 @@ namespace Pigeoid.Ogc
 			);
 		}
 
+		public IDatum ReadVerticalDatumFromParams() {
+			var allParams = ReadParams();
+			var authority = allParams.OfType<IAuthorityTag>().FirstOrDefault();
+			var datum = Options.GetDatum(authority);
+			if (null != datum)
+				return datum;
+
+			var name = allParams.OfType<string>().FirstOrDefault();
+			if (null == name)
+				name = String.Empty;
+
+			var datumTypeCode = (OgcDatumType)(int)(allParams.OfType<double>().FirstOrDefault());
+			return new OgcDatum(name, datumTypeCode, authority);
+		}
+
 		private ICoordinateOperationMethodInfo ReadCoordinateOperationMethodFromParams() {
 			var allParams = ReadParams();
 			var authority = allParams.OfType<IAuthorityTag>().FirstOrDefault();
@@ -547,6 +583,8 @@ namespace Pigeoid.Ogc
 				return ReadGeographicCsFromParams();
 			case WktKeyword.GeocentricCs:
 				return ReadGeocentricCsFromParams();
+			case WktKeyword.VerticalCs:
+				return ReadVerticalCsFromParams();
 			case WktKeyword.Spheroid:
 				return ReadSpheroidFromParams();
 			case WktKeyword.PrimeMeridian:
@@ -555,6 +593,8 @@ namespace Pigeoid.Ogc
 				return ReadUnitFromParams();
 			case WktKeyword.Datum:
 				return ReadDatumFromParams();
+			case WktKeyword.VerticalDatum:
+				return ReadVerticalDatumFromParams();
 			case WktKeyword.ToWgs84:
 				return ReadToWgs84FromParams();
 			case WktKeyword.Projection:
