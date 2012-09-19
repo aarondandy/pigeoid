@@ -3,7 +3,6 @@ using System.Linq;
 using NUnit.Framework;
 using Pigeoid.Contracts;
 using Pigeoid.Ogc;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Core.Test
 {
@@ -209,7 +208,6 @@ AUTHORITY[""EPSG"",""7001""]
 
 		[Test]
 		public void ParseUnitTest() {
-
 			const string input = @"UNIT[""metre"",1,AUTHORITY[""EPSG"",""9001""]]";
 
 			var result = Default.Parse(input) as IUom;
@@ -224,7 +222,49 @@ AUTHORITY[""EPSG"",""7001""]
 			Assert.IsNotNull(result as IAuthorityBoundEntity);
 			Assert.AreEqual("EPSG", (result as IAuthorityBoundEntity).Authority.Name);
 			Assert.AreEqual("9001", (result as IAuthorityBoundEntity).Authority.Code);
+		}
 
+		[Test]
+		public void ParseOgcWktSample() {
+			var input = String.Join(Environment.NewLine,new[]{
+				"COMPD_CS[\"OSGB36 / British National Grid + ODN\",",
+				"\tPROJCS[\"OSGB 1936 / British National Grid\",",
+				"\t\tGEOGCS[\"OSGB 1936\",",
+				"\t\t\tDATUM[\"OSGB_1936\",",
+				"\t\t\t\tSPHEROID[\"Airy 1830\",6377563.396,299.3249646,AUTHORITY[\"EPSG\",\"7001\"]],",
+				"\t\t\t\tTOWGS84[375,-111,431,0,0,0,0],",
+				"\t\t\t\tAUTHORITY[\"EPSG\",\"6277\"]",
+				"\t\t\t],",
+				"\t\t\tPRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],",
+				"\t\t\tUNIT[\"DMSH\",0.0174532925199433,AUTHORITY[\"EPSG\",\"9108\"]],",
+				"\t\t\tAXIS[\"Lat\",NORTH],",
+				"\t\t\tAXIS[\"Long\",EAST],",
+				"\t\t\tAUTHORITY[\"EPSG\",\"4277\"]",
+				"\t\t],",
+				"\t\tPROJECTION[\"Transverse_Mercator\"],",
+				"\t\tPARAMETER[\"latitude_of_origin\",49],",
+				"\t\tPARAMETER[\"central_meridian\",-2],",
+				"\t\tPARAMETER[\"scale_factor\",0.999601272],",
+				"\t\tPARAMETER[\"false_easting\",400000],",
+				"\t\tPARAMETER[\"false_northing\",-100000],",
+				"\t\tUNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],",
+				"\t\tAXIS[\"E\",EAST],",
+				"\t\tAXIS[\"N\",NORTH],",
+				"\t\tAUTHORITY[\"EPSG\",\"27700\"]",
+				"\t],",
+				"\tVERT_CS[\"Newlyn\",",
+				"\t\tVERT_DATUM[\"Ordnance Datum Newlyn\",2005,AUTHORITY[\"EPSG\",\"5101\"]],",
+				"\t\tUNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],",
+				"\t\tAXIS[\"Up\",UP],",
+				"\t\tAUTHORITY[\"EPSG\",\"5701\"]",
+				"\t],",
+				"\tAUTHORITY[\"EPSG\",\"7405\"]",
+				"]"
+			});
+
+			var result = Default.Parse(input);
+
+			Assert.Inconclusive();
 		}
 
 	}

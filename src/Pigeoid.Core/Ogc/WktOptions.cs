@@ -6,7 +6,7 @@ using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
 {
-	public class WktOptions
+	public class WktOptions : IAuthorityResolver
 	{
 
 		/// <summary>
@@ -16,21 +16,21 @@ namespace Pigeoid.Ogc
 		{
 			Pretty = false;
 			ThrowOnError = false;
+			ResolveAuthorities = true;
+			CorrectNames = true;
 			CultureInfo = null;
-			SpheroidAuthorityResolvers = new List<Func<IAuthorityTag, ISpheroidInfo>>();
-			UomAuthorityResolvers = new List<Func<IAuthorityTag, IUom>>();
-			PrimeMeridianAuthorityResolvers = new List<Func<IAuthorityTag, IPrimeMeridianInfo>>();
+			AuthorityResolvers = new List<IAuthorityResolver>();
 		}
 
-		public List<Func<IAuthorityTag, ISpheroidInfo>> SpheroidAuthorityResolvers { get; private set; }
-
-		public List<Func<IAuthorityTag, IUom>> UomAuthorityResolvers { get; private set; }
-
-		public List<Func<IAuthorityTag, IPrimeMeridianInfo>> PrimeMeridianAuthorityResolvers { get; private set; } 
+		public List<IAuthorityResolver> AuthorityResolvers { get; private set; } 
 
 		public bool Pretty { get; set; }
 
 		public bool ThrowOnError { get; set; }
+
+		public bool ResolveAuthorities { get; set; }
+
+		public bool CorrectNames { get; set; }
 
 		public CultureInfo CultureInfo { get; set; }
 
@@ -118,7 +118,8 @@ namespace Pigeoid.Ogc
 				return (entity as ISpheroidInfo).Name;
 			if (entity is IPrimeMeridianInfo)
 				return (entity as IPrimeMeridianInfo).Name;
-
+			if (entity is IDatum)
+				return (entity as IDatum).Name;
 			throw new NotSupportedException();
 		}
 
@@ -144,7 +145,6 @@ namespace Pigeoid.Ogc
 		}
 
 		public virtual OgcDatumType ToDatumType(string typeName) {
-
 			// TODO: can these values be cached?
 			var allNames = Enum.GetNames(typeof(OgcDatumType));
 			for (int i = 0; i < allNames.Length; i++)
@@ -166,39 +166,36 @@ namespace Pigeoid.Ogc
 			return OgcDatumType.None;
 		}
 
-		public virtual IAuthorityTag CreateAuthority(string name, string code) {
-			return new AuthorityTag(name, code);
+		private T GetAuthorityBoundObject<T>(Func<IAuthorityResolver,T> func) where T:class {
+			return AuthorityResolvers.Select(func).FirstOrDefault(x => null != x);
 		}
 
-		public virtual ISpheroidInfo CreateSpheroidFromAuthority(IAuthorityTag authority) {
-			if (null == authority || null == SpheroidAuthorityResolvers || 0 == SpheroidAuthorityResolvers.Count)
-				return null;
-
-			return SpheroidAuthorityResolvers
-				.Select(resolver => resolver(authority))
-				.FirstOrDefault(result => null != result);
+		public IAuthorityTag GetAuthorityTag(string authorityName, string code) {
+			return GetAuthorityBoundObject(r => r.GetAuthorityTag(authorityName, code));
 		}
 
-		public virtual IUom CreateUomFromAuthority(IAuthorityTag authorityTag) {
-			if (null == authorityTag || null == UomAuthorityResolvers || 0 == UomAuthorityResolvers.Count)
-				return null;
-
-			return UomAuthorityResolvers
-				.Select(resolver => resolver(authorityTag))
-				.FirstOrDefault(result => null != result);
+		public ICrs GetCrs(IAuthorityTag tag) {
+			return GetAuthorityBoundObject(r => r.GetCrs(tag));
 		}
 
-		public OgcAngularUnit GetAngularUnit(string name) {
-			return null;
+		public ISpheroidInfo GetSpheroid(IAuthorityTag tag) {
+			return GetAuthorityBoundObject(r => r.GetSpheroid(tag));
 		}
 
-		public IPrimeMeridianInfo CreatePrimeMeridianFromAuthority(IAuthorityTag authorityTag) {
-			if (null == authorityTag || null == PrimeMeridianAuthorityResolvers || 0 == PrimeMeridianAuthorityResolvers.Count)
-				return null;
+		public IPrimeMeridianInfo GetPrimeMeridian(IAuthorityTag tag) {
+			return GetAuthorityBoundObject(r => r.GetPrimeMeridian(tag));
+		}
 
-			return PrimeMeridianAuthorityResolvers
-				.Select(resolver => resolver(authorityTag))
-				.FirstOrDefault(result => null != result);
+		public IDatum GetDatum(IAuthorityTag tag) {
+			return GetAuthorityBoundObject(r => r.GetDatum(tag));
+		}
+
+		public IUom GetUom(IAuthorityTag tag) {
+			return GetAuthorityBoundObject(r => r.GetUom(tag));
+		}
+
+		public ICoordinateOperationMethodInfo GetCoordinateOperationMethod(IAuthorityTag tag) {
+			return GetAuthorityBoundObject(r => r.GetCoordinateOperationMethod(tag));
 		}
 	}
 }

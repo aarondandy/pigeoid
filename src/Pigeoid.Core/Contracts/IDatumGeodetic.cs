@@ -1,5 +1,6 @@
 ﻿// TODO: source header
 
+using Pigeoid.Transformation;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Contracts
@@ -18,6 +19,10 @@ namespace Pigeoid.Contracts
 		/// The prime meridian.
 		/// </summary>
 		IPrimeMeridianInfo PrimeMeridian { get; }
+
+		Helmert7Transformation BasicWgs84Transformation { get; }
+
+		bool IsTransformableToWgs84 { get; }
 	}
 
 }

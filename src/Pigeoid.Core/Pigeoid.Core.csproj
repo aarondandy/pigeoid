@@ -56,6 +56,7 @@
     <Compile Include="AuthorityTag.cs" />
     <Compile Include="ConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IAuthorityBoundEntity.cs" />
+    <Compile Include="Contracts\IAuthorityResolver.cs" />
     <Compile Include="Contracts\IAuthorityTag.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -65,6 +66,7 @@
     <Compile Include="Contracts\IConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IConcatenatedOperation.cs" />
     <Compile Include="Contracts\ICoordinateOperationInfo.cs" />
+    <Compile Include="Contracts\ICoordinateOperationMethodInfo.cs" />
     <Compile Include="Contracts\ICrs.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -117,6 +119,7 @@
     <Compile Include="Interop\CoordinateOperationStandardNames.cs" />
     <Compile Include="LongitudeDegreeRange.cs" />
     <Compile Include="NamedParameter.cs" />
+    <Compile Include="Ogc\OgcCoordinateOperationMethodInfo.cs" />
     <Compile Include="Ogc\OgcCrsCompound.cs" />
     <Compile Include="Ogc\OgcCrsFitted.cs" />
     <Compile Include="Ogc\OgcCrsGeocentric.cs" />

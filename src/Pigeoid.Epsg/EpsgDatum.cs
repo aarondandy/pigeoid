@@ -197,5 +197,12 @@ namespace Pigeoid.Epsg
 
 		public override string Type { get { return "Geodetic"; } }
 
+		public Transformation.Helmert7Transformation BasicWgs84Transformation {
+			get { throw new NotImplementedException(); } // TODO: this
+		}
+
+		public bool IsTransformableToWgs84 {
+			get { throw new NotImplementedException(); } // TODO: this
+		}
 	}
 }

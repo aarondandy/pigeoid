@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
 using Pigeoid.Contracts;
+using Pigeoid.Transformation;
 using Vertesaur;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Ogc
 {
@@ -186,7 +185,50 @@ namespace Pigeoid.Ogc
 			if (names.Length < 2)
 				return null;
 
-			return Options.CreateAuthority(names[0], names[1]);
+			var tag = Options.ResolveAuthorities
+				? Options.GetAuthorityTag(names[0], names[1])
+				: null;
+			return tag ?? new AuthorityTag(names[0], names[1]);
+		}
+
+		private bool IsDirectionKeyword(WktKeyword keyword) {
+			switch(keyword) {
+			case WktKeyword.North:
+			case WktKeyword.South:
+			case WktKeyword.East:
+			case WktKeyword.West:
+			case WktKeyword.Up:
+			case WktKeyword.Down:
+			case WktKeyword.Other:
+				return true;
+			default: return false;
+			}
+		}
+
+		private OgcOrientationType ToOgcOrientationType(WktKeyword keyword) {
+			switch (keyword) {
+			case WktKeyword.North: return OgcOrientationType.North;
+			case WktKeyword.South: return OgcOrientationType.South;
+			case WktKeyword.East: return OgcOrientationType.East;
+			case WktKeyword.West: return OgcOrientationType.West;
+			case WktKeyword.Up: return OgcOrientationType.Up;
+			case WktKeyword.Down: return OgcOrientationType.Down;
+			default: return OgcOrientationType.Other;
+			}
+		}
+
+		public IAxis ReadAxisFromParams() {
+			var allParams = ReadParams();
+			
+			var name = allParams.OfType<string>().FirstOrDefault();
+			if (null == name)
+				name = String.Empty;
+
+			var direction = allParams.OfType<WktKeyword>().FirstOrDefault();
+			if (!IsDirectionKeyword(direction))
+				direction = WktKeyword.Other;
+
+			return new OgcAxis(name, ToOgcOrientationType(direction));
 		}
 
 		public INamedParameter ReadParameterFromParams() {
@@ -195,41 +237,155 @@ namespace Pigeoid.Ogc
 				return null;
 
 			var name = allParams[0] as string;
-			if (String.IsNullOrEmpty(name))
-				return null;
+			if (null == name)
+				name = String.Empty;
+			if (Options.CorrectNames)
+				name = name.Replace('_', ' ');
 
 			var value = allParams[1];
-			name = name.Replace('_', ' ');
-			if (value is double) {
+			if (value is double)
 				return new NamedParameter<double>(name, (double)value);
-			}
+			if (value is string)
+				return new NamedParameter<string>(name, (string)value);
 			return new NamedParameter<object>(name, value);
 		}
 
-		public object ReadParamMtFromParams() {
+		public ICoordinateOperationInfo ReadParamMtFromParams() {
 			var allParams = ReadParams();
 			if (allParams.Length == 0)
 				return null;
 
 			var name = allParams[0] as string;
-			if (String.IsNullOrEmpty(name))
-				return null;
+			if (null == name)
+				name = String.Empty;
 
-			return new CoordinateOperationInfo(name, allParams.Skip(1).Cast<INamedParameter>());
+			return new CoordinateOperationInfo(name, allParams.Skip(1).OfType<INamedParameter>());
 		}
 
-		public object ReadConcatMtFromParams() {
-			return new ConcatenatedCoordinateOperationInfo(ReadParams().Cast<ICoordinateOperationInfo>());
+		public IConcatenatedCoordinateOperationInfo ReadConcatMtFromParams() {
+			return new ConcatenatedCoordinateOperationInfo(
+				ReadParams()
+				.OfType<ICoordinateOperationInfo>()
+			);
 		}
 
-		public object ReadInverseFromParams() {
+		public ICrsCompound ReadCompoundCsFromParams() {
+			var allParams = ReadParams();
+			var authority = allParams.OfType<IAuthorityTag>().FirstOrDefault();
+			var crs = Options.GetCrs(authority) as ICrsCompound;
+			if(null != crs)
+				return crs;
+
+			var allCrs = allParams.OfType<ICrs>().ToArray();
+			if(allCrs.Length != 2 && Options.ThrowOnError)
+				throw new InvalidDataException("A compound CRS requires a head and tail CRS.");
+
+			var name = allParams.OfType<string>().FirstOrDefault();
+			if (null == name)
+				name = String.Empty;
+
+			return new OgcCrsCompound(
+				name,
+				allCrs.Length > 0 ? allCrs[0] : null,
+				allCrs.Length > 1 ? allCrs[1] : null,
+				authority
+			);
+		}
+
+		public ICrsProjected ReadProjectedCsFromParams() {
+			var allParams = ReadParams();
+			var authority = allParams.OfType<IAuthorityTag>().FirstOrDefault();
+			var crs = Options.GetCrs(authority) as ICrsProjected;
+			if (null != crs)
+				return crs;
+
+			var name = allParams.OfType<string>().FirstOrDefault();
+			var baseCrs = allParams.OfType<ICrsGeodetic>().FirstOrDefault();
+			var operationMethod = allParams.OfType<ICoordinateOperationMethodInfo>().FirstOrDefault();
+			var operationMethodName = null == operationMethod
+				? String.Empty
+				: (operationMethod.Name ?? String.Empty);
+			var parameters = allParams.OfType<INamedParameter>().ToArray();
+			var linearUnit = allParams.OfType<IUom>().FirstOrDefault();
+			var axes = allParams.OfType<IAxis>();
+
+			return new OgcCrsProjected(
+				name,
+				baseCrs,
+				new CoordinateOperationInfo(operationMethodName, parameters), 
+				linearUnit,
+				axes,
+				authority
+			);
+		}
+
+		private ICrsGeocentric ReadGeocentricCsFromParams() {
+			var allParams = ReadParams();
+			var authority = allParams.OfType<IAuthorityTag>().FirstOrDefault();
+			var crs = Options.GetCrs(authority) as ICrsGeocentric;
+			if (null != crs)
+				return crs;
+
+			var name = allParams.OfType<string>().FirstOrDefault();
+
+			var datum = allParams.OfType<IDatumGeodetic>().FirstOrDefault();
+			var primeMeridian = allParams.OfType<IPrimeMeridianInfo>().FirstOrDefault();
+			datum = AttemptDatumPrimeMeridianCorrection(datum, primeMeridian);
+
+			var uom = allParams.OfType<IUom>().FirstOrDefault();
+			var axes = allParams.OfType<IAxis>().ToArray();
+			
+			return new OgcCrsGeocentric(
+				name,
+				datum,
+				uom,
+				axes,
+				authority
+			);
+		}
+
+		private IDatumGeodetic AttemptDatumPrimeMeridianCorrection(IDatumGeodetic datum, IPrimeMeridianInfo primeMeridian) {
+			var datumAuthority = Options.GetAuthorityTag(datum);
+			var authoritativeDatum = null == datumAuthority ? null : Options.GetDatum(datumAuthority) as IDatumGeodetic;
+			if (null != authoritativeDatum)
+				return authoritativeDatum; // that is that, leave it as is!
+
+			return new OgcDatumHorizontal(Options.GetEntityName(datum), datum.Spheroid, primeMeridian, datum.BasicWgs84Transformation, datumAuthority);
+		}
+
+		private ICrsGeographic ReadGeographicCsFromParams() {
+			var allParams = ReadParams();
+			var authority = allParams.OfType<IAuthorityTag>().FirstOrDefault();
+			var crs = Options.GetCrs(authority) as ICrsGeographic;
+			if (null != crs)
+				return crs;
+
+			var name = allParams.OfType<string>().FirstOrDefault();
+
+			var datum = allParams.OfType<IDatumGeodetic>().FirstOrDefault();
+			var primeMeridian = allParams.OfType<IPrimeMeridianInfo>().FirstOrDefault();
+			datum = AttemptDatumPrimeMeridianCorrection(datum, primeMeridian);
+
+			var uom = allParams.OfType<IUom>().FirstOrDefault();
+			var axes = allParams.OfType<IAxis>().ToArray();
+
+			return new OgcCrsGeographic(
+				name,
+				datum,
+				uom,
+				axes,
+				authority
+			);
+		}
+
+		public ICoordinateOperationInfo ReadInverseFromParams() {
 			var allParams = ReadParams().Cast<ICoordinateOperationInfo>().ToArray();
 			return allParams.Length == 1
 				? allParams[0].GetInverse()
 				: null;
 		}
 
-		public object ReadPassThroughFromParams() {
+		public ICoordinateOperationInfo ReadPassThroughFromParams() {
 			var allParams = ReadParams();
 			var index = Convert.ToInt32(
 				allParams.First(o => null != o && (o is int || o is double)));
@@ -245,18 +401,17 @@ namespace Pigeoid.Ogc
 			if (allParams == null || allParams.Length < 3) 
 				return null;
 
-			var name = allParams[0] as string;
+			var name = allParams[0].ToString();
 			var majorAxis = Convert.ToDouble(allParams[1]);
 			var inverseF = Convert.ToDouble(allParams[2]);
-			var authority = allParams.Length > 3
-				? allParams[3] as IAuthorityTag
-				: null;
+			var authority = allParams.OfType<IAuthorityTag>().FirstOrDefault();
 
 			var spheroid = new SpheroidEquatorialInvF(majorAxis, inverseF);
-			return Options.CreateSpheroidFromAuthority(authority)
+			return Options.GetSpheroid(authority)
 				?? new OgcSpheroid(spheroid, name, authority);
 		}
 
+		[Obsolete("Singleton?")]
 		private OgcAngularUnit GenerateDegreeUnit() {
 			return new OgcAngularUnit(
 				"degree",
@@ -266,63 +421,146 @@ namespace Pigeoid.Ogc
 		}
 
 		public IPrimeMeridianInfo ReadPrimeMeridianFromParams(IUom angularUnit = null) {
-			angularUnit = angularUnit
-				?? Options.GetAngularUnit("degree")
-				?? GenerateDegreeUnit();
+			var allParams = ReadParams();
 
-			var all = ReadParams();
-			if (all == null || all.Length < 2) {
-				return null;
-			}
-			var name = all[0] as string;
-			var longitude = Convert.ToDouble(all[1]);
-			var authorityTag = all.Length > 2 ? all[2] as IAuthorityTag : null;
-			return
-				Options.CreatePrimeMeridianFromAuthority(authorityTag)
-				?? new OgcPrimeMeridian(name, longitude, angularUnit, authorityTag)
-			;
+			var authorityTag = allParams.OfType<IAuthorityTag>().FirstOrDefault();
+			var primeMeridian = Options.GetPrimeMeridian(authorityTag);
+			if (null != primeMeridian)
+				return primeMeridian;
+
+			var name = allParams.OfType<string>().FirstOrDefault();
+			var longitude = allParams.OfType<double>().FirstOrDefault();
+			angularUnit = angularUnit ?? GenerateDegreeUnit();
+
+			return new OgcPrimeMeridian(name, longitude, angularUnit, authorityTag);
+		}
+
+		public IDatum ReadDatumFromParams() {
+			var allParams = ReadParams();
+			var authority = allParams.OfType<IAuthorityTag>().FirstOrDefault();
+			var datum = Options.GetDatum(authority);
+			if (null != datum)
+				return datum;
+
+			var name = allParams.OfType<string>().FirstOrDefault();
+			if(null == name)
+				name = String.Empty;
+
+			var spheroid = allParams.OfType<ISpheroidInfo>().FirstOrDefault();
+			var wgs84Transformation = allParams.OfType<Helmert7Transformation>().FirstOrDefault();
+			var primeMeridian = allParams.OfType<IPrimeMeridianInfo>().FirstOrDefault(); // NOTE: should be null
+			return new OgcDatumHorizontal(
+				name,
+				spheroid,
+				primeMeridian,
+				wgs84Transformation,
+				authority
+			);
+		}
+
+		private ICoordinateOperationMethodInfo ReadCoordinateOperationMethodFromParams() {
+			var allParams = ReadParams();
+			var authority = allParams.OfType<IAuthorityTag>().FirstOrDefault();
+			var method = Options.GetCoordinateOperationMethod(authority);
+			if (null != method)
+				return method;
+
+			var name = allParams.OfType<string>().FirstOrDefault();
+			if (null == name)
+				name = String.Empty;
+
+			return new OgcCoordinateOperationMethodInfo(name, authority);
+		}
+
+		public Helmert7Transformation ReadToWgs84FromParams() {
+			var allParams = ReadParams();
+			
+			var allDoubles = allParams.OfType<double>().ToList();
+			while(allDoubles.Count < 6)
+				allDoubles.Add(0);
+			if (allDoubles.Count < 7)
+				allDoubles.Add(1);
+
+			return new Helmert7Transformation(
+				new Vector3(allDoubles[0], allDoubles[1], allDoubles[2]),
+				new Vector3(allDoubles[3], allDoubles[4], allDoubles[5]),
+ 				allDoubles[6]
+			);
 		}
 
 		public IUom ReadUnitFromParams(bool isLength = true) {
-			var all = ReadParams();
-			if (all == null || all.Length < 2) {
+			var allParams = ReadParams();
+			if (allParams == null || allParams.Length == 0)
 				return null;
-			}
-			var name = all[0] as string;
-			var factor = Convert.ToDouble(all[1]);
-			var authorityTag = all.Length > 2 ? all[2] as IAuthorityTag : null;
-			return Options.CreateUomFromAuthority(authorityTag) ?? (
-				isLength
-					? (IUom)new OgcLinearUnit(name, factor, authorityTag)
-					: new OgcAngularUnit(name, factor, authorityTag)
-			);
+
+			var authorityTag = allParams.OfType<IAuthorityTag>().FirstOrDefault();
+			var uom = Options.GetUom(authorityTag);
+			if (null != uom)
+				return uom;
+
+			var name = allParams[0] as string;
+			var factor = allParams.Length > 1 ? Convert.ToDouble(allParams[1]) : 1.0;
+			
+			return  isLength
+				? (IUom)new OgcLinearUnit(name, factor, authorityTag)
+				: new OgcAngularUnit(name, factor, authorityTag);
 		}
 
 		public object ReadObject() {
 			var keyword = ReadKeyword();
 			if (WktKeyword.Invalid == keyword) { return null; }
-			if (!ReadOpenBracket()) { return null; }
+
+			switch(keyword) {
+			case WktKeyword.North:
+			case WktKeyword.South:
+			case WktKeyword.East:
+			case WktKeyword.West:
+			case WktKeyword.Up:
+			case WktKeyword.Down:
+			case WktKeyword.Other:
+				return keyword;
+			}
+
+			if (!ReadOpenBracket()) {
+				return null;
+			}
 			switch (keyword) {
-				case WktKeyword.Authority:
-					return ReadAuthorityFromParams();
-				case WktKeyword.Parameter:
-					return ReadParameterFromParams();
-				case WktKeyword.ParamMt:
-					return ReadParamMtFromParams();
-				case WktKeyword.ConcatMt:
-					return ReadConcatMtFromParams();
-				case WktKeyword.InverseMt:
-					return ReadInverseFromParams();
-				case WktKeyword.PassThroughMt:
-					return ReadPassThroughFromParams();
-				case WktKeyword.Spheroid:
-					return ReadSpheroidFromParams();
-				case WktKeyword.PrimeMeridian:
-					return ReadPrimeMeridianFromParams();
-				case WktKeyword.Unit:
-					return ReadUnitFromParams();
-				default:
-					throw new NotSupportedException("Object type not supported.");
+			case WktKeyword.Axis:
+				return ReadAxisFromParams();
+			case WktKeyword.Authority:
+				return ReadAuthorityFromParams();
+			case WktKeyword.Parameter:
+				return ReadParameterFromParams();
+			case WktKeyword.ParamMt:
+				return ReadParamMtFromParams();
+			case WktKeyword.ConcatMt:
+				return ReadConcatMtFromParams();
+			case WktKeyword.InverseMt:
+				return ReadInverseFromParams();
+			case WktKeyword.PassThroughMt:
+				return ReadPassThroughFromParams();
+			case WktKeyword.CompoundCs:
+				return ReadCompoundCsFromParams();
+			case WktKeyword.ProjectedCs:
+				return ReadProjectedCsFromParams();
+			case WktKeyword.GeographicCs:
+				return ReadGeographicCsFromParams();
+			case WktKeyword.GeocentricCs:
+				return ReadGeocentricCsFromParams();
+			case WktKeyword.Spheroid:
+				return ReadSpheroidFromParams();
+			case WktKeyword.PrimeMeridian:
+				return ReadPrimeMeridianFromParams();
+			case WktKeyword.Unit:
+				return ReadUnitFromParams();
+			case WktKeyword.Datum:
+				return ReadDatumFromParams();
+			case WktKeyword.ToWgs84:
+				return ReadToWgs84FromParams();
+			case WktKeyword.Projection:
+				return ReadCoordinateOperationMethodFromParams();
+			default:
+				throw new NotSupportedException("Object type not supported: " + keyword);
 			}
 		}
 
@@ -330,14 +568,14 @@ namespace Pigeoid.Ogc
 			if (!SkipWhiteSpace()) {
 				return null;
 			}
-			if (IsValidForDoubleValue) {
-				return ReadDouble();
-			}
 			if (IsDoubleQuote) {
 				return ReadQuotedString();
 			}
 			if (IsKeyword) {
 				return ReadObject();
+			}
+			if (IsValidForDoubleValue) {
+				return ReadDouble();
 			}
 			return null;
 		}
@@ -490,6 +728,39 @@ namespace Pigeoid.Ogc
 			return WktKeyword.Invalid;
 		}
 
+		private WktKeyword ReadKeywordS() {
+			var previousChar = CurrentUpperInvariant;
+			if(MoveNext()) {
+				switch(previousChar) {
+				case 'O': return ReadKeywordSubmatch("UTH", WktKeyword.South);
+				case 'P': return ReadKeywordSubmatch("HEROID", WktKeyword.Spheroid);
+				}
+			}
+			return WktKeyword.Invalid;
+		}
+
+		private WktKeyword ReadKeywordU() {
+			var previousChar = CurrentUpperInvariant;
+			if(MoveNext()) {
+				switch(previousChar) {
+				case 'N': return ReadKeywordSubmatch("IT", WktKeyword.Unit);
+				case 'P': return WktKeyword.Up;
+				}
+			}
+			return WktKeyword.Invalid;
+		}
+
+		private WktKeyword ReadKeywordD() {
+			var previousChar = CurrentUpperInvariant;
+			if(MoveNext()) {
+				switch(previousChar) {
+				case 'A': return ReadKeywordSubmatch("TUM", WktKeyword.Datum);
+				case 'O': return ReadKeywordSubmatch("WN", WktKeyword.Down);
+				}
+			}
+			return WktKeyword.Invalid;
+		}
+
 		public WktKeyword ReadKeyword() {
 			var previousChar = CurrentUpperInvariant;
 			if (!MoveNext())
@@ -498,16 +769,20 @@ namespace Pigeoid.Ogc
 			switch (previousChar) {
 				case 'A': return ReadKeywordA();
 				case 'C': return ReadKeywordC();
-				case 'D': return ReadKeywordSubmatch("ATUM", WktKeyword.Datum);
+				case 'D': return ReadKeywordD();
+				case 'E': return ReadKeywordSubmatch("AST", WktKeyword.East);
 				case 'F': return ReadKeywordSubmatch("ITTED_CS", WktKeyword.FittedCs);
 				case 'G': return ReadKeywordG();
 				case 'I': return ReadKeywordSubmatch("NVERSE_MT", WktKeyword.InverseMt);
 				case 'L': return ReadKeywordL();
+				case 'O': return ReadKeywordSubmatch("THER", WktKeyword.Other);
 				case 'P': return ReadKeywordP();
-				case 'S': return ReadKeywordSubmatch("PHEROID", WktKeyword.Spheroid);
+				case 'N': return ReadKeywordSubmatch("ORTH", WktKeyword.North);
+				case 'S': return ReadKeywordS();
 				case 'T': return ReadKeywordSubmatch("OWGS84", WktKeyword.ToWgs84);
-				case 'U': return ReadKeywordSubmatch("NIT", WktKeyword.Unit);
+				case 'U': return ReadKeywordU();
 				case 'V': return ReadKeywordV();
+				case 'W': return ReadKeywordSubmatch("EST", WktKeyword.West);
 				default: return WktKeyword.Invalid;
 			}
 		}

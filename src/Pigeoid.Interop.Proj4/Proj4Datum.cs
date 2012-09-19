@@ -142,9 +142,8 @@ namespace Pigeoid.Interop.Proj4
 			get { return null != _toWgs84; }
 		}
 
-		public Helmert7Transformation PrimaryWgs84Transformation {
+		public Helmert7Transformation BasicWgs84Transformation {
 			get { return _toWgs84; }
 		}
-
 	}
 }

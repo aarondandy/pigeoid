@@ -10,7 +10,7 @@ using Pigeoid.Epsg.Resources;
 
 namespace Pigeoid.Epsg
 {
-	public class EpsgCoordinateOperationMethodInfo
+	public class EpsgCoordinateOperationMethodInfo : ICoordinateOperationMethodInfo
 	{
 
 		internal class EpsgCoordinateOperationMethodInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgCoordinateOperationMethodInfo>
@@ -241,6 +241,6 @@ namespace Pigeoid.Epsg
 			return null == info ? null : info.Values;
 		}
 
-
+		public IAuthorityTag Authority { get { return new EpsgAuthorityTag(_code); } }
 	}
 }

@@ -27,6 +27,13 @@
 		ToWgs84,
 		Unit,
 		VerticalDatum,
-		VerticalCs
+		VerticalCs,
+		North,
+		South,
+		East,
+		West,
+		Up,
+		Down,
+		Other
 	}
 }

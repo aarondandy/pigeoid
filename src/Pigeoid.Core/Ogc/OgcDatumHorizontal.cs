@@ -53,9 +53,6 @@ namespace Pigeoid.Ogc
 			get { return null != _transformation; }
 		}
 
-		public Helmert7Transformation PrimaryWgs84Transformation {
-			get { return _transformation; }
-		}
-
+		public Helmert7Transformation BasicWgs84Transformation { get { return _transformation; } }
 	}
 }
