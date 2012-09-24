@@ -24,9 +24,16 @@ namespace Pigeoid.Ogc
 
 		public OgcDatumType OgcType { get { return _ogcType; } }
 
-		public string Type {
-			get { return _ogcType.ToString(); }
+		private static string ToRenderableName(OgcDatumType type) {
+			switch(type) {
+			case OgcDatumType.LocalOther: return "Local";
+			case OgcDatumType.VerticalOther: return "Vertical";
+			case OgcDatumType.HorizontalOther: return "Horizontal";
+			default: return type.ToString();
+			}
 		}
+
+		public string Type { get { return ToRenderableName(_ogcType); } }
 
     }
 }

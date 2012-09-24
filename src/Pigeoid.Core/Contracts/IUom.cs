@@ -1,5 +1,8 @@
 ﻿// TODO: source header
 
+using System;
+using System.Collections.Generic;
+
 namespace Pigeoid.Contracts
 {
 	/// <summary>
@@ -15,6 +18,14 @@ namespace Pigeoid.Contracts
 		/// Gets the unit type or category for this unit of measure.
 		/// </summary>
 		string Type { get; }
+
+		IEnumerable<IUom> ConvertibleTo { get; }
+
+		IEnumerable<IUom> ConvertibleFrom { get; }
+
+		IUomConversion<double> GetConversionTo(IUom uom);
+
+		IUomConversion<double> GetConversionFrom(IUom uom);
 
 	}
 }

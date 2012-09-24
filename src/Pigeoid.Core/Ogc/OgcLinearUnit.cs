@@ -1,5 +1,8 @@
 ﻿// TODO: source header
 
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Pigeoid.Contracts;
 
@@ -11,7 +14,8 @@ namespace Pigeoid.Ogc
 	public class OgcLinearUnit : OgcUnitBase
 	{
 
-		private static readonly OgcLinearUnit DefaultMeterUnit = new OgcLinearUnit("meter", 1);
+		private static readonly OgcLinearUnit DefaultMeterUnit = new OgcLinearUnit("Meter", 1);
+		private static readonly ReadOnlyCollection<OgcLinearUnit> DefaultBaseUnitList = Array.AsReadOnly(new[]{DefaultMeterUnit});
 
 		/// <summary>
 		/// The default OGC reference unit for length measures.
@@ -39,5 +43,14 @@ namespace Pigeoid.Ogc
 		public override string Type {
 			get { return "length"; }
 		}
+
+		public override IEnumerable<IUom> ConvertibleTo {
+			get { return DefaultBaseUnitList; }
+		}
+
+		public override IEnumerable<IUom> ConvertibleFrom {
+			get { return DefaultBaseUnitList; }
+		}
+
 	}
 }

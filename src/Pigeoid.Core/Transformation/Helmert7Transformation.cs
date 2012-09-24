@@ -163,7 +163,7 @@ namespace Pigeoid.Transformation
 				&& D.Equals(other.D)
 				&& R.Equals(other.R)
 // ReSharper disable CompareOfFloatsByEqualityOperator
-				&& M == other.M
+				&& Mppm == other.Mppm
 // ReSharper restore CompareOfFloatsByEqualityOperator
 			;
 		}

@@ -6,7 +6,6 @@ using System.Collections.ObjectModel;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 using Vertesaur;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Interop.Proj4
 {
@@ -126,7 +125,7 @@ namespace Pigeoid.Interop.Proj4
 			get { return _spheroid; }
 		}
 
-		ISpheroid<double> IDatumGeodetic.Spheroid {
+		ISpheroidInfo IDatumGeodetic.Spheroid {
 			get { return _spheroid; }
 		}
 
@@ -144,6 +143,10 @@ namespace Pigeoid.Interop.Proj4
 
 		public Helmert7Transformation BasicWgs84Transformation {
 			get { return _toWgs84; }
+		}
+
+		public IAuthorityTag Authority {
+			get { return new AuthorityTag("PROJ4", Name); }
 		}
 	}
 }

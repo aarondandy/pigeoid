@@ -21,7 +21,7 @@ namespace Pigeoid.Ogc
 		/// <param name="spheroid">The spheroid this spheroid is based on.</param>
 		/// <param name="name">The name of this spheroid.</param>
 		/// <param name="authority">The authority.</param>
-		public OgcSpheroid(ISpheroid<double> spheroid, string name, IAuthorityTag authority)
+		public OgcSpheroid(ISpheroid<double> spheroid, string name, IAuthorityTag authority = null)
 			: base(name, authority) {
 			Spheroid = spheroid;
 		}

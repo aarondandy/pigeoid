@@ -5,13 +5,14 @@ namespace Pigeoid.Contracts
 	/// <summary>
 	/// A coordinate reference system.
 	/// </summary>
-	public interface ICrs
+	public interface ICrs : IAuthorityBoundEntity
 	{
 		// TODO: maybe IDatum Datum { get; } ?
 
 		// TODO: maybe IUom Unit { get; } ?
 
-		// TODO: maybe string Name { get; } ?
+		string Name { get; }
+
 	}
 
 }

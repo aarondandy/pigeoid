@@ -9,7 +9,9 @@ namespace Pigeoid.Epsg
 	/// <summary>
 	/// An EPSG authority tag.
 	/// </summary>
-	public struct EpsgAuthorityTag : IAuthorityTag, IEquatable<EpsgAuthorityTag>
+	public struct EpsgAuthorityTag :
+		IAuthorityTag,
+		IEquatable<EpsgAuthorityTag>
 	{
 
 		public static bool operator==(EpsgAuthorityTag a, EpsgAuthorityTag b) {
@@ -40,8 +42,16 @@ namespace Pigeoid.Epsg
 			return other._code == _code;
 		}
 
+		public bool Equals(IAuthorityTag other) {
+			return null != other
+				&& Name.Equals(other.Name)
+				&& Code.Equals(other.Code);
+		}
+
 		public override bool Equals(object obj) {
-			return obj is EpsgAuthorityTag && Equals((EpsgAuthorityTag) obj);
+			return obj is EpsgAuthorityTag
+				? Equals((EpsgAuthorityTag) obj)
+				: Equals(obj as IAuthorityTag);
 		}
 
 		public override int GetHashCode() {
@@ -49,7 +59,7 @@ namespace Pigeoid.Epsg
 		}
 
 		public override string ToString() {
-			return EpsgName + ':' + _code;
+			return Name + ':' + _code;
 		}
 
 	}

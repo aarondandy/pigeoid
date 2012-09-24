@@ -51,6 +51,8 @@
     <Compile Include="..\..\src\PigeoidAssemblyInfo.cs">
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Mock\MockAxis.cs" />
+    <Compile Include="Mock\MockDatum.cs" />
     <Compile Include="Projection\LambertConicNearConformalTest.cs" />
     <Compile Include="Projection\CassiniSoldnerTest.cs" />
     <Compile Include="Projection\HyperbolicCassiniSoldnerTest.cs" />

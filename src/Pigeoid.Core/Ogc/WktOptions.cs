@@ -18,6 +18,7 @@ namespace Pigeoid.Ogc
 			ThrowOnError = false;
 			ResolveAuthorities = true;
 			CorrectNames = true;
+			SuppressProjectionAuthority = true;
 			CultureInfo = null;
 			AuthorityResolvers = new List<IAuthorityResolver>();
 		}
@@ -31,6 +32,8 @@ namespace Pigeoid.Ogc
 		public bool ResolveAuthorities { get; set; }
 
 		public bool CorrectNames { get; set; }
+
+		public bool SuppressProjectionAuthority { get; set; }
 
 		public CultureInfo CultureInfo { get; set; }
 
@@ -74,6 +77,8 @@ namespace Pigeoid.Ogc
 					return "FITTED_CS";
 				case WktKeyword.CompoundCs:
 					return "COMPD_CS";
+				case WktKeyword.PassThroughMt:
+					return "PASSTHROUGH_MT";
 				default:
 					return keyword.ToString().ToUpperInvariant();
 			}
@@ -111,6 +116,7 @@ namespace Pigeoid.Ogc
 			);
 		}
 
+		[Obsolete]
 		public virtual string GetEntityName(object entity) {
 			if (entity is ICoordinateOperationInfo)
 				return (entity as ICoordinateOperationInfo).Name;
@@ -120,6 +126,10 @@ namespace Pigeoid.Ogc
 				return (entity as IPrimeMeridianInfo).Name;
 			if (entity is IDatum)
 				return (entity as IDatum).Name;
+			if (entity is ICrs)
+				return (entity as ICrs).Name;
+			if (entity is IAxis)
+				return (entity as IAxis).Name;
 			throw new NotSupportedException();
 		}
 
@@ -127,7 +137,7 @@ namespace Pigeoid.Ogc
 			if (entity is IAuthorityBoundEntity)
 				return (entity as IAuthorityBoundEntity).Authority;
 
-			throw new NotSupportedException();
+			return null;
 		}
 
 		public virtual bool IsLocalDatum(OgcDatumType type) {

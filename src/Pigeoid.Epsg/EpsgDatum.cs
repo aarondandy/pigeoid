@@ -187,7 +187,7 @@ namespace Pigeoid.Epsg
 			get { return _primeMeridian; }
 		}
 
-		ISpheroid<double> IDatumGeodetic.Spheroid {
+		ISpheroidInfo IDatumGeodetic.Spheroid {
 			get { return _spheroid; }
 		}
 

@@ -3,7 +3,6 @@
 using System;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Ogc
 {
@@ -12,7 +11,7 @@ namespace Pigeoid.Ogc
 	/// </summary>
 	public class OgcDatumHorizontal : OgcDatum, IDatumGeodetic
 	{
-		private readonly ISpheroid<double> _spheroid;
+		private readonly ISpheroidInfo _spheroid;
 		private readonly IPrimeMeridianInfo _primeMeridian;
 		private readonly Helmert7Transformation _transformation;
 
@@ -26,7 +25,7 @@ namespace Pigeoid.Ogc
 		/// <param name="authority">The authority.</param>
 		public OgcDatumHorizontal(
 			string name,
-			ISpheroid<double> spheroid,
+			ISpheroidInfo spheroid,
 			IPrimeMeridianInfo primeMeridian,
 			Helmert7Transformation transform,
 			IAuthorityTag authority
@@ -45,7 +44,7 @@ namespace Pigeoid.Ogc
 			get { return _primeMeridian; }
 		}
 
-		public ISpheroid<double> Spheroid {
+		public ISpheroidInfo Spheroid {
 			get { return _spheroid; }
 		}
 

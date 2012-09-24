@@ -24,11 +24,7 @@ namespace Pigeoid.Ogc
 		}
 
 		public string Name {
-			get { return "Pass-through " + _core.Name; }
-		}
-
-		public IEnumerable<INamedParameter> Parameters {
-			get { return _core.Parameters; }
+			get { return "Pass-through"; }
 		}
 
 		public bool HasInverse {

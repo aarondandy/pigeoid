@@ -2,7 +2,7 @@
 
 namespace Pigeoid.Contracts
 {
-	public interface IDatum
+	public interface IDatum : IAuthorityBoundEntity
 	{
 
 		string Name { get; }

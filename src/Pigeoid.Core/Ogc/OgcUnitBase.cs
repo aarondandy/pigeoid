@@ -1,5 +1,8 @@
 ﻿// TODO: source header
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
@@ -32,5 +35,26 @@ namespace Pigeoid.Ogc
 			get { return _factor; }
 		}
 
+		public abstract IEnumerable<IUom> ConvertibleTo { get; }
+
+		public abstract IEnumerable<IUom> ConvertibleFrom { get; }
+
+		public IUomConversion<double> GetConversionTo(IUom uom) {
+			if (null == uom)
+				throw new ArgumentNullException("uom");
+
+			if (ConvertibleTo.Any(x => StringComparer.OrdinalIgnoreCase.Equals(x.Name, uom.Name))) {
+				if(_factor == 1.0)
+					return new UomUnityConversion(this, uom);
+				return new UomScalarConversion(this, uom, Factor);
+			}
+
+			return null;
+		}
+
+		public IUomConversion<double> GetConversionFrom(IUom uom) {
+			var conversion = GetConversionTo(uom);
+			return null != conversion && conversion.HasInverse ? conversion.GetInverse() : null;
+		}
 	}
 }

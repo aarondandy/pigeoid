@@ -103,6 +103,7 @@
     <Compile Include="Contracts\IGeographicCoordinate.cs" />
     <Compile Include="Contracts\IGeographicHeightCoordinate.cs" />
     <Compile Include="Contracts\INamedParameter.cs" />
+    <Compile Include="Contracts\IParameterizedCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IPassthroughCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IPrimeMeridianInfo.cs">
       <SubType>Code</SubType>
@@ -112,6 +113,7 @@
     <Compile Include="Contracts\IUom.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Contracts\IUomConversion.cs" />
     <Compile Include="CoordinateOperationInfo.cs" />
     <Compile Include="CoordinateOperationInfoInverse.cs" />
     <Compile Include="GeographicCoordinate.cs" />
@@ -182,7 +184,9 @@
     <Compile Include="Transformation\Helmert7Transformation.cs" />
     <Compile Include="Transformation\InvertedTransformationBase.cs" />
     <Compile Include="Transformation\MolodenskyBadekasTransformation.cs" />
-    <Compile Include="Uom\Unit.cs" />
+    <Compile Include="UomRatioConversion.cs" />
+    <Compile Include="UomScalarConversion.cs" />
+    <Compile Include="UomUnityConversion.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

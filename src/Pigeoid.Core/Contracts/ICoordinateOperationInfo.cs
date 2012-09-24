@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Pigeoid.Contracts
+﻿namespace Pigeoid.Contracts
 {
 	public interface ICoordinateOperationInfo
 	{
@@ -9,11 +7,6 @@ namespace Pigeoid.Contracts
 		/// The name of the operation.
 		/// </summary>
 		string Name { get; }
-
-		/// <summary>
-		/// The operation parameters.
-		/// </summary>
-		IEnumerable<INamedParameter> Parameters { get; }
 
 		/// <summary>
 		/// Determines if this operation has an inverse.

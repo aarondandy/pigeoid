@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Epsg
 {
-	public abstract class EpsgCoordinateOperationInfoBase : ICoordinateOperationInfo
+	public abstract class EpsgCoordinateOperationInfoBase : ICoordinateOperationInfo, IAuthorityBoundEntity
 	{
 
 		private readonly ushort _code;
@@ -24,9 +23,6 @@ namespace Pigeoid.Epsg
 		public EpsgArea Area { get { return EpsgArea.Get(_areaCode); } }
 		public bool Deprecated { get { return _deprecated; } }
 
-		public abstract IEnumerable<INamedParameter> Parameters { get; }
-
-
 		public abstract bool HasInverse { get; }
 
 		public ICoordinateOperationInfo GetInverse() {
@@ -40,6 +36,9 @@ namespace Pigeoid.Epsg
 			get { return false; }
 		}
 
+		public IAuthorityTag Authority {
+			get { return new EpsgAuthorityTag(_code); }
+		}
 	}
 
 }

@@ -23,8 +23,6 @@ namespace Pigeoid
 
 			string ICoordinateOperationInfo.Name { get { return "Inverse " + ((ICoordinateOperationInfo)_core).Name; } }
 
-			IEnumerable<INamedParameter> ICoordinateOperationInfo.Parameters { get { return ((ICoordinateOperationInfo)_core).Parameters; } }
-
 			public bool HasInverse { get { return true; } }
 
 			public ICoordinateOperationInfo GetInverse() { return _core; }
@@ -46,10 +44,6 @@ namespace Pigeoid
 
 		string ICoordinateOperationInfo.Name {
 			get { return "Concatenated Operation"; }
-		}
-
-		IEnumerable<INamedParameter> ICoordinateOperationInfo.Parameters {
-			get { return Enumerable.Empty<INamedParameter>(); }
 		}
 
 		public bool HasInverse {

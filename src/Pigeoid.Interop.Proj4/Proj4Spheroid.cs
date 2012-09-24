@@ -4,22 +4,23 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Pigeoid.Uom;
+using Pigeoid.Contracts;
+using Pigeoid.Ogc;
 using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Interop.Proj4
 {
 	public class Proj4Spheroid :
-		ISpheroid<double>,
+		ISpheroidInfo,
 		IEquatable<ISpheroid<double>>
 	{
 
-		private static readonly Unit UomMeter;
+		private static readonly IUom UomMeter;
 		private static readonly ReadOnlyCollection<Proj4Spheroid> DefaultSpheroids;
 
 		static Proj4Spheroid() {
-			UomMeter = new Unit("meter","length");
+			UomMeter = new OgcLinearUnit("meter", 1.0);
 			DefaultSpheroids = new ReadOnlyCollection<Proj4Spheroid>(new[] {
 				new Proj4Spheroid("MERIT","MERIT 1983",new SpheroidEquatorialInvF(6378137.0,298.257)),
 				new Proj4Spheroid("SGS85","Soviet Geodetic System 85",new SpheroidEquatorialInvF(6378136.0,298.257)), 
@@ -88,7 +89,7 @@ namespace Pigeoid.Interop.Proj4
 		/// <remarks>
 		/// The length unit for Proj4 ellipses is meters.
 		/// </remarks>
-		public static Unit LengthUom {
+		public static IUom LengthUom {
 			get { return UomMeter; }
 		}
 
@@ -148,6 +149,10 @@ namespace Pigeoid.Interop.Proj4
         public bool Equals(ISpheroid<double> other) {
             return _spheroid.Equals(other);
         }
+
+		public IAuthorityTag Authority {
+			get { return new AuthorityTag("PROJ4", Code); }
+		}
 
 	}
 }

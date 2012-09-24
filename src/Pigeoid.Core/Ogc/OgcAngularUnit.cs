@@ -1,5 +1,8 @@
 ﻿// TODO: source header
 
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Pigeoid.Contracts;
 
@@ -12,8 +15,9 @@ namespace Pigeoid.Ogc
 	{
 
 		private static readonly OgcAngularUnit DefaultRadianInstance = new OgcAngularUnit("Radian", 1);
+		private static readonly ReadOnlyCollection<OgcAngularUnit> DefaultBaseUnitList = Array.AsReadOnly(new[] {DefaultRadianInstance});
 		// TODO: possibly calculate the degree conversion factor from a conversion graph?
-		private static readonly OgcAngularUnit DefaultDegreesInstance = new OgcAngularUnit("Degree", System.Math.PI / 180.0);
+		private static readonly OgcAngularUnit DefaultDegreesInstance = new OgcAngularUnit("Degree", Math.PI / 180.0);
 
 		/// <summary>
 		/// This is the OGC reference unit for angular measure.
@@ -43,8 +47,10 @@ namespace Pigeoid.Ogc
 		public OgcAngularUnit(string name, double factor, IAuthorityTag authority)
 			: base(name, factor, authority) { }
 
-		public override string Type {
-			get { return "angle"; }
-		}
+		public override string Type { get { return "angle"; } }
+
+		public override IEnumerable<IUom> ConvertibleTo { get { return DefaultBaseUnitList; } }
+
+		public override IEnumerable<IUom> ConvertibleFrom { get { return DefaultBaseUnitList; } }
 	}
 }

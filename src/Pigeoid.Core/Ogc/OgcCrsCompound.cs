@@ -45,9 +45,5 @@ namespace Pigeoid.Ogc
 		/// </summary>
 		public ICrs Tail { get { return _tail; } }
 
-		/// <inheritdoc/>
-		public IEnumerable<ICrs> CrsComponents {
-			get { return new[]{_head, _tail}; }
-		}
 	}
 }

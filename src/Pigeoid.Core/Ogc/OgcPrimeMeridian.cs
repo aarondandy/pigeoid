@@ -20,7 +20,7 @@ namespace Pigeoid.Ogc
 		/// <param name="name">The name of the prime meridian.</param>
 		/// <param name="longitude">The longitude location of the meridian.</param>
 		/// <param name="authority">The authority.</param>
-		public OgcPrimeMeridian(string name, double longitude, IAuthorityTag authority)
+		public OgcPrimeMeridian(string name, double longitude, IAuthorityTag authority = null)
 			: this(name, longitude, null, authority) { }
 
 		/// <summary>
@@ -30,7 +30,7 @@ namespace Pigeoid.Ogc
 		/// <param name="longitude">The longitude location of the meridian.</param>
 		/// <param name="angularUnit">The angular unit of the longitude value.</param>
 		/// <param name="authority">The authority.</param>
-		public OgcPrimeMeridian(string name, double longitude, IUom angularUnit, IAuthorityTag authority)
+		public OgcPrimeMeridian(string name, double longitude, IUom angularUnit, IAuthorityTag authority = null)
 			: base(name, authority) {
 			_longitude = longitude;
 			_unit = angularUnit ?? OgcAngularUnit.DefaultDegrees;

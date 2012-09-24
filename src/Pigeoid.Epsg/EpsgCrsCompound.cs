@@ -72,10 +72,11 @@ namespace Pigeoid.Epsg
 
 		public EpsgCrs Horizontal { get { return _horizontal; } }
 
+		ICrs ICrsCompound.Head { get { return _horizontal; } }
+
 		public EpsgCrsVertical Vertical { get { return _vertical; } }
 
-		public IEnumerable<ICrs> CrsComponents {
-			get { return new ICrs[]{_horizontal, _vertical}; }
-		}
+		ICrs ICrsCompound.Tail { get { return _vertical; } }
+
 	}
 }

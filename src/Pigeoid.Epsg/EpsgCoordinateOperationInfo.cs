@@ -6,7 +6,7 @@ using Pigeoid.Contracts;
 namespace Pigeoid.Epsg
 {
 
-	public class EpsgCoordinateOperationInfo : EpsgCoordinateOperationInfoBase
+	public class EpsgCoordinateOperationInfo : EpsgCoordinateOperationInfoBase, IParameterizedCoordinateOperationInfo
 	{
 
 		private readonly ushort _opMethodCode;
@@ -16,18 +16,25 @@ namespace Pigeoid.Epsg
 			_opMethodCode = opMethodCode;
 		}
 
-		public EpsgCoordinateOperationMethodInfo OperationMethodInfo { get { return EpsgCoordinateOperationMethodInfo.Get(_opMethodCode); } }
+		public EpsgCoordinateOperationMethodInfo Method { get { return EpsgCoordinateOperationMethodInfo.Get(_opMethodCode); } }
 
-		public override IEnumerable<INamedParameter> Parameters {
+		ICoordinateOperationMethodInfo IParameterizedCoordinateOperationInfo.Method {
+			get { return Method; }
+		}
+
+		public IEnumerable<INamedParameter> Parameters {
 			get {
-				var opMethodInfo = OperationMethodInfo;
+				var opMethodInfo = Method; // make a local copy to prevent another call to 'Get'
 				return null != opMethodInfo ? opMethodInfo.GetOperationParameters(Code) : null;
 			}
 		}
 
 		public override bool HasInverse {
-			get { return OperationMethodInfo.CanReverse; }
+			get { return Method.CanReverse; }
 		}
+
+
+		
 	}
 
 }

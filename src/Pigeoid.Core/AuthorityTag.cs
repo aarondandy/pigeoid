@@ -8,8 +8,7 @@ namespace Pigeoid
 	/// <summary>
 	/// An authority tag used to identify an object.
 	/// </summary>
-	public class AuthorityTag :
-		IAuthorityTag
+	public class AuthorityTag : IAuthorityTag
 	{
 		/// <summary>
 		/// The authority name.
@@ -41,6 +40,24 @@ namespace Pigeoid
 		/// <inheritdoc/>
 		public string Code {
 			get { return _code; }
+		}
+
+		public bool Equals(IAuthorityTag other) {
+			return null != other
+				&& Name.Equals(other.Name)
+				&& Code.Equals(other.Code);
+		}
+
+		public override bool Equals(object obj) {
+			return ReferenceEquals(this,obj) || Equals(obj as IAuthorityTag);
+		}
+
+		public override int GetHashCode() {
+			return Code.GetHashCode();
+		}
+
+		public override string ToString() {
+			return Name + ':' + Code;
 		}
 
 	}

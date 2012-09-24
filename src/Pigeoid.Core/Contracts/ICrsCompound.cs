@@ -10,10 +10,11 @@ namespace Pigeoid.Contracts
 	public interface ICrsCompound : ICrs
 	{
 
-		/// <summary>
-		/// The component coordinate reference systems that make up this compound coordinate reference system.
-		/// </summary>
-		IEnumerable<ICrs> CrsComponents { get; }
+
+
+		ICrs Head { get; }
+
+		ICrs Tail { get; }
 
 	}
 }

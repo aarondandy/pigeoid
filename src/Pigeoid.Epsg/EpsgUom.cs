@@ -1,7 +1,9 @@
 ﻿// TODO: source header
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Pigeoid.Contracts;
 using Pigeoid.Epsg.Resources;
 
@@ -71,5 +73,39 @@ namespace Pigeoid.Epsg
 			get { return new EpsgAuthorityTag(_code); }
 		}
 
+		private IUom GetBaseUnit() {
+			if (StringComparer.OrdinalIgnoreCase.Equals("Angle", Type))
+				return null;
+			if (StringComparer.OrdinalIgnoreCase.Equals("Length", Type))
+				return null;
+			if (StringComparer.OrdinalIgnoreCase.Equals("Scale", Type))
+				return null;
+			return null;
+		}
+
+		public IEnumerable<IUom> ConvertibleTo { get { return new[]{ GetBaseUnit() }; } }
+
+		public IEnumerable<IUom> ConvertibleFrom { get { return new[] { GetBaseUnit() }; } }
+
+		public IUomConversion<double> GetConversionTo(IUom uom) {
+			if(null == uom)
+				throw new ArgumentNullException("uom");
+
+			if (0 == FactorC)
+				return null;
+
+			if (ConvertibleTo.Any(x => StringComparer.OrdinalIgnoreCase.Equals(x.Name, uom.Name))) {
+				if(FactorB == 1.0 && FactorC == 1.0)
+					return new UomUnityConversion(this, uom);
+				return new UomRatioConversion(this, uom, FactorB, FactorC);
+			}
+			return null;
+
+		}
+
+		public IUomConversion<double> GetConversionFrom(IUom uom) {
+			var conversion = GetConversionTo(uom);
+			return null != conversion && conversion.HasInverse ? conversion.GetInverse() : null;
+		}
 	}
 }

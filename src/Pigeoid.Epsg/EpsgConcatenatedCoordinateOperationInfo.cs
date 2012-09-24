@@ -42,8 +42,6 @@ namespace Pigeoid.Epsg
 
 		IEnumerable<ICoordinateOperationInfo> IConcatenatedCoordinateOperationInfo.Steps { get { return Steps; } }
 
-		public override IEnumerable<INamedParameter> Parameters { get { return Enumerable.Empty<INamedParameter>(); } }
-
 		public override bool HasInverse { get { return Steps.All(step => step.HasInverse); } }
 	}
 }

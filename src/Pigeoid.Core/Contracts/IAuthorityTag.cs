@@ -1,11 +1,13 @@
 ﻿// TODO: source header
 
+using System;
+
 namespace Pigeoid.Contracts
 {
 	/// <summary>
 	/// Definition of an authority tag complete with an authority name and item code.
 	/// </summary>
-	public interface IAuthorityTag
+	public interface IAuthorityTag : IEquatable<IAuthorityTag>
 	{
 
 		/// <summary>

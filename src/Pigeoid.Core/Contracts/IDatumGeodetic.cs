@@ -14,7 +14,7 @@ namespace Pigeoid.Contracts
 		/// <summary>
 		/// The spheroid.
 		/// </summary>
-		ISpheroid<double> Spheroid { get; }
+		ISpheroidInfo Spheroid { get; }
 		/// <summary>
 		/// The prime meridian.
 		/// </summary>
