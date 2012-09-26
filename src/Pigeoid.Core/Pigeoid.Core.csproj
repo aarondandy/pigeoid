@@ -116,6 +116,7 @@
     <Compile Include="Contracts\IUomConversion.cs" />
     <Compile Include="CoordinateOperationInfo.cs" />
     <Compile Include="CoordinateOperationInfoInverse.cs" />
+    <Compile Include="GeneralTransformationGenerator.cs" />
     <Compile Include="GeographicCoordinate.cs" />
     <Compile Include="GeographicHeightCoordinate.cs" />
     <Compile Include="Interop\CoordinateOperationStandardNames.cs" />

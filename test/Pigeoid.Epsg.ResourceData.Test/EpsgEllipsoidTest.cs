@@ -18,7 +18,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
-				new Tester((x, y) => x.Unit.Code == y.Uom.Code),
+				new Tester((x, y) => x.AxisUnit.Code == y.Uom.Code),
 // ReSharper disable CompareOfFloatsByEqualityOperator
 				new Tester((x, y) => x.A == y.SemiMajorAxis),
 				new Tester((x, y) => 

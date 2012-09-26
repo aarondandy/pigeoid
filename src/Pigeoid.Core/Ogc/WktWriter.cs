@@ -212,8 +212,18 @@ namespace Pigeoid.Ogc
 			Indent();
 			WriteQuoted(entity.Name);
 			WriteComma();
-			WriteValue(entity.A);
+
+			// the axis value must be in meters
+			var a = entity.A;
+			if(entity.AxisUnit != null) {
+				var conversion = entity.AxisUnit.GetConversionTo(OgcLinearUnit.DefaultMeter);
+				if(null != conversion) {
+					a = conversion.TransformValue(a);
+				}
+			}
+			WriteValue(a);
 			WriteComma();
+
 			WriteValue(entity.InvF);
 			if (null != entity.Authority) {
 				WriteComma();

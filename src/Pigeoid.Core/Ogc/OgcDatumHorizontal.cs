@@ -28,7 +28,7 @@ namespace Pigeoid.Ogc
 			ISpheroidInfo spheroid,
 			IPrimeMeridianInfo primeMeridian,
 			Helmert7Transformation transform,
-			IAuthorityTag authority
+			IAuthorityTag authority = null
 		)
 			: base(name, OgcDatumType.None, authority)
 		{

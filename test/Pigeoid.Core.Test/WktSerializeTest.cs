@@ -46,6 +46,7 @@ namespace Pigeoid.Core.Test
 				serializer.Serialize(new OgcSpheroid(
 					new SpheroidEquatorialInvF(12345,278),
 					"round",
+					OgcLinearUnit.DefaultMeter,
 					new AuthorityTag("PIGEOID","?!#$")
 				))
 			);
@@ -209,6 +210,7 @@ namespace Pigeoid.Core.Test
 							new OgcSpheroid(
 								new SpheroidEquatorialInvF(6377563.396,299.3249646),
 								"Airy 1830",
+								OgcLinearUnit.DefaultMeter,
 								new AuthorityTag("EPSG","7001")
 							),
 							new OgcPrimeMeridian("Greenwich", 0, new AuthorityTag("EPSG","8901")), 
@@ -325,10 +327,13 @@ namespace Pigeoid.Core.Test
 					"aaaa",
 					new OgcDatumHorizontal(
 						"?",
-						new OgcSpheroid(new SpheroidEquatorialInvF(123456,278),"a ball"),
+						new OgcSpheroid(
+							new SpheroidEquatorialInvF(123456,278),
+							"a ball",
+							OgcLinearUnit.DefaultMeter
+						),
 						new OgcPrimeMeridian("most important place in the word", 99999),
- 						null,
-						null
+ 						null
 					),
 					new OgcLinearUnit("a stick", 1.123),
 					new IAxis[]{new MockAxis{Name="a",Orientation = "up"}},

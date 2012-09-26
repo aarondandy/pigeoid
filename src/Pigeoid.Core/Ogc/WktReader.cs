@@ -100,12 +100,6 @@ namespace Pigeoid.Ogc
 
 		public bool IsKeyword { get { return IsLetter || '_' == Current; } }
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="value"></param>
-		/// <returns></returns>
-		/// <remarks>This method will advance the stream.</remarks>
 		public double? ReadDouble() {
 			var builder = new StringBuilder();
 			while(IsValidForDoubleValue) {
@@ -610,6 +604,7 @@ namespace Pigeoid.Ogc
 					inverseF ?? Double.NaN
 				),
 				name ?? String.Empty,
+				OgcLinearUnit.DefaultMeter,
 				authority
 			);
 		}
@@ -710,7 +705,7 @@ namespace Pigeoid.Ogc
 				if (parameter is string)
 					name = (string)parameter;
 				else if (parameter is IAuthorityTag)
-					authority = (IAuthorityTag)parameter;
+					authority = (IAuthorityTag)parameter; // NOTE: this is in the spec for PROJECTION but does not appear to be used in practice
 			}
 
 			if(null != authority) {

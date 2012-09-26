@@ -63,7 +63,9 @@ namespace Pigeoid.Epsg
 
 		public string Name { get { return _name; } }
 
-		public EpsgUom Unit { get { return _uom; } }
+		public EpsgUom AxisUnit { get { return _uom; } }
+
+		IUom ISpheroidInfo.AxisUnit { get { return AxisUnit; } }
 
 		public ISpheroid<double> Core { get { return _core; } }
 

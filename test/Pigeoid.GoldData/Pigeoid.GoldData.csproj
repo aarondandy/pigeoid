@@ -51,6 +51,7 @@
     <Compile Include="..\..\src\PigeoidAssemblyInfo.cs">
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="GeneralTransformationGenerationTest.cs" />
     <Compile Include="GeoTransGoldDataReader.cs" />
     <Compile Include="GeoTransGoldDataReaderTest.cs" />
     <Compile Include="GoldData.cs" />

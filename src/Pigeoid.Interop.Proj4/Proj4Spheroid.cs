@@ -16,11 +16,9 @@ namespace Pigeoid.Interop.Proj4
 		IEquatable<ISpheroid<double>>
 	{
 
-		private static readonly IUom UomMeter;
 		private static readonly ReadOnlyCollection<Proj4Spheroid> DefaultSpheroids;
 
 		static Proj4Spheroid() {
-			UomMeter = new OgcLinearUnit("meter", 1.0);
 			DefaultSpheroids = new ReadOnlyCollection<Proj4Spheroid>(new[] {
 				new Proj4Spheroid("MERIT","MERIT 1983",new SpheroidEquatorialInvF(6378137.0,298.257)),
 				new Proj4Spheroid("SGS85","Soviet Geodetic System 85",new SpheroidEquatorialInvF(6378136.0,298.257)), 
@@ -83,16 +81,6 @@ namespace Pigeoid.Interop.Proj4
 			return DefaultSpheroids.FirstOrDefault(e => e.Code.Equals(name) || e.Name.Equals(name));
 		}
 
-		/// <summary>
-		/// The length unit of measure used for all Proj4 ellipses.
-		/// </summary>
-		/// <remarks>
-		/// The length unit for Proj4 ellipses is meters.
-		/// </remarks>
-		public static IUom LengthUom {
-			get { return UomMeter; }
-		}
-
 		private readonly string _code;
         private readonly string _name;
         private readonly ISpheroid<double> _spheroid;
@@ -106,6 +94,8 @@ namespace Pigeoid.Interop.Proj4
         public string Name {
             get { return _name; }
         }
+
+		public IUom AxisUnit { get { return OgcLinearUnit.DefaultMeter; } }
 
         /// <summary>
         /// The ellipse codename.

@@ -48,5 +48,9 @@ namespace Pigeoid.Epsg
 
 		public bool Deprecated { get { return _deprecated; } }
 
+		public override string ToString() {
+			return Authority.ToString();
+		}
+
 	}
 }

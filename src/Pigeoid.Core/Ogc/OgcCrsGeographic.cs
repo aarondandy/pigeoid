@@ -30,7 +30,7 @@ namespace Pigeoid.Ogc
 			IDatumGeodetic datum,
 			IUom angularUnit,
 			IEnumerable<IAxis> axes,
-			IAuthorityTag authority
+			IAuthorityTag authority = null
 		) : base(name, authority) {
 			if (null == datum)
 				throw new ArgumentNullException("datum");

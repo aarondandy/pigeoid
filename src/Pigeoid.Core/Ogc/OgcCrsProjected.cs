@@ -33,7 +33,7 @@ namespace Pigeoid.Ogc
 			ICoordinateOperationInfo projection,
 			IUom linearUnit,
 			IEnumerable<IAxis> axes,
-			IAuthorityTag authority
+			IAuthorityTag authority = null
 		)
 			: base(name, authority) {
 

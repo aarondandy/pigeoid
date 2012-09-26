@@ -2,7 +2,7 @@
 using Pigeoid.Projection;
 using Vertesaur;
 
-namespace Pigeoid.Core.Test
+namespace Pigeoid.Core.Test.Projection
 {
 	[TestFixture]
 	public class LambertConicNearConformalTest

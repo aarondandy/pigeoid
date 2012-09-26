@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pigeoid.Contracts;
+using Pigeoid.Ogc;
 using Vertesaur;
 using Vertesaur.Contracts;
 
@@ -14,7 +15,8 @@ namespace Pigeoid.Transformation
 	/// </summary>
 	public class Helmert7Transformation :
 		ITransformation<Point3>,
-		IEquatable<Helmert7Transformation>
+		IEquatable<Helmert7Transformation>,
+		IParameterizedCoordinateOperationInfo
 	{
 
 		/// <summary>
@@ -24,7 +26,8 @@ namespace Pigeoid.Transformation
 
 		private class Inverted :
 			InvertedTransformationBase<Helmert7Transformation, Point3>,
-			IEquatable<Inverted>
+			IEquatable<Inverted>,
+			ICoordinateOperationInfo
 		{
 
 			private readonly Matrix3 _invRot;
@@ -72,6 +75,18 @@ namespace Pigeoid.Transformation
 				return Equals(obj as Inverted);
 			}
 
+
+			public string Name {
+				get { return "Inverse " + Core.Name; }
+			}
+
+			ICoordinateOperationInfo ICoordinateOperationInfo.GetInverse() {
+				return Core;
+			}
+
+			public bool IsInverseOfDefinition {
+				get { return true; }
+			}
 		}
 
 		/// <summary>
@@ -176,23 +191,35 @@ namespace Pigeoid.Transformation
 			return D.GetHashCode() ^ R.GetHashCode();
 		}
 
-		public IEnumerable<INamedParameter> GetParameters() {
-			return new INamedParameter[]
-                {
-                    new NamedParameter<double>("dx",D.X),
-                    new NamedParameter<double>("dy",D.Y),
-                    new NamedParameter<double>("dz",D.Z),
-                    new NamedParameter<double>("rx",R.X),
-                    new NamedParameter<double>("ry",R.Y),
-                    new NamedParameter<double>("rz",R.Z),
-                    new NamedParameter<double>("m",Mppm)
-                }
-			;
-		}
-
 		public string Name {
 			get { return "Helmert 7 Parameter Transformation"; }
 		}
 
+
+		public IEnumerable<INamedParameter> Parameters {
+			get {
+				return new INamedParameter[] {
+					new NamedParameter<double>("dx",D.X),
+					new NamedParameter<double>("dy",D.Y),
+					new NamedParameter<double>("dz",D.Z),
+					new NamedParameter<double>("rx",R.X),
+					new NamedParameter<double>("ry",R.Y),
+					new NamedParameter<double>("rz",R.Z),
+					new NamedParameter<double>("m",Mppm)
+				};
+			}
+		}
+
+		public ICoordinateOperationMethodInfo Method {
+			get { return new OgcCoordinateOperationMethodInfo(Name); }
+		}
+
+		ICoordinateOperationInfo ICoordinateOperationInfo.GetInverse() {
+			return GetInverse() as ICoordinateOperationInfo;
+		}
+
+		public bool IsInverseOfDefinition {
+			get { return false; }
+		}
 	}
 }
