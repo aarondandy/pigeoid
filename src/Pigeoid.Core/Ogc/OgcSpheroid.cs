@@ -1,5 +1,6 @@
 ﻿// TODO: source header
 
+using System;
 using Pigeoid.Contracts;
 using Vertesaur.Contracts;
 
@@ -62,5 +63,12 @@ namespace Pigeoid.Ogc
 			get { return Spheroid.ESecondSquared; }
 		}
 
+		public override string ToString(){
+			var result = "MajorAxis: " + A + " InverseF: " + B;
+			if (!String.IsNullOrEmpty(Name))
+				result += " (" + Name + ')';
+
+			return result;
+		}
 	}
 }

@@ -65,6 +65,7 @@
     </Compile>
     <Compile Include="Contracts\IConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IConcatenatedOperation.cs" />
+    <Compile Include="Contracts\ICoordinateOperationGenerator.cs" />
     <Compile Include="Contracts\ICoordinateOperationInfo.cs" />
     <Compile Include="Contracts\ICoordinateOperationMethodInfo.cs" />
     <Compile Include="Contracts\ICrs.cs">
@@ -116,7 +117,7 @@
     <Compile Include="Contracts\IUomConversion.cs" />
     <Compile Include="CoordinateOperationInfo.cs" />
     <Compile Include="CoordinateOperationInfoInverse.cs" />
-    <Compile Include="GeneralTransformationGenerator.cs" />
+    <Compile Include="GeneralCrsCoordinateTransformOperationGenerator.cs" />
     <Compile Include="GeographicCoordinate.cs" />
     <Compile Include="GeographicHeightCoordinate.cs" />
     <Compile Include="Interop\CoordinateOperationStandardNames.cs" />

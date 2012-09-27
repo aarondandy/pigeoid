@@ -87,6 +87,11 @@ namespace Pigeoid.Transformation
 			public bool IsInverseOfDefinition {
 				get { return true; }
 			}
+
+			public override string ToString(){
+				return "Inverse " + Core;
+			}
+
 		}
 
 		/// <summary>
@@ -220,6 +225,20 @@ namespace Pigeoid.Transformation
 
 		public bool IsInverseOfDefinition {
 			get { return false; }
+		}
+
+		public override string ToString(){
+			var result = Name + ' ' + D;
+			var writeM = 0 != Mppm;
+
+			if(writeM || !Vector3.Zero.Equals(R)){
+				result += ' ' + R.ToString();
+				if(writeM){
+					result += String.Concat(' ',M);
+				}
+			}
+			
+			return result;
 		}
 	}
 }

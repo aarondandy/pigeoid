@@ -722,10 +722,9 @@ namespace Pigeoid.Ogc
 
 		public Helmert7Transformation ReadToWgs84FromParams() {
 			var allDoubles = ReadParams().OfType<double>().ToList();
-			while(allDoubles.Count < 6)
+
+			while (allDoubles.Count < 7)
 				allDoubles.Add(0);
-			if (allDoubles.Count < 7)
-				allDoubles.Add(1);
 
 			return new Helmert7Transformation(
 				new Vector3(allDoubles[0], allDoubles[1], allDoubles[2]),

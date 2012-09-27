@@ -22,8 +22,7 @@ namespace Pigeoid.Transformation
 		protected readonly double MajorAxis;
 		protected readonly double MinorAxis;
 		protected readonly double ESq;
-		protected readonly double ESecSq;
-		protected readonly double OneMinusESq;
+
 		/// <summary>
 		/// The spheroid.
 		/// </summary>
@@ -44,12 +43,10 @@ namespace Pigeoid.Transformation
 			MajorAxis = spheroid.A;
 			MinorAxis = spheroid.B;
 			ESq = spheroid.ESquared;
-			ESecSq = spheroid.ESecondSquared;
-			OneMinusESq = 1.0 - ESq;
 			Spheroid = spheroid;
 
 			_eSqMajAxis = ESq * MajorAxis;
-			_eSecSqMinAxis = ESecSq * MinorAxis;
+			_eSecSqMinAxis = spheroid.ESecondSquared * MinorAxis;
 
 			// ReSharper disable CompareOfFloatsByEqualityOperator
 			if (0 == MinorAxis) throw new ArgumentException("Core cannot be inverted.");
@@ -146,6 +143,11 @@ namespace Pigeoid.Transformation
 		public ICoordinateOperationMethodInfo Method {
 			get { return new OgcCoordinateOperationMethodInfo(Name); }
 		}
+
+		public override string ToString(){
+			return Name + ' ' + Spheroid;
+		}
+
 	}
 
 	public class GeographicGeocentricTransformation :
@@ -157,7 +159,6 @@ namespace Pigeoid.Transformation
 		protected readonly double MajorAxis;
 		protected readonly double MinorAxis;
 		protected readonly double ESq;
-		protected readonly double ESecSq;
 		protected readonly double OneMinusESq;
 		/// <summary>
 		/// The spheroid.
@@ -177,7 +178,6 @@ namespace Pigeoid.Transformation
 			MajorAxis = spheroid.A;
 			MinorAxis = spheroid.B;
 			ESq = spheroid.ESquared;
-			ESecSq = spheroid.ESecondSquared;
 			OneMinusESq = 1.0 - ESq;
 			Spheroid = spheroid;
 		}
@@ -266,6 +266,10 @@ namespace Pigeoid.Transformation
 
 		public ICoordinateOperationMethodInfo Method {
 			get { return new OgcCoordinateOperationMethodInfo(Name); }
+		}
+
+		public override string ToString() {
+			return Name + ' ' + Spheroid;
 		}
 	}
 }

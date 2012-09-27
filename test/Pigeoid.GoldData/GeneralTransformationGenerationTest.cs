@@ -18,10 +18,10 @@ namespace Pigeoid.GoldData
 			Assert.IsNotNull(sourceCrs);
 			Assert.IsNotNull(targetCrs);
 
-			var generator = new GeneralTransformationGenerator();
-			var transform = generator.Generate(sourceCrs, targetCrs);
-			Assert.IsNotNull(transform);
-
+			var operationGenerator = new GeneralCrsCoordinateTransformOperationGenerator();
+			var operation = operationGenerator.Generate(sourceCrs, targetCrs);
+			Assert.IsNotNull(operation);
+			Assert.Inconclusive();
 		}
 
 
