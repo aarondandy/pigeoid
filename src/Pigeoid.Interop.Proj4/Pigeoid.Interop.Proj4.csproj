@@ -59,10 +59,6 @@
       <Project>{ECDC3D02-067E-4D6F-9DF2-58015EFDAE87}</Project>
       <Name>Pigeoid.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Pigeoid.Interop.Proj4.Unmanaged\Pigeoid.Interop.Proj4.Unmanaged.vcxproj">
-      <Project>{4DB7B813-449C-42E8-8424-52C62CB4B8EB}</Project>
-      <Name>Pigeoid.Interop.Proj4.Unmanaged %28Visual Studio 2010%29</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

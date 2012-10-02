@@ -71,7 +71,7 @@
     <Compile Include="EpsgEllipsoid.cs" />
     <Compile Include="EpsgParameter.cs" />
     <Compile Include="EpsgPrimeMeridian.cs" />
-    <Compile Include="EpsgTransformationGenerator.cs" />
+    <Compile Include="EpsgCrsCoordinateTransformOperationGenerator.cs" />
     <Compile Include="EpsgUom.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\EpsgDataResource.cs" />

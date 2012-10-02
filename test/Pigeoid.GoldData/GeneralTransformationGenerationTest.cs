@@ -2,6 +2,7 @@
 
 namespace Pigeoid.GoldData
 {
+
 	[TestFixture]
 	public class GeneralTransformationGenerationTest
 	{
@@ -24,6 +25,6 @@ namespace Pigeoid.GoldData
 			Assert.Inconclusive();
 		}
 
-
 	}
+
 }

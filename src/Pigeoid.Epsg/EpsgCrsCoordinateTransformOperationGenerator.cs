@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Pigeoid.Contracts;
-using Vertesaur.Contracts;
 using Vertesaur.Search;
 
 namespace Pigeoid.Epsg
 {
-	public class EpsgTransformationGenerator :
-		ITransformationGenerator<ICrs>,
-		ITransformationGenerator<EpsgCrs>
+	public class EpsgCrsCoordinateTransformOperationGenerator :
+		ICoordinateOperationGenerator<ICrs>,
+		ICoordinateOperationGenerator<EpsgCrs>
 	{
 
 		private struct EpsgTransformGraphCost :
@@ -117,19 +117,37 @@ namespace Pigeoid.Epsg
 			}
 		}
 
+		private static ICoordinateOperationInfo GenerateConcatenated(List<ICoordinateOperationInfo> operations) {
+			if (null == operations)
+				return null;
+			if (operations.Count == 0)
+				return null;
+			if (operations.Count == 1)
+				return operations[0];
+			return new ConcatenatedCoordinateOperationInfo(operations);
+		}
 
-		public ITransformation Generate(EpsgCrs from, EpsgCrs to) {
+		public ICoordinateOperationInfo Generate(EpsgCrs from, EpsgCrs to) {
 			var graph = new EpsgTransformGraph(from.Area, to.Area);
+			
 			var execTimer = new Stopwatch();
 			execTimer.Start();
+			
 			var path = graph.FindPath(from, to);
+			
 			execTimer.Stop();
 			var elapsed = execTimer.Elapsed;
 			Debug.Write("GenerateCore: " + elapsed);
-			return null;// throw new NotImplementedException();
+
+			return GenerateConcatenated(
+				path
+				.Where(x => null != x && null != x.Edge)
+				.Select(x => x.Edge)
+				.ToList()
+			);
 		}
 
-		public ITransformation Generate(ICrs from, ICrs to) {
+		public ICoordinateOperationInfo Generate(ICrs from, ICrs to) {
 			if(from is EpsgCrs && to is EpsgCrs) {
 				return Generate(from as EpsgCrs, to as EpsgCrs);
 			}

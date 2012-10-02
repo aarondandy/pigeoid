@@ -6,7 +6,7 @@ namespace Pigeoid.Contracts
 
 	// TODO: move these to vertesaur
 
-	public interface ITransformationGenerator<in TItem>
+	/*public interface ITransformationGenerator<in TItem>
 	{
 		ITransformation Generate(TItem from, TItem to);
 	}
@@ -21,6 +21,6 @@ namespace Pigeoid.Contracts
 	public interface ITransformationGenerator<in TItem, TValue> : ITransformationGenerator<TItem, TValue, TValue>
 	{
 		new ITransformation<TValue> Generate(TItem from, TItem to);
-	}
+	}*/
 
 }

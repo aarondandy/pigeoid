@@ -562,6 +562,8 @@ namespace Pigeoid.Ogc
 		public void WriteEntity(object entity) {
 			if (null == entity)
 				WriteValue(null);
+			else if (entity is Helmert7Transformation)
+				Write(entity as Helmert7Transformation);
 			else if(entity is IAuthorityTag)
 				Write(entity as IAuthorityTag);
 			else if(entity is INamedParameter)
@@ -580,8 +582,6 @@ namespace Pigeoid.Ogc
 				Write(entity as IDatum);
 			else if(entity is IAxis)
 				Write(entity as IAxis);
-			else if(entity is Helmert7Transformation)
-				Write(entity as Helmert7Transformation);
 			else
 				throw new NotSupportedException("Entity type not supported.");
 		}

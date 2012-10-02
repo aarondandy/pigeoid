@@ -1,29 +1,28 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
-using Vertesaur.Contracts;
 
 namespace Pigeoid
 {
 	public class GeneralCrsCoordinateTransformOperationGenerator : ICoordinateOperationGenerator<ICrs>
 	{
 
-		public ICoordinateOperationInfo Generate(ICrs from, ICrs to) {
-			return GenerateConcatenated(GenerateCore(from, to));
-		}
-
-		private ICoordinateOperationInfo GenerateConcatenated(List<ICoordinateOperationInfo> operations){
+		private static ICoordinateOperationInfo GenerateConcatenated(List<ICoordinateOperationInfo> operations) {
 			if (null == operations)
 				return null;
 
 			operations.RemoveAll(x => null == x);
+
 			if (operations.Count == 0)
 				return null;
 			if (operations.Count == 1)
 				return operations[0];
 			return new ConcatenatedCoordinateOperationInfo(operations);
+		}
+
+		public ICoordinateOperationInfo Generate(ICrs from, ICrs to) {
+			return GenerateConcatenated(GenerateCore(from, to));
 		}
 
 		private List<ICoordinateOperationInfo> GenerateCore(ICrs from, ICrs to) {
@@ -35,7 +34,7 @@ namespace Pigeoid
 
 		private List<ICoordinateOperationInfo> GenerateCoreProjectedLevel(ICrsGeodetic from, ICrsGeodetic to) {
 			var result = new List<ICoordinateOperationInfo>();
-			
+
 			// undo the from projection
 			var unProjectedFrom = from;
 			while(unProjectedFrom is ICrsProjected) {
@@ -104,11 +103,11 @@ namespace Pigeoid
 
 			var fromUnit = from.Spheroid.AxisUnit;
 			var toUnit = to.Spheroid.AxisUnit;
-			if(null != fromUnit && null != toUnit) {
+			if(null != fromUnit && null != toUnit && fromUnit != toUnit) {
 				var conversion = fromUnit.GetConversionTo(toUnit);
 				if(null != conversion) {
 					if(conversion is UomUnityConversion) {
-						;
+						; // do nothing
 					}
 					else if(conversion is IUomScalarConversion<double>) {
 						throw new NotImplementedException("scalar unit conversion");
@@ -144,9 +143,11 @@ namespace Pigeoid
 			return operations;
 		}
 
-		private List<ICoordinateOperationInfo> GenerateCoreDatumShift(ICrsGeographic from, ICrsGeocentric to) {
-			var operations = GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum);
-			operations.Insert(0, new GeographicGeocentricTransformation(from.Datum.Spheroid));
+		private List<ICoordinateOperationInfo> GenerateCoreDatumShift(ICrsGeographic from, ICrsGeocentric to){
+			var operations = new List<ICoordinateOperationInfo>{
+				new GeographicGeocentricTransformation(from.Datum.Spheroid)
+			};
+			operations.AddRange(GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum));
 			return operations;
 		}
 

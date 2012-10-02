@@ -1,1 +1,0 @@
-This is a version of Proj4 built using C++/CLI for use in testing. Pretty pretty please don't actually use this library for anything it would be better to use DotSpatial or a CLR port.
