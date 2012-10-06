@@ -5,7 +5,7 @@ using Pigeoid.Transformation;
 
 namespace Pigeoid
 {
-	public class GeneralCrsCoordinateTransformOperationGenerator : ICoordinateOperationGenerator<ICrs>
+	public class GeneralCrsCoordinateOperationPathGenerator : ICoordinateOperationPathGenerator<ICrs>
 	{
 
 		private static ICoordinateOperationInfo GenerateConcatenated(List<ICoordinateOperationInfo> operations) {

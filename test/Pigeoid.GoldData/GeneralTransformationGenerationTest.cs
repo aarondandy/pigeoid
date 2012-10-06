@@ -19,7 +19,7 @@ namespace Pigeoid.GoldData
 			Assert.IsNotNull(sourceCrs);
 			Assert.IsNotNull(targetCrs);
 
-			var operationGenerator = new GeneralCrsCoordinateTransformOperationGenerator();
+			var operationGenerator = new GeneralCrsCoordinateOperationPathGenerator();
 			var operation = operationGenerator.Generate(sourceCrs, targetCrs);
 			Assert.IsNotNull(operation);
 			Assert.Inconclusive();

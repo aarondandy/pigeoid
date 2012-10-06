@@ -1,6 +1,6 @@
 ﻿namespace Pigeoid.Contracts
 {
-	public interface ICoordinateOperationGenerator<in TItem>
+	public interface ICoordinateOperationPathGenerator<in TItem>
 	{
 		ICoordinateOperationInfo Generate(TItem from, TItem to);
 	}

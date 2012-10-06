@@ -44,9 +44,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vertesaur.Core, Version=0.5.0.15078, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Vertesaur.Core, Version=0.5.4660.21388, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.0-Dev-20120912-032239\lib\net40-client\Vertesaur.Core.dll</HintPath>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.756-Dev-20121004-065258\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -65,9 +65,10 @@
     </Compile>
     <Compile Include="Contracts\IConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IConcatenatedOperation.cs" />
-    <Compile Include="Contracts\ICoordinateOperationGenerator.cs" />
+    <Compile Include="Contracts\ICoordinateOperationPathGenerator.cs" />
     <Compile Include="Contracts\ICoordinateOperationInfo.cs" />
     <Compile Include="Contracts\ICoordinateOperationMethodInfo.cs" />
+    <Compile Include="Contracts\ICoordinateOperationToTransformationConverter.cs" />
     <Compile Include="Contracts\ICrs.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -117,7 +118,8 @@
     <Compile Include="Contracts\IUomConversion.cs" />
     <Compile Include="CoordinateOperationInfo.cs" />
     <Compile Include="CoordinateOperationInfoInverse.cs" />
-    <Compile Include="GeneralCrsCoordinateTransformOperationGenerator.cs" />
+    <Compile Include="CoreCoordinateOperationToTransformationConverter.cs" />
+    <Compile Include="GeneralCrsCoordinateOperationPathGenerator.cs" />
     <Compile Include="GeographicCoordinate.cs" />
     <Compile Include="GeographicHeightCoordinate.cs" />
     <Compile Include="Interop\CoordinateOperationStandardNames.cs" />

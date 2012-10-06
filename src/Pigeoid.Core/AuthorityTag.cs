@@ -1,6 +1,6 @@
 ﻿// TODO: source header
 
-using System.Diagnostics;
+using System;
 using Pigeoid.Contracts;
 
 namespace Pigeoid
@@ -10,42 +10,27 @@ namespace Pigeoid
 	/// </summary>
 	public class AuthorityTag : IAuthorityTag
 	{
-		/// <summary>
-		/// The authority name.
-		/// </summary>
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private readonly string _name;
-
-		/// <summary>
-		/// The authority code.
-		/// </summary>
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private readonly string _code;
-
+		
 		/// <summary>
 		/// Constructs a new authority tag.
 		/// </summary>
 		/// <param name="name">The authority name.</param>
 		/// <param name="code">The authority code.</param>
 		public AuthorityTag(string name, string code) {
-			_name = name;
-			_code = code;
+			Name = name;
+			Code = code;
 		}
 
 		/// <inheritdoc/>
-		public string Name {
-			get { return _name; }
-		}
+		public string Name { get; private set; }
 
 		/// <inheritdoc/>
-		public string Code {
-			get { return _code; }
-		}
+		public string Code { get; private set; }
 
 		public bool Equals(IAuthorityTag other) {
 			return null != other
-				&& Name.Equals(other.Name)
-				&& Code.Equals(other.Code);
+				&& String.Equals(Name, other.Name)
+				&& String.Equals(Code, other.Code);
 		}
 
 		public override bool Equals(object obj) {
@@ -57,7 +42,12 @@ namespace Pigeoid
 		}
 
 		public override string ToString() {
-			return Name + ':' + Code;
+			if (String.IsNullOrEmpty(Name))
+				return "Unknown";
+
+			return String.IsNullOrEmpty(Code)
+				? Name
+				: (Name + ':' + Code);
 		}
 
 	}

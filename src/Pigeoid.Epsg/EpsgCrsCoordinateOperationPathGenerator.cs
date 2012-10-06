@@ -7,9 +7,9 @@ using Vertesaur.Search;
 
 namespace Pigeoid.Epsg
 {
-	public class EpsgCrsCoordinateTransformOperationGenerator :
-		ICoordinateOperationGenerator<ICrs>,
-		ICoordinateOperationGenerator<EpsgCrs>
+	public class EpsgCrsCoordinateOperationPathGenerator :
+		ICoordinateOperationPathGenerator<ICrs>,
+		ICoordinateOperationPathGenerator<EpsgCrs>
 	{
 
 		private struct EpsgTransformGraphCost :
