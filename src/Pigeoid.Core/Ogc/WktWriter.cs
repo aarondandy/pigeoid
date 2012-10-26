@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 
@@ -17,10 +18,10 @@ namespace Pigeoid.Ogc
 		private string _indentationText;
 		private readonly TextWriter _writer;
 
-		public WktWriter(TextWriter writer, WktOptions options = null)
+		public WktWriter([NotNull] TextWriter writer, WktOptions options = null)
 			: this(writer, options, 0) { }
 
-		internal WktWriter(TextWriter writer, WktOptions options, int initialIndent) {
+		internal WktWriter([NotNull] TextWriter writer, [CanBeNull] WktOptions options, int initialIndent) {
 			if(null == writer)
 				throw new ArgumentNullException("writer");
 
@@ -60,14 +61,14 @@ namespace Pigeoid.Ogc
 		}
 
 		public void WriteRaw(string text) {
-			if (null != text) {
+			if (!String.IsNullOrEmpty(text)) {
 				_writer.Write(text);
 			}
 		}
 
 		public void WriteQuoted(string text) {
 			WriteQuote();
-			if (null != text){
+			if (!String.IsNullOrEmpty(text)) {
 				// TODO: some way to escape quotes within here?
 				_writer.Write(text);
 			}
@@ -90,6 +91,7 @@ namespace Pigeoid.Ogc
 			WriteIndentedNewLineIfPretty();
 		}
 
+		[ContractAnnotation("=>notnull")]
 		private static string GenerateTabs(int n) {
 			var text = new StringBuilder(n);
 			for (int i = n; i > 0; i--)
@@ -105,7 +107,7 @@ namespace Pigeoid.Ogc
 			_writer.WriteLine();
 		}
 
-		public void WriteValue(object value) {
+		public void WriteValue([CanBeNull] object value) {
 			value = value ?? String.Empty;
 			var isValueType = value.GetType().IsValueType;
 			var isNumber = isValueType && !(
@@ -130,7 +132,7 @@ namespace Pigeoid.Ogc
 				WriteQuoted(textOut);
 		}
 
-		public void Write(IAuthorityTag entity) {
+		public void Write([NotNull] IAuthorityTag entity) {
 			Write(WktKeyword.Authority);
 			WriteOpenParenthesis();
 			WriteQuoted(FixName(entity.Name));
@@ -139,7 +141,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(INamedParameter entity) {
+		public void Write([NotNull] INamedParameter entity) {
 			Write(WktKeyword.Parameter);
 			WriteOpenParenthesis();
 			WriteQuoted(FixName(entity.Name).ToLowerInvariant());
@@ -148,7 +150,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(ICoordinateOperationInfo entity) {
+		public void Write([NotNull] ICoordinateOperationInfo entity) {
 
 			if(entity is IPassThroughCoordinateOperationInfo) {
 				Write(entity as IPassThroughCoordinateOperationInfo);
@@ -187,7 +189,7 @@ namespace Pigeoid.Ogc
 			}
 		}
 
-		public void Write(IPassThroughCoordinateOperationInfo entity) {
+		public void Write([NotNull] IPassThroughCoordinateOperationInfo entity) {
 			Write(WktKeyword.PassThroughMt);
 			WriteOpenParenthesis();
 			WriteValue(entity.FirstAffectedOrdinate);
@@ -196,7 +198,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(IConcatenatedCoordinateOperationInfo entity){
+		public void Write([NotNull] IConcatenatedCoordinateOperationInfo entity) {
 			Write(WktKeyword.ConcatMt);
 			WriteOpenParenthesis();
 			Indent();
@@ -206,7 +208,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(ISpheroidInfo entity) {
+		public void Write([NotNull] ISpheroidInfo entity) {
 			Write(WktKeyword.Spheroid);
 			WriteOpenParenthesis();
 			Indent();
@@ -233,7 +235,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(IPrimeMeridianInfo entity) {
+		public void Write([NotNull] IPrimeMeridianInfo entity) {
 			Write(WktKeyword.PrimeMeridian);
 			WriteOpenParenthesis();
 			Indent();
@@ -249,7 +251,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(Helmert7Transformation helmert) {
+		public void Write([NotNull] Helmert7Transformation helmert) {
 			Write(WktKeyword.ToWgs84);
 			WriteOpenParenthesis();
 			WriteValue(helmert.D.X);
@@ -268,9 +270,9 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(IDatum entity) {
+		public void Write([NotNull] IDatum entity) {
 			var ogcDatumType = Options.ToDatumType(entity.Type);
-			if(Options.IsLocalDatum(ogcDatumType)) {
+			if(ogcDatumType == OgcDatumType.LocalOther) {
 				WriteBasicDatum(entity, WktKeyword.LocalDatum, ogcDatumType);
 			}
 			else if(Options.IsVerticalDatum(ogcDatumType)) {
@@ -281,7 +283,7 @@ namespace Pigeoid.Ogc
 			}
 		}
 
-		private void WriteGeoDatum(IDatum entity) {
+		private void WriteGeoDatum([NotNull] IDatum entity) {
 			var geodeticDatum = entity as IDatumGeodetic;
 			Write(WktKeyword.Datum);
 			WriteOpenParenthesis();
@@ -307,7 +309,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		private void WriteBasicDatum(IDatum entity, WktKeyword keyword, OgcDatumType ogcDatumType) {
+		private void WriteBasicDatum([NotNull] IDatum entity, WktKeyword keyword, OgcDatumType ogcDatumType) {
 			Write(keyword);
 			WriteOpenParenthesis();
 			WriteQuoted(entity.Name);
@@ -320,7 +322,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(IAxis entity) {
+		public void Write([NotNull] IAxis entity) {
 			Write(WktKeyword.Axis);
 			WriteOpenParenthesis();
 			WriteQuoted(entity.Name);
@@ -329,7 +331,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(ICrs entity) {
+		public void Write([NotNull] ICrs entity) {
 			if (entity is ICrsCompound)
 				Write(entity as ICrsCompound);
 			else if (entity is ICrsProjected)
@@ -348,7 +350,7 @@ namespace Pigeoid.Ogc
 				throw new NotSupportedException();
 		}
 
-		public void WriteCrs(ICrsGeodetic entity, WktKeyword keyword) {
+		public void WriteCrs([NotNull] ICrsGeodetic entity, WktKeyword keyword) {
 			Write(keyword);
 			WriteOpenParenthesis();
 			WriteQuoted(entity.Name);
@@ -375,7 +377,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(ICrsProjected entity) {
+		public void Write([NotNull] ICrsProjected entity) {
 			Write(WktKeyword.ProjectedCs);
 			WriteOpenParenthesis();
 			WriteQuoted(entity.Name);
@@ -414,7 +416,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		private void WriteProjection(ICoordinateOperationMethodInfo method) {
+		private void WriteProjection([NotNull] ICoordinateOperationMethodInfo method) {
 			Write(WktKeyword.Projection);
 			WriteOpenParenthesis();
 			WriteQuoted(FixName(method.Name));
@@ -425,7 +427,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(ICrsVertical entity) {
+		public void Write([NotNull] ICrsVertical entity) {
 			Write(WktKeyword.VerticalCs);
 			WriteOpenParenthesis();
 			WriteQuoted(entity.Name);
@@ -450,7 +452,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(ICrsLocal entity) {
+		public void Write([NotNull] ICrsLocal entity) {
 			Write(WktKeyword.LocalCs);
 			WriteOpenParenthesis();
 			WriteQuoted(entity.Name);
@@ -476,7 +478,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(ICrsFitted entity) {
+		public void Write([NotNull] ICrsFitted entity) {
 			Write(WktKeyword.FittedCs);
 			WriteOpenParenthesis();
 			WriteQuoted(entity.Name);
@@ -492,7 +494,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(ICrsCompound entity) {
+		public void Write([NotNull] ICrsCompound entity) {
 			Write(WktKeyword.CompoundCs);
 			WriteOpenParenthesis();
 			WriteQuoted(entity.Name);
@@ -512,7 +514,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write(IUom entity) {
+		public void Write([NotNull] IUom entity) {
 			Write(WktKeyword.Unit);
 			WriteOpenParenthesis();
 			WriteQuoted(entity.Name);
@@ -531,7 +533,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		private double GetReferenceFactor(IUom entity) {
+		private double GetReferenceFactor([NotNull] IUom entity) {
 			IUom convertTo;
 			if (StringComparer.OrdinalIgnoreCase.Equals("Length", entity.Type))
 				convertTo = OgcLinearUnit.DefaultMeter;
@@ -547,7 +549,7 @@ namespace Pigeoid.Ogc
 			return Double.NaN;
 		}
 
-		private void WriteEntityCollection<T>(IEnumerable<T> entities, Action<T> write) {
+		private void WriteEntityCollection<T>([NotNull] IEnumerable<T> entities, [NotNull] Action<T> write) {
 			using (var enumerator = entities.GetEnumerator()) {
 				if (!enumerator.MoveNext())
 					return;
@@ -559,7 +561,7 @@ namespace Pigeoid.Ogc
 			}
 		}
 
-		public void WriteEntity(object entity) {
+		public void WriteEntity([CanBeNull] object entity) {
 			if (null == entity)
 				WriteValue(null);
 			else if (entity is Helmert7Transformation)
@@ -593,7 +595,6 @@ namespace Pigeoid.Ogc
 		public void UnIndent() {
 			_indentationText = GenerateTabs(Interlocked.Decrement(ref _indent));
 		}
-
 
 	}
 }

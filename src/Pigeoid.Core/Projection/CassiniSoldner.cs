@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 using Vertesaur;
@@ -34,7 +35,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<CassiniSoldner,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(CassiniSoldner core) : base(core) { }
+			public Inverted([NotNull] CassiniSoldner core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 coordinate) {
 				var latp = (Core.MOriginYOffset + coordinate.Y) / Core.MLineCoefficient1Major;
@@ -74,7 +75,7 @@ namespace Pigeoid.Projection
 		public CassiniSoldner(
 			GeographicCoordinate naturalOrigin,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		) : base(falseProjectedOffset, spheroid) {
 			NaturalOrigin = naturalOrigin;
 
@@ -198,14 +199,14 @@ namespace Pigeoid.Projection
 			get { return "Cassini Soldner"; }
 		}
 
+		[NotNull]
 		public override IEnumerable<INamedParameter> GetParameters() {
 			return base.GetParameters().Concat(new INamedParameter[] {
-                new NamedParameter<double>(NamedParameter.NameLatitudeOfNaturalOrigin, NaturalOrigin.Latitude),
-                new NamedParameter<double>(NamedParameter.NameLongitudeOfNaturalOrigin, NaturalOrigin.Longitude)
-            });
+				new NamedParameter<double>(NamedParameter.NameLatitudeOfNaturalOrigin, NaturalOrigin.Latitude),
+				new NamedParameter<double>(NamedParameter.NameLongitudeOfNaturalOrigin, NaturalOrigin.Longitude)
+			});
 		}
-
-
+		
 		public bool Equals(CassiniSoldner other) {
 			return !ReferenceEquals(other, null)
 				&& (

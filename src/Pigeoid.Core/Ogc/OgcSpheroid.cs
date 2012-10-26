@@ -2,6 +2,7 @@
 
 using System;
 using Pigeoid.Contracts;
+using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Ogc
@@ -11,6 +12,14 @@ namespace Pigeoid.Ogc
 	/// </summary>
 	public class OgcSpheroid : OgcNamedAuthorityBoundEntity, ISpheroidInfo
 	{
+
+		public static readonly OgcSpheroid DefaultWgs84 = new OgcSpheroid(
+			new SpheroidEquatorialInvF(6378137, 298.257223563),
+			"WGS 84",
+			OgcLinearUnit.DefaultMeter,
+			new AuthorityTag("EPSG","7030")
+		);
+
 		/// <summary>
 		/// The spheroid data this OGC spheroid is based on.
 		/// </summary>

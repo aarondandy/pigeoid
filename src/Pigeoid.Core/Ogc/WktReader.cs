@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 using Vertesaur;
@@ -12,10 +13,11 @@ namespace Pigeoid.Ogc
 {
 	public class WktReader : IEnumerator<char>
 	{
+		private static readonly object[] _emptyObjectArray = new object[0];
 
 		private TextReader _reader;
 
-		public WktReader(TextReader reader, WktOptions options = null)
+		public WktReader([NotNull] TextReader reader, WktOptions options = null)
 		{
 			if(null == reader)
 				throw new ArgumentNullException("reader");
@@ -36,7 +38,7 @@ namespace Pigeoid.Ogc
 
 		object IEnumerator.Current { get { return Current; } }
 
-		public string FixName(string name) {
+		public string FixName([CanBeNull] string name) {
 			if (null == name)
 				return String.Empty;
 
@@ -152,48 +154,47 @@ namespace Pigeoid.Ogc
 			return ok;
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public object[] ReadParams() {
 			var paramResults = new List<object>();
 			while (true) {
 				if (!SkipWhiteSpace())
-					return null;
+					return _emptyObjectArray;
 
 				var paramEntity = ReadEntity();
 				if (null == paramEntity)
-					return null;
+					return _emptyObjectArray;
 
 				paramResults.Add(paramEntity);
 				if (!SkipWhiteSpace())
-					return null;
+					return _emptyObjectArray;
 
 				if (IsComma) {
 					if (!MoveNext())
-						return null;
+						return _emptyObjectArray;
 				}
 				else {
 					if (IsCloseBracket && ReadCloseBracket())
 						break;
 
-					return null;
+					return _emptyObjectArray;
 				}
 			}
 			return paramResults.ToArray();
 		}
 
-		public IAuthorityTag ReadAuthorityFromParams() {
-			var names = Array.ConvertAll(
-				ReadParams(),
-				x => null == x ? String.Empty : x.ToString()
-			);
+		[ContractAnnotation("=>canbenull")]
+		public IAuthorityTag ReadAuthorityFromParams(){
+			var names = Array.ConvertAll(ReadParams(), x => null == x ? String.Empty : x.ToString());
 			if (names.Length == 0)
 				return null;
 
 			var authorityName = names[0] ?? String.Empty;
 			var authorityCode = (names.Length > 1 ? names[1] : null) ?? String.Empty;
 
-			var tag = Options.ResolveAuthorities
-				? Options.GetAuthorityTag(authorityName, authorityCode)
-				: null;
+			IAuthorityTag tag = null;
+			if(Options.ResolveAuthorities)
+				tag = Options.GetAuthorityTag(authorityName, authorityCode);
 			return tag ?? new AuthorityTag(authorityName, authorityCode);
 		}
 
@@ -223,6 +224,7 @@ namespace Pigeoid.Ogc
 			}
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public IAxis ReadAxisFromParams() {
 			var directionKeyword = WktKeyword.Invalid;
 			string name = null;
@@ -239,6 +241,7 @@ namespace Pigeoid.Ogc
 			);
 		}
 
+		[ContractAnnotation("=>canbenull")]
 		public INamedParameter ReadParameterFromParams() {
 			var allParams = ReadParams();
 			if (allParams.Length == 0)
@@ -256,8 +259,9 @@ namespace Pigeoid.Ogc
 			return new NamedParameter<object>(name, value);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public ICoordinateOperationInfo ReadParamMtFromParams() {
-			string name = null;
+			string name = String.Empty;
 			var transformParams = new List<INamedParameter>();
 			foreach(var parameter in ReadParams()) {
 				if (parameter is string)
@@ -266,9 +270,6 @@ namespace Pigeoid.Ogc
 					transformParams.Add((INamedParameter)parameter);
 			}
 
-			if (name == null)
-				name = String.Empty;
-
 			return new CoordinateOperationInfo(
 				name,
 				transformParams,
@@ -276,18 +277,17 @@ namespace Pigeoid.Ogc
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public IConcatenatedCoordinateOperationInfo ReadConcatMtFromParams() {
-			return new ConcatenatedCoordinateOperationInfo(
-				ReadParams()
-				.OfType<ICoordinateOperationInfo>()
-			);
+			return new ConcatenatedCoordinateOperationInfo(ReadParams().OfType<ICoordinateOperationInfo>());
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public ICrsCompound ReadCompoundCsFromParams() {
 			IAuthorityTag authority = null;
 			ICrs headCrs = null;
 			ICrs tailCrs = null;
-			string name = null;
+			string name = String.Empty;
 			foreach(var parameter in ReadParams()) {
 				if(parameter is IAuthorityTag) {
 					if(null == authority)
@@ -311,13 +311,14 @@ namespace Pigeoid.Ogc
 			}
 
 			return new OgcCrsCompound(
-				name ?? String.Empty,
+				name,
 				headCrs,
 				tailCrs,
 				authority
 			);
 		}
 
+		[ContractAnnotation("=>canbenull")]
 		public ICrsProjected ReadProjectedCsFromParams() {
 			IAuthorityTag authority = null;
 			string name = null;
@@ -349,6 +350,9 @@ namespace Pigeoid.Ogc
 					return crs;
 			}
 
+			if (null == baseCrs)
+				return null;
+
 			return new OgcCrsProjected(
 				name ?? String.Empty,
 				baseCrs,
@@ -357,18 +361,19 @@ namespace Pigeoid.Ogc
 					operationParameters,
 					operationMethodInfo
 				), 
-				linearUnit,
+				linearUnit ?? OgcLinearUnit.DefaultMeter,
 				axes,
 				authority
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		private ICrsGeocentric ReadGeocentricCsFromParams() {
 			IAuthorityTag authority = null;
-			string name = null;
+			var name = String.Empty;
 			IDatumGeodetic datum = null;
 			IPrimeMeridianInfo primeMeridian = null;
-			IUom unit = null;
+			IUom unit = OgcLinearUnit.DefaultMeter;
 			var axes = new List<IAxis>();
 
 			foreach(var parameter in ReadParams()) {
@@ -394,7 +399,7 @@ namespace Pigeoid.Ogc
 
 			if(null != datum && datum.PrimeMeridian == null && null != primeMeridian) {
 				// in this case the datum must have NOT been created from an authority source so we should remake it with a prime meridian
-				datum =  new OgcDatumHorizontal(
+				datum = new OgcDatumHorizontal(
 					datum.Name,
 					datum.Spheroid,
 					primeMeridian,
@@ -404,17 +409,18 @@ namespace Pigeoid.Ogc
 			}
 
 			return new OgcCrsGeocentric(
-				name ?? String.Empty,
-				datum,
+				name,
+				datum ?? OgcDatumHorizontal.DefaultWgs84,
 				unit,
 				axes,
 				authority
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public ICrsVertical ReadVerticalCsFromParams() {
 			IAuthorityTag authority = null;
-			string name = null;
+			var name = String.Empty;
 			IDatum datum = null;
 			IUom uom = null;
 			IAxis axis = null;
@@ -438,7 +444,7 @@ namespace Pigeoid.Ogc
 			}
 
 			return new OgcCrsVertical(
-				name ?? String.Empty,
+				name,
 				datum,
 				uom,
 				axis,
@@ -446,8 +452,9 @@ namespace Pigeoid.Ogc
 			);
 		}
 
+		[ContractAnnotation("=>canbenull")]
 		private ICrsFitted ReadFittedCsFromParams() {
-			string name = null;
+			var name = String.Empty;
 			ICoordinateOperationInfo toBaseOperation = null;
 			ICrs baseCrs = null;
 			foreach(var parameter in ReadParams()) {
@@ -459,16 +466,20 @@ namespace Pigeoid.Ogc
 					baseCrs = (ICrs)parameter;
 			}
 
+			if (null == toBaseOperation || null == baseCrs)
+				return null;
+
 			return new OgcCrsFitted(
-				name ?? String.Empty,
+				name,
 				toBaseOperation,
 				baseCrs
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		private ICrsLocal ReadLocalCsFromParams() {
 			IAuthorityTag authority = null;
-			string name = null;
+			var name = String.Empty;
 			IDatum datum = null;
 			IUom unit = null;
 			var axes = new List<IAxis>();
@@ -492,7 +503,7 @@ namespace Pigeoid.Ogc
 			}
 
 			return new OgcCrsLocal(
-				name ?? String.Empty,
+				name,
 				datum,
 				unit,
 				axes,
@@ -500,12 +511,13 @@ namespace Pigeoid.Ogc
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		private ICrsGeographic ReadGeographicCsFromParams() {
 			IAuthorityTag authority = null;
-			string name = null;
+			var name = String.Empty;
 			IDatumGeodetic datum = null;
 			IPrimeMeridianInfo primeMeridian = null;
-			IUom unit = null;
+			IUom unit = OgcAngularUnit.DefaultDegrees;
 			var axes = new List<IAxis>();
 			foreach(var parameter in ReadParams()) {
 				if (parameter is string)
@@ -540,14 +552,15 @@ namespace Pigeoid.Ogc
 			}
 
 			return new OgcCrsGeographic(
-				name ?? String.Empty,
-				datum,
+				name,
+				datum ?? OgcDatumHorizontal.DefaultWgs84,
 				unit,
 				axes,
 				authority
 			);
 		}
 
+		[ContractAnnotation("=>canbenull")]
 		public ICoordinateOperationInfo ReadInverseFromParams() {
 			var nestedOperation = ReadParams()
 				.OfType<ICoordinateOperationInfo>()
@@ -555,24 +568,31 @@ namespace Pigeoid.Ogc
 			return null != nestedOperation ? nestedOperation.GetInverse() : null;
 		}
 
+		[ContractAnnotation("=>canbenull")]
 		public ICoordinateOperationInfo ReadPassThroughFromParams() {
-			int? index = null;
+			int index = 0;
 			ICoordinateOperationInfo coordinateOperationInfo = null;
 			foreach(var parameter in ReadParams()) {
-				if (!index.HasValue && (parameter is int || parameter is double))
+				if (parameter is int)
+					index = (int) parameter;
+				else if (parameter is double)
 					index = Convert.ToInt32(parameter);
 				else if (null == coordinateOperationInfo && parameter is ICoordinateOperationInfo)
 					coordinateOperationInfo = (ICoordinateOperationInfo)parameter;
 			}
 
+			if (null == coordinateOperationInfo)
+				return null;
+
 			return new OgcPassThroughCoordinateOperationInfo(
 				coordinateOperationInfo,
-				index ?? 0
+				index
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public ISpheroidInfo ReadSpheroidFromParams() {
-			string name = null;
+			var name = String.Empty;
 			double? majorAxis = null;
 			double? inverseF = null;
 			IAuthorityTag authority = null;
@@ -603,16 +623,17 @@ namespace Pigeoid.Ogc
 					majorAxis ?? Double.NaN,
 					inverseF ?? Double.NaN
 				),
-				name ?? String.Empty,
+				name,
 				OgcLinearUnit.DefaultMeter,
 				authority
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public IPrimeMeridianInfo ReadPrimeMeridianFromParams() {
 			IAuthorityTag authority = null;
-			string name = null;
-			double? longitude = null;
+			var name = String.Empty;
+			double longitude = 0;
 			foreach (var parameter in ReadParams()) {
 				if (parameter is string)
 					name = (string)parameter;
@@ -629,16 +650,17 @@ namespace Pigeoid.Ogc
 			}
 
 			return new OgcPrimeMeridian(
-				name ?? String.Empty,
-				longitude ?? 0,
+				name,
+				longitude,
 				OgcAngularUnit.DefaultDegrees,// TODO: from options?
 				authority
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public IDatumGeodetic ReadHorizontalDatumFromParams() {
 			IAuthorityTag authority = null;
-			string name = null;
+			var name = String.Empty;
 			ISpheroidInfo spheroid = null;
 			Helmert7Transformation toWgs84 = null;
 			IPrimeMeridianInfo primeMeridian = null;
@@ -662,18 +684,19 @@ namespace Pigeoid.Ogc
 			}
 
 			return new OgcDatumHorizontal(
-				name ?? String.Empty,
-				spheroid,
+				name,
+				spheroid ?? OgcSpheroid.DefaultWgs84,
 				primeMeridian,
 				toWgs84,
 				authority
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public IDatum ReadBasicDatumFromParams(OgcDatumType defaultDatumType) {
 			IAuthorityTag authority = null;
-			string name = null;
-			OgcDatumType? datumType = null;
+			var name = String.Empty;
+			var datumType = OgcDatumType.None;
 			foreach(var parameter in ReadParams()) {
 				if (parameter is string)
 					name = (string)parameter;
@@ -692,15 +715,16 @@ namespace Pigeoid.Ogc
 			}
 
 			return new OgcDatum(
-				name ?? String.Empty,
-				datumType ?? OgcDatumType.None,
+				name,
+				datumType,
 				authority
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		private ICoordinateOperationMethodInfo ReadCoordinateOperationMethodFromParams() {
 			IAuthorityTag authority = null;
-			string name = null;
+			var name = String.Empty;
 			foreach(var parameter in ReadParams()) {
 				if (parameter is string)
 					name = (string)parameter;
@@ -715,11 +739,12 @@ namespace Pigeoid.Ogc
 			}
 
 			return new OgcCoordinateOperationMethodInfo(
-				name ?? String.Empty,
+				name,
 				authority
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public Helmert7Transformation ReadToWgs84FromParams() {
 			var allDoubles = ReadParams().OfType<double>().ToList();
 
@@ -733,10 +758,11 @@ namespace Pigeoid.Ogc
 			);
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public IUom ReadUnitFromParams(bool isLength = true) {
 			IAuthorityTag authority = null;
-			string name = null;
-			double? factor = null;
+			var name = String.Empty;
+			var factor = 1.0;
 
 			foreach(var parameter in ReadParams()) {
 				if (parameter is IAuthorityTag)
@@ -753,14 +779,12 @@ namespace Pigeoid.Ogc
 					return unit;
 			}
 
-			if (!factor.HasValue)
-				factor = 1.0; // I guess just assume the standard unit
-
 			return isLength
-				? (IUom)new OgcLinearUnit(name, factor.Value, authority)
-				: new OgcAngularUnit(name, factor.Value, authority);
+				? (IUom)new OgcLinearUnit(name, factor, authority)
+				: new OgcAngularUnit(name, factor, authority);
 		}
 
+		[ContractAnnotation("=>canbenull")]
 		public object ReadObject() {
 			var keyword = ReadKeyword();
 			if (WktKeyword.Invalid == keyword) { return null; }
@@ -779,6 +803,7 @@ namespace Pigeoid.Ogc
 			if (!ReadOpenBracket()) {
 				return null;
 			}
+
 			switch (keyword) {
 			case WktKeyword.Axis:
 				return ReadAxisFromParams();
@@ -829,6 +854,7 @@ namespace Pigeoid.Ogc
 			}
 		}
 
+		[ContractAnnotation("=>canbenull")]
 		public object ReadEntity() {
 			if (!SkipWhiteSpace())
 				return null;
@@ -841,16 +867,16 @@ namespace Pigeoid.Ogc
 			return null;
 		}
 
-		private WktKeyword ReadKeywordSubmatch(string submatch, WktKeyword keyword) {
-			return ReadKeywordSubmatch(submatch) ? keyword : WktKeyword.Invalid;
+		private WktKeyword ReadKeywordSubmatch(string subMatch, WktKeyword keyword) {
+			return ReadKeywordSubmatch(subMatch) ? keyword : WktKeyword.Invalid;
 		}
 
-		private bool ReadKeywordSubmatch(string submatch) {
-			for (var i = 0; i < submatch.Length; i++) {
+		private bool ReadKeywordSubmatch([NotNull] string subMatch) {
+			for (var i = 0; i < subMatch.Length; i++) {
 				if (
-					(CurrentUpperInvariant != submatch[i])
+					(CurrentUpperInvariant != subMatch[i])
 					||
-					(!MoveNext() && (i + 1) != submatch.Length)
+					(!MoveNext() && (i + 1) != subMatch.Length)
 				) {
 					return false;
 				}

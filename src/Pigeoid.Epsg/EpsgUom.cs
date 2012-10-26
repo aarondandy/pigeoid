@@ -88,9 +88,9 @@ namespace Pigeoid.Epsg
 		public IEnumerable<IUom> ConvertibleFrom { get { return new[] { GetBaseUnit() }; } }
 
 		public IUomConversion<double> GetConversionTo(IUom uom) {
+			// ReSharper disable CompareOfFloatsByEqualityOperator
 			if(null == uom)
 				throw new ArgumentNullException("uom");
-
 			if (0 == FactorC)
 				return null;
 
@@ -100,7 +100,7 @@ namespace Pigeoid.Epsg
 				return new UomRatioConversion(this, uom, FactorB, FactorC);
 			}
 			return null;
-
+			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		public IUomConversion<double> GetConversionFrom(IUom uom) {

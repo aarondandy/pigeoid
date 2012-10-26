@@ -14,7 +14,7 @@ namespace Pigeoid.Ogc
 	public class OgcLinearUnit : OgcUnitBase
 	{
 
-		private static readonly OgcLinearUnit DefaultMeterUnit = new OgcLinearUnit("Meter", 1);
+		private static readonly OgcLinearUnit DefaultMeterUnit = new OgcLinearUnit("Meter", 1, new AuthorityTag("EPSG","9001"));
 		private static readonly ReadOnlyCollection<OgcLinearUnit> DefaultBaseUnitList = Array.AsReadOnly(new[]{DefaultMeterUnit});
 
 		/// <summary>

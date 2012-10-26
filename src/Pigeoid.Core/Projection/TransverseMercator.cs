@@ -7,7 +7,6 @@ using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
-using Vertesaur.Periodic;
 
 namespace Pigeoid.Projection
 {
@@ -41,6 +40,7 @@ namespace Pigeoid.Projection
 
 			public override GeographicCoordinate TransformValue(Point2 coordinate)
 			{
+				// ReSharper disable CompareOfFloatsByEqualityOperator
 				var n = (coordinate.X - Core.FalseProjectedOffset.X)
 					/ PrimaryScaleFactor;
 				var c = (
@@ -67,14 +67,15 @@ namespace Pigeoid.Projection
 				{
 					var oldQ = q;
 					q = qPrime + (Core.E*ArcTanH(Core.E * Math.Tanh(q)));
-					if (q == oldQ) break;
+					if (q == oldQ)
+						break;
 				}
 
 				return new GeographicCoordinate(
 					Math.Atan(Math.Sinh(q)),
 					Core.NaturalOrigin.Longitude + Math.Asin(Math.Tanh(n0) / Math.Cos(beta))
 				);
-
+				// ReSharper restore CompareOfFloatsByEqualityOperator
 			}
 
 		}
@@ -112,6 +113,7 @@ namespace Pigeoid.Projection
 			ISpheroid<double> spheroid
 		) : base(falseProjectedOffset, spheroid)
 		{
+			// ReSharper disable CompareOfFloatsByEqualityOperator
 			NaturalOrigin = naturalOrigin;
 			ScaleFactor = scaleFactor;
 			var n = Spheroid.F/(2.0 - Spheroid.F);
@@ -159,7 +161,7 @@ namespace Pigeoid.Projection
 				var goo4 = Coefficient4 * Math.Sin(8 * goo0);
 				MOrigin = (goo0 + goo1 + goo2 + goo3 + goo4) * ValueB;
 			}
-			
+			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {

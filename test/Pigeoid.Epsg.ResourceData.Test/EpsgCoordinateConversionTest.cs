@@ -23,7 +23,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 				databaseItems,
 				new Tester((x, y) => x.Code == y.Code),
 				new Tester((x, y) => x.Name == y.Name),
-				new Tester((x, y) => x.OperationMethodInfo.Code == y.Method.Code),
+				new Tester((x, y) => x.Method.Code == y.Method.Code),
 				new Tester((x, y) => x.Area.Code == y.Area.Code),
 				new Tester((x, y) => x.Deprecated == y.Deprecated)
 			);

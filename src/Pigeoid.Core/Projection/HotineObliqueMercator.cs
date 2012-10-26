@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using Vertesaur;
 using Vertesaur.Contracts;
 
@@ -23,7 +24,7 @@ namespace Pigeoid.Projection
 		protected bool NegativeCenterLatitude;
 		protected bool HighAzimuth;
 
-		public HotineObliqueMercator(GeographicCoordinate geographicCenter, double azimuthOfInitialLine, double angleFromRectified, double scaleFactor, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
+		public HotineObliqueMercator(GeographicCoordinate geographicCenter, double azimuthOfInitialLine, double angleFromRectified, double scaleFactor, Vector2 falseProjectedOffset, [NotNull] ISpheroid<double> spheroid)
 			: base(falseProjectedOffset, spheroid)
 		{
 			GeographicCenter = geographicCenter;
@@ -75,7 +76,6 @@ namespace Pigeoid.Projection
 
 		public override Point2 TransformValue(GeographicCoordinate source)
 		{
-			var vc = 0.0;
 			double uc;
 			if(HighAzimuth)
 			{

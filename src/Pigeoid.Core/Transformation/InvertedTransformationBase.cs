@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Transformation
@@ -14,7 +15,7 @@ namespace Pigeoid.Transformation
 
 		private readonly TCore _core;
 
-		protected InvertedTransformationBase(TCore core) {
+		protected InvertedTransformationBase([NotNull] TCore core) {
 			if (!core.HasInverse)
 				throw new ArgumentException("Core cannot be inverted.");
 			_core = core;
@@ -39,7 +40,7 @@ namespace Pigeoid.Transformation
 
 		public abstract TTarget TransformValue(TSource value);
 
-		public IEnumerable<TTarget> TransformValues(IEnumerable<TSource> values) {
+		[NotNull] public IEnumerable<TTarget> TransformValues([NotNull] IEnumerable<TSource> values) {
 			return values.Select(TransformValue);
 		}
 
@@ -51,7 +52,7 @@ namespace Pigeoid.Transformation
 		where TCore : ITransformation<TCoordinate>
 	{
 
-		protected InvertedTransformationBase(TCore core)
+		protected InvertedTransformationBase([NotNull] TCore core)
 			: base(core) { }
 
 		public override abstract TCoordinate TransformValue(TCoordinate value);
@@ -60,7 +61,7 @@ namespace Pigeoid.Transformation
 			return base.GetInverse() as ITransformation<TCoordinate>;
 		}
 
-		public void TransformValues(TCoordinate[] values) {
+		public void TransformValues([NotNull] TCoordinate[] values) {
 			for (int i = 0; i < values.Length; i++) {
 				TransformValue(ref values[i]);
 			}

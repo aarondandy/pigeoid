@@ -1,7 +1,5 @@
 ﻿// TODO: source header
 
-using System.Collections.Generic;
-
 namespace Pigeoid.Contracts
 {
 	/// <summary>
@@ -9,8 +7,6 @@ namespace Pigeoid.Contracts
 	/// </summary>
 	public interface ICrsCompound : ICrs
 	{
-
-
 
 		ICrs Head { get; }
 

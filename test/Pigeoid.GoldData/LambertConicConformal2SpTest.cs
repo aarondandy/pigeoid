@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using Pigeoid.Projection;
 using Vertesaur;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.GoldData
 {

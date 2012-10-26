@@ -6,7 +6,6 @@ using Pigeoid.Contracts;
 using Pigeoid.Ogc;
 using Pigeoid.Transformation;
 using Vertesaur;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.GoldData
 {

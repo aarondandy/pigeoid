@@ -1,7 +1,6 @@
 ﻿// TODO: source header
 
 using Pigeoid.Transformation;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Contracts
 {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Epsg.Resources;
 
@@ -48,6 +49,7 @@ namespace Pigeoid.Epsg
 				_reverseIndex = reverseIndex;
 			}
 
+			[CanBeNull]
 			public ReadOnlyCollection<int> GetProjectionCodesBasedOn(int baseCrsCode) {
 				int[] rawList;
 				return baseCrsCode >= 0

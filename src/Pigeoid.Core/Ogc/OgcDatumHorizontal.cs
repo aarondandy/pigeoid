@@ -1,6 +1,7 @@
 ﻿// TODO: source header
 
 using System;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 
@@ -11,6 +12,15 @@ namespace Pigeoid.Ogc
 	/// </summary>
 	public class OgcDatumHorizontal : OgcDatum, IDatumGeodetic
 	{
+
+		public static readonly OgcDatumHorizontal DefaultWgs84 = new OgcDatumHorizontal(
+			"WGS_1984",
+			OgcSpheroid.DefaultWgs84,
+			OgcPrimeMeridian.DefaultGreenwich,
+			Helmert7Transformation.IdentityTransformation,
+			new AuthorityTag("EPSG","6326")
+		);
+
 		private readonly ISpheroidInfo _spheroid;
 		private readonly IPrimeMeridianInfo _primeMeridian;
 		private readonly Helmert7Transformation _transformation;
@@ -25,7 +35,7 @@ namespace Pigeoid.Ogc
 		/// <param name="authority">The authority.</param>
 		public OgcDatumHorizontal(
 			string name,
-			ISpheroidInfo spheroid,
+			[NotNull] ISpheroidInfo spheroid,
 			IPrimeMeridianInfo primeMeridian,
 			Helmert7Transformation transform,
 			IAuthorityTag authority = null
@@ -35,9 +45,9 @@ namespace Pigeoid.Ogc
 			if (null == spheroid)
 				throw new ArgumentNullException("spheroid");
 
+			_spheroid = spheroid;
 			_primeMeridian = primeMeridian;
 			_transformation = transform;
-			_spheroid = spheroid;
 		}
 
 		public IPrimeMeridianInfo PrimeMeridian {
@@ -53,5 +63,7 @@ namespace Pigeoid.Ogc
 		}
 
 		public Helmert7Transformation BasicWgs84Transformation { get { return _transformation; } }
+
+		
 	}
 }

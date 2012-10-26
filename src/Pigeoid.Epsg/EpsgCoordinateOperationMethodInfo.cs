@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Epsg.Resources;
 
@@ -191,15 +192,15 @@ namespace Pigeoid.Epsg
 		public class OpParamValueInfo
 		{
 			private readonly ushort _opCode;
-			private readonly INamedParameter[] _values;
+			private readonly ReadOnlyCollection<INamedParameter> _values;
 
-			internal OpParamValueInfo(ushort opCode, INamedParameter[] values) {
+			internal OpParamValueInfo(ushort opCode, [NotNull] INamedParameter[] values) {
 				_opCode = opCode;
-				_values = values;
+				_values = Array.AsReadOnly(values);
 			}
 
 			public int OpCode { get { return _opCode; }}
-			public ReadOnlyCollection<INamedParameter> Values { get { return Array.AsReadOnly(_values); }}
+			public ReadOnlyCollection<INamedParameter> Values { [NotNull] get { return _values; } }
 		}
 
 		internal static readonly EpsgCoordinateOperationMethodInfoLookUp LookUp = new EpsgCoordinateOperationMethodInfoLookUp();

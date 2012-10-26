@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
@@ -9,7 +10,7 @@ namespace Pigeoid.Ogc
 
 		private readonly ICoordinateOperationInfo _core;
 
-		public OgcPassThroughCoordinateOperationInfo(ICoordinateOperationInfo core, int firstAffectedOrdinate) {
+		public OgcPassThroughCoordinateOperationInfo([NotNull] ICoordinateOperationInfo core, int firstAffectedOrdinate) {
 			if(null == core)
 				throw new ArgumentNullException("core");
 

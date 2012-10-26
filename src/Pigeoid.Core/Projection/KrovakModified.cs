@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -14,7 +15,8 @@ namespace Pigeoid.Projection
 		{
 			private readonly ITransformation<Point2,GeographicCoordinate> InvertedCore;
 
-			public Inverse(KrovakModified core) : base(core)
+			public Inverse([NotNull] KrovakModified core)
+				: base(core)
 			{
 				InvertedCore = core.Core.GetInverse();
 			}
@@ -76,9 +78,9 @@ namespace Pigeoid.Projection
 			double azimuthOfInitialLine,
 			double scaleFactor,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid,
+			[NotNull] ISpheroid<double> spheroid,
 			Point2 evaluationPoint,
-			double[] constants
+			[NotNull] double[] constants
 		) : this(new Krovak(
 			geographicOrigin,
 			latitudeOfPseudoStandardParallel,
@@ -88,7 +90,7 @@ namespace Pigeoid.Projection
 			spheroid
 		), falseProjectedOffset, evaluationPoint, constants) { }
 
-		private KrovakModified(Krovak core, Vector2 falseProjectedOffset, Point2 evaluationPoint, double[] constants)
+		private KrovakModified([NotNull] Krovak core, Vector2 falseProjectedOffset, Point2 evaluationPoint, [NotNull] double[] constants)
 		{
 			if(null == core) throw new ArgumentNullException("core");
 			if(null == constants) throw new ArgumentNullException("constants");

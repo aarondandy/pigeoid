@@ -228,6 +228,7 @@ namespace Pigeoid.Transformation
 		}
 
 		public override string ToString(){
+			// ReSharper disable CompareOfFloatsByEqualityOperator
 			var result = Name + ' ' + D;
 			var writeM = 0 != Mppm;
 
@@ -239,6 +240,7 @@ namespace Pigeoid.Transformation
 			}
 			
 			return result;
+			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 	}
 }

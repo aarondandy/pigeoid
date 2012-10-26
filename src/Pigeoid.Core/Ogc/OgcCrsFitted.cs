@@ -2,7 +2,7 @@
 
 using System;
 using Pigeoid.Contracts;
-using Vertesaur.Contracts;
+using JetBrains.Annotations;
 
 namespace Pigeoid.Ogc
 {
@@ -22,8 +22,13 @@ namespace Pigeoid.Ogc
 		/// <param name="name">The name.</param>
 		/// <param name="toBaseOperation">The operation which converts to <paramref name="baseCrs"/>.</param>
 		/// <param name="baseCrs">The base CRS.</param>
-		public OgcCrsFitted(string name, ICoordinateOperationInfo toBaseOperation, ICrs baseCrs, IAuthorityTag authority = null)
-			:base(name,authority) {
+		/// <param name="authority">The authority code of the CRS.</param>
+		public OgcCrsFitted(
+			string name,
+			[NotNull] ICoordinateOperationInfo toBaseOperation,
+			[NotNull] ICrs baseCrs,
+			IAuthorityTag authority = null
+		) :base(name,authority) {
 			if (null == toBaseOperation)
 				throw new ArgumentNullException("toBaseOperation");
 			if (null == baseCrs)

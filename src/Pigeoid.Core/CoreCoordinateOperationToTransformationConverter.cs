@@ -7,8 +7,6 @@ namespace Pigeoid
 	public class CoreCoordinateOperationToTransformationConverter : ICoordinateOperationToTransformationConverter
 	{
 
-		public CoreCoordinateOperationToTransformationConverter() { }
-
 		public ITransformation Convert(ICoordinateOperationInfo operation) {
 			if(null == operation)
 				throw new ArgumentNullException("operation");

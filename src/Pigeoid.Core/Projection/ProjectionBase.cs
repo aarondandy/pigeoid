@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -24,7 +25,7 @@ namespace Pigeoid.Projection
 		/// <summary>
 		/// The false projected offset.
 		/// </summary>
-		public Vector2 FalseProjectedOffset;
+		public readonly Vector2 FalseProjectedOffset;
 		/// <summary>
 		/// The spheroid.
 		/// </summary>
@@ -32,11 +33,11 @@ namespace Pigeoid.Projection
 
 		protected ProjectionBase(
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		) {
-			if (null == spheroid) {
+			if (null == spheroid)
 				throw new ArgumentNullException("spheroid");
-			}
+
 			Spheroid = spheroid;
 			FalseProjectedOffset = falseProjectedOffset;
 			MajorAxis = spheroid.A;
@@ -47,7 +48,7 @@ namespace Pigeoid.Projection
 
 		public abstract Point2 TransformValue(GeographicCoordinate source);
 
-		public virtual IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values) {
+		[NotNull] public virtual IEnumerable<Point2> TransformValues([NotNull] IEnumerable<GeographicCoordinate> values) {
 			return values.Select(TransformValue);
 		}
 
@@ -59,14 +60,13 @@ namespace Pigeoid.Projection
 			return GetInverse();
 		}
 
-		public virtual IEnumerable<INamedParameter> GetParameters() {
-			return new INamedParameter[]
-            {
-                new NamedParameter<double>(NamedParameter.NameFalseEasting, FalseProjectedOffset.X), 
-                new NamedParameter<double>(NamedParameter.NameFalseNorthing, FalseProjectedOffset.Y),
-                new NamedParameter<double>("semi major", Spheroid.A),
-                new NamedParameter<double>("semi minor", Spheroid.B)
-            };
+		[NotNull] public virtual IEnumerable<INamedParameter> GetParameters() {
+			return new INamedParameter[] {
+				new NamedParameter<double>(NamedParameter.NameFalseEasting, FalseProjectedOffset.X), 
+				new NamedParameter<double>(NamedParameter.NameFalseNorthing, FalseProjectedOffset.Y),
+				new NamedParameter<double>("semi major", Spheroid.A),
+				new NamedParameter<double>("semi minor", Spheroid.B)
+			};
 		}
 
 		public abstract string Name { get; }

@@ -59,7 +59,6 @@ namespace Pigeoid.GoldData
 					), 
 					spheroid
 				);
-				;
 			}
 
 			var inverse = projection.GetInverse();

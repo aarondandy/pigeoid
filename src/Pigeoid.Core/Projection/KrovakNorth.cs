@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Vertesaur;
 using Vertesaur.Contracts;
 
@@ -17,7 +18,7 @@ namespace Pigeoid.Projection
 			double azimuthOfInitialLine,
 			double scaleFactor,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		) : this(new Krovak(
 			geographicOrigin,
 			latitudeOfPseudoStandardParallel,
@@ -27,7 +28,7 @@ namespace Pigeoid.Projection
 			spheroid
 		)) { }
 
-		public KrovakNorth(Krovak core)
+		public KrovakNorth([NotNull] Krovak core)
 		{
 			if(null == core) throw new ArgumentNullException("core");
 			Core = core;
@@ -35,7 +36,7 @@ namespace Pigeoid.Projection
 
 		internal class Inverse : Krovak.Inverse
 		{
-			public Inverse(Krovak core) : base(core) { }
+			public Inverse([NotNull] Krovak core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 value)
 			{
@@ -45,7 +46,7 @@ namespace Pigeoid.Projection
 
 		public ITransformation<Point2, GeographicCoordinate> GetInverse()
 		{
-			return new KrovakNorth.Inverse(Core);
+			return new Inverse(Core);
 		}
 
 		public Point2 TransformValue(GeographicCoordinate source)

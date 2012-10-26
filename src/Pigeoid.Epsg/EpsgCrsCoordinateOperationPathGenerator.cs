@@ -86,6 +86,7 @@ namespace Pigeoid.Epsg
 					results.Add(new DynamicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>(
 						crs , currentCost.Add(1, 0), op));
 				}
+
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(nodeCode)) {
 					if(!op.HasInverse)
 						continue;
@@ -103,6 +104,7 @@ namespace Pigeoid.Epsg
 					results.Add(new DynamicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>(
 						crs, currentCost.Add(1, 0), op));
 				}
+
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetTransformReverseReferenced(nodeCode)) {
 					if(!op.HasInverse)
 						continue;
@@ -129,15 +131,22 @@ namespace Pigeoid.Epsg
 
 		public ICoordinateOperationInfo Generate(EpsgCrs from, EpsgCrs to) {
 			var graph = new EpsgTransformGraph(from.Area, to.Area);
-			
+
+#if DEBUG
 			var execTimer = new Stopwatch();
 			execTimer.Start();
-			
+#endif	
+
 			var path = graph.FindPath(from, to);
-			
+
+#if DEBUG
 			execTimer.Stop();
 			var elapsed = execTimer.Elapsed;
-			Debug.Write("GenerateCore: " + elapsed);
+			Debug.Write("FindPath: " + elapsed);
+#endif
+
+			if (null == path)
+				return null;
 
 			return GenerateConcatenated(
 				path
@@ -158,7 +167,5 @@ namespace Pigeoid.Epsg
 		}
 
 	}
-
-
 
 }

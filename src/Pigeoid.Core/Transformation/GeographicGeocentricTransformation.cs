@@ -99,9 +99,9 @@ namespace Pigeoid.Transformation
 			return values.Select(TransformValue);
 		}
 
-		public bool HasInverse {
-			get { return 0 != MajorAxis; }
-		}
+// ReSharper disable CompareOfFloatsByEqualityOperator
+		public bool HasInverse { get { return 0 != MajorAxis; } }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 
 		public GeographicGeocentricTransformation GetInverse() {
 			if (!HasInverse)

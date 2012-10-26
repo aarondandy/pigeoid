@@ -1,6 +1,5 @@
 ﻿// TODO: source header
 
-using System;
 using System.Collections.Generic;
 
 namespace Pigeoid.Contracts

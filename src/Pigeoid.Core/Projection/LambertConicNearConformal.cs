@@ -25,6 +25,7 @@ namespace Pigeoid.Projection
 
 			public override GeographicCoordinate TransformValue(Point2 value)
 			{
+				// ReSharper disable CompareOfFloatsByEqualityOperator
 				var eastOffset = value.X - Core.FalseProjectedOffset.X;
 				var northOffset = _northOffsetBase - value.Y;
 				var mBase = Math.Sqrt(
@@ -87,6 +88,7 @@ namespace Pigeoid.Projection
 					+ Core.GeographicOrigin.Longitude
 				);
 			}
+			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		/// <summary>

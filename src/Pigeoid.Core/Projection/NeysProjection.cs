@@ -24,10 +24,7 @@ namespace Pigeoid.Projection
 			geographicOrigin.Latitude >= 0 ? MaximumLatitude : -MaximumLatitude,
 			falseProjectedOffset,
 			spheroid
-		)
-		{
-			;
-		}
+		) { }
 
 		public override string Name
 		{

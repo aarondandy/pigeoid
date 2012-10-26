@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
@@ -29,24 +30,25 @@ namespace Pigeoid.Ogc
 		/// <param name="authority">The authority.</param>
 		public OgcCrsProjected(
 			string name,
-			ICrsGeodetic baseCrs,
-			ICoordinateOperationInfo projection,
-			IUom linearUnit,
-			IEnumerable<IAxis> axes,
+			[NotNull] ICrsGeodetic baseCrs,
+			[NotNull] ICoordinateOperationInfo projection,
+			[NotNull] IUom linearUnit,
+			[CanBeNull] IEnumerable<IAxis> axes,
 			IAuthorityTag authority = null
 		)
 			: base(name, authority) {
 
 			if (null == baseCrs)
 				throw new ArgumentNullException("baseCrs");
-			if (null == linearUnit)
-				throw new ArgumentNullException("linearUnit");
 			if (null == projection)
 				throw new ArgumentNullException("projection");
+			if (null == linearUnit)
+				throw new ArgumentNullException("linearUnit");
 
 			_baseCrs = baseCrs;
-			_unit = linearUnit;
 			_projection = projection;
+			_unit = linearUnit;
+
 			_axes = Array.AsReadOnly(null == axes ? new IAxis[0] : axes.ToArray());
 		}
 
@@ -72,7 +74,7 @@ namespace Pigeoid.Ogc
 
 		/// <inheritdoc/>
 		public IDatumGeodetic Datum {
-			get { return null == _baseCrs ? null : _baseCrs.Datum; }
+			get { return _baseCrs.Datum; }
 		}
 
 	}

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
@@ -29,7 +30,7 @@ namespace Pigeoid.Ogc
 			string name,
 			IDatum datum,
 			IUom unit,
-			IEnumerable<IAxis> axes,
+			[CanBeNull] IEnumerable<IAxis> axes,
 			IAuthorityTag authority
 		) : base(name, authority) {
 			_datum = datum;

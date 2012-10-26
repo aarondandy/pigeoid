@@ -551,9 +551,10 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			var pathOffset = 0;
 
 			foreach (var op in data.Repository.CoordinateOperations.OrderBy(x => x.Code)) {
+				var opCode = op.Code;
 				switch(op.TypeName.ToLower()) {
 					case "transformation": {
-						writerDataTransformation.Write((ushort)op.Code);
+						writerDataTransformation.Write((ushort)opCode);
 						writerDataTransformation.Write((ushort)op.SourceCrs.Code);
 						writerDataTransformation.Write((ushort)op.TargetCrs.Code);
 						writerDataTransformation.Write((ushort)op.Method.Code);
@@ -564,7 +565,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 						break;
 					}
 					case "conversion": {
-						writerDataConversion.Write((ushort)op.Code);
+						writerDataConversion.Write((ushort)opCode);
 						writerDataConversion.Write((ushort)op.Method.Code);
 						writerDataConversion.Write((ushort)op.Area.Code);
 						writerDataConversion.Write((byte)(op.Deprecated ? 0xff : 0));
@@ -572,14 +573,14 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 						break;
 					}
 					case "concatenated operation": {
-						writerDataConcatenated.Write((ushort)op.Code);
+						writerDataConcatenated.Write((ushort)opCode);
 						writerDataConcatenated.Write((ushort)op.SourceCrs.Code);
 						writerDataConcatenated.Write((ushort)op.TargetCrs.Code);
 						writerDataConcatenated.Write((ushort)op.Area.Code);
 						writerDataConcatenated.Write((byte)(op.Deprecated ? 0xff : 0));
 						writerDataConcatenated.Write((ushort)stringLookUp[op.Name]);
 						var catOps = data.Repository.CoordOpPathItems
-							.Where(x => x.CatCode == op.Code)
+							.Where(x => x.CatCode == opCode)
 							.OrderBy(x => x.Step)
 							.ToList();
 						writerDataConcatenated.Write((byte)(catOps.Count));

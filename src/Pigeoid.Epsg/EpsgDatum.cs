@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using Pigeoid.Contracts;
 using Pigeoid.Epsg.Resources;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Epsg
 {

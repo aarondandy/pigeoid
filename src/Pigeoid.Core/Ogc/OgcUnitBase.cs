@@ -44,9 +44,11 @@ namespace Pigeoid.Ogc
 				throw new ArgumentNullException("uom");
 
 			if (ConvertibleTo.Any(x => StringComparer.OrdinalIgnoreCase.Equals(x.Name, uom.Name))) {
+// ReSharper disable CompareOfFloatsByEqualityOperator
 				if(_factor == 1.0)
 					return new UomUnityConversion(this, uom);
 				return new UomScalarConversion(this, uom, Factor);
+				// ReSharper restore CompareOfFloatsByEqualityOperator
 			}
 
 			return null;

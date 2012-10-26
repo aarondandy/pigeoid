@@ -8,19 +8,19 @@ namespace Pigeoid.Ogc
 	/// A datum.
 	/// </summary>
 	public class OgcDatum : OgcNamedAuthorityBoundEntity, IDatum
-    {
+	{
 
-        private readonly OgcDatumType _ogcType;
-        /// <summary>
-        /// Constructs a local datum.
-        /// </summary>
-        /// <param name="name">The datum name.</param>
-        /// <param name="type">The datum type code.</param>
-        /// <param name="authority">The authority.</param>
-        public OgcDatum(string name, OgcDatumType type, IAuthorityTag authority) : base(name, authority)
-        {
-            _ogcType = type;
-        }
+		private readonly OgcDatumType _ogcType;
+		/// <summary>
+		/// Constructs a local datum.
+		/// </summary>
+		/// <param name="name">The datum name.</param>
+		/// <param name="type">The datum type code.</param>
+		/// <param name="authority">The authority.</param>
+		public OgcDatum(string name, OgcDatumType type, IAuthorityTag authority) : base(name, authority)
+		{
+			_ogcType = type;
+		}
 
 		public OgcDatumType OgcType { get { return _ogcType; } }
 
@@ -35,5 +35,5 @@ namespace Pigeoid.Ogc
 
 		public string Type { get { return ToRenderableName(_ogcType); } }
 
-    }
+	}
 }

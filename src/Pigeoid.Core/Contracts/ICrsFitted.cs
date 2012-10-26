@@ -1,7 +1,5 @@
 ﻿// TODO: source header
 
-using Vertesaur.Contracts;
-
 namespace Pigeoid.Contracts
 {
 	/// <summary>

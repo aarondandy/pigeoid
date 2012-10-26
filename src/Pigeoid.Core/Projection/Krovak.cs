@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
+using JetBrains.Annotations;
 
 namespace Pigeoid.Projection
 {
@@ -14,13 +12,14 @@ namespace Pigeoid.Projection
 		internal class Inverse : InvertedTransformationBase<Krovak, Point2, GeographicCoordinate>
 		{
 
-			public Inverse(Krovak core) : base(core)
+			public Inverse([NotNull] Krovak core) : base(core)
 			{
 				
 			}
 
 			public override GeographicCoordinate TransformValue(Point2 value)
 			{
+				// ReSharper disable CompareOfFloatsByEqualityOperator
 				var x = value.X - Core.FalseProjectedOffset.X;
 				var y = value.Y - Core.FalseProjectedOffset.Y;
 				var r = Math.Sqrt((x*x) + (y*y));
@@ -54,7 +53,7 @@ namespace Pigeoid.Projection
 							* uCalculation
 						) - QuarterPi
 					) * 2.0;
-					;
+
 					if(lat == oldLat)
 						break;
 				}
@@ -65,8 +64,8 @@ namespace Pigeoid.Projection
 					) / Core.B
 				);
 				return new GeographicCoordinate(lat, lon);
-
 			}
+			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		protected readonly GeographicCoordinate GeographicOrigin;
@@ -96,7 +95,7 @@ namespace Pigeoid.Projection
 			double azimuthOfInitialLine,
 			double scaleFactor,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		) : base(falseProjectedOffset, spheroid)
 		{
 			// TODO: should the longitude be adjusted for Ferro here and accepted as relative to Greenwich?
@@ -179,13 +178,9 @@ namespace Pigeoid.Projection
 			return new Inverse(this);
 		}
 
-		public override bool HasInverse
-		{
-			get
-			{
-				return 0 != SinLatitudeOfPseudoStandardParallel;
-			}
-		}
+// ReSharper disable CompareOfFloatsByEqualityOperator
+		public override bool HasInverse { get { return 0 != SinLatitudeOfPseudoStandardParallel; } }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 
 		public override string Name
 		{

@@ -1,7 +1,5 @@
 ﻿// TODO: source header
 
-using System;
-using System.Collections.Generic;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
@@ -28,10 +26,6 @@ namespace Pigeoid.Ogc
 			ICrs tail,
 			IAuthorityTag authority
 		) : base(name, authority) {
-			if (null == head)
-				throw new ArgumentNullException("head");
-			if (null == tail)
-				throw new ArgumentNullException("tail");
 			_head = head;
 			_tail = tail;
 		}
@@ -40,6 +34,7 @@ namespace Pigeoid.Ogc
 		/// The head CRS.
 		/// </summary>
 		public ICrs Head { get { return _head; } }
+
 		/// <summary>
 		/// The tail CRS.
 		/// </summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 
@@ -67,6 +68,7 @@ namespace Pigeoid
 
 		}
 
+		[ContractAnnotation("=>canbenull")]
 		private List<ICoordinateOperationInfo> GenerateCoreDatumShift(ICrsGeodetic from, ICrsGeodetic to) {
 			if(from is ICrsGeographic) {
 				if (to is ICrsGeographic)
@@ -126,6 +128,7 @@ namespace Pigeoid
 		}
 
 		private List<ICoordinateOperationInfo> GenerateCoreDatumShiftGeographic(ICrsGeographic from, ICrsGeographic to){
+			// ReSharper disable CompareOfFloatsByEqualityOperator
 			var operations = GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum);
 			var fromSpheroid = from.Datum.Spheroid;
 			var toSpheroid = to.Datum.Spheroid;
@@ -135,6 +138,7 @@ namespace Pigeoid
 				operations.Add(new GeocentricGeographicTransformation(toSpheroid));
 			}
 			return operations;
+			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		private List<ICoordinateOperationInfo> GenerateCoreDatumShift(ICrsGeocentric from, ICrsGeographic to){

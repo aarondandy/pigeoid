@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
@@ -27,9 +28,9 @@ namespace Pigeoid.Ogc
 		/// <param name="authority">The authority.</param>
 		public OgcCrsGeographic(
 			string name,
-			IDatumGeodetic datum,
-			IUom angularUnit,
-			IEnumerable<IAxis> axes,
+			[NotNull] IDatumGeodetic datum,
+			[NotNull] IUom angularUnit,
+			[CanBeNull] IEnumerable<IAxis> axes,
 			IAuthorityTag authority = null
 		) : base(name, authority) {
 			if (null == datum)

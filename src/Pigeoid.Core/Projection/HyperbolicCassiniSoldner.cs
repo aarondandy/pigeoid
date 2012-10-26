@@ -1,6 +1,7 @@
 ﻿// TODO: source header
 
 using System;
+using JetBrains.Annotations;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -23,7 +24,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<HyperbolicCassiniSoldner,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(HyperbolicCassiniSoldner core) : base(core) { }
+			public Inverted([NotNull] HyperbolicCassiniSoldner core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 coordinate) {
 				var latp = Core.NaturalOrigin.Latitude + ((coordinate.Y - Core.FalseProjectedOffset.Y) / 315320.0);
@@ -53,7 +54,7 @@ namespace Pigeoid.Projection
 		public HyperbolicCassiniSoldner(
 			GeographicCoordinate naturalOrigin,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		)
 			: base(naturalOrigin, falseProjectedOffset, spheroid)
 		{

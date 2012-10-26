@@ -20,6 +20,7 @@ namespace Pigeoid
 		private readonly Func<double, double> _transform; 
 
 		public UomRatioConversion(IUom from, IUom to, double numerator, double denominator) {
+			// ReSharper disable CompareOfFloatsByEqualityOperator
 			if(null == from)
 				throw new ArgumentNullException("from");
 			if(null == to)
@@ -38,7 +39,7 @@ namespace Pigeoid
 				_transform = Multiply;
 				_transformInPlace = MultiplyInPlace;
 			}
-
+			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		private void MultiplyInPlace(ref double value) {

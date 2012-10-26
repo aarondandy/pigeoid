@@ -1,5 +1,6 @@
 ﻿// TODO: source header
 
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
@@ -11,6 +12,9 @@ namespace Pigeoid.Ogc
 		OgcNamedAuthorityBoundEntity,
 		IPrimeMeridianInfo
 	{
+
+		public static readonly OgcPrimeMeridian DefaultGreenwich = new OgcPrimeMeridian("Greenwich", 0, new AuthorityTag("EPSG","8901"));
+
 		private readonly double _longitude;
 		private readonly IUom _unit;
 
@@ -30,7 +34,7 @@ namespace Pigeoid.Ogc
 		/// <param name="longitude">The longitude location of the meridian.</param>
 		/// <param name="angularUnit">The angular unit of the longitude value.</param>
 		/// <param name="authority">The authority.</param>
-		public OgcPrimeMeridian(string name, double longitude, IUom angularUnit, IAuthorityTag authority = null)
+		public OgcPrimeMeridian(string name, double longitude, [CanBeNull] IUom angularUnit, IAuthorityTag authority = null)
 			: base(name, authority) {
 			_longitude = longitude;
 			_unit = angularUnit ?? OgcAngularUnit.DefaultDegrees;
@@ -44,5 +48,6 @@ namespace Pigeoid.Ogc
 			get { return _unit; }
 		}
 
+		
 	}
 }
