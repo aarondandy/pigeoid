@@ -21,6 +21,9 @@ namespace Pigeoid.Epsg
 			private const int RecordSize = CodeSize + RecordDataSize;
 			private const int RecordIndexSkipSize = RecordDataSize - sizeof(ushort);
 
+			private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
+			private static readonly ReadOnlyCollection<int> EmptyIntList = Array.AsReadOnly(new int[0]); 
+
 			public static EpsgCrsProjectedLookUp Create() {
 				var keys = new List<int>();
 				var reverseIndex = new Dictionary<ushort, List<int>>();
@@ -56,7 +59,7 @@ namespace Pigeoid.Epsg
 					&& baseCrsCode <= ushort.MaxValue
 					&& _reverseIndex.TryGetValue((ushort)baseCrsCode, out rawList)
 					? Array.AsReadOnly(rawList)
-					: null;
+					: EmptyIntList;
 			}
 
 			protected override EpsgCrsProjected Create(int code, int index) {
@@ -66,7 +69,7 @@ namespace Pigeoid.Epsg
 					var projectionCode = reader.ReadUInt16();
 					var cs = EpsgCoordinateSystem.Get(reader.ReadUInt16());
 					var area = EpsgArea.Get(reader.ReadUInt16());
-					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = TextLookUp.GetString(reader.ReadUInt16());
 					var deprecated = reader.ReadByte() == 0xff;
 					return new EpsgCrsProjected(code, name, area, deprecated, baseCrs, cs, projectionCode);
 				}
@@ -85,14 +88,19 @@ namespace Pigeoid.Epsg
 
 		public static IEnumerable<EpsgCrsProjected> ProjectedValues { get { return LookUp.Values; } }
 
-		public static IEnumerable<int> GetProjectionCodesBasedOn(int baseCrsCode) {
-			return LookUp.GetProjectionCodesBasedOn(baseCrsCode) ?? Enumerable.Empty<int>();
+		public static ReadOnlyCollection<int> GetProjectionCodesBasedOn(int baseCrsCode) {
+			return LookUp.GetProjectionCodesBasedOn(baseCrsCode);
 		}
 
 		public static IEnumerable<EpsgCrsProjected> GetProjectionsBasedOn(int baseCrsCode) {
-			return GetProjectionCodesBasedOn(baseCrsCode)
-				.Select(GetProjected)
-				.Where(x => null != x);
+			var projectionCodes = GetProjectionCodesBasedOn(baseCrsCode);
+			var result = new List<EpsgCrsProjected>(projectionCodes.Count);
+			result.AddRange(
+				projectionCodes
+					.Select(GetProjected)
+					.Where(projection => null != projection)
+			);
+			return result;
 		}
 
 		private static EpsgCrsGeodetic FindGeodeticBase(EpsgCrs crs) {

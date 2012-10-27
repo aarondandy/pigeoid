@@ -12,6 +12,7 @@ namespace Pigeoid.Epsg
 		ICoordinateOperationPathGenerator<EpsgCrs>
 	{
 
+		[Obsolete]
 		private struct EpsgTransformGraphCost :
 			IComparable<EpsgTransformGraphCost>
 		{
@@ -35,7 +36,7 @@ namespace Pigeoid.Epsg
 		}
 
 		// TODO: a custom cost class may be needed because: concatenated operation should be used first and not all operations have accuracy values
-		private class EpsgTransformGraph : DynamicGraphBase<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>
+		private class EpsgTransformGraph : DynamicGraphBase<EpsgCrs, int, ICoordinateOperationInfo>
 		{
 
 			private readonly EpsgArea _fromArea;
@@ -54,28 +55,32 @@ namespace Pigeoid.Epsg
 					|| _toArea.Intersects(area);
 			}
 
-			public override IEnumerable<DynamicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>> GetNeighborInfo(EpsgCrs node, EpsgTransformGraphCost currentCost) {
+			public override IEnumerable<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>> GetNeighborInfo(EpsgCrs node, int currentCost) {
 				var nodeCode = node.Code;
-				var results = new List<DynamicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>>();
+				var results = new List<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>>();
+				var costPlusOne = currentCost + 1;
+				if (costPlusOne > 7)
+					return results;
 
-
+				// if this is a projection see if we can go up to the parent CRS
 				var projectionNode = node as EpsgCrsProjected;
 				if(null != projectionNode) {
 					var projectionOperationInformation = projectionNode.Projection;
 					if(null != projectionOperationInformation) {
-						results.Add(new DynamicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>(
-							projectionNode.BaseCrs, currentCost.Add(1, 0), projectionOperationInformation));
+						results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
+							projectionNode.BaseCrs, costPlusOne, projectionOperationInformation));
 					}
 				}
 
+				// see if any projections are based on this CRS
 				foreach(var projectionCoordinateReferenceSystem in EpsgCrsProjected.GetProjectionsBasedOn(nodeCode)) {
 					if(!AreaIntersectionPasses(projectionCoordinateReferenceSystem.Area))
 						continue;
 
 					var projectionOperationInformation = projectionCoordinateReferenceSystem.Projection;
 					if(null != projectionOperationInformation && projectionOperationInformation.HasInverse) {
-						results.Add(new DynamicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>(
-							projectionCoordinateReferenceSystem, currentCost.Add(1, 0), projectionOperationInformation.GetInverse()));
+						results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
+							projectionCoordinateReferenceSystem, costPlusOne, projectionOperationInformation.GetInverse()));
 					}
 				}
 
@@ -83,8 +88,8 @@ namespace Pigeoid.Epsg
 					var crs = op.TargetCrs;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
-					results.Add(new DynamicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>(
-						crs , currentCost.Add(1, 0), op));
+					results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
+						crs, costPlusOne, op));
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(nodeCode)) {
@@ -93,16 +98,16 @@ namespace Pigeoid.Epsg
 					var crs = op.SourceCrs;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
-					results.Add(new DynamicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>(
-						crs, currentCost.Add(1, 0), op.GetInverse()));
+					results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
+						crs, costPlusOne, op.GetInverse()));
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced(nodeCode)) {
 					var crs = op.TargetCrs;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
-					results.Add(new DynamicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>(
-						crs, currentCost.Add(1, 0), op));
+					results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
+						crs, costPlusOne, op));
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetTransformReverseReferenced(nodeCode)) {
@@ -111,8 +116,8 @@ namespace Pigeoid.Epsg
 					var crs = op.SourceCrs;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
-					results.Add(new DynamicGraphNodeData<EpsgCrs, EpsgTransformGraphCost, ICoordinateOperationInfo>(
-						crs, currentCost.Add(1, 0), op.GetInverse()));
+					results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
+						crs, costPlusOne, op.GetInverse()));
 				}
 
 				return results;
@@ -142,7 +147,7 @@ namespace Pigeoid.Epsg
 #if DEBUG
 			execTimer.Stop();
 			var elapsed = execTimer.Elapsed;
-			Debug.Write("FindPath: " + elapsed);
+			Debug.WriteLine("FindPath {0} to {1}: {2}", from.Code, to.Code, elapsed);
 #endif
 
 			if (null == path)

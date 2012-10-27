@@ -12,7 +12,8 @@ namespace Pigeoid.Epsg.ProjectionTest
 		}
 
 		public void Run() {
-			
+			var generator = new EpsgCrsCoordinateOperationPathGenerator();
+			var path = generator.Generate(From, To);
 		}
 
 	}

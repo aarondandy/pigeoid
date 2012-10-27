@@ -24,6 +24,8 @@ namespace Pigeoid.Epsg
 			private const int RecordDataSize = (4 * sizeof(short)) + sizeof(ushort);
 			private const int RecordSize = sizeof(ushort) + RecordDataSize;
 			private const int CodeSize = sizeof(ushort);
+			
+			private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
 
 			private static ushort[] GetKeys() {
 				using(var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
@@ -53,7 +55,7 @@ namespace Pigeoid.Epsg
 					var eastBound = DecodeDegreeValueFromShort(reader.ReadInt16());
 					var southBound = DecodeDegreeValueFromShort(reader.ReadInt16());
 					var northBound = DecodeDegreeValueFromShort(reader.ReadInt16());
-					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = TextLookUp.GetString(reader.ReadUInt16());
 					return new EpsgArea(
 						key, name,
 						EpsgTextLookUp.LookUpIsoString(key, "iso2.dat", 2),

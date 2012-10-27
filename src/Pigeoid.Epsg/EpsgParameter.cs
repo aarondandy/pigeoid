@@ -19,6 +19,8 @@ namespace Pigeoid.Epsg
 			private const int RecordSize = sizeof(ushort) + RecordDataSize;
 			private const int CodeSize = sizeof(ushort);
 
+			private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
+
 			private static ushort[] GetKeys() {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					var keys = new ushort[reader.ReadUInt16()];
@@ -35,7 +37,7 @@ namespace Pigeoid.Epsg
 			protected override EpsgParameterInfo Create(ushort key, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					reader.BaseStream.Seek((index * RecordSize) + FileHeaderSize + CodeSize, SeekOrigin.Begin);
-					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = TextLookUp.GetString(reader.ReadUInt16());
 					return new EpsgParameterInfo(key, name);
 				}
 			}

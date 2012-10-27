@@ -18,6 +18,8 @@ namespace Pigeoid.Epsg
 			private const int CodeSize = sizeof(ushort);
 			private const int RecordSize = CodeSize + RecordDataSize;
 
+			private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
+
 			private static ushort[] GetKeys() {
 				var keys = new List<ushort>();
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
@@ -37,7 +39,7 @@ namespace Pigeoid.Epsg
 					var horizontal = EpsgCrs.Get(reader.ReadUInt16());
 					var vertical = (EpsgCrsVertical)EpsgCrsDatumBased.GetDatumBased(reader.ReadUInt16());
 					var area = EpsgArea.Get(reader.ReadUInt16());
-					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = TextLookUp.GetString(reader.ReadUInt16());
 					var deprecated = reader.ReadByte() == 0xff;
 					return new EpsgCrsCompound(code, name, area, deprecated, horizontal, vertical);
 				}

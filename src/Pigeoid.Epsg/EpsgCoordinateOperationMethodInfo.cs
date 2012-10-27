@@ -17,10 +17,13 @@ namespace Pigeoid.Epsg
 		internal class EpsgCoordinateOperationMethodInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgCoordinateOperationMethodInfo>
 		{
 			private const string DatFileName = "opmethod.dat";
+			private const string TxtFileName = "opmethod.txt";
 			private const int FileHeaderSize = sizeof(ushort);
 			private const int RecordDataSize = sizeof(ushort) + sizeof(byte);
 			private const int RecordSize = sizeof(ushort) + RecordDataSize;
 			private const int CodeSize = sizeof(ushort);
+
+			private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
 
 			private static ushort[] GetKeys()
 			{
@@ -40,7 +43,7 @@ namespace Pigeoid.Epsg
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					reader.BaseStream.Seek((index * RecordSize) + FileHeaderSize + CodeSize, SeekOrigin.Begin);
 					var reverse = reader.ReadByte() == 'B';
-					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), "opmethod.txt");
+					var name = TextLookUp.GetString(reader.ReadUInt16());
 					return new EpsgCoordinateOperationMethodInfo(key, name, reverse);
 				}
 			}

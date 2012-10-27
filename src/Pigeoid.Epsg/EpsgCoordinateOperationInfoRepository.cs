@@ -18,6 +18,8 @@ namespace Pigeoid.Epsg
 			private const int CodeSize = sizeof(ushort);
 			private const int RecordSize = CodeSize + RecordDataSize;
 
+			private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
+
 			private static ushort[] GetKeys() {
 				var keys = new List<ushort>();
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
@@ -37,7 +39,7 @@ namespace Pigeoid.Epsg
 					var opMethodCode = reader.ReadUInt16();
 					var areaCode = reader.ReadUInt16();
 					var deprecated = reader.ReadByte() != 0;
-					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = TextLookUp.GetString(reader.ReadUInt16());
 					return new EpsgCoordinateOperationInfo(code, opMethodCode, areaCode, deprecated, name);
 				}
 			}
@@ -57,6 +59,8 @@ namespace Pigeoid.Epsg
 			private const int RecordDataIndexSkipSize = RecordDataSize - (2 * sizeof(ushort));
 			private const int CodeSize = sizeof(ushort);
 			private const int RecordSize = CodeSize + RecordDataSize;
+
+			private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
 
 			public static EpsgCoordinateTransformInfoLookUp Create() {
 				var forwardLookUp = new Dictionary<ushort, List<ushort>>();
@@ -115,7 +119,7 @@ namespace Pigeoid.Epsg
 					var accuracy = numberLookUp.Get(reader.ReadUInt16());
 					var areaCode = reader.ReadUInt16();
 					var deprecated = reader.ReadByte() != 0;
-					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = TextLookUp.GetString(reader.ReadUInt16());
 					return new EpsgCoordinateTransformInfo(
 						code, sourceCrsCode, targetCrsCode, opMethodCode,
 						accuracy, areaCode, deprecated, name);
@@ -155,6 +159,8 @@ namespace Pigeoid.Epsg
 			private const int RecordDataIndexSkipSize = RecordDataSize - (sizeof(ushort)*2);
 			private const int CodeSize = sizeof(ushort);
 			private const int RecordSize = CodeSize + RecordDataSize;
+
+			private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
 
 			internal static EpsgCoordinateOperationConcatenatedInfoLookUp Create() {
 				var forwardLookUp = new Dictionary<ushort, List<ushort>>();
@@ -209,7 +215,7 @@ namespace Pigeoid.Epsg
 					var targetCrsCode = reader.ReadUInt16();
 					var areaCode = reader.ReadUInt16();
 					var deprecated = reader.ReadByte() != 0;
-					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = TextLookUp.GetString(reader.ReadUInt16());
 					var stepCodes = new ushort[reader.ReadByte()];
 					var stepFileOffset = reader.ReadUInt16();
 					using (var readerPath = EpsgDataResource.CreateBinaryReader(PathFileName)) {

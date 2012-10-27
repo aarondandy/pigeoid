@@ -5,9 +5,10 @@ using System.Text;
 
 namespace Pigeoid.Epsg.Resources
 {
-	internal static class EpsgTextLookUp
+	internal class EpsgTextLookUp : IDisposable
 	{
 
+		[Obsolete]
 		public static string GetString(ushort stringOffset, string wordPointerFile) {
 			if (stringOffset == UInt16.MaxValue)
 				return String.Empty;
@@ -106,6 +107,38 @@ namespace Pigeoid.Epsg.Resources
 			return null;
 		}
 
+		private readonly object _sync;
+		private BinaryReader _reader;
+
+		public EpsgTextLookUp(string wordPointerFile) : this(EpsgDataResource.CreateBinaryReader(wordPointerFile)) { }
+
+		private EpsgTextLookUp(BinaryReader reader) {
+			_sync = new object();
+			_reader = reader;
+		}
+
+		public string GetString(ushort stringOffset) {
+			lock (_sync) {
+				return GetString(stringOffset, _reader);
+			}
+		}
+
+		public void Dispose()
+		{
+ 			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		protected virtual void Dispose(bool disposing) {
+			lock(_sync) {
+				_reader.Dispose();
+				_reader = null;
+			}
+		}
+
+		~EpsgTextLookUp() {
+			Dispose(false);
+		}
 
 	}
 }

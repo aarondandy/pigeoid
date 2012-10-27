@@ -17,6 +17,8 @@ namespace Pigeoid.Epsg
 			private const int CodeSize = sizeof(uint);
 			private const int RecordSize = CodeSize + RecordDataSize;
 
+			private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
+
 			private static int[] GetKeys() {
 				var keys = new List<int>();
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
@@ -36,7 +38,7 @@ namespace Pigeoid.Epsg
 					var datum = EpsgDatum.Get(reader.ReadUInt16());
 					var cs = EpsgCoordinateSystem.Get(reader.ReadUInt16());
 					var area = EpsgArea.Get(reader.ReadUInt16());
-					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = TextLookUp.GetString(reader.ReadUInt16());
 					var deprecated = reader.ReadByte() == 0xff;
 					var kind = reader.ReadByte();
 					switch(kind) {

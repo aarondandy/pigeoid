@@ -39,6 +39,8 @@ namespace Pigeoid.Epsg
 			private const int RecordDataSize = sizeof(ushort) * 4;
 			private const int RecordSize = sizeof(ushort) + RecordDataSize;
 
+			private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
+
 			private static ushort[] GetAllKeys() {
 				using(var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					var keys = new List<ushort>();
@@ -55,7 +57,7 @@ namespace Pigeoid.Epsg
 			protected override EpsgDatumGeodetic Create(ushort key, int index) {
 				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
 					reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
-					var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), TxtFileName);
+					var name = TextLookUp.GetString(reader.ReadUInt16());
 					var area = EpsgArea.Get(reader.ReadUInt16());
 					var spheroid = EpsgEllipsoid.Get(reader.ReadUInt16());
 					var meridian = EpsgPrimeMeridian.Get(reader.ReadUInt16());
