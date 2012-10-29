@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Pigeoid.Contracts;
+using JetBrains.Annotations;
 
 namespace Pigeoid
 {
@@ -57,6 +58,26 @@ namespace Pigeoid
 
 		public IUom Unit { get { return _unit; } }
 
+		[ContractAnnotation("=>notnull")]
+		private string GetValueUnitString(){
+			if (null == Value)
+				return String.Empty;
+			var result = Value.ToString();
+			if (null != Unit)
+				result += Unit.ToString();
+			return result;
+		}
+
+		[ContractAnnotation("=>notnull")]
+		public override string ToString(){
+			return null == Name
+				? (null == Value
+					? base.ToString()
+					: GetValueUnitString())
+				: (null != Value
+					? String.Concat(Name, ": ", GetValueUnitString())
+					: Name);
+		}
 	}
 
 	/// <summary>

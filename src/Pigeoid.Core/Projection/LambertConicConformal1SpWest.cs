@@ -1,6 +1,7 @@
 ﻿// TODO: source header
 
 using System.Diagnostics;
+using JetBrains.Annotations;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -16,7 +17,7 @@ namespace Pigeoid.Projection
 
 			private readonly InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoordinate> _baseInv;
 
-			public Inverted(LambertConicConformal1SpWest core) : base(core) {
+			public Inverted([NotNull] LambertConicConformal1SpWest core) : base(core) {
 				_baseInv = core.BaseInverse;
 			}
 
@@ -29,7 +30,7 @@ namespace Pigeoid.Projection
 			GeographicCoordinate geographicOrigin,
 			double originScaleFactor,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		)
 			: base(
 			  geographicOrigin,
@@ -50,10 +51,6 @@ namespace Pigeoid.Projection
 
 		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
-		}
-
-		public override string Name {
-			get { return "Lambert Conic Conformal (West Orientated)"; }
 		}
 
 	}

@@ -1,6 +1,7 @@
 ﻿// TODO: source header
 
 using System;
+using JetBrains.Annotations;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -13,7 +14,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<ObliqueStereographic,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(ObliqueStereographic core) : base(core) { }
+			public Inverted([NotNull] ObliqueStereographic core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 source) {
 				throw new NotImplementedException();
@@ -32,7 +33,7 @@ namespace Pigeoid.Projection
 			GeographicCoordinate geographicOrigin,
 			double scaleFactor,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		) : base(falseProjectedOffset, spheroid)
 		{
 			GeographicOrigin = geographicOrigin;
@@ -91,8 +92,5 @@ namespace Pigeoid.Projection
 			get { throw new NotImplementedException(); }
 		}
 
-		public override string Name {
-			get { return "Oblique Stereographic"; }
-		}
 	}
 }

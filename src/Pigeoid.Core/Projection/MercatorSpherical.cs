@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -30,7 +31,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<MercatorSpherical,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(MercatorSpherical core) : base(core) { }
+			public Inverted([NotNull] MercatorSpherical core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 coordinate) {
 				return new GeographicCoordinate(

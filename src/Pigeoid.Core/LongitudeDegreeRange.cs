@@ -116,7 +116,8 @@ namespace Pigeoid
 			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
-		[Pure] public override bool Equals(object obj) {
+		[Pure, ContractAnnotation("null=>false")]
+		public override bool Equals(object obj) {
 			return obj is LongitudeDegreeRange
 				? Equals((LongitudeDegreeRange) obj)
 				: (obj is double && Equals((double) obj));

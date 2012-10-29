@@ -69,7 +69,7 @@ namespace Pigeoid
 		}
 
 		[ContractAnnotation("=>canbenull")]
-		private List<ICoordinateOperationInfo> GenerateCoreDatumShift(ICrsGeodetic from, ICrsGeodetic to) {
+		private List<ICoordinateOperationInfo> GenerateCoreDatumShift([NotNull] ICrsGeodetic from, [NotNull] ICrsGeodetic to) {
 			if(from is ICrsGeographic) {
 				if (to is ICrsGeographic)
 					return GenerateCoreDatumShiftGeographic(from as ICrsGeographic, to as ICrsGeographic);
@@ -85,11 +85,13 @@ namespace Pigeoid
 			return null;
 		}
 
-		private List<ICoordinateOperationInfo> GenerateCoreDatumShiftGeocentric(ICrsGeocentric from, ICrsGeocentric to) {
+		[ContractAnnotation("=>notnull")]
+		private List<ICoordinateOperationInfo> GenerateCoreDatumShiftGeocentric([NotNull] ICrsGeocentric from, [NotNull] ICrsGeocentric to) {
 			return GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum);
 		}
 
-		private List<ICoordinateOperationInfo> GenerateCoreDatumShiftGeocentric(IDatumGeodetic from, IDatumGeodetic to) {
+		[ContractAnnotation("=>notnull")]
+		private List<ICoordinateOperationInfo> GenerateCoreDatumShiftGeocentric([NotNull] IDatumGeodetic from, [NotNull]  IDatumGeodetic to) {
 
 			var operations = new List<ICoordinateOperationInfo>();
 
@@ -127,7 +129,8 @@ namespace Pigeoid
 			return operations;
 		}
 
-		private List<ICoordinateOperationInfo> GenerateCoreDatumShiftGeographic(ICrsGeographic from, ICrsGeographic to){
+		[ContractAnnotation("=>notnull")]
+		private List<ICoordinateOperationInfo> GenerateCoreDatumShiftGeographic([NotNull] ICrsGeographic from, [NotNull] ICrsGeographic to) {
 			// ReSharper disable CompareOfFloatsByEqualityOperator
 			var operations = GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum);
 			var fromSpheroid = from.Datum.Spheroid;
@@ -141,13 +144,15 @@ namespace Pigeoid
 			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
-		private List<ICoordinateOperationInfo> GenerateCoreDatumShift(ICrsGeocentric from, ICrsGeographic to){
+		[ContractAnnotation("=>notnull")]
+		private List<ICoordinateOperationInfo> GenerateCoreDatumShift([NotNull] ICrsGeocentric from, [NotNull] ICrsGeographic to) {
 			var operations = GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum);
 			operations.Add(new GeocentricGeographicTransformation(to.Datum.Spheroid));
 			return operations;
 		}
 
-		private List<ICoordinateOperationInfo> GenerateCoreDatumShift(ICrsGeographic from, ICrsGeocentric to){
+		[ContractAnnotation("=>notnull")]
+		private List<ICoordinateOperationInfo> GenerateCoreDatumShift([NotNull] ICrsGeographic from, [NotNull] ICrsGeocentric to) {
 			var operations = new List<ICoordinateOperationInfo>{
 				new GeographicGeocentricTransformation(from.Datum.Spheroid)
 			};

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Vertesaur;
 using Vertesaur.Contracts;
 
@@ -28,7 +29,7 @@ namespace Pigeoid.Transformation
 		private class Inverted : InvertedTransformationBase<GeocentricTopocentricTransformation, Point3>
 		{
 
-			public Inverted(GeocentricTopocentricTransformation core) : base(core) { }
+			public Inverted([NotNull] GeocentricTopocentricTransformation core) : base(core) { }
 
 			public override Point3 TransformValue(Point3 topocentric) {
 				return new Point3(
@@ -46,7 +47,7 @@ namespace Pigeoid.Transformation
 		/// <param name="spheroid">The spheroid.</param>
 		public GeocentricTopocentricTransformation(
 			Point3 topocentricOrigin,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		) {
 			GeographicTransform = new GeographicGeocentricTransformation(spheroid);
 			SetTopocentricOrigin(topocentricOrigin);

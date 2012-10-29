@@ -1,4 +1,5 @@
-﻿using Vertesaur;
+﻿using JetBrains.Annotations;
+using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Projection
@@ -14,9 +15,8 @@ namespace Pigeoid.Projection
 		protected LambertConicBase(
 			GeographicCoordinate geographicOrigin,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
-		)
-			: base(falseProjectedOffset, spheroid)
+			[NotNull] ISpheroid<double> spheroid
+		) : base(falseProjectedOffset, spheroid)
 		{
 			GeographicOrigin = geographicOrigin;
 		}
@@ -27,6 +27,5 @@ namespace Pigeoid.Projection
 
 		public abstract override bool HasInverse { get; }
 
-		public abstract override string Name { get; }
 	}
 }

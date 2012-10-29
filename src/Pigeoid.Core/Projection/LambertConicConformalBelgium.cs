@@ -1,6 +1,7 @@
 ﻿// TODO: source header
 
 using System;
+using JetBrains.Annotations;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -18,7 +19,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<LambertConicConformalBelgium,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(LambertConicConformalBelgium core) : base(core) { }
+			public Inverted([NotNull] LambertConicConformalBelgium core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 coordinate) {
 				var eastingComponent = coordinate.X - Core.FalseProjectedOffset.X;
@@ -57,7 +58,7 @@ namespace Pigeoid.Projection
 			double firstParallel,
 			double secondParallel,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		)
 			: base(geographicOrigin, firstParallel, secondParallel, falseProjectedOffset, spheroid) { }
 

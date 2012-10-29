@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Vertesaur.Contracts;
 
@@ -19,7 +20,7 @@ namespace Pigeoid
 		private readonly TransformValueInPlaceFunction _transformInPlace;
 		private readonly Func<double, double> _transform; 
 
-		public UomRatioConversion(IUom from, IUom to, double numerator, double denominator) {
+		public UomRatioConversion([NotNull] IUom from, [NotNull] IUom to, double numerator, double denominator) {
 			// ReSharper disable CompareOfFloatsByEqualityOperator
 			if(null == from)
 				throw new ArgumentNullException("from");
@@ -60,11 +61,11 @@ namespace Pigeoid
 
 		public double Factor { get { return _factor; } }
 
-		public IUom From { get { return _from; } }
+		public IUom From { [ContractAnnotation("=>notnull")] get { return _from; } }
 
-		public IUom To { get { return _to; } }
+		public IUom To { [ContractAnnotation("=>notnull")] get { return _to; } }
 
-		public void TransformValues(double[] values) {
+		public void TransformValues([NotNull] double[] values) {
 			for (int i = 0; i < values.Length; i++)
 				_transformInPlace(ref values[i]);
 		}
@@ -73,13 +74,18 @@ namespace Pigeoid
 			return _transform(value);
 		}
 
-		public IEnumerable<double> TransformValues(IEnumerable<double> values) { return values.Select(_transform); }
+		[ContractAnnotation("=>notnull")]
+		public IEnumerable<double> TransformValues([NotNull] IEnumerable<double> values) { return values.Select(_transform); }
 
 // ReSharper disable CompareOfFloatsByEqualityOperator
 		public bool HasInverse { get { return 0 != _numerator; } }
 // ReSharper restore CompareOfFloatsByEqualityOperator
 
-		public IUomScalarConversion<double> GetInverse() { return new UomRatioConversion(To,From,_denominator,_numerator); }
+		public IUomScalarConversion<double> GetInverse(){
+			if(!HasInverse)
+				throw new InvalidOperationException("No inverse.");
+			return new UomRatioConversion(To,From,_denominator,_numerator);
+		}
 
 		IUomConversion<double> IUomConversion<double>.GetInverse() { return GetInverse(); }
 

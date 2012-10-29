@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 using Vertesaur;
@@ -28,7 +29,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(LambertConicConformal core) : base(core) { }
+			public Inverted([NotNull] LambertConicConformal core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 coordinate) {
 				var eastingComponent = coordinate.X - Core.FalseProjectedOffset.X;
@@ -66,7 +67,7 @@ namespace Pigeoid.Projection
 		protected LambertConicConformal(
 			GeographicCoordinate geographicOrigin,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid)
+			[NotNull] ISpheroid<double> spheroid)
 		: base(geographicOrigin, falseProjectedOffset, spheroid)
 		{ }
 
@@ -104,20 +105,6 @@ namespace Pigeoid.Projection
 // ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
-		public override string Name {
-			get { return DefaultName; }
-		}
-
-		public override IEnumerable<INamedParameter> GetParameters() {
-			return base.GetParameters()
-				.Concat(new INamedParameter[]
-                    {
-                        new NamedParameter<double>(NamedParameter.NameLatitudeOfNaturalOrigin,GeographicOrigin.Latitude), 
-                        new NamedParameter<double>(NamedParameter.NameLongitudeOfNaturalOrigin,GeographicOrigin.Longitude)
-                    }
-				)
-			;
-		}
 
 	}
 }

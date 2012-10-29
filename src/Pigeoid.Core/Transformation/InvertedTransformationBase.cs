@@ -40,7 +40,7 @@ namespace Pigeoid.Transformation
 
 		public abstract TTarget TransformValue(TSource value);
 
-		[NotNull] public IEnumerable<TTarget> TransformValues([NotNull] IEnumerable<TSource> values) {
+		public IEnumerable<TTarget> TransformValues([NotNull] IEnumerable<TSource> values) {
 			return values.Select(TransformValue);
 		}
 

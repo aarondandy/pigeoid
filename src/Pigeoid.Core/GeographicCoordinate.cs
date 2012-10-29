@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid
@@ -18,7 +19,7 @@ namespace Pigeoid
 		/// <param name="a">A coordinate.</param>
 		/// <param name="b">A coordinate.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator ==(GeographicCoordinate a, GeographicCoordinate b) {
+		[Pure] public static bool operator ==(GeographicCoordinate a, GeographicCoordinate b) {
 			return a.Equals(b);
 		}
 
@@ -28,7 +29,7 @@ namespace Pigeoid
 		/// <param name="a">A coordinate.</param>
 		/// <param name="b">A coordinate.</param>
 		/// <returns>The result of the operator.</returns>
-		public static bool operator !=(GeographicCoordinate a, GeographicCoordinate b) {
+		[Pure] public static bool operator !=(GeographicCoordinate a, GeographicCoordinate b) {
 			return !a.Equals(b);
 		}
 
@@ -56,35 +57,36 @@ namespace Pigeoid
 		/// <inheritdoc/>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		double IGeographicCoordinate<double>.Latitude {
-			get { return Latitude; }
+			[Pure] get { return Latitude; }
 		}
 
 		/// <inheritdoc/>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		double IGeographicCoordinate<double>.Longitude {
-			get { return Longitude; }
+			[Pure] get { return Longitude; }
 		}
 
 		/// <inheritdoc/>
-		public int CompareTo(GeographicCoordinate other) {
+		[Pure] public int CompareTo(GeographicCoordinate other) {
 			int c = Longitude.CompareTo(other.Longitude);
 			return 0 == c ? Latitude.CompareTo(other.Latitude) : c;
 		}
 
 		/// <inheritdoc/>
-		public bool Equals(GeographicCoordinate other) {
+		[Pure] public bool Equals(GeographicCoordinate other) {
 // ReSharper disable CompareOfFloatsByEqualityOperator
 			return Latitude == other.Latitude && Longitude == other.Longitude;
 	// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		/// <inheritdoc/>
+		[Pure, ContractAnnotation("null=>false")]
 		public override bool Equals(object obj) {
 			return obj is GeographicCoordinate && Equals((GeographicCoordinate) obj);
 		}
 
 		/// <inheritdoc/>
-		public override int GetHashCode() {
+		[Pure] public override int GetHashCode() {
 			return Longitude.GetHashCode();
 		}
 

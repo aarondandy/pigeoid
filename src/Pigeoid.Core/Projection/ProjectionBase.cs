@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
-using Pigeoid.Contracts;
 using Vertesaur;
 using Vertesaur.Contracts;
 
@@ -48,7 +47,8 @@ namespace Pigeoid.Projection
 
 		public abstract Point2 TransformValue(GeographicCoordinate source);
 
-		[NotNull] public virtual IEnumerable<Point2> TransformValues([NotNull] IEnumerable<GeographicCoordinate> values) {
+		[ContractAnnotation("notnull=>notnull")]
+		public virtual IEnumerable<Point2> TransformValues([NotNull] IEnumerable<GeographicCoordinate> values) {
 			return values.Select(TransformValue);
 		}
 
@@ -60,15 +60,5 @@ namespace Pigeoid.Projection
 			return GetInverse();
 		}
 
-		[NotNull] public virtual IEnumerable<INamedParameter> GetParameters() {
-			return new INamedParameter[] {
-				new NamedParameter<double>(NamedParameter.NameFalseEasting, FalseProjectedOffset.X), 
-				new NamedParameter<double>(NamedParameter.NameFalseNorthing, FalseProjectedOffset.Y),
-				new NamedParameter<double>("semi major", Spheroid.A),
-				new NamedParameter<double>("semi minor", Spheroid.B)
-			};
-		}
-
-		public abstract string Name { get; }
 	}
 }

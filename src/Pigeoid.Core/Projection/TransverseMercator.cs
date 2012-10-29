@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 using Vertesaur;
@@ -26,7 +27,7 @@ namespace Pigeoid.Projection
 			protected readonly double InverseCoefficient4;
 			protected readonly double PrimaryScaleFactor;
 
-			public Inverted(TransverseMercator core) : base(core) {
+			public Inverted([NotNull] TransverseMercator core) : base(core) {
 				var n = Core.Spheroid.F / (2.0 - Core.Spheroid.F);
 				var n2 = n * n;
 				var n3 = n2 * n;
@@ -110,7 +111,7 @@ namespace Pigeoid.Projection
 			GeographicCoordinate naturalOrigin,
 			Vector2 falseProjectedOffset,
 			double scaleFactor,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		) : base(falseProjectedOffset, spheroid)
 		{
 			// ReSharper disable CompareOfFloatsByEqualityOperator
@@ -201,17 +202,6 @@ namespace Pigeoid.Projection
 			);
 
 		}
-
-		public override string Name {
-			get { return "Transverse Mercator"; }
-		}
-
-		public override IEnumerable<INamedParameter> GetParameters() {
-			return base.GetParameters().Concat(
-				new INamedParameter[] { }
-			);
-		}
-
 
 	}
 }

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -35,7 +36,7 @@ namespace Pigeoid.Projection
 			GeographicCoordinate geographicOrigin,
 			double originScaleFactor,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		)
 			: base(geographicOrigin, falseProjectedOffset, spheroid) {
 			OriginScaleFactor = originScaleFactor;
@@ -56,19 +57,6 @@ namespace Pigeoid.Projection
 			InvN = 1.0 / N;
 			NorthingOffset = falseProjectedOffset.Y + ROrigin;
 		}
-
-		public override string Name {
-			get { return DefaultName; }
-		}
-
-		public override IEnumerable<INamedParameter> GetParameters() {
-			return base.GetParameters()
-				.Concat(new INamedParameter[]{
-					new NamedParameter<double>(NamedParameter.NameScaleFactorAtNaturalOrigin, OriginScaleFactor)
-				})
-			;
-		}
-
 
 		public bool Equals(LambertConicConformal1Sp other) {
 			return !ReferenceEquals(other, null)

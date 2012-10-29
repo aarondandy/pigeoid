@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -16,7 +17,7 @@ namespace Pigeoid.Projection
 			private readonly double _northOffsetBase;
 			private readonly double _scaledA;
 
-			public Inverted(LambertConicNearConformal core) : base(core)
+			public Inverted([NotNull] LambertConicNearConformal core) : base(core)
 			{
 				_negateR = Core.GeographicOrigin.Latitude < 0;
 				_northOffsetBase = Core.FalseProjectedOffset.Y + Core.ROrigin;
@@ -183,9 +184,5 @@ namespace Pigeoid.Projection
 		}
 // ReSharper restore CompareOfFloatsByEqualityOperator
 
-		public override string Name
-		{
-			get { return "Lambert Conic Near-Conformal"; }
-		}
 	}
 }

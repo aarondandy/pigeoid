@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using Vertesaur;
 using Vertesaur.Contracts;
 
@@ -14,7 +15,7 @@ namespace Pigeoid.Projection
 			GeographicCoordinate geographicOrigin,
 			double standardParallel,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		) :base(
 			new GeographicCoordinate(
 				geographicOrigin.Latitude,
@@ -26,9 +27,5 @@ namespace Pigeoid.Projection
 			spheroid
 		) { }
 
-		public override string Name
-		{
-			get { return "Ney's"; }
-		}
 	}
 }

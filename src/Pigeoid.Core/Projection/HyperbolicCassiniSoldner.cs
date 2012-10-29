@@ -107,10 +107,6 @@ namespace Pigeoid.Projection
 			);
 		}
 
-		public override string Name {
-			get { return "Hyperbolic Cassini Soldner"; }
-		}
-
 		public bool Equals(HyperbolicCassiniSoldner other) {
 			return !ReferenceEquals(other, null)
 				&& (

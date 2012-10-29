@@ -1,6 +1,7 @@
 ﻿// TODO: source header
 
 using System;
+using JetBrains.Annotations;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -22,7 +23,7 @@ namespace Pigeoid.Projection
 			private readonly double _scaleValue;
 			private readonly Func<Point2, GeographicCoordinate> _transform; 
 
-			public Inverse(PolarStereographic core) : base(core)
+			public Inverse([NotNull] PolarStereographic core) : base(core)
 			{
 				var e2 = Core.ESq;
 				var e4 = e2 * e2;
@@ -107,7 +108,7 @@ namespace Pigeoid.Projection
 
 		private static readonly PeriodicOperations LongitudePeriod = new PeriodicOperations(-Math.PI, Math.PI * 2.0);
 
-		public static PolarStereographic CreateFromStandardParallel(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
+		public static PolarStereographic CreateFromStandardParallel(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffset, [NotNull] ISpheroid<double> spheroid)
 		{
 			var sinLat = Math.Sin(standardParallel);
 			var mf = Math.Cos(standardParallel) / Math.Sqrt(1 - (spheroid.ESquared * sinLat * sinLat));
@@ -134,7 +135,7 @@ namespace Pigeoid.Projection
 			return new PolarStereographic(geographicOrigin, scaleFactor, falseProjectedOffset, spheroid);
 		}
 
-		public static PolarStereographic CreateFromStandardParallelAndFalseOffsetAtOrigin(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffsetAtOrigin, ISpheroid<double> spheroid)
+		public static PolarStereographic CreateFromStandardParallelAndFalseOffsetAtOrigin(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffsetAtOrigin, [NotNull] ISpheroid<double> spheroid)
 		{
 			var sinLat = Math.Sin(standardParallel);
 			var mf = Math.Cos(standardParallel) / Math.Sqrt(1 - (spheroid.ESquared * sinLat * sinLat));
@@ -171,7 +172,7 @@ namespace Pigeoid.Projection
 		protected readonly double CoefficientT;
 		private readonly Func<GeographicCoordinate, Point2> _transform; 
 
-		public PolarStereographic(GeographicCoordinate geographicOrigin, double scaleFactor, Vector2 falseProjectedOffset, ISpheroid<double> spheroid)
+		public PolarStereographic(GeographicCoordinate geographicOrigin, double scaleFactor, Vector2 falseProjectedOffset, [NotNull] ISpheroid<double> spheroid)
 			: base(falseProjectedOffset, spheroid)
 		{
 			ScaleFactor = scaleFactor;
@@ -217,11 +218,6 @@ namespace Pigeoid.Projection
 		public override ITransformation<Point2, GeographicCoordinate> GetInverse()
 		{
 			return new Inverse(this);
-		}
-
-		public override string Name
-		{
-			get { return "Polar Stereographic"; }
 		}
 
 // ReSharper disable CompareOfFloatsByEqualityOperator

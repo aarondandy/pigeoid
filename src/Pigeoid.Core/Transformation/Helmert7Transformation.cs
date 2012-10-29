@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Ogc;
 using Vertesaur;
@@ -32,7 +33,7 @@ namespace Pigeoid.Transformation
 
 			private readonly Matrix3 _invRot;
 
-			public Inverted(Helmert7Transformation core) : base(core) {
+			public Inverted([NotNull] Helmert7Transformation core) : base(core) {
 				if (!core.HasInverse)
 					throw new ArgumentException("Core cannot be inverted.");
 
@@ -196,11 +197,12 @@ namespace Pigeoid.Transformation
 			return D.GetHashCode() ^ R.GetHashCode();
 		}
 
+		[Obsolete]
 		public string Name {
 			get { return "Helmert 7 Parameter Transformation"; }
 		}
 
-
+		[Obsolete]
 		public IEnumerable<INamedParameter> Parameters {
 			get {
 				return new INamedParameter[] {
@@ -215,6 +217,7 @@ namespace Pigeoid.Transformation
 			}
 		}
 
+		[Obsolete]
 		public ICoordinateOperationMethodInfo Method {
 			get { return new OgcCoordinateOperationMethodInfo(Name); }
 		}

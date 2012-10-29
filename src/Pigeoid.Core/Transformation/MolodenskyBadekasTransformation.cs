@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Vertesaur;
 using Vertesaur.Contracts;
 
@@ -25,7 +26,7 @@ namespace Pigeoid.Transformation
 
 			private readonly Matrix3 _invRot;
 
-			public Inverted(MolodenskyBadekasTransformation core) : base(core) {
+			public Inverted([NotNull] MolodenskyBadekasTransformation core) : base(core) {
 				if (!Core.HasInverse) throw new ArgumentException("Core has no inverse.");
 
 				_invRot = new Matrix3(

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Ogc;
 using Vertesaur;
@@ -30,13 +31,13 @@ namespace Pigeoid.Transformation
 		private readonly double _eSqMajAxis;
 		private readonly double _eSecSqMinAxis;
 
-		internal GeocentricGeographicTransformation(ISpheroid<double> spheroid, bool isInverse)
+		internal GeocentricGeographicTransformation([NotNull] ISpheroid<double> spheroid, bool isInverse)
 			: this(spheroid)
 		{
 			IsInverseOfDefinition = isInverse;
 		}
 
-		public GeocentricGeographicTransformation(ISpheroid<double> spheroid) {
+		public GeocentricGeographicTransformation([NotNull] ISpheroid<double> spheroid) {
 			if (null == spheroid)
 				throw new ArgumentNullException("spheroid");
 
@@ -95,7 +96,7 @@ namespace Pigeoid.Transformation
 			return values.Select(((ITransformation<Point3, GeographicCoordinate>)this).TransformValue);
 		}
 
-		public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<Point3> values) {
+		public IEnumerable<GeographicHeightCoordinate> TransformValues([NotNull] IEnumerable<Point3> values) {
 			return values.Select(TransformValue);
 		}
 
@@ -131,6 +132,7 @@ namespace Pigeoid.Transformation
 
 		public bool IsInverseOfDefinition { get; private set; }
 
+		[Obsolete]
 		public IEnumerable<INamedParameter> Parameters {
 			get {
 				return new[] {
@@ -140,6 +142,7 @@ namespace Pigeoid.Transformation
 			}
 		}
 
+		[Obsolete]
 		public ICoordinateOperationMethodInfo Method {
 			get { return new OgcCoordinateOperationMethodInfo(Name); }
 		}
@@ -165,13 +168,13 @@ namespace Pigeoid.Transformation
 		/// </summary>
 		public readonly ISpheroid<double> Spheroid;
 
-		internal GeographicGeocentricTransformation(ISpheroid<double> spheroid, bool isInverse)
+		internal GeographicGeocentricTransformation([NotNull] ISpheroid<double> spheroid, bool isInverse)
 			: this(spheroid)
 		{
 			IsInverseOfDefinition = isInverse;
 		}
 
-		public GeographicGeocentricTransformation(ISpheroid<double> spheroid) {
+		public GeographicGeocentricTransformation([NotNull] ISpheroid<double> spheroid) {
 			if (null == spheroid)
 				throw new ArgumentNullException("spheroid");
 			
@@ -255,6 +258,7 @@ namespace Pigeoid.Transformation
 
 		public bool IsInverseOfDefinition { get; private set; }
 
+		[Obsolete]
 		public IEnumerable<INamedParameter> Parameters {
 			get {
 				return new[] {
@@ -264,6 +268,7 @@ namespace Pigeoid.Transformation
 			}
 		}
 
+		[Obsolete]
 		public ICoordinateOperationMethodInfo Method {
 			get { return new OgcCoordinateOperationMethodInfo(Name); }
 		}

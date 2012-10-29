@@ -1,6 +1,7 @@
 ﻿// TODO: source header
 
 using System;
+using JetBrains.Annotations;
 using Pigeoid.Interop;
 using Pigeoid.Transformation;
 using Vertesaur;
@@ -18,7 +19,7 @@ namespace Pigeoid.Projection
 
 			private readonly double _r2;
 
-			public Inverted(LambertAzimuthalEqualAreaSpherical core) : base(core) {
+			public Inverted([NotNull] LambertAzimuthalEqualAreaSpherical core) : base(core) {
 				_r2 = core.R * 2.0;
 			}
 
@@ -59,9 +60,8 @@ namespace Pigeoid.Projection
 		public LambertAzimuthalEqualAreaSpherical(
 			GeographicCoordinate geogOrigin,
 			Vector2 falseOffset,
-			ISpheroid<double> spheroid
-		)
-			: base(falseOffset, spheroid) {
+			[NotNull] ISpheroid<double> spheroid
+		) : base(falseOffset, spheroid) {
 			GeographicOrigin = geogOrigin;
 			R = spheroid.A * Math.Sqrt(
 				(1.0 - (((1.0 - ESq) / (2.0 * E)) * Math.Log((1.0 - E) / (1.0 + E))))
@@ -92,10 +92,6 @@ namespace Pigeoid.Projection
 
 		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
-		}
-
-		public override string Name {
-			get { return CoordinateOperationStandardNames.LambertAzimuthalEqualArea; }
 		}
 
 		public bool Equals(LambertAzimuthalEqualAreaSpherical other) {

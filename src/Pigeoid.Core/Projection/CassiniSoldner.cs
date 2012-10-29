@@ -195,18 +195,6 @@ namespace Pigeoid.Projection
 			}
 		}
 
-		public override string Name {
-			get { return "Cassini Soldner"; }
-		}
-
-		[NotNull]
-		public override IEnumerable<INamedParameter> GetParameters() {
-			return base.GetParameters().Concat(new INamedParameter[] {
-				new NamedParameter<double>(NamedParameter.NameLatitudeOfNaturalOrigin, NaturalOrigin.Latitude),
-				new NamedParameter<double>(NamedParameter.NameLongitudeOfNaturalOrigin, NaturalOrigin.Longitude)
-			});
-		}
-		
 		public bool Equals(CassiniSoldner other) {
 			return !ReferenceEquals(other, null)
 				&& (

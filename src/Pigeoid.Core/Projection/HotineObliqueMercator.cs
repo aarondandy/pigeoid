@@ -113,9 +113,5 @@ namespace Pigeoid.Projection
 			get { throw new NotImplementedException(); }
 		}
 
-		public override string Name
-		{
-			get { return "Hotine Oblique Mercator"; }
-		}
 	}
 }

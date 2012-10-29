@@ -1,6 +1,7 @@
 ﻿// TODO: source header
 
 using System.Diagnostics;
+using JetBrains.Annotations;
 using Pigeoid.Interop;
 using Pigeoid.Transformation;
 using Vertesaur;
@@ -17,7 +18,7 @@ namespace Pigeoid.Projection
 
 			private readonly InvertedTransformationBase<TransverseMercator,Point2,GeographicCoordinate> _baseInv;
 
-			public Inverted(TransverseMercatorSouth core) : base(core) {
+			public Inverted([NotNull] TransverseMercatorSouth core) : base(core) {
 				_baseInv = core.BaseInverse;
 			}
 
@@ -30,7 +31,7 @@ namespace Pigeoid.Projection
 			GeographicCoordinate naturalOrigin,
 			Vector2 falseProjectedOffset,
 			double scaleFactor,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		)
 			: base(
 				naturalOrigin,
@@ -51,10 +52,6 @@ namespace Pigeoid.Projection
 
 		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
 			return new Inverted(this);
-		}
-
-		public override string Name {
-			get { return CoordinateOperationStandardNames.TransverseMercatorSouthOriented; }
 		}
 
 	}

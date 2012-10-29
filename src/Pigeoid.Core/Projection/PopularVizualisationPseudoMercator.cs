@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -11,7 +12,7 @@ namespace Pigeoid.Projection
 		private class Inverse : InvertedTransformationBase<PopularVisualizationPseudoMercator, Point2, GeographicCoordinate>
 		{
 
-			public Inverse(PopularVisualizationPseudoMercator core) : base(core) { }
+			public Inverse([NotNull] PopularVisualizationPseudoMercator core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 value)
 			{
@@ -28,7 +29,7 @@ namespace Pigeoid.Projection
 		public PopularVisualizationPseudoMercator(
 			GeographicCoordinate geographicOrigin,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid 
+			[NotNull] ISpheroid<double> spheroid 
 		)
 			: base(falseProjectedOffset, spheroid)
 		{
@@ -53,9 +54,5 @@ namespace Pigeoid.Projection
 		public override bool HasInverse { get { return 0 != R; } }
 // ReSharper restore CompareOfFloatsByEqualityOperator
 
-		public override string Name
-		{
-			get { return "Popular Visualization Pseudo Mercator"; }
-		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿// TODO: source header
 
 using System;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid
@@ -27,28 +28,32 @@ namespace Pigeoid
 		/// <inheritdoc/>
 		public string Code { get; private set; }
 
+		[ContractAnnotation("null=>false")]
 		public bool Equals(IAuthorityTag other) {
 			return null != other
 				&& String.Equals(Name, other.Name)
 				&& String.Equals(Code, other.Code);
 		}
 
+		[ContractAnnotation("null=>false")]
 		public override bool Equals(object obj) {
 			return ReferenceEquals(this,obj) || Equals(obj as IAuthorityTag);
 		}
 
-		public override int GetHashCode() {
-			return Code.GetHashCode();
+		public override int GetHashCode(){
+			return null != Code
+				? Code.GetHashCode()
+				: 0;
 		}
 
-		public override string ToString() {
-			if (String.IsNullOrEmpty(Name))
-				return "Unknown";
-
-			return String.IsNullOrEmpty(Code)
-				? Name
-				: (Name + ':' + Code);
+		public override string ToString(){
+			if(String.IsNullOrEmpty(Name)){
+				return String.IsNullOrEmpty(Code) ? "Unknown" : Code;
+			}
+			if (String.IsNullOrEmpty(Code)){
+				return Name;
+			}
+			return String.Concat(Name, ':', Code);
 		}
-
 	}
 }

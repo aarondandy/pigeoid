@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid
@@ -8,9 +9,11 @@ namespace Pigeoid
 	public class CoordinateOperationInfoInverse : IParameterizedCoordinateOperationInfo
 	{
 
-		public ICoordinateOperationInfo Core { get; private set; }
+		public ICoordinateOperationInfo Core { [ContractAnnotation("=>notnull")] get; private set; }
 
-		public CoordinateOperationInfoInverse(ICoordinateOperationInfo core) {
+		public IParameterizedCoordinateOperationInfo ParameterizedCore { get { return Core as IParameterizedCoordinateOperationInfo; } }
+
+		public CoordinateOperationInfoInverse([NotNull] ICoordinateOperationInfo core) {
 			if(null == core)
 				throw new ArgumentNullException("core");
 
@@ -21,23 +24,25 @@ namespace Pigeoid
 
 		public IEnumerable<INamedParameter> Parameters {
 			get {
-				var parameterizedOperationInfo = Core as IParameterizedCoordinateOperationInfo;
+				var parameterizedOperationInfo = ParameterizedCore;
 				return null != parameterizedOperationInfo
 					? parameterizedOperationInfo.Parameters
 					: Enumerable.Empty<INamedParameter>();
 			}
 		}
 
-		public bool HasInverse { get { return true; } }
+		public bool HasInverse { [ContractAnnotation("=>true")]get { return true; } }
 
+		[ContractAnnotation("=>notnull")]
 		public ICoordinateOperationInfo GetInverse() { return Core; }
 
-		public bool IsInverseOfDefinition { get { return true; } }
+		public bool IsInverseOfDefinition { [ContractAnnotation("=>true")] get { return true; } }
 
 		public ICoordinateOperationMethodInfo Method {
-			get {
-				return Core is IParameterizedCoordinateOperationInfo
-					? (Core as IParameterizedCoordinateOperationInfo).Method
+			get{
+				var paramOp = ParameterizedCore;
+				return null != paramOp
+					? paramOp.Method
 					: null;
 			}
 		}

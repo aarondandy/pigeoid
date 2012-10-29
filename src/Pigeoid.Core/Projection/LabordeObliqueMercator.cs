@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 using Vertesaur;
 using Vertesaur.Contracts;
 
@@ -17,7 +18,7 @@ namespace Pigeoid.Projection
 			GeographicCoordinate projectionCenter,
 			double azimuthOfInitialLine,
 			double scaleFactor,
-			ISpheroid<double> spheroid,
+			[NotNull] ISpheroid<double> spheroid,
 			Vector2 falseProjectedOffset
 		) : base(falseProjectedOffset, spheroid)
 		{
@@ -74,9 +75,5 @@ namespace Pigeoid.Projection
 			get { throw new NotImplementedException(); }
 		}
 
-		public override string Name
-		{
-			get { return "Laborde Oblique Mercator"; }
-		}
 	}
 }

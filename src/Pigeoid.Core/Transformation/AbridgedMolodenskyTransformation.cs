@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Vertesaur;
 using Vertesaur.Contracts;
 
@@ -19,7 +20,7 @@ namespace Pigeoid.Transformation
 		public readonly Vector3 D;
 		protected readonly double Da;
 		protected readonly double SeSq;
-		protected readonly double Sadfsfda;
+		protected readonly double SaDfSfDa;
 		protected readonly double OneMinusESqsaSinOne;
 		protected readonly double SaSinOne;
 
@@ -34,25 +35,26 @@ namespace Pigeoid.Transformation
 		/// <param name="targetSpheroid">The destination CRS spheroid.</param>
 		public AbridgedMolodenskyTransformation(
 			Vector3 translation,
-			ISpheroid<double> sourceSpheroid,
-			ISpheroid<double> targetSpheroid
+			[NotNull] ISpheroid<double> sourceSpheroid,
+			[NotNull] ISpheroid<double> targetSpheroid
 		) {
 			SourceSpheroid = sourceSpheroid;
 			TargetSpheroid = targetSpheroid;
 			D = translation;
-			double sf = sourceSpheroid.F;
-			double tf = targetSpheroid.F;
-			double df = tf - sf;
-			double sa = sourceSpheroid.A;
-			double ta = targetSpheroid.A;
+			var sf = sourceSpheroid.F;
+			var tf = targetSpheroid.F;
+			var df = tf - sf;
+			var sa = sourceSpheroid.A;
+			var ta = targetSpheroid.A;
 			Da = ta - sa;
 			SeSq = sourceSpheroid.ESquared;
-			Sadfsfda = (sa * df) + (sf * Da);
+			SaDfSfDa = (sa * df) + (sf * Da);
 			SaSinOne = sa * SinOne;
 			OneMinusESqsaSinOne = SaSinOne * (1.0 - SeSq);
 			
 // ReSharper disable CompareOfFloatsByEqualityOperator
-			if (0 == OneMinusESqsaSinOne || 0 == SaSinOne) throw new ArgumentException("Invalid spheroid.", "sourceSpheroid");
+			if (0 == OneMinusESqsaSinOne || 0 == SaSinOne)
+				throw new ArgumentException("Invalid spheroid.", "sourceSpheroid");
 // ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
@@ -70,7 +72,7 @@ namespace Pigeoid.Transformation
 					(
 						(
 							(D.Z * cosLatitude)
-							+ (Sadfsfda * Math.Sin(2.0 * coordinate.Latitude))
+							+ (SaDfSfDa * Math.Sin(2.0 * coordinate.Latitude))
 							- (sinLatitude * dxdy)
 						)
 						* c * cSq
@@ -87,7 +89,7 @@ namespace Pigeoid.Transformation
 				coordinate.Height + (
 					+(cosLatitude * dxdy)
 					+ (D.Z * sinLatitude)
-					+ (Sadfsfda * sinLatitudeSquared)
+					+ (SaDfSfDa * sinLatitudeSquared)
 					- Da
 				)
 			);

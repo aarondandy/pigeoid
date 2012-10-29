@@ -1,6 +1,7 @@
 ﻿// TODO: source header
 
 using System;
+using JetBrains.Annotations;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -26,7 +27,7 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<Mercator,Point2,GeographicCoordinate>
 		{
 
-			public Inverted(Mercator core) : base(core) { }
+			public Inverted([NotNull] Mercator core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 coordinate) {
 				var x = (
@@ -60,7 +61,7 @@ namespace Pigeoid.Projection
 		public Mercator(
 			GeographicCoordinate geographicOrigin,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		) : this(
 			geographicOrigin.Longitude,
 			Math.Cos(geographicOrigin.Latitude)
@@ -80,7 +81,7 @@ namespace Pigeoid.Projection
 			double centralMeridian,
 			double scaleFactor,
 			Vector2 falseProjectedOffset,
-			ISpheroid<double> spheroid
+			[NotNull] ISpheroid<double> spheroid
 		) : base(falseProjectedOffset, spheroid)
 		{
 			CentralMeridian = centralMeridian;
@@ -115,10 +116,6 @@ namespace Pigeoid.Projection
 // ReSharper disable CompareOfFloatsByEqualityOperator
 			get { return 0 != Ak; }
 // ReSharper restore CompareOfFloatsByEqualityOperator
-		}
-
-		public override string Name {
-			get { return "Mercator 2SP"; }
 		}
 
 		public bool Equals(Mercator other) {

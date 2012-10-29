@@ -182,9 +182,5 @@ namespace Pigeoid.Projection
 		public override bool HasInverse { get { return 0 != SinLatitudeOfPseudoStandardParallel; } }
 // ReSharper restore CompareOfFloatsByEqualityOperator
 
-		public override string Name
-		{
-			get { return "Krovak"; }
-		}
 	}
 }
