@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Pigeoid.Contracts;
 using Vertesaur.Search;
@@ -12,30 +11,6 @@ namespace Pigeoid.Epsg
 		ICoordinateOperationPathGenerator<EpsgCrs>
 	{
 
-		[Obsolete]
-		private struct EpsgTransformGraphCost :
-			IComparable<EpsgTransformGraphCost>
-		{
-			public readonly int TotalCount;
-			public readonly double TotalAccuracy;
-
-			private EpsgTransformGraphCost(int totalCount, double totalAccuracy) {
-				TotalCount = totalCount;
-				TotalAccuracy = totalAccuracy;
-			}
-
-			public int CompareTo(EpsgTransformGraphCost other) {
-				var compareResult = TotalCount.CompareTo(other.TotalCount);
-				return 0 != compareResult ? compareResult : TotalAccuracy.CompareTo(other.TotalAccuracy);
-			}
-
-			public EpsgTransformGraphCost Add(int additionalCount, double additionalAccuracy) {
-				return new EpsgTransformGraphCost(TotalCount + additionalCount, TotalAccuracy + additionalAccuracy);
-			}
-
-		}
-
-		// TODO: a custom cost class may be needed because: concatenated operation should be used first and not all operations have accuracy values
 		private class EpsgTransformGraph : DynamicGraphBase<EpsgCrs, int, ICoordinateOperationInfo>
 		{
 
@@ -56,33 +31,12 @@ namespace Pigeoid.Epsg
 			}
 
 			public override IEnumerable<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>> GetNeighborInfo(EpsgCrs node, int currentCost) {
+				var costPlusOne = currentCost + 1;
+				if (costPlusOne > 3)
+					return Enumerable.Empty<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>>(); 
+				
 				var nodeCode = node.Code;
 				var results = new List<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>>();
-				var costPlusOne = currentCost + 1;
-				if (costPlusOne > 7)
-					return results;
-
-				// if this is a projection see if we can go up to the parent CRS
-				var projectionNode = node as EpsgCrsProjected;
-				if(null != projectionNode) {
-					var projectionOperationInformation = projectionNode.Projection;
-					if(null != projectionOperationInformation) {
-						results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
-							projectionNode.BaseCrs, costPlusOne, projectionOperationInformation));
-					}
-				}
-
-				// see if any projections are based on this CRS
-				foreach(var projectionCoordinateReferenceSystem in EpsgCrsProjected.GetProjectionsBasedOn(nodeCode)) {
-					if(!AreaIntersectionPasses(projectionCoordinateReferenceSystem.Area))
-						continue;
-
-					var projectionOperationInformation = projectionCoordinateReferenceSystem.Projection;
-					if(null != projectionOperationInformation && projectionOperationInformation.HasInverse) {
-						results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
-							projectionCoordinateReferenceSystem, costPlusOne, projectionOperationInformation.GetInverse()));
-					}
-				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedForwardReferenced(nodeCode)) {
 					var crs = op.TargetCrs;
@@ -120,6 +74,9 @@ namespace Pigeoid.Epsg
 						crs, costPlusOne, op.GetInverse()));
 				}
 
+				if(results.Any(x => null == x || null == x.Edge || null == x.Node))
+					throw new Exception();
+
 				return results;
 			}
 		}
@@ -134,31 +91,113 @@ namespace Pigeoid.Epsg
 			return new ConcatenatedCoordinateOperationInfo(operations);
 		}
 
+		private class CrsOperationRelation
+		{
+
+			public static List<CrsOperationRelation> BuildSourceSearchList(EpsgCrs source) {
+				var result = new List<CrsOperationRelation>();
+				var cost = 0;
+				var current = source;
+				var operations = new List<ICoordinateOperationInfo>();
+				while(current is EpsgCrsProjected) {
+					var projected = current as EpsgCrsProjected;
+					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Operations = operations.ToArray()});
+					current = projected.BaseCrs;
+					cost++;
+					operations.Add(projected.Projection.GetInverse());
+				}
+				if(current is EpsgCrsGeodetic) {
+					result.Add(new CrsOperationRelation{ Cost = cost, RelatedCrs = current, Operations = operations.ToArray()});
+				}
+				return result;
+			}
+
+			public static List<CrsOperationRelation> BuildTargetSearchList(EpsgCrs target) {
+				var result = new List<CrsOperationRelation>();
+				var cost = 0;
+				var current = target;
+				var operations = new List<ICoordinateOperationInfo>();
+				while (current is EpsgCrsProjected) {
+					var projected = current as EpsgCrsProjected;
+					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Operations = operations.ToArray() });
+					current = projected.BaseCrs;
+					cost++;
+					operations.Insert(0, projected.Projection);
+				}
+				if (current is EpsgCrsGeodetic) {
+					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Operations = operations.ToArray() });
+				}
+				return result;
+			} 
+
+			public EpsgCrs RelatedCrs;
+			public IEnumerable<ICoordinateOperationInfo> Operations;
+			public int Cost;
+		}
+
+		private class CrsPathResult
+		{
+			public int Cost;
+			public IEnumerable<ICoordinateOperationInfo> Operations;
+		}
+
 		public ICoordinateOperationInfo Generate(EpsgCrs from, EpsgCrs to) {
+			var result = GenerateCore(from, to);
+			return null == result ? null : GenerateConcatenated(result.ToList());
+		}
+
+		public IEnumerable<ICoordinateOperationInfo> GenerateCore(EpsgCrs from, EpsgCrs to) {
+			// see if there is a direct path above the source
+			var sourceList = CrsOperationRelation.BuildSourceSearchList(from);
+			foreach(var source in sourceList) {
+				if(source.RelatedCrs == to) {
+					return source.Operations;
+				}
+			}
+
+			// see if there is a direct path above the target
+			var targetList = CrsOperationRelation.BuildTargetSearchList(to);
+			foreach(var target in targetList) {
+				if(target.RelatedCrs == from) {
+					return target.Operations;
+				}
+			}
+			
+			// try to find the best path from any source to any target
 			var graph = new EpsgTransformGraph(from.Area, to.Area);
+			var results = new List<CrsPathResult>();
+			foreach(var source in sourceList) {
+				foreach(var target in targetList) {
 
-#if DEBUG
-			var execTimer = new Stopwatch();
-			execTimer.Start();
-#endif	
+					if (source.RelatedCrs == target.RelatedCrs) {
+						results.Add(new CrsPathResult {
+							Cost = source.Cost + target.Cost,
+							Operations = source.Operations.Concat(target.Operations)
+						});
+					}
 
-			var path = graph.FindPath(from, to);
+					var path = graph.FindPath(source.RelatedCrs, target.RelatedCrs);
+					if(null == path)
+						continue; // no path found
 
-#if DEBUG
-			execTimer.Stop();
-			var elapsed = execTimer.Elapsed;
-			Debug.WriteLine("FindPath {0} to {1}: {2}", from.Code, to.Code, elapsed);
-#endif
+					int pathCost = source.Cost + target.Cost;
+					var pathOperations = source.Operations.ToList();
+					foreach(var pathPart in path) {
+						pathCost += pathPart.Cost;
+						pathOperations.Add(pathPart.Edge);
+					}
+					pathOperations.AddRange(target.Operations);
 
-			if (null == path)
-				return null;
+					results.Add(new CrsPathResult {
+						Cost = pathCost,
+						Operations = source.Operations.Concat(pathOperations).Concat(target.Operations)
+					});
+				}
+			}
 
-			return GenerateConcatenated(
-				path
-				.Where(x => null != x && null != x.Edge)
-				.Select(x => x.Edge)
-				.ToList()
-			);
+			// use a stable sort to get the best result
+			var bestPath = results.OrderBy(x => x.Cost).FirstOrDefault();
+			return null == bestPath ? null : bestPath.Operations;
 		}
 
 		public ICoordinateOperationInfo Generate(ICrs from, ICrs to) {
