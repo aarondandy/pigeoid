@@ -33,17 +33,15 @@ namespace Pigeoid.Epsg
 			public override IEnumerable<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>> GetNeighborInfo(EpsgCrs node, int currentCost) {
 				var costPlusOne = currentCost + 1;
 				if (costPlusOne > 3)
-					return Enumerable.Empty<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>>(); 
+					yield break;
 				
 				var nodeCode = node.Code;
-				var results = new List<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>>();
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedForwardReferenced(nodeCode)) {
 					var crs = op.TargetCrs;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
-					results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
-						crs, costPlusOne, op));
+					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(nodeCode)) {
@@ -52,16 +50,14 @@ namespace Pigeoid.Epsg
 					var crs = op.SourceCrs;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
-					results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
-						crs, costPlusOne, op.GetInverse()));
+					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced(nodeCode)) {
 					var crs = op.TargetCrs;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
-					results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
-						crs, costPlusOne, op));
+					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetTransformReverseReferenced(nodeCode)) {
@@ -70,14 +66,9 @@ namespace Pigeoid.Epsg
 					var crs = op.SourceCrs;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
-					results.Add(new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(
-						crs, costPlusOne, op.GetInverse()));
+					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
 				}
 
-				if(results.Any(x => null == x || null == x.Edge || null == x.Node))
-					throw new Exception();
-
-				return results;
 			}
 		}
 
@@ -166,21 +157,31 @@ namespace Pigeoid.Epsg
 			// try to find the best path from any source to any target
 			var graph = new EpsgTransformGraph(from.Area, to.Area);
 			var results = new List<CrsPathResult>();
+			var lowestCost = Int32.MaxValue;
 			foreach(var source in sourceList) {
 				foreach(var target in targetList) {
+					var pathCost = source.Cost + target.Cost;
+					if(pathCost >= lowestCost)
+						continue;
 
 					if (source.RelatedCrs == target.RelatedCrs) {
 						results.Add(new CrsPathResult {
-							Cost = source.Cost + target.Cost,
+							Cost = pathCost,
 							Operations = source.Operations.Concat(target.Operations)
 						});
+						if (pathCost < lowestCost)
+							lowestCost = pathCost;
+
+						continue;
 					}
+
+					if ((pathCost+1) >= lowestCost)
+						continue;
 
 					var path = graph.FindPath(source.RelatedCrs, target.RelatedCrs);
 					if(null == path)
 						continue; // no path found
 
-					int pathCost = source.Cost + target.Cost;
 					var pathOperations = source.Operations.ToList();
 					foreach(var pathPart in path) {
 						pathCost += pathPart.Cost;
@@ -192,12 +193,22 @@ namespace Pigeoid.Epsg
 						Cost = pathCost,
 						Operations = source.Operations.Concat(pathOperations).Concat(target.Operations)
 					});
+
+					if(pathCost < lowestCost)
+						lowestCost = pathCost;
 				}
 			}
 
-			// use a stable sort to get the best result
-			var bestPath = results.OrderBy(x => x.Cost).FirstOrDefault();
-			return null == bestPath ? null : bestPath.Operations;
+			// find the smallest result;
+			IEnumerable<ICoordinateOperationInfo> bestResult = null;
+			lowestCost = Int32.MaxValue;
+			foreach(var result in results){
+				if(result.Cost < lowestCost){
+					lowestCost = result.Cost;
+					bestResult = result.Operations;
+				}
+			}
+			return bestResult;
 		}
 
 		public ICoordinateOperationInfo Generate(ICrs from, ICrs to) {

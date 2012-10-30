@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
@@ -126,21 +127,21 @@ namespace Pigeoid.Epsg
 				}
 			}
 
-			internal ReadOnlyCollection<ushort> GetForwardReferencedOperationCodes(int sourceCode) {
+			internal ushort[] GetForwardReferencedOperationCodes(int sourceCode) {
 				ushort[] data;
 				return sourceCode >= 0
 					&& sourceCode <= ushort.MaxValue
 					&& _forwardLookUp.TryGetValue((ushort)sourceCode, out data)
-					? Array.AsReadOnly(data)
+					? data
 					: null;
 			}
 
-			internal ReadOnlyCollection<ushort> GetReverseReferencedOperationCodes(int targetCode) {
+			internal ushort[] GetReverseReferencedOperationCodes(int targetCode) {
 				ushort[] data;
 				return targetCode >= 0
 					&& targetCode <= ushort.MaxValue
 					&& _reverseLookUp.TryGetValue((ushort)targetCode, out data)
-					? Array.AsReadOnly(data)
+					? data
 					: null;
 			}
 
@@ -231,21 +232,21 @@ namespace Pigeoid.Epsg
 				}
 			}
 
-			internal ReadOnlyCollection<ushort> GetForwardReferencedOperationCodes(int sourceCode) {
+			internal ushort[] GetForwardReferencedOperationCodes(int sourceCode) {
 				ushort[] data;
 				return sourceCode >= 0
 					&& sourceCode <= ushort.MaxValue
 					&& _forwardLookUp.TryGetValue((ushort)sourceCode, out data)
-					? Array.AsReadOnly(data)
+					? data
 					: null;
 			}
 
-			internal ReadOnlyCollection<ushort> GetReverseReferencedOperationCodes(int targetCode) {
+			internal ushort[] GetReverseReferencedOperationCodes(int targetCode) {
 				ushort[] data;
 				return targetCode >= 0
 					&& targetCode <= ushort.MaxValue
 					&& _reverseLookUp.TryGetValue((ushort)targetCode, out data)
-					? Array.AsReadOnly(data)
+					? data
 					: null;
 			}
 
@@ -258,6 +259,12 @@ namespace Pigeoid.Epsg
 		internal static readonly EpsgCoordinateTransformInfoLookUp TransformLookUp = EpsgCoordinateTransformInfoLookUp.Create();
 		internal static readonly EpsgCoordinateConversionInfoLookUp ConversionLookUp = new EpsgCoordinateConversionInfoLookUp();
 		internal static readonly EpsgCoordinateOperationConcatenatedInfoLookUp ConcatenatedLookUp = EpsgCoordinateOperationConcatenatedInfoLookUp.Create();
+
+		private static readonly ReadOnlyCollection<EpsgCoordinateTransformInfo> EmptyEcti =
+			Array.AsReadOnly(new EpsgCoordinateTransformInfo[0]);
+
+		private static readonly ReadOnlyCollection<EpsgConcatenatedCoordinateOperationInfo> EmptyEccoi =
+			Array.AsReadOnly(new EpsgConcatenatedCoordinateOperationInfo[0]);
 
 		public static EpsgCoordinateTransformInfo GetTransformInfo(int code) {
 			return code >= 0 && code < UInt16.MaxValue ? TransformLookUp.Get((ushort)code) : null;
@@ -286,34 +293,32 @@ namespace Pigeoid.Epsg
 
 		public static IEnumerable<EpsgCoordinateTransformInfo> TransformInfos { get { return TransformLookUp.Values; } }
 
-		public static IEnumerable<EpsgCoordinateTransformInfo> GetTransformForwardReferenced(int sourceCode) {
-			var ids = TransformLookUp.GetForwardReferencedOperationCodes(sourceCode);
-			return null != ids
-				? ids.Select(id => TransformLookUp.Get(id))
-				: Enumerable.Empty<EpsgCoordinateTransformInfo>();
-		}
-		public static IEnumerable<EpsgCoordinateTransformInfo> GetTransformReverseReferenced(int targetCode) {
-			var ids = TransformLookUp.GetReverseReferencedOperationCodes(targetCode);
-			return null != ids
-				? ids.Select(id => TransformLookUp.Get(id))
-				: Enumerable.Empty<EpsgCoordinateTransformInfo>();
-		}
-
 		public static IEnumerable<EpsgCoordinateOperationInfo> ConversionInfos { get { return ConversionLookUp.Values; } }
 
 		public static IEnumerable<EpsgConcatenatedCoordinateOperationInfo> ConcatenatedInfos { get { return ConcatenatedLookUp.Values; } }
-		public static IEnumerable<EpsgConcatenatedCoordinateOperationInfo> GetConcatenatedForwardReferenced(int sourceCode) {
-			var ids = ConcatenatedLookUp.GetForwardReferencedOperationCodes(sourceCode);
-			return null != ids
-				? ids.Select(id => ConcatenatedLookUp.Get(id))
-				: Enumerable.Empty<EpsgConcatenatedCoordinateOperationInfo>();
-		}
-		public static IEnumerable<EpsgConcatenatedCoordinateOperationInfo> GetConcatenatedReverseReferenced(int targetCode) {
-			var ids = ConcatenatedLookUp.GetReverseReferencedOperationCodes(targetCode);
-			return null != ids
-				? ids.Select(id => ConcatenatedLookUp.Get(id))
-				: Enumerable.Empty<EpsgConcatenatedCoordinateOperationInfo>();
+
+		public static ReadOnlyCollection<EpsgCoordinateTransformInfo> GetTransformForwardReferenced(int sourceCode){
+			return ConvertToOperations(TransformLookUp.GetForwardReferencedOperationCodes(sourceCode));
 		}
 
+		public static ReadOnlyCollection<EpsgCoordinateTransformInfo> GetTransformReverseReferenced(int targetCode) {
+			return ConvertToOperations(TransformLookUp.GetReverseReferencedOperationCodes(targetCode));
+		}
+
+		private static ReadOnlyCollection<EpsgCoordinateTransformInfo> ConvertToOperations(ushort[] ids){
+			return null == ids ? EmptyEcti : Array.AsReadOnly(Array.ConvertAll(ids, TransformLookUp.Get));
+		}
+
+		public static ReadOnlyCollection<EpsgConcatenatedCoordinateOperationInfo> GetConcatenatedForwardReferenced(int sourceCode) {
+			return ConvertToCatOperations(ConcatenatedLookUp.GetForwardReferencedOperationCodes(sourceCode));
+		}
+
+		public static ReadOnlyCollection<EpsgConcatenatedCoordinateOperationInfo> GetConcatenatedReverseReferenced(int targetCode) {
+			return ConvertToCatOperations(ConcatenatedLookUp.GetReverseReferencedOperationCodes(targetCode));
+		}
+
+		private static ReadOnlyCollection<EpsgConcatenatedCoordinateOperationInfo> ConvertToCatOperations(ushort[] ids){
+			return null == ids ? EmptyEccoi : Array.AsReadOnly(Array.ConvertAll(ids, ConcatenatedLookUp.Get));
+		}
 	}
 }

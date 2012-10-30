@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Pigeoid.Contracts;
 
 namespace Pigeoid.Epsg.ProjectionTest
 {
@@ -23,6 +22,21 @@ namespace Pigeoid.Epsg.ProjectionTest
 			}
 		}
 
+		public IEnumerable<T[]> Batch<T>(List<T> items, int batchSize){
+			for(int i = 0; i < items.Count; i+=batchSize){
+				int startIndex = i;
+				int endIndex = startIndex + batchSize;
+				if(endIndex > items.Count){
+					endIndex = items.Count;
+				}
+				var batch = new T[endIndex - startIndex];
+				if(batch.Length > 0){
+					items.CopyTo(startIndex, batch, 0, batch.Length);
+					yield return batch;
+				}
+			}
+		} 
+
 		public void Run() {
 			Console.Write("Generating test cases...");
 			var crsTestList = GenerateAreaIntersectingCrs().ToList();
@@ -34,26 +48,27 @@ namespace Pigeoid.Epsg.ProjectionTest
 			stopwatch.Start();
 
 			var generator = new EpsgCrsCoordinateOperationPathGenerator();
-			int testNumber = 0;
-			Parallel.ForEach(crsTestList, testCase => {
-				var progress = Interlocked.Increment(ref testNumber);
-				if (progress % 100 == 0) {
-					Console.WriteLine(
-						"{0:P6} ({1}/{2}) @{3}ops/s",
-						(progress / (double)crsTestList.Count),
-						progress,
-						crsTestList.Count,
-						progress / (stopwatch.ElapsedMilliseconds / 1000.0)
-					);
-				}
-				try {
-					testCase.Run(generator);
-				}
-				catch(Exception ex) {
-					Console.WriteLine("Failure on '{0}'.", testCase);
-					Console.WriteLine(ex);
-				}
-			});
+
+			int processedItems = 0;
+			foreach (var batch in Batch(crsTestList, 512)){
+				Console.WriteLine(
+					"{0:P6} ({1}/{2}) @{3}ops/s",
+					(processedItems / (double)crsTestList.Count),
+					processedItems,
+					crsTestList.Count,
+					processedItems / (stopwatch.ElapsedMilliseconds / 1000.0)
+				);
+				Parallel.ForEach(batch, testCase =>{
+					try {
+						testCase.Run(generator);
+					}
+					catch (Exception ex) {
+						Console.WriteLine("Failure on '{0}'.", testCase);
+						Console.WriteLine(ex);
+					}
+				});
+				processedItems += batch.Length;
+			}
 
 			stopwatch.Stop();
 			Console.WriteLine("All tests complete");
