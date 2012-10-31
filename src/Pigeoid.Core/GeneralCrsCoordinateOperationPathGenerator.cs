@@ -22,8 +22,9 @@ namespace Pigeoid
 			return new ConcatenatedCoordinateOperationInfo(operations);
 		}
 
-		public ICoordinateOperationInfo Generate(ICrs from, ICrs to) {
-			return GenerateConcatenated(GenerateCore(from, to));
+		public ICoordinateOperationCrsPathInfo Generate(ICrs from, ICrs to) {
+			throw new NotImplementedException();
+			//return GenerateConcatenated(GenerateCore(from, to));
 		}
 
 		private List<ICoordinateOperationInfo> GenerateCore(ICrs from, ICrs to) {
@@ -64,7 +65,6 @@ namespace Pigeoid
 
 			result.AddRange(backDownToProjectionSteps);
 			return result;
-			
 
 		}
 

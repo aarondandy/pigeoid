@@ -12,6 +12,7 @@ namespace Pigeoid.Epsg.ProjectionTest
 
 		public ICrs From { get; private set; }
 		public ICrs To { get; private set; }
+		public ICoordinateOperationCrsPathInfo Operations { get; private set; }
 
 		public override string ToString() {
 			return string.Format("{0} to {1}", From, To);
@@ -21,7 +22,7 @@ namespace Pigeoid.Epsg.ProjectionTest
 			if(null == generator)
 				generator = new EpsgCrsCoordinateOperationPathGenerator();
 
-			var path = generator.Generate(From, To);
+			Operations = generator.Generate(From, To);
 		}
 
 	}

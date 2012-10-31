@@ -2,6 +2,6 @@
 {
 	public interface ICoordinateOperationPathGenerator<in TItem>
 	{
-		ICoordinateOperationInfo Generate(TItem from, TItem to);
+		ICoordinateOperationCrsPathInfo Generate(TItem from, TItem to);
 	}
 }

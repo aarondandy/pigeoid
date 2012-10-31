@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Vertesaur.Search;
 
@@ -11,15 +11,23 @@ namespace Pigeoid.Epsg
 		ICoordinateOperationPathGenerator<EpsgCrs>
 	{
 
+		public class SharedOptions
+		{
+			public bool IgnoreDeprecatedCrs { get; set; }
+			public bool IgnoreDeprecatedOperations { get; set; }
+		}
+
 		private class EpsgTransformGraph : DynamicGraphBase<EpsgCrs, int, ICoordinateOperationInfo>
 		{
 
 			private readonly EpsgArea _fromArea;
 			private readonly EpsgArea _toArea;
+			private readonly SharedOptions _options;
 
-			public EpsgTransformGraph(EpsgArea fromArea, EpsgArea toArea) {
+			public EpsgTransformGraph([NotNull] EpsgArea fromArea, [NotNull] EpsgArea toArea, [NotNull] SharedOptions options) {
 				_fromArea = fromArea;
 				_toArea = toArea;
+				_options = options;
 			}
 
 			private bool AreaIntersectionPasses(EpsgArea area) {
@@ -32,54 +40,60 @@ namespace Pigeoid.Epsg
 
 			public override IEnumerable<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>> GetNeighborInfo(EpsgCrs node, int currentCost) {
 				var costPlusOne = currentCost + 1;
-				if (costPlusOne > 3)
+				if (costPlusOne > 4)
 					yield break;
 				
 				var nodeCode = node.Code;
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedForwardReferenced(nodeCode)) {
+					if(_options.IgnoreDeprecatedOperations && op.Deprecated)
+						continue;
 					var crs = op.TargetCrs;
+					if (_options.IgnoreDeprecatedCrs && crs.Deprecated)
+						continue;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
 					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(nodeCode)) {
+					if (_options.IgnoreDeprecatedOperations && op.Deprecated)
+						continue;
 					if(!op.HasInverse)
 						continue;
 					var crs = op.SourceCrs;
+					if (_options.IgnoreDeprecatedCrs && crs.Deprecated)
+						continue;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
 					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced(nodeCode)) {
+					if (_options.IgnoreDeprecatedOperations && op.Deprecated)
+						continue;
 					var crs = op.TargetCrs;
+					if (_options.IgnoreDeprecatedCrs && crs.Deprecated)
+						continue;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
 					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetTransformReverseReferenced(nodeCode)) {
+					if (_options.IgnoreDeprecatedOperations && op.Deprecated)
+						continue;
 					if(!op.HasInverse)
 						continue;
 					var crs = op.SourceCrs;
+					if (_options.IgnoreDeprecatedCrs && crs.Deprecated)
+						continue;
 					if(!AreaIntersectionPasses(crs.Area))
 						continue;
 					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
 				}
 
 			}
-		}
-
-		private static ICoordinateOperationInfo GenerateConcatenated(List<ICoordinateOperationInfo> operations) {
-			if (null == operations)
-				return null;
-			if (operations.Count == 0)
-				return null;
-			if (operations.Count == 1)
-				return operations[0];
-			return new ConcatenatedCoordinateOperationInfo(operations);
 		}
 
 		private class CrsOperationRelation
@@ -89,16 +103,17 @@ namespace Pigeoid.Epsg
 				var result = new List<CrsOperationRelation>();
 				var cost = 0;
 				var current = source;
-				var operations = new List<ICoordinateOperationInfo>();
+				var path = new CoordinateOperationCrsPathInfo(source);
+
 				while(current is EpsgCrsProjected) {
 					var projected = current as EpsgCrsProjected;
-					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Operations = operations.ToArray()});
+					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path});
 					current = projected.BaseCrs;
 					cost++;
-					operations.Add(projected.Projection.GetInverse());
+					path = path.Append(current, projected.Projection.GetInverse());
 				}
 				if(current is EpsgCrsGeodetic) {
-					result.Add(new CrsOperationRelation{ Cost = cost, RelatedCrs = current, Operations = operations.ToArray()});
+					result.Add(new CrsOperationRelation{ Cost = cost, RelatedCrs = current, Path = path});
 				}
 				return result;
 			}
@@ -107,42 +122,43 @@ namespace Pigeoid.Epsg
 				var result = new List<CrsOperationRelation>();
 				var cost = 0;
 				var current = target;
-				var operations = new List<ICoordinateOperationInfo>();
+				var path = new CoordinateOperationCrsPathInfo(target);
 				while (current is EpsgCrsProjected) {
 					var projected = current as EpsgCrsProjected;
-					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Operations = operations.ToArray() });
+					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path });
 					current = projected.BaseCrs;
 					cost++;
-					operations.Insert(0, projected.Projection);
+					path = path.Prepend(current, projected.Projection);
 				}
 				if (current is EpsgCrsGeodetic) {
-					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Operations = operations.ToArray() });
+					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path });
 				}
 				return result;
 			} 
 
 			public EpsgCrs RelatedCrs;
-			public IEnumerable<ICoordinateOperationInfo> Operations;
+			public CoordinateOperationCrsPathInfo Path;
 			public int Cost;
 		}
 
 		private class CrsPathResult
 		{
 			public int Cost;
-			public IEnumerable<ICoordinateOperationInfo> Operations;
+			public CoordinateOperationCrsPathInfo Path;
 		}
 
-		public ICoordinateOperationInfo Generate(EpsgCrs from, EpsgCrs to) {
-			var result = GenerateCore(from, to);
-			return null == result ? null : GenerateConcatenated(result.ToList());
+		public EpsgCrsCoordinateOperationPathGenerator() {
+			Options = new SharedOptions();
 		}
 
-		public IEnumerable<ICoordinateOperationInfo> GenerateCore(EpsgCrs from, EpsgCrs to) {
+		public SharedOptions Options { get; private set; }
+
+		public ICoordinateOperationCrsPathInfo Generate(EpsgCrs from, EpsgCrs to) {
 			// see if there is a direct path above the source
 			var sourceList = CrsOperationRelation.BuildSourceSearchList(from);
 			foreach(var source in sourceList) {
 				if(source.RelatedCrs == to) {
-					return source.Operations;
+					return source.Path;
 				}
 			}
 
@@ -150,12 +166,12 @@ namespace Pigeoid.Epsg
 			var targetList = CrsOperationRelation.BuildTargetSearchList(to);
 			foreach(var target in targetList) {
 				if(target.RelatedCrs == from) {
-					return target.Operations;
+					return target.Path;
 				}
 			}
 			
 			// try to find the best path from any source to any target
-			var graph = new EpsgTransformGraph(from.Area, to.Area);
+			var graph = new EpsgTransformGraph(from.Area, to.Area, Options);
 			var results = new List<CrsPathResult>();
 			var lowestCost = Int32.MaxValue;
 			foreach(var source in sourceList) {
@@ -167,7 +183,7 @@ namespace Pigeoid.Epsg
 					if (source.RelatedCrs == target.RelatedCrs) {
 						results.Add(new CrsPathResult {
 							Cost = pathCost,
-							Operations = source.Operations.Concat(target.Operations)
+							Path = source.Path.Append(target.Path)
 						});
 						if (pathCost < lowestCost)
 							lowestCost = pathCost;
@@ -182,16 +198,17 @@ namespace Pigeoid.Epsg
 					if(null == path)
 						continue; // no path found
 
-					var pathOperations = source.Operations.ToList();
-					foreach(var pathPart in path) {
-						pathCost += pathPart.Cost;
-						pathOperations.Add(pathPart.Edge);
+					var pathOperations = source.Path;
+					for (int partIndex = 1; partIndex < path.Count; partIndex++) {
+						var part = path[partIndex];
+						pathCost += part.Cost;
+						pathOperations = pathOperations.Append(part.Node, part.Edge);
 					}
-					pathOperations.AddRange(target.Operations);
+					pathOperations = pathOperations.Append(target.Path);
 
 					results.Add(new CrsPathResult {
 						Cost = pathCost,
-						Operations = source.Operations.Concat(pathOperations).Concat(target.Operations)
+						Path = pathOperations //source.Path.Append(pathOperations).Append(target.Path)
 					});
 
 					if(pathCost < lowestCost)
@@ -200,24 +217,24 @@ namespace Pigeoid.Epsg
 			}
 
 			// find the smallest result;
-			IEnumerable<ICoordinateOperationInfo> bestResult = null;
+			ICoordinateOperationCrsPathInfo bestResult = null;
 			lowestCost = Int32.MaxValue;
 			foreach(var result in results){
 				if(result.Cost < lowestCost){
 					lowestCost = result.Cost;
-					bestResult = result.Operations;
+					bestResult = result.Path;
 				}
 			}
 			return bestResult;
 		}
 
-		public ICoordinateOperationInfo Generate(ICrs from, ICrs to) {
+		public ICoordinateOperationCrsPathInfo Generate(ICrs from, ICrs to) {
 			if(from is EpsgCrs && to is EpsgCrs) {
 				return Generate(from as EpsgCrs, to as EpsgCrs);
 			}
 			// TODO: if one is not an EpsgCrs we should try making it one (but really it should already have been... so maybe not)
 			// TODO: if one is EpsgCrs and the other is not, we need to find the nearest EpsgCrs along the way and use standard methods to get us there
-			throw new NotImplementedException("Currently only EpsgCrs to EpsgCrs is supported."); // TODO: just return null if we don't know what to do with it?
+			throw new NotImplementedException("Currently only 'EpsgCrs' to 'EpsgCrs' is supported."); // TODO: just return null if we don't know what to do with it?
 			return null; // TODO: or maybe just return null and move on?
 		}
 
