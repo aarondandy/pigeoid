@@ -55,6 +55,10 @@ namespace Pigeoid.Transformation
 		}
 
 		GeographicCoordinate ITransformation<Point3, GeographicCoordinate>.TransformValue(Point3 geocentric) {
+			return TransformValue2D(geocentric);
+		}
+
+		public GeographicCoordinate TransformValue2D(Point3 geocentric) {
 			double p = Math.Sqrt((geocentric.X * geocentric.X) + (geocentric.Y * geocentric.Y));
 			double cosQ = Math.Atan((geocentric.Z * MajorAxis) / (p * MinorAxis));
 			double sinQ = Math.Sin(cosQ);

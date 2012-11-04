@@ -54,6 +54,7 @@
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AuthorityTag.cs" />
+    <Compile Include="BasicCoordinateOperationToTransformationGenerator.cs" />
     <Compile Include="ConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IAuthorityBoundEntity.cs" />
     <Compile Include="Contracts\IAuthorityResolver.cs" />
@@ -69,7 +70,7 @@
     <Compile Include="Contracts\ICoordinateOperationPathGenerator.cs" />
     <Compile Include="Contracts\ICoordinateOperationInfo.cs" />
     <Compile Include="Contracts\ICoordinateOperationMethodInfo.cs" />
-    <Compile Include="Contracts\ICoordinateOperationToTransformationConverter.cs" />
+    <Compile Include="Contracts\ICoordinateOperationToTransformationGenerator.cs" />
     <Compile Include="Contracts\ICrs.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -112,7 +113,6 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Contracts\ISpheroidInfo.cs" />
-    <Compile Include="Contracts\ITransformationGenerator.cs" />
     <Compile Include="Contracts\IUom.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -120,11 +120,14 @@
     <Compile Include="CoordinateOperationCrsPathInfo.cs" />
     <Compile Include="CoordinateOperationInfo.cs" />
     <Compile Include="CoordinateOperationInfoInverse.cs" />
-    <Compile Include="CoreCoordinateOperationToTransformationConverter.cs" />
     <Compile Include="GeneralCrsCoordinateOperationPathGenerator.cs" />
     <Compile Include="GeographicCoordinate.cs" />
     <Compile Include="GeographicHeightCoordinate.cs" />
+    <Compile Include="Interop\CoordinateOperationNameComparer.cs" />
     <Compile Include="Interop\CoordinateOperationStandardNames.cs" />
+    <Compile Include="Interop\NameNormalizedComparerBase.cs" />
+    <Compile Include="Interop\ParameterNameComparer.cs" />
+    <Compile Include="Interop\ParameterStandardNames.cs" />
     <Compile Include="LongitudeDegreeRange.cs" />
     <Compile Include="NamedParameter.cs" />
     <Compile Include="Ogc\OgcCoordinateOperationMethodInfo.cs" />
@@ -153,6 +156,7 @@
     <Compile Include="Ogc\WktSerializer.cs" />
     <Compile Include="Ogc\WktWriter.cs" />
     <Compile Include="Projection\CassiniSoldner.cs" />
+    <Compile Include="Projection\EquidistantCylindrical.cs" />
     <Compile Include="Projection\HotineObliqueMercator.cs" />
     <Compile Include="Projection\HyperbolicCassiniSoldner.cs" />
     <Compile Include="Projection\Krovak.cs" />
@@ -187,12 +191,14 @@
     <Compile Include="Transformation\GeographicDimension.cs" />
     <Compile Include="Transformation\GeographicGeocentricTransformation.cs" />
     <Compile Include="Transformation\GeographicOffset.cs" />
+    <Compile Include="Transformation\GeographicGeocentricTranslation.cs" />
     <Compile Include="Transformation\Helmert7Transformation.cs" />
     <Compile Include="Transformation\InvertedTransformationBase.cs" />
     <Compile Include="Transformation\MolodenskyBadekasTransformation.cs" />
     <Compile Include="UomRatioConversion.cs" />
     <Compile Include="UomScalarConversion.cs" />
     <Compile Include="UomUnityConversion.cs" />
+    <Compile Include="Utility\ConversionUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

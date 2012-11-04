@@ -64,9 +64,11 @@ namespace Pigeoid.Epsg.ProjectionTest
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var generator = new EpsgCrsCoordinateOperationPathGenerator();
-			generator.Options.IgnoreDeprecatedCrs = IgnoreDeprecated;
-			generator.Options.IgnoreDeprecatedOperations = IgnoreDeprecated;
+			var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
+			pathGenerator.Options.IgnoreDeprecatedCrs = IgnoreDeprecated;
+			pathGenerator.Options.IgnoreDeprecatedOperations = IgnoreDeprecated;
+
+			var transformGenerator = new BasicCoordinateOperationToTransformationGenerator();
 
 			int processedItems = 0;
 			foreach (var batch in Batch(crsTestList, batchSize)) {
@@ -79,7 +81,7 @@ namespace Pigeoid.Epsg.ProjectionTest
 				);
 				Parallel.ForEach(batch, testCase =>{
 					try {
-						testCase.Run(generator);
+						testCase.Run(pathGenerator, transformGenerator);
 					}
 					catch (Exception ex) {
 						Console.WriteLine("Failure on '{0}'.", testCase);

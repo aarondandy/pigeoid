@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Vertesaur;
 using Vertesaur.Contracts;
 
@@ -27,14 +28,14 @@ namespace Pigeoid.Transformation
 			return p.Add(D);
 		}
 
-		public IEnumerable<Point3> TransformValues(IEnumerable<Point3> values) {
+		[ContractAnnotation("=>notnull")]
+		public IEnumerable<Point3> TransformValues([NotNull] IEnumerable<Point3> values) {
 			return values.Select(D.Add);
 		}
 
-		public void TransformValues(Point3[] values) {
-			for (int i = 0; i < values.Length; i++) {
+		public void TransformValues([NotNull] Point3[] values) {
+			for (int i = 0; i < values.Length; i++)
 				TransformValue(ref values[i]);
-			}
 		}
 
 		private void TransformValue(ref Point3 p) {
@@ -42,17 +43,20 @@ namespace Pigeoid.Transformation
 		}
 
 		public bool HasInverse {
-			get { return true; }
+			[ContractAnnotation("=>true")] get { return true; }
 		}
 
+		[ContractAnnotation("=>notnull")]
 		ITransformation<Point3, Point3> ITransformation<Point3, Point3>.GetInverse() {
 			return GetInverse();
 		}
 
+		[ContractAnnotation("=>notnull")]
 		ITransformation ITransformation.GetInverse() {
 			return GetInverse();
 		}
 
+		[ContractAnnotation("=>notnull")]
 		public ITransformation<Point3> GetInverse() {
 			return new GeocentricTranslation(D.GetNegative());
 		}

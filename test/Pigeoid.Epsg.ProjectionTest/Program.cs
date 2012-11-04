@@ -20,7 +20,7 @@ namespace Pigeoid.Epsg.ProjectionTest
 			//	Test();
 			
 			var test = new CrsTest();
-			test.Run(SaveToDb);
+			test.Run(SaveResultsToHtml);
 
 			Console.WriteLine("Press the [Any] key to close.");
 			Console.ReadKey();

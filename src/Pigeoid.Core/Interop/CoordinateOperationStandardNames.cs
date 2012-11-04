@@ -1,13 +1,13 @@
 ﻿// TODO: source header
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Pigeoid.Interop
 {
-	[Obsolete("Not sure that this class is a good idea.")]
 	public static class CoordinateOperationStandardNames
 	{
-
 		public static readonly string AlbersEqualAreaConic = "Albers Equal-Area Conic";
 		public static readonly string AzimuthalEquidistant = "Azimuthal Equidistant";
 		public static readonly string CassiniSoldner = "Cassini-Soldner";
@@ -17,6 +17,8 @@ namespace Pigeoid.Interop
 		public static readonly string EquidistantConic = "Equidistant Conic";
 		public static readonly string Equirectangular = "Equirectangular";
 		public static readonly string GallStereographic = "Gall Stereographic";
+		public static readonly string GeocentricTranslationsGeog2D = "Geocentric translations (geog2D domain)";
+		public static readonly string GeographicOffsets = "Geographic2D Offsets";
 		public static readonly string Geos = "Geostationary Satellite View";
 		public static readonly string Gnomonic = "Gnomonic";
 		public static readonly string HotineObliqueMercator = "Hotine Oblique Mercator";
@@ -27,6 +29,9 @@ namespace Pigeoid.Interop
 		public static readonly string LambertConicConformal2Sp = "Lambert Conic Conformal (2SP)";
 		public static readonly string Mercator1Sp = "Mercator (1SP)";
 		public static readonly string Mercator2Sp = "Mercator (2SP)";
+		public static readonly string MercatorVariantA = "Mercator (variant A)";
+		public static readonly string MercatorVariantB = "Mercator (variant B)";
+		public static readonly string MercatorVariantC = "Mercator (variant C)";
 		public static readonly string MillerCylindrical = "Miller Cylindrical";
 		public static readonly string Mollweide = "Mollweide";
 		public static readonly string NewZealandMapGrid = "New Zealand Map Grid";
@@ -44,5 +49,59 @@ namespace Pigeoid.Interop
 		public static readonly string TransverseMercatorSouthOriented = "Transverse Mercator (South Oriented)";
 		public static readonly string TunisiaMiningGrid = "Tunisia Mining Grid";
 		public static readonly string VanDerGrinten = "VanDerGrinten";
+
+		private static readonly HashSet<string> AllNames;
+		private static readonly HashSet<string> NormalizedNames; 
+
+		static CoordinateOperationStandardNames() {
+			AllNames = new HashSet<string> {
+				AlbersEqualAreaConic,
+				AzimuthalEquidistant,
+				CassiniSoldner,
+				CylindricalEqualArea,
+				Eckert4,
+				Eckert6,
+				EquidistantConic,
+				Equirectangular,
+				GallStereographic,
+				GeocentricTranslationsGeog2D,
+				GeographicOffsets,
+				Geos,
+				Gnomonic,
+				HotineObliqueMercator,
+				KrovakObliqueConicConformal,
+				LabordeObliqueMercator,
+				LambertAzimuthalEqualArea,
+				LambertConicConformal1Sp,
+				LambertConicConformal2Sp,
+				Mercator1Sp,
+				Mercator2Sp,
+				MercatorVariantA,
+				MercatorVariantB,
+				MercatorVariantC,
+				MillerCylindrical,
+				Mollweide,
+				NewZealandMapGrid,
+				ObliqueMercator,
+				ObliqueStereographic,
+				Orthographic,
+				PolarStereographic,
+				Polyconic,
+				Robinson,
+				RosenmundObliqueMercator,
+				Sinusoidal,
+				SwissObliqueCylindrical,
+				Stereographic,
+				TransverseMercator,
+				TransverseMercatorSouthOriented,
+				TunisiaMiningGrid,
+				VanDerGrinten
+			};
+			NormalizedNames = new HashSet<string>(AllNames.Select(NameNormalizedComparerBase.NormalizeBasic), StringComparer.OrdinalIgnoreCase);
+		}
+
+		internal static bool IsNormalizedName(string text) {
+			return NormalizedNames.Contains(text);
+		}
 	}
 }

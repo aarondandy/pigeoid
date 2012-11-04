@@ -18,11 +18,21 @@ namespace Pigeoid.Epsg.ProjectionTest
 			return string.Format("{0} to {1}", From, To);
 		}
 
-		public void Run(EpsgCrsCoordinateOperationPathGenerator generator = null) {
-			if(null == generator)
-				generator = new EpsgCrsCoordinateOperationPathGenerator();
+		public void Run(
+			EpsgCrsCoordinateOperationPathGenerator pathGenerator = null,
+			ICoordinateOperationToTransformationGenerator transformationGenerator = null
+		) {
+			if(null == pathGenerator)
+				pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
 
-			Operations = generator.Generate(From, To);
+			Operations = pathGenerator.Generate(From, To);
+
+			if (null != Operations) {
+				if (null == transformationGenerator)
+					transformationGenerator = new BasicCoordinateOperationToTransformationGenerator();
+
+				var transform = transformationGenerator.Create(Operations);
+			}
 		}
 
 	}

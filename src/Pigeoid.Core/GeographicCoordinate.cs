@@ -2,6 +2,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
@@ -88,6 +89,15 @@ namespace Pigeoid
 		/// <inheritdoc/>
 		[Pure] public override int GetHashCode() {
 			return Longitude.GetHashCode();
+		}
+
+		/// <inheritdoc/>
+		[Pure] public override string ToString() {
+			return String.Concat(
+				"lat:",
+				Latitude.ToString(CultureInfo.InvariantCulture),
+				" lon:",
+				Longitude.ToString(CultureInfo.InvariantCulture));
 		}
 
 	}
