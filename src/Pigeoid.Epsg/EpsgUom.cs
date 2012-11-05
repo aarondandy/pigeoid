@@ -107,5 +107,9 @@ namespace Pigeoid.Epsg
 			var conversion = GetConversionTo(uom);
 			return null != conversion && conversion.HasInverse ? conversion.GetInverse() : null;
 		}
+
+		public override string ToString(){
+			return Name;
+		}
 	}
 }

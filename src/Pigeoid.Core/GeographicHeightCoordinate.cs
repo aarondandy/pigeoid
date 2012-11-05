@@ -37,6 +37,12 @@ namespace Pigeoid
 			return !a.Equals(b);
 		}
 
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static readonly GeographicHeightCoordinate Zero = new GeographicHeightCoordinate(0, 0, 0);
+
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static readonly GeographicHeightCoordinate Invalid = new GeographicHeightCoordinate(Double.NaN, Double.NaN, Double.NaN);
+
 		/// <summary>
 		/// The latitude component of the coordinate.
 		/// </summary>

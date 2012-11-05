@@ -28,7 +28,9 @@ namespace Pigeoid.Interop
 					builder.Append(Char.ToUpperInvariant(c));
 				}
 			}
-			return builder.ToString();
+			var result = builder.ToString();
+			result = result.Replace("VISUALISATION", "VISUALIZATION");
+			return result;
 		}
 
 		[ContractAnnotation("=>notnull")]

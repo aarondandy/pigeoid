@@ -4,6 +4,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Interop;
+using Pigeoid.Ogc;
 using Pigeoid.Projection;
 using Pigeoid.Transformation;
 using Pigeoid.Utility;
@@ -81,6 +82,7 @@ namespace Pigeoid
 		{
 			public NamedParameterLookup ParamLookup;
 			public string OperationName;
+			public string OperationNameNormalized;
 			public ICrs CrsFrom;
 			public ICrs CrsTo;
 		}
@@ -94,7 +96,20 @@ namespace Pigeoid
 
 		private static bool TryCreateGeographicCoordinate(INamedParameter latParam, INamedParameter lonParam, out GeographicCoordinate result) {
 			double lat, lon;
-			if(NamedParameter.TryGetDouble(latParam, out lat) && NamedParameter.TryGetDouble(lonParam, out lon)) {
+			if(NamedParameter.TryGetDouble(latParam, out lat) && NamedParameter.TryGetDouble(lonParam, out lon)){
+
+				var latUnit = latParam.Unit;
+				if (null != latUnit){
+					var conv = latUnit.GetConversionTo(OgcAngularUnit.DefaultRadians);
+					lat = conv.TransformValue(lat);
+				}
+
+				var lonUnit = lonParam.Unit;
+				if(null != lonUnit){
+					var conv = lonUnit.GetConversionTo(OgcAngularUnit.DefaultRadians);
+					lon = conv.TransformValue(lon);
+				}
+
 				result = new GeographicCoordinate(lat, lon);
 				return true;
 			}
@@ -119,6 +134,26 @@ namespace Pigeoid
 				return true;
 			}
 			result = Vector3.Invalid;
+			return false;
+		}
+
+		private static bool TryCratePoint2(INamedParameter xParam, INamedParameter yParam, out Point2 result) {
+			double x, y;
+			if (NamedParameter.TryGetDouble(xParam, out x) && NamedParameter.TryGetDouble(yParam, out y)) {
+				result = new Point2(x, y);
+				return true;
+			}
+			result = Point2.Invalid;
+			return false;
+		}
+
+		private static bool TryCratePoint3(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, out Point3 result) {
+			double x, y, z;
+			if (NamedParameter.TryGetDouble(xParam, out x) && NamedParameter.TryGetDouble(yParam, out y) && NamedParameter.TryGetDouble(zParam, out z)) {
+				result = new Point3(x, y, z);
+				return true;
+			}
+			result = Point3.Invalid;
 			return false;
 		}
 
@@ -196,7 +231,8 @@ namespace Pigeoid
 			return null;
 		}
 
-		private static GeographicGeocentricTranslation CreateGeographicTransformation(OperationGenerationParams opData) {
+		[Obsolete("TODO: make this more generic to handle geocentric operations as well")]
+		private static GeographicGeocentricTranslation CreateGeographicGeocentricTranslation(OperationGenerationParams opData) {
 			var deltaXParam = new ParamSelector("XAXIS");
 			var deltaYParam = new ParamSelector("YAXIS");
 			var deltaZParam = new ParamSelector("ZAXIS");
@@ -256,10 +292,199 @@ namespace Pigeoid
 			return null;
 		}
 
-		private readonly Dictionary<string, Func<OperationGenerationParams, ITransformation>> _transformationCreator;
+		private static EquidistantCylindrical CreateEquidistantCylindrical(OperationGenerationParams opData){
+			var originLatParam = new ParamSelector("LAT", "NATURALORIGIN");
+			var originLonParam = new ParamSelector("LON", "NATURALORIGIN");
+			var offsetXParam = new ParamSelector("FALSE", "OFFSET", "X", "EAST");
+			var offsetYParam = new ParamSelector("FALSE", "OFFSET", "Y", "NORTH");
+			if (!opData.ParamLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam))
+				return null;
 
-		public BasicCoordinateOperationToTransformationGenerator() {
-			_transformationCreator = new Dictionary<string, Func<OperationGenerationParams, ITransformation>>(CoordinateOperationNameComparer.Default) {
+			var spheroid = ExtractSpheroid(opData.CrsFrom) ?? ExtractSpheroid(opData.CrsTo);
+			if (null == spheroid)
+				return null;
+
+			GeographicCoordinate origin;
+			Vector2 offset;
+
+			if (
+				TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin)
+				&& TryCrateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset)
+			) {
+				return new EquidistantCylindrical(origin, offset, spheroid);
+			}
+			return null;
+		}
+
+		private static ITransformation CreatePositionVectorTransformation(OperationGenerationParams opData){
+			var xTransParam = new ParamSelector("XAXIS", "TRANS");
+			var yTransParam = new ParamSelector("YAXIS", "TRANS");
+			var zTransParam = new ParamSelector("ZAXIS", "TRANS");
+			var xRotParam = new ParamSelector("XAXIS", "ROT");
+			var yRotParam = new ParamSelector("YAXIS", "ROT");
+			var zRotParam = new ParamSelector("ZAXIS", "ROT");
+			var scaleParam = new ParamSelector("SCALE");
+
+			if (!opData.ParamLookup.Assign(xTransParam, yTransParam, zTransParam, xRotParam, yRotParam, zRotParam, scaleParam))
+				return null;
+
+			Vector3 translation, rotation;
+			double scale;
+
+			if (!TryCrateVector3(xTransParam.Selection, yTransParam.Selection, zTransParam.Selection, out translation))
+				return null;
+			if (!TryCrateVector3(xRotParam.Selection, yRotParam.Selection, zRotParam.Selection, out rotation))
+				return null;
+			if (!NamedParameter.TryGetDouble(scaleParam.Selection, out scale))
+				return null;
+
+			var helmert = new Helmert7Transformation(translation, rotation, scale);
+
+			if (opData.CrsFrom is ICrsGeocentric && opData.CrsTo is ICrsGeocentric)
+				return helmert;
+
+			var spheroidFrom = ExtractSpheroid(opData.CrsFrom) ?? ExtractSpheroid(opData.CrsTo);
+			if (null == spheroidFrom)
+				return null;
+
+			var spheroidTo = ExtractSpheroid(opData.CrsTo) ?? spheroidFrom;
+
+			return new Helmert7GeographicTransformation(spheroidFrom, helmert, spheroidTo);
+		}
+
+		private static ITransformation CreateCoordinateFrameTransformation(OperationGenerationParams opData){
+			var xTransParam = new ParamSelector("XAXIS", "TRANS");
+			var yTransParam = new ParamSelector("YAXIS", "TRANS");
+			var zTransParam = new ParamSelector("ZAXIS", "TRANS");
+			var xRotParam = new ParamSelector("XAXIS", "ROT");
+			var yRotParam = new ParamSelector("YAXIS", "ROT");
+			var zRotParam = new ParamSelector("ZAXIS", "ROT");
+			var scaleParam = new ParamSelector("SCALE");
+
+			if (!opData.ParamLookup.Assign(xTransParam, yTransParam, zTransParam, xRotParam, yRotParam, zRotParam, scaleParam))
+				return null;
+
+			Vector3 translation, rotation;
+			double scale;
+
+			if (!TryCrateVector3(xTransParam.Selection, yTransParam.Selection, zTransParam.Selection, out translation))
+				return null;
+			if (!TryCrateVector3(xRotParam.Selection, yRotParam.Selection, zRotParam.Selection, out rotation))
+				return null;
+			if (!NamedParameter.TryGetDouble(scaleParam.Selection, out scale))
+				return null;
+
+			var helmert = new Helmert7Transformation(translation, rotation.GetNegative(), scale);
+
+			if(opData.CrsFrom is ICrsGeocentric && opData.CrsTo is ICrsGeocentric)
+				return helmert;
+
+			var spheroidFrom = ExtractSpheroid(opData.CrsFrom) ?? ExtractSpheroid(opData.CrsTo);
+			if (null == spheroidFrom)
+				return null;
+
+			var spheroidTo = ExtractSpheroid(opData.CrsTo) ?? spheroidFrom;
+
+			return new Helmert7GeographicTransformation(spheroidFrom, helmert, spheroidTo);
+		}
+
+		private static ITransformation CreateMolodenskyBadekasTransformation(OperationGenerationParams opData) {
+			var xTransParam = new ParamSelector("XAXIS", "TRANS");
+			var yTransParam = new ParamSelector("YAXIS", "TRANS");
+			var zTransParam = new ParamSelector("ZAXIS", "TRANS");
+			var xRotParam = new ParamSelector("XAXIS", "ROT");
+			var yRotParam = new ParamSelector("YAXIS", "ROT");
+			var zRotParam = new ParamSelector("ZAXIS", "ROT");
+			var scaleParam = new ParamSelector("SCALE");
+			var ord1Param = new ParamSelector("ORDINATE1");
+			var ord2Param = new ParamSelector("ORDINATE2");
+			var ord3Param = new ParamSelector("ORDINATE3");
+
+			if (!opData.ParamLookup.Assign(xTransParam, yTransParam, zTransParam, xRotParam, yRotParam, zRotParam, scaleParam, ord1Param, ord2Param, ord3Param))
+				return null;
+
+			Vector3 translation, rotation;
+			Point3 ordinate;
+			double scale;
+
+			if (!TryCrateVector3(xTransParam.Selection, yTransParam.Selection, zTransParam.Selection, out translation))
+				return null;
+			if (!TryCrateVector3(xRotParam.Selection, yRotParam.Selection, zRotParam.Selection, out rotation))
+				return null;
+			if (!TryCratePoint3(ord1Param.Selection, ord2Param.Selection, ord3Param.Selection, out ordinate))
+				return null;
+			if (!NamedParameter.TryGetDouble(scaleParam.Selection, out scale))
+				return null;
+
+			var molodensky = new MolodenskyBadekasTransformation(translation, rotation, ordinate, scale);
+
+			if (opData.CrsFrom is ICrsGeocentric && opData.CrsTo is ICrsGeocentric)
+				return molodensky;
+
+			var spheroidFrom = ExtractSpheroid(opData.CrsFrom) ?? ExtractSpheroid(opData.CrsTo);
+			if (null == spheroidFrom)
+				return null;
+
+			var spheroidTo = ExtractSpheroid(opData.CrsTo) ?? spheroidFrom;
+
+			return new MolodenskyBadekasGeographicTransformation(spheroidFrom, molodensky, spheroidTo);
+		}
+
+		private static PopularVisualizationPseudoMercator CreatePopularVisualisationPseudoMercator(OperationGenerationParams opData) {
+			var originLatParam = new ParamSelector("LAT", "NATURALORIGIN");
+			var originLonParam = new ParamSelector("LON", "NATURALORIGIN");
+			var offsetXParam = new ParamSelector("FALSE", "OFFSET", "X", "EAST");
+			var offsetYParam = new ParamSelector("FALSE", "OFFSET", "Y", "NORTH");
+			if (!opData.ParamLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam))
+				return null;
+
+			var spheroid = ExtractSpheroid(opData.CrsFrom) ?? ExtractSpheroid(opData.CrsTo);
+			if (null == spheroid)
+				return null;
+
+			GeographicCoordinate origin;
+			Vector2 offset;
+
+			if (
+				TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin)
+				&& TryCrateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset)
+			) {
+				return new PopularVisualizationPseudoMercator(origin, offset, spheroid);
+			}
+			return null;
+		}
+
+		private static ITransformation CreateLambertAzimuthalEqualArea(OperationGenerationParams opData){
+			var originLatParam = new ParamSelector("LAT", "NATURALORIGIN");
+			var originLonParam = new ParamSelector("LON", "NATURALORIGIN");
+			var offsetXParam = new ParamSelector("FALSE", "OFFSET", "X", "EAST");
+			var offsetYParam = new ParamSelector("FALSE", "OFFSET", "Y", "NORTH");
+			var hasParams = opData.ParamLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
+
+			var spheroid = ExtractSpheroid(opData.CrsFrom) ?? ExtractSpheroid(opData.CrsTo);
+			if (null == spheroid)
+				return null;
+
+			if (hasParams && opData.OperationNameNormalized.EndsWith("SPHERICAL")){
+				GeographicCoordinate origin;
+				Vector2 offset;
+				if (
+					TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin)
+					&& TryCrateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset)
+				){
+					return new LambertAzimuthalEqualAreaSpherical(origin, offset, spheroid);
+				}
+			}
+
+			return new LambertAzimuthalEqualArea(spheroid);
+		}
+
+		private readonly CoordinateOperationNameComparer _coordinateOperationNameNormalizer;
+		private readonly Dictionary<string, Func<OperationGenerationParams, ITransformation>> _transformationCreatorLookup;
+
+		public BasicCoordinateOperationToTransformationGenerator(){
+			_coordinateOperationNameNormalizer = CoordinateOperationNameComparer.Default;
+			_transformationCreatorLookup = new Dictionary<string, Func<OperationGenerationParams, ITransformation>>(_coordinateOperationNameNormalizer) {
 				{CoordinateOperationStandardNames.AlbersEqualAreaConic,null},
 				{CoordinateOperationStandardNames.AzimuthalEquidistant,null},
 				{CoordinateOperationStandardNames.CassiniSoldner, CreateCassiniSoldner},
@@ -267,23 +492,21 @@ namespace Pigeoid
 				{CoordinateOperationStandardNames.Eckert4,null},
 				{CoordinateOperationStandardNames.Eckert6,null},
 				{CoordinateOperationStandardNames.EquidistantConic,null},
+				{CoordinateOperationStandardNames.EquidistantCylindrical,CreateEquidistantCylindrical},
 				{CoordinateOperationStandardNames.Equirectangular,null},
 				{CoordinateOperationStandardNames.GallStereographic,null},
-				{CoordinateOperationStandardNames.GeocentricTranslationsGeog2D, CreateGeographicTransformation},
 				{CoordinateOperationStandardNames.GeographicOffsets, CreateGeographicOffset},
 				{CoordinateOperationStandardNames.Geos,null},
 				{CoordinateOperationStandardNames.Gnomonic,null},
 				{CoordinateOperationStandardNames.HotineObliqueMercator,null},
 				{CoordinateOperationStandardNames.KrovakObliqueConicConformal,null},
 				{CoordinateOperationStandardNames.LabordeObliqueMercator,CreateLabordeObliqueMercator},
-				{CoordinateOperationStandardNames.LambertAzimuthalEqualArea,null},
+				{CoordinateOperationStandardNames.LambertAzimuthalEqualArea,CreateLambertAzimuthalEqualArea},
+				{CoordinateOperationStandardNames.LambertAzimuthalEqualAreaSpherical,CreateLambertAzimuthalEqualArea},
 				{CoordinateOperationStandardNames.LambertConicConformal1Sp,null},
 				{CoordinateOperationStandardNames.LambertConicConformal2Sp,null},
 				{CoordinateOperationStandardNames.Mercator1Sp,CreateMercator},
 				{CoordinateOperationStandardNames.Mercator2Sp,CreateMercator},
-				{CoordinateOperationStandardNames.MercatorVariantA,CreateMercator},
-				{CoordinateOperationStandardNames.MercatorVariantB,CreateMercator},
-				{CoordinateOperationStandardNames.MercatorVariantC,CreateMercator},
 				{CoordinateOperationStandardNames.MillerCylindrical,null},
 				{CoordinateOperationStandardNames.Mollweide,null},
 				{CoordinateOperationStandardNames.NewZealandMapGrid,null},
@@ -292,6 +515,7 @@ namespace Pigeoid
 				{CoordinateOperationStandardNames.Orthographic,null},
 				{CoordinateOperationStandardNames.PolarStereographic,null},
 				{CoordinateOperationStandardNames.Polyconic,null},
+				{CoordinateOperationStandardNames.PopularVisualisationPseudoMercator, CreatePopularVisualisationPseudoMercator},
 				{CoordinateOperationStandardNames.Robinson,null},
 				{CoordinateOperationStandardNames.RosenmundObliqueMercator,null},
 				{CoordinateOperationStandardNames.Sinusoidal,null},
@@ -302,18 +526,6 @@ namespace Pigeoid
 				{CoordinateOperationStandardNames.TunisiaMiningGrid,null},
 				{CoordinateOperationStandardNames.VanDerGrinten,null}
 			};
-		}
-
-		private bool TryExtractSpheroid(NamedParameterLookup namedParameters, out ISpheroid<double> result) {
-			throw new NotImplementedException();
-		}
-
-		private bool TryExtractFalseProjectedOffset(NamedParameterLookup namedParameters, out Vector2 result) {
-			throw new NotImplementedException();
-		}
-
-		private bool TryExtractNaturalOrigin(NamedParameterLookup namedParameters, out GeographicCoordinate result) {
-			throw new NotImplementedException();
 		}
 
 		public ITransformation Create([NotNull] ICoordinateOperationCrsPathInfo operationPath) {
@@ -351,6 +563,35 @@ namespace Pigeoid
 			return null;// throw new NotImplementedException();
 		}
 
+		private bool TryGetTransformCreator(string operationName, out Func<OperationGenerationParams, ITransformation> transformationCreator){
+			if (_transformationCreatorLookup.TryGetValue(operationName, out transformationCreator))
+				return true;
+
+			var normalizedName = _coordinateOperationNameNormalizer.Normalize(operationName);
+			if (normalizedName.StartsWith("MERCATOR")){
+				transformationCreator = CreateMercator;
+				return true;
+			}
+			if(normalizedName.StartsWith("GEOCENTRICTRANSLATIONSGEOG")){
+				transformationCreator = CreateGeographicGeocentricTranslation;
+				return true;
+			}
+			if(normalizedName.StartsWith("COORDINATEFRAMEROTATION")){
+				transformationCreator = CreateCoordinateFrameTransformation;
+				return true;
+			}
+			if (normalizedName.StartsWith("MOLODENSKYBADEKAS")){
+				transformationCreator = CreateMolodenskyBadekasTransformation;
+				return true;
+			}
+			if(normalizedName.StartsWith("POSITIONVECTORTRANSFORMATION")){
+				transformationCreator = CreatePositionVectorTransformation;
+				return true;
+			}
+
+			return false;
+		}
+
 		private ITransformation CreateTransform([NotNull] ICoordinateOperationInfo operationInfo, ICrs crsFrom, ICrs crsTo) {
 			if (operationInfo.IsInverseOfDefinition && operationInfo.HasInverse) {
 				var result = CreateTransform(operationInfo.GetInverse(), crsTo, crsFrom);
@@ -369,9 +610,10 @@ namespace Pigeoid
 			var operationParams = parameterizedOperationInfo.Parameters.ToArray();
 
 			Func<OperationGenerationParams, ITransformation> transformationCreator;
-			if(_transformationCreator.TryGetValue(operationName, out transformationCreator) && null != transformationCreator) {
+			if (TryGetTransformCreator(operationName, out transformationCreator) && null != transformationCreator) {
 				var result = transformationCreator(new OperationGenerationParams {
 					OperationName = operationName,
+					OperationNameNormalized = _coordinateOperationNameNormalizer.Normalize(operationName),
 					ParamLookup = new NamedParameterLookup(operationParams),
 					CrsFrom = crsFrom,
 					CrsTo = crsTo

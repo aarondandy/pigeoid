@@ -34,6 +34,12 @@ namespace Pigeoid
 			return !a.Equals(b);
 		}
 
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static readonly GeographicCoordinate Zero = new GeographicCoordinate(0,0);
+
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static readonly GeographicCoordinate Invalid = new GeographicCoordinate(Double.NaN, Double.NaN);
+
 		/// <summary>
 		/// The latitude component of the coordinate.
 		/// </summary>

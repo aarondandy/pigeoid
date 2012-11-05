@@ -15,9 +15,9 @@ namespace Pigeoid.Interop
 		public static readonly string Eckert4 = "Eckert IV";
 		public static readonly string Eckert6 = "Eckert VI";
 		public static readonly string EquidistantConic = "Equidistant Conic";
+		public static readonly string EquidistantCylindrical = "Equidistant Cylindrical";
 		public static readonly string Equirectangular = "Equirectangular";
 		public static readonly string GallStereographic = "Gall Stereographic";
-		public static readonly string GeocentricTranslationsGeog2D = "Geocentric translations (geog2D domain)";
 		public static readonly string GeographicOffsets = "Geographic2D Offsets";
 		public static readonly string Geos = "Geostationary Satellite View";
 		public static readonly string Gnomonic = "Gnomonic";
@@ -25,13 +25,11 @@ namespace Pigeoid.Interop
 		public static readonly string KrovakObliqueConicConformal = "Krovak Oblique Conic Conformal";
 		public static readonly string LabordeObliqueMercator = "Laborde Oblique Mercator";
 		public static readonly string LambertAzimuthalEqualArea = "Lambert Azimuthal Equal Area";
+		public static readonly string LambertAzimuthalEqualAreaSpherical = "Lambert Azimuthal Equal Area Spherical";
 		public static readonly string LambertConicConformal1Sp = "Lambert Conic Conformal (1SP)";
 		public static readonly string LambertConicConformal2Sp = "Lambert Conic Conformal (2SP)";
 		public static readonly string Mercator1Sp = "Mercator (1SP)";
 		public static readonly string Mercator2Sp = "Mercator (2SP)";
-		public static readonly string MercatorVariantA = "Mercator (variant A)";
-		public static readonly string MercatorVariantB = "Mercator (variant B)";
-		public static readonly string MercatorVariantC = "Mercator (variant C)";
 		public static readonly string MillerCylindrical = "Miller Cylindrical";
 		public static readonly string Mollweide = "Mollweide";
 		public static readonly string NewZealandMapGrid = "New Zealand Map Grid";
@@ -40,6 +38,7 @@ namespace Pigeoid.Interop
 		public static readonly string Orthographic = "Orthographic";
 		public static readonly string PolarStereographic = "Polar Stereographic";
 		public static readonly string Polyconic = "Polyconic";
+		public static readonly string PopularVisualisationPseudoMercator = "Popular Visualisation Pseudo Mercator";
 		public static readonly string Robinson = "Robinson";
 		public static readonly string RosenmundObliqueMercator = "Rosenmund Oblique Mercator";
 		public static readonly string Sinusoidal = "Sinusoidal";
@@ -62,9 +61,9 @@ namespace Pigeoid.Interop
 				Eckert4,
 				Eckert6,
 				EquidistantConic,
+				EquidistantCylindrical,
 				Equirectangular,
 				GallStereographic,
-				GeocentricTranslationsGeog2D,
 				GeographicOffsets,
 				Geos,
 				Gnomonic,
@@ -72,13 +71,11 @@ namespace Pigeoid.Interop
 				KrovakObliqueConicConformal,
 				LabordeObliqueMercator,
 				LambertAzimuthalEqualArea,
+				LambertAzimuthalEqualAreaSpherical,
 				LambertConicConformal1Sp,
 				LambertConicConformal2Sp,
 				Mercator1Sp,
 				Mercator2Sp,
-				MercatorVariantA,
-				MercatorVariantB,
-				MercatorVariantC,
 				MillerCylindrical,
 				Mollweide,
 				NewZealandMapGrid,
@@ -87,6 +84,7 @@ namespace Pigeoid.Interop
 				Orthographic,
 				PolarStereographic,
 				Polyconic,
+				PopularVisualisationPseudoMercator,
 				Robinson,
 				RosenmundObliqueMercator,
 				Sinusoidal,
