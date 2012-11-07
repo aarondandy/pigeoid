@@ -12,7 +12,7 @@
 
 		IDatum GetDatum(IAuthorityTag tag);
 
-		IUom GetUom(IAuthorityTag tag);
+		IUnit GetUom(IAuthorityTag tag);
 
 		ICoordinateOperationMethodInfo GetCoordinateOperationMethod(IAuthorityTag tag);
 	}

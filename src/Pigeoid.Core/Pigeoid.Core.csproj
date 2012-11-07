@@ -44,9 +44,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vertesaur.Core, Version=0.5.4685.35007, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Vertesaur.Core, Version=0.5.4693.40940, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Vertesaur.Core.0.5.4685.35007\lib\net40-client\Vertesaur.Core.dll</HintPath>
+      <HintPath>..\..\packages\Vertesaur.Core.0.5.4693.40940\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -107,27 +107,31 @@
     <Compile Include="Contracts\IGeographicCoordinate.cs" />
     <Compile Include="Contracts\IGeographicHeightCoordinate.cs" />
     <Compile Include="Contracts\INamedParameter.cs" />
+    <Compile Include="Contracts\INameNormalizedComparer.cs" />
     <Compile Include="Contracts\IParameterizedCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IPassthroughCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IPrimeMeridianInfo.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Contracts\ISpheroidInfo.cs" />
-    <Compile Include="Contracts\IUom.cs">
+    <Compile Include="Contracts\IUnit.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\IUomConversion.cs" />
+    <Compile Include="Contracts\IUnitConversion.cs" />
+    <Compile Include="Contracts\IUnitConversionMap.cs" />
+    <Compile Include="Contracts\IUnitConversionGenerator.cs" />
     <Compile Include="CoordinateOperationCrsPathInfo.cs" />
     <Compile Include="CoordinateOperationInfo.cs" />
     <Compile Include="CoordinateOperationInfoInverse.cs" />
     <Compile Include="GeneralCrsCoordinateOperationPathGenerator.cs" />
     <Compile Include="GeographicCoordinate.cs" />
     <Compile Include="GeographicHeightCoordinate.cs" />
-    <Compile Include="Interop\CoordinateOperationNameComparer.cs" />
+    <Compile Include="Interop\CoordinateOperationNameNormalizedComparer.cs" />
     <Compile Include="Interop\CoordinateOperationStandardNames.cs" />
     <Compile Include="Interop\NameNormalizedComparerBase.cs" />
-    <Compile Include="Interop\ParameterNameComparer.cs" />
+    <Compile Include="Interop\ParameterNameNormalizedComparer.cs" />
     <Compile Include="Interop\ParameterStandardNames.cs" />
+    <Compile Include="Interop\UnitNameNormalizedComparer.cs" />
     <Compile Include="LongitudeDegreeRange.cs" />
     <Compile Include="NamedParameter.cs" />
     <Compile Include="Ogc\OgcCoordinateOperationMethodInfo.cs" />
@@ -198,9 +202,17 @@
     <Compile Include="Transformation\InvertedTransformationBase.cs" />
     <Compile Include="Transformation\MolodenskyBadekasGeographicTransformation.cs" />
     <Compile Include="Transformation\MolodenskyBadekasTransformation.cs" />
-    <Compile Include="UomRatioConversion.cs" />
-    <Compile Include="UomScalarConversion.cs" />
-    <Compile Include="UomUnityConversion.cs" />
+    <Compile Include="Unit\ConcatenatedUnitConversion.cs" />
+    <Compile Include="Unit\ReadOnlyUnitConversionMap.cs" />
+    <Compile Include="Unit\SimpleUnitConversionMapBase.cs" />
+    <Compile Include="Unit\BinaryUnitConversionMap.cs" />
+    <Compile Include="Unit\SimpleUnitConversionGenerator.cs" />
+    <Compile Include="Unit\SingleUnityUnitConversionMap.cs" />
+    <Compile Include="Unit\UnitConversionMapCollection.cs" />
+    <Compile Include="Unit\UnitEqualityComparer.cs" />
+    <Compile Include="Unit\UnitRatioConversion.cs" />
+    <Compile Include="Unit\UnitScalarConversion.cs" />
+    <Compile Include="Unit\UnitUnityConversion.cs" />
     <Compile Include="Utility\ConversionUtil.cs" />
   </ItemGroup>
   <ItemGroup>

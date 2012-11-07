@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using JetBrains.Annotations;
+using Pigeoid.Contracts;
 
 namespace Pigeoid.Interop
 {
-	public abstract class NameNormalizedComparerBase : IComparer<string>, IEqualityComparer<string>
+	public abstract class NameNormalizedComparerBase : INameNormalizedComparer
 	{
 
 		protected NameNormalizedComparerBase() : this(null) { }

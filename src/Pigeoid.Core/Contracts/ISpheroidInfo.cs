@@ -7,7 +7,7 @@ namespace Pigeoid.Contracts
 
 		string Name { get; }
 
-		IUom AxisUnit { get; }
+		IUnit AxisUnit { get; }
 
 	}
 }

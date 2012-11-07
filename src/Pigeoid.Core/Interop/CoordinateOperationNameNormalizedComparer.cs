@@ -3,14 +3,14 @@ using JetBrains.Annotations;
 
 namespace Pigeoid.Interop
 {
-	public class CoordinateOperationNameComparer : NameNormalizedComparerBase
+	public class CoordinateOperationNameNormalizedComparer : NameNormalizedComparerBase
 	{
 
-		public static readonly CoordinateOperationNameComparer Default = new CoordinateOperationNameComparer();
+		public static readonly CoordinateOperationNameNormalizedComparer Default = new CoordinateOperationNameNormalizedComparer();
 
-		public CoordinateOperationNameComparer() : this(null) { }
+		public CoordinateOperationNameNormalizedComparer() : this(null) { }
 
-		public CoordinateOperationNameComparer(StringComparer comparer) : base(comparer) { }
+		public CoordinateOperationNameNormalizedComparer(StringComparer comparer) : base(comparer) { }
 
 		[ContractAnnotation("=>notnull")]
 		public override string Normalize(string text) {

@@ -18,7 +18,7 @@ namespace Pigeoid.Epsg
 			using (var readerDat = EpsgDataResource.CreateBinaryReader("meridians.dat")) {
 				for (int i = readerDat.ReadUInt16(); i > 0; i--) {
 					var code = readerDat.ReadUInt16();
-					var uom = EpsgUom.Get(readerDat.ReadUInt16());
+					var uom = EpsgUnit.Get(readerDat.ReadUInt16());
 					var longitude = numberLookUp.Get(readerDat.ReadUInt16());
 					var name = EpsgTextLookUp.GetString(readerDat.ReadByte(), readerTxt);
 					lookUpDictionary.Add(code, new EpsgPrimeMeridian(code, name, longitude, uom));
@@ -34,13 +34,13 @@ namespace Pigeoid.Epsg
 		public static IEnumerable<EpsgPrimeMeridian> Values { get { return LookUp.Values; } }
 
 		private readonly ushort _code;
-		private readonly EpsgUom _uom;
+		private readonly EpsgUnit _unit;
 		private readonly double _longitude;
 		private readonly string _name;
 
-		private EpsgPrimeMeridian(ushort code, string name, double longitude, EpsgUom uom) {
+		private EpsgPrimeMeridian(ushort code, string name, double longitude, EpsgUnit unit) {
 			_code = code;
-			_uom = uom;
+			_unit = unit;
 			_longitude = longitude;
 			_name = name;
 		}
@@ -57,12 +57,12 @@ namespace Pigeoid.Epsg
 			get { return _longitude; }
 		}
 
-		public EpsgUom Unit {
-			get { return _uom; }
+		public EpsgUnit Unit {
+			get { return _unit; }
 		}
 
-		IUom IPrimeMeridianInfo.Unit {
-			get { return _uom; }
+		IUnit IPrimeMeridianInfo.Unit {
+			get { return _unit; }
 		}
 
 		public IAuthorityTag Authority {

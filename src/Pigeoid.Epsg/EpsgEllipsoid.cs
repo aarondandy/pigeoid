@@ -23,7 +23,7 @@ namespace Pigeoid.Epsg
 					var semiMajorAxis = numberLookUp.Get(readerDat.ReadUInt16());
 					var valueB = numberLookUp.Get(readerDat.ReadUInt16());
 					var name = EpsgTextLookUp.GetString(readerDat.ReadUInt16(), readerTxt);
-					var uom = EpsgUom.Get(readerDat.ReadByte() + 9000);
+					var uom = EpsgUnit.Get(readerDat.ReadByte() + 9000);
 // ReSharper disable CompareOfFloatsByEqualityOperator
 					lookUpDictionary.Add(code, new EpsgEllipsoid(
 						code, name, uom,
@@ -50,22 +50,22 @@ namespace Pigeoid.Epsg
 		private readonly ushort _code;
 		private readonly ISpheroid<double> _core;
 		private readonly string _name;
-		private readonly EpsgUom _uom;
+		private readonly EpsgUnit _unit;
 
-		private EpsgEllipsoid(ushort code, string name, EpsgUom uom, ISpheroid<double> core) {
+		private EpsgEllipsoid(ushort code, string name, EpsgUnit unit, ISpheroid<double> core) {
 			_code = code;
 			_name = name;
 			_core = core;
-			_uom = uom;
+			_unit = unit;
 		}
 
 		public int Code { get { return _code; } }
 
 		public string Name { get { return _name; } }
 
-		public EpsgUom AxisUnit { get { return _uom; } }
+		public EpsgUnit AxisUnit { get { return _unit; } }
 
-		IUom ISpheroidInfo.AxisUnit { get { return AxisUnit; } }
+		IUnit ISpheroidInfo.AxisUnit { get { return AxisUnit; } }
 
 		public ISpheroid<double> Core { get { return _core; } }
 

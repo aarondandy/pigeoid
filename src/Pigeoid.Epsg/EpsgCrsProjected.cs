@@ -147,9 +147,9 @@ namespace Pigeoid.Epsg
 
 		IDatumGeodetic ICrsGeodetic.Datum { get { return Datum; } }
 
-		public EpsgUom Unit { get { return _cs.Axes.First().Unit; } }
+		public EpsgUnit Unit { get { return _cs.Axes.First().Unit; } }
 
-		IUom ICrsGeodetic.Unit { get { return Unit; } }
+		IUnit ICrsGeodetic.Unit { get { return Unit; } }
 
 		public IList<EpsgAxis> Axes { get { return _cs.Axes.ToArray(); } }
 

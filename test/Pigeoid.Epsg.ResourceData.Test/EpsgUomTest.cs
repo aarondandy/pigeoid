@@ -4,13 +4,13 @@ using NUnit.Framework;
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgUomTest : EpsgDataTestBase<EpsgUom, DataTransmogrifier.EpsgUom>
+	public class EpsgUomTest : EpsgDataTestBase<EpsgUnit, DataTransmogrifier.EpsgUom>
 	{
 
 		[Test]
 		public void Resources_Match_Db() {
 
-			var assemblyItems = EpsgUom.Values;
+			var assemblyItems = EpsgUnit.Values;
 			var databaseItems = Repository.Uoms;
 
 			AssertMatches(

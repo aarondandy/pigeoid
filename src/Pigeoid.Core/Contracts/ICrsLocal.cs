@@ -17,7 +17,7 @@ namespace Pigeoid.Contracts
 		/// <summary>
 		/// The unit of measure used by this CRS.
 		/// </summary>
-		IUom Unit { get; }
+		IUnit Unit { get; }
 
 		/// <summary>
 		/// The axes for the projection.

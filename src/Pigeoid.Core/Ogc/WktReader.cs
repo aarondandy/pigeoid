@@ -325,7 +325,7 @@ namespace Pigeoid.Ogc
 			ICrsGeodetic baseCrs = null;
 			ICoordinateOperationMethodInfo operationMethodInfo = null;
 			var operationParameters = new List<INamedParameter>();
-			IUom linearUnit = null;
+			IUnit linearUnit = null;
 			var axes = new List<IAxis>();
 			foreach(var parameter in ReadParams()) {
 				if (parameter is string)
@@ -336,8 +336,8 @@ namespace Pigeoid.Ogc
 					operationMethodInfo = (ICoordinateOperationMethodInfo)parameter;
 				else if (parameter is INamedParameter)
 					operationParameters.Add((INamedParameter)parameter);
-				else if (parameter is IUom)
-					linearUnit = (IUom)parameter;
+				else if (parameter is IUnit)
+					linearUnit = (IUnit)parameter;
 				else if (parameter is IAxis)
 					axes.Add((IAxis)parameter);
 				else if (parameter is IAuthorityTag)
@@ -373,7 +373,7 @@ namespace Pigeoid.Ogc
 			var name = String.Empty;
 			IDatumGeodetic datum = null;
 			IPrimeMeridianInfo primeMeridian = null;
-			IUom unit = OgcLinearUnit.DefaultMeter;
+			IUnit unit = OgcLinearUnit.DefaultMeter;
 			var axes = new List<IAxis>();
 
 			foreach(var parameter in ReadParams()) {
@@ -385,8 +385,8 @@ namespace Pigeoid.Ogc
 					datum = (IDatumGeodetic)parameter;
 				else if (parameter is IPrimeMeridianInfo)
 					primeMeridian = (IPrimeMeridianInfo)parameter;
-				else if (parameter is IUom)
-					unit = (IUom) parameter;
+				else if (parameter is IUnit)
+					unit = (IUnit) parameter;
 				else if(parameter is IAxis)
 					axes.Add((IAxis)parameter);
 			}
@@ -422,7 +422,7 @@ namespace Pigeoid.Ogc
 			IAuthorityTag authority = null;
 			var name = String.Empty;
 			IDatum datum = null;
-			IUom uom = null;
+			IUnit unit = null;
 			IAxis axis = null;
 			foreach(var parameter in ReadParams()) {
 				if (parameter is string)
@@ -431,8 +431,8 @@ namespace Pigeoid.Ogc
 					authority = (IAuthorityTag)parameter;
 				else if (parameter is IDatum)
 					datum = (IDatum)parameter;
-				else if (parameter is IUom)
-					uom = (IUom)parameter;
+				else if (parameter is IUnit)
+					unit = (IUnit)parameter;
 				else if (parameter is IAxis)
 					axis = (IAxis) parameter;
 			}
@@ -446,7 +446,7 @@ namespace Pigeoid.Ogc
 			return new OgcCrsVertical(
 				name,
 				datum,
-				uom,
+				unit,
 				axis,
 				authority
 			);
@@ -481,7 +481,7 @@ namespace Pigeoid.Ogc
 			IAuthorityTag authority = null;
 			var name = String.Empty;
 			IDatum datum = null;
-			IUom unit = null;
+			IUnit unit = null;
 			var axes = new List<IAxis>();
 			foreach(var parameter in ReadParams()) {
 				if (parameter is IAuthorityTag)
@@ -490,8 +490,8 @@ namespace Pigeoid.Ogc
 					name = (string)parameter;
 				else if (parameter is IDatum)
 					datum = (IDatum)parameter;
-				else if (parameter is IUom)
-					unit = (IUom)parameter;
+				else if (parameter is IUnit)
+					unit = (IUnit)parameter;
 				else if(parameter is IAxis)
 					axes.Add((IAxis)parameter);
 			}
@@ -517,7 +517,7 @@ namespace Pigeoid.Ogc
 			var name = String.Empty;
 			IDatumGeodetic datum = null;
 			IPrimeMeridianInfo primeMeridian = null;
-			IUom unit = OgcAngularUnit.DefaultDegrees;
+			IUnit unit = OgcAngularUnit.DefaultDegrees;
 			var axes = new List<IAxis>();
 			foreach(var parameter in ReadParams()) {
 				if (parameter is string)
@@ -528,8 +528,8 @@ namespace Pigeoid.Ogc
 					datum = (IDatumGeodetic)parameter;
 				else if (parameter is IPrimeMeridianInfo)
 					primeMeridian = (IPrimeMeridianInfo)parameter;
-				else if (parameter is IUom)
-					unit = (IUom)parameter;
+				else if (parameter is IUnit)
+					unit = (IUnit)parameter;
 				else if (parameter is IAxis)
 					axes.Add((IAxis)parameter);
 			}
@@ -759,7 +759,7 @@ namespace Pigeoid.Ogc
 		}
 
 		[ContractAnnotation("=>notnull")]
-		public IUom ReadUnitFromParams(bool isLength = true) {
+		public IUnit ReadUnitFromParams(bool isLength = true) {
 			IAuthorityTag authority = null;
 			var name = String.Empty;
 			var factor = 1.0;
@@ -780,7 +780,7 @@ namespace Pigeoid.Ogc
 			}
 
 			return isLength
-				? (IUom)new OgcLinearUnit(name, factor, authority)
+				? (IUnit)new OgcLinearUnit(name, factor, authority)
 				: new OgcAngularUnit(name, factor, authority);
 		}
 

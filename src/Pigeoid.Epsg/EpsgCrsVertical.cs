@@ -20,9 +20,9 @@ namespace Pigeoid.Epsg
 
 		IDatum ICrsVertical.Datum { get { return _datum; } }
 
-		public EpsgUom Unit { get { return Axis.Unit; } }
+		public EpsgUnit Unit { get { return Axis.Unit; } }
 
-		IUom ICrsVertical.Unit { get { return Unit; } }
+		IUnit ICrsVertical.Unit { get { return Unit; } }
 
 		public EpsgAxis Axis { get { return CoordinateSystem.Axes.FirstOrDefault(); } }
 

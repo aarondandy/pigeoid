@@ -54,7 +54,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 						if(null == dbUom)
 							Assert.IsNull(assemblyParamValue.Unit);
 						else
-							Assert.AreEqual(dbUom.Code, ((EpsgUom) assemblyParamValue.Unit).Code);
+							Assert.AreEqual(dbUom.Code, ((EpsgUnit) assemblyParamValue.Unit).Code);
 					}
 				}
 			}

@@ -14,7 +14,7 @@ namespace Pigeoid.Contracts
 		/// <summary>
 		/// The unit of measure for the longitude.
 		/// </summary>
-		IUom Unit { get; }
+		IUnit Unit { get; }
 
 		string Name { get; }
 

@@ -4,6 +4,7 @@ using NUnit.Framework;
 using Pigeoid.Contracts;
 using Pigeoid.Ogc;
 using Pigeoid.Transformation;
+using Pigeoid.Unit;
 using Vertesaur;
 
 namespace Pigeoid.Core.Test
@@ -211,7 +212,7 @@ AUTHORITY[""EPSG"",""7001""]
 		public void ParseUnitTest() {
 			const string input = @"UNIT[""metre"",1,AUTHORITY[""EPSG"",""9001""]]";
 
-			var result = Default.Parse(input) as IUom;
+			var result = Default.Parse(input) as IUnit;
 
 			Assert.IsNotNull(result);
 			Assert.AreEqual("metre", result.Name);
@@ -274,7 +275,7 @@ AUTHORITY[""EPSG"",""7001""]
 			var unit = baseCrs.Unit;
 			Assert.IsNotNull(unit);
 			Assert.AreEqual("a stick", unit.Name);
-			Assert.AreEqual(1.123, (unit.GetConversionTo(unit.ConvertibleTo.First()) as IUomScalarConversion<double>).Factor);
+			Assert.AreEqual(1.123, (SimpleUnitConversionGenerator.FindConversion(unit, OgcLinearUnit.DefaultMeter) as IUnitScalarConversion<double>).Factor);
 			var axis = baseCrs.Axes.FirstOrDefault();
 			Assert.IsNotNull(axis);
 			Assert.AreEqual("a", axis.Name);
@@ -303,7 +304,7 @@ AUTHORITY[""EPSG"",""7001""]
 			Assert.AreEqual(new AuthorityTag("EPSG","9300"), datum.Authority);
 			Assert.IsNotNull(result.Unit);
 			Assert.AreEqual("metre", result.Unit.Name);
-			Assert.AreEqual(1, (result.Unit.GetConversionTo(result.Unit.ConvertibleTo.First()) as IUomScalarConversion<double>).Factor);
+			Assert.AreEqual(1, (SimpleUnitConversionGenerator.FindConversion(result.Unit, OgcLinearUnit.DefaultMeter) as IUnitScalarConversion<double>).Factor);
 			Assert.IsNotNull(result.Axes);
 			Assert.AreEqual(2, result.Axes.Count);
 			Assert.AreEqual("X", result.Axes[0].Name);

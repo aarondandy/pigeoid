@@ -9,7 +9,7 @@ namespace Pigeoid.Contracts
 	{
 		string Name { get; }
 		object Value { get; }
-		IUom Unit { get; }
+		IUnit Unit { get; }
 	}
 
 }

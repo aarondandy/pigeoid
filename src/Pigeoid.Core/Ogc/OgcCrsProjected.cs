@@ -15,7 +15,7 @@ namespace Pigeoid.Ogc
 	{
 
 		private readonly ICrsGeodetic _baseCrs;
-		private readonly IUom _unit;
+		private readonly IUnit _unit;
 		private readonly ICoordinateOperationInfo _projection;
 		private readonly IList<IAxis> _axes;
 
@@ -32,7 +32,7 @@ namespace Pigeoid.Ogc
 			string name,
 			[NotNull] ICrsGeodetic baseCrs,
 			[NotNull] ICoordinateOperationInfo projection,
-			[NotNull] IUom linearUnit,
+			[NotNull] IUnit linearUnit,
 			[CanBeNull] IEnumerable<IAxis> axes,
 			IAuthorityTag authority = null
 		)
@@ -58,7 +58,7 @@ namespace Pigeoid.Ogc
 		}
 
 		/// <inheritdoc/>
-		public IUom Unit {
+		public IUnit Unit {
 			get { return _unit; }
 		}
 

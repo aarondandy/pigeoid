@@ -95,7 +95,7 @@ namespace Pigeoid.Interop.Proj4
             get { return _name; }
         }
 
-		public IUom AxisUnit { get { return OgcLinearUnit.DefaultMeter; } }
+		public IUnit AxisUnit { get { return OgcLinearUnit.DefaultMeter; } }
 
         /// <summary>
         /// The ellipse codename.

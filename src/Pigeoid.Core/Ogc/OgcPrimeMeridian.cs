@@ -16,7 +16,7 @@ namespace Pigeoid.Ogc
 		public static readonly OgcPrimeMeridian DefaultGreenwich = new OgcPrimeMeridian("Greenwich", 0, new AuthorityTag("EPSG","8901"));
 
 		private readonly double _longitude;
-		private readonly IUom _unit;
+		private readonly IUnit _unit;
 
 		/// <summary>
 		/// Constructs a prime meridian.
@@ -34,7 +34,7 @@ namespace Pigeoid.Ogc
 		/// <param name="longitude">The longitude location of the meridian.</param>
 		/// <param name="angularUnit">The angular unit of the longitude value.</param>
 		/// <param name="authority">The authority.</param>
-		public OgcPrimeMeridian(string name, double longitude, [CanBeNull] IUom angularUnit, IAuthorityTag authority = null)
+		public OgcPrimeMeridian(string name, double longitude, [CanBeNull] IUnit angularUnit, IAuthorityTag authority = null)
 			: base(name, authority) {
 			_longitude = longitude;
 			_unit = angularUnit ?? OgcAngularUnit.DefaultDegrees;
@@ -44,7 +44,7 @@ namespace Pigeoid.Ogc
 			get { return _longitude; }
 		}
 
-		public IUom Unit {
+		public IUnit Unit {
 			get { return _unit; }
 		}
 

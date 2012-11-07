@@ -7,7 +7,7 @@ namespace Pigeoid.Contracts
 	/// <summary>
 	/// A unit of measure.
 	/// </summary>
-	public interface IUom
+	public interface IUnit
 	{
 		/// <summary>
 		/// The name of the unit.
@@ -18,13 +18,7 @@ namespace Pigeoid.Contracts
 		/// </summary>
 		string Type { get; }
 
-		IEnumerable<IUom> ConvertibleTo { get; }
-
-		IEnumerable<IUom> ConvertibleFrom { get; }
-
-		IUomConversion<double> GetConversionTo(IUom uom);
-
-		IUomConversion<double> GetConversionFrom(IUom uom);
+		IUnitConversionMap<double> ConversionMap { get; }
 
 	}
 }

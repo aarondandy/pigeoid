@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
+using Pigeoid.Unit;
 
 namespace Pigeoid
 {
@@ -108,12 +109,12 @@ namespace Pigeoid
 			var fromUnit = from.Spheroid.AxisUnit;
 			var toUnit = to.Spheroid.AxisUnit;
 			if(null != fromUnit && null != toUnit && fromUnit != toUnit) {
-				var conversion = fromUnit.GetConversionTo(toUnit);
+				var conversion = SimpleUnitConversionGenerator.FindConversion(fromUnit, toUnit);
 				if(null != conversion) {
-					if(conversion is UomUnityConversion) {
+					if(conversion is UnitUnityConversion) {
 						; // do nothing
 					}
-					else if(conversion is IUomScalarConversion<double>) {
+					else if(conversion is IUnitScalarConversion<double>) {
 						throw new NotImplementedException("scalar unit conversion");
 					}
 					else {

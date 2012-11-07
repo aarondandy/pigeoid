@@ -44,13 +44,5 @@ namespace Pigeoid.Ogc
 			get { return "length"; }
 		}
 
-		public override IEnumerable<IUom> ConvertibleTo {
-			get { return DefaultBaseUnitList; }
-		}
-
-		public override IEnumerable<IUom> ConvertibleFrom {
-			get { return DefaultBaseUnitList; }
-		}
-
 	}
 }

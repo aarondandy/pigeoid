@@ -89,7 +89,7 @@ namespace Pigeoid.Epsg
 							var uomCode = reader.ReadUInt16();
 							if(valueCode != 0xffff) {
 								string paramName = _parent._paramUsage[i].Parameter.Name;
-								var uom = EpsgUom.Get(uomCode);
+								var uom = EpsgUnit.Get(uomCode);
 								paramValues.Add(CreateParameter(valueCode, paramName, uom, readerTxt, numberLookUp));
 							}
 						}
@@ -105,12 +105,12 @@ namespace Pigeoid.Epsg
 			private const string ParamTextValueFileName = "params.txt";
 			private const int FixedLookUpThreshold = 8;
 
-			private static INamedParameter CreateParameter(ushort valueCode, string paramName, EpsgUom uom, BinaryReader readerTxt, EpsgNumberLookUp numberLookUp) {
+			private static INamedParameter CreateParameter(ushort valueCode, string paramName, EpsgUnit unit, BinaryReader readerTxt, EpsgNumberLookUp numberLookUp) {
 				return ((valueCode & 0xc000) == 0x8000)
 					? new NamedParameter<string>(paramName,
 						EpsgTextLookUp.GetString((ushort)(valueCode & 0x7fff), readerTxt),
-						uom) as INamedParameter
-					: new NamedParameter<double>(paramName, numberLookUp.Get(valueCode), uom);
+						unit) as INamedParameter
+					: new NamedParameter<double>(paramName, numberLookUp.Get(valueCode), unit);
 			}
 
 			private static EpsgFixedLookUpBase<ushort, OpParamValueInfo> CreateFullLookUp(BinaryReader reader, int opCount, ParamUsage[] paramUsage) {
@@ -126,7 +126,7 @@ namespace Pigeoid.Epsg
 							var uomCode = reader.ReadUInt16();
 							if (valueCode != 0xffff) {
 								string paramName = paramUsage[paramIndex].Parameter.Name;
-								var uom = EpsgUom.Get(uomCode);
+								var uom = EpsgUnit.Get(uomCode);
 								paramValues.Add(CreateParameter(valueCode, paramName, uom, readerTxt, numberLookUp));
 							}
 						}

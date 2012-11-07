@@ -15,7 +15,7 @@ namespace Pigeoid.Contracts
 		/// <summary>
 		/// The vertical unit of measure for this CRS.
 		/// </summary>
-		IUom Unit { get; }
+		IUnit Unit { get; }
 
 		/// <summary>
 		/// The axis for this CRS.

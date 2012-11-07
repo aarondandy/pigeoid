@@ -183,7 +183,7 @@ namespace Pigeoid.Ogc
 			return GetAuthorityBoundObject(r => r.GetDatum(tag));
 		}
 
-		public IUom GetUom(IAuthorityTag tag) {
+		public IUnit GetUom(IAuthorityTag tag) {
 			return GetAuthorityBoundObject(r => r.GetUom(tag));
 		}
 

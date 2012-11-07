@@ -11,7 +11,7 @@ namespace Pigeoid.Ogc
 	{
 
 		private readonly IDatum _datum;
-		private readonly IUom _unit;
+		private readonly IUnit _unit;
 		private readonly IAxis _axis;
 
 		/// <summary>
@@ -25,7 +25,7 @@ namespace Pigeoid.Ogc
 		public OgcCrsVertical(
 			string name,
 			IDatum datum,
-			IUom linearUnit,
+			IUnit linearUnit,
 			IAxis axis,
 			IAuthorityTag authority
 		) : base(name, authority) {
@@ -38,7 +38,7 @@ namespace Pigeoid.Ogc
 			get { return _datum; }
 		}
 
-		public IUom Unit {
+		public IUnit Unit {
 			get { return _unit; }
 		}
 

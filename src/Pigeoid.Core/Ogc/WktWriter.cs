@@ -8,6 +8,7 @@ using System.Threading;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
+using Pigeoid.Unit;
 
 namespace Pigeoid.Ogc
 {
@@ -218,7 +219,8 @@ namespace Pigeoid.Ogc
 			// the axis value must be in meters
 			var a = entity.A;
 			if(entity.AxisUnit != null) {
-				var conversion = entity.AxisUnit.GetConversionTo(OgcLinearUnit.DefaultMeter);
+
+				var conversion = SimpleUnitConversionGenerator.FindConversion(entity.AxisUnit, OgcLinearUnit.DefaultMeter);
 				if(null != conversion) {
 					a = conversion.TransformValue(a);
 				}
@@ -514,7 +516,7 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		public void Write([NotNull] IUom entity) {
+		public void Write([NotNull] IUnit entity) {
 			Write(WktKeyword.Unit);
 			WriteOpenParenthesis();
 			WriteQuoted(entity.Name);
@@ -533,8 +535,8 @@ namespace Pigeoid.Ogc
 			WriteCloseParenthesis();
 		}
 
-		private double GetReferenceFactor([NotNull] IUom entity) {
-			IUom convertTo;
+		private double GetReferenceFactor([NotNull] IUnit entity) {
+			IUnit convertTo;
 			if (StringComparer.OrdinalIgnoreCase.Equals("Length", entity.Type))
 				convertTo = OgcLinearUnit.DefaultMeter;
 			else if (StringComparer.OrdinalIgnoreCase.Equals("Angle", entity.Type))
@@ -542,7 +544,7 @@ namespace Pigeoid.Ogc
 			else
 				return Double.NaN;
 
-			var conversion = entity.GetConversionTo(convertTo) as IUomScalarConversion<double>;
+			var conversion = SimpleUnitConversionGenerator.FindConversion(entity, convertTo) as IUnitScalarConversion<double>;
 			if (null != conversion)
 				return conversion.Factor;
 
@@ -578,8 +580,8 @@ namespace Pigeoid.Ogc
 				Write(entity as ISpheroidInfo);
 			else if(entity is IPrimeMeridianInfo)
 				Write(entity as IPrimeMeridianInfo);
-			else if(entity is IUom)
-				Write(entity as IUom);
+			else if(entity is IUnit)
+				Write(entity as IUnit);
 			else if(entity is IDatum)
 				Write(entity as IDatum);
 			else if(entity is IAxis)

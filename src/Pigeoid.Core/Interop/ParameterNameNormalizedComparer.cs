@@ -3,14 +3,14 @@ using JetBrains.Annotations;
 
 namespace Pigeoid.Interop
 {
-	public class ParameterNameComparer : NameNormalizedComparerBase
+	public class ParameterNameNormalizedComparer : NameNormalizedComparerBase
 	{
 
-		public static readonly ParameterNameComparer Default = new ParameterNameComparer();
+		public static readonly ParameterNameNormalizedComparer Default = new ParameterNameNormalizedComparer();
 
-		public ParameterNameComparer() : this(null) { }
+		public ParameterNameNormalizedComparer() : this(null) { }
 
-		public ParameterNameComparer(StringComparer comparer) : base(comparer) { }
+		public ParameterNameNormalizedComparer(StringComparer comparer) : base(comparer) { }
 
 		[ContractAnnotation("=>notnull")]
 		public override string Normalize(string text) {

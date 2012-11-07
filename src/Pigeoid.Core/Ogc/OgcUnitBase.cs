@@ -10,7 +10,7 @@ namespace Pigeoid.Ogc
 	/// <summary>
 	/// The base OGC unit of measure class. All units are relative to a single base unit by some factor.
 	/// </summary>
-	public abstract class OgcUnitBase : OgcNamedAuthorityBoundEntity, IUom
+	public abstract class OgcUnitBase : OgcNamedAuthorityBoundEntity, IUnit
 	{
 		private readonly double _factor;
 
@@ -24,7 +24,7 @@ namespace Pigeoid.Ogc
 
 		public abstract string Type { get; }
 
-		string IUom.Name {
+		string IUnit.Name {
 			get { return Name; }
 		}
 
@@ -35,28 +35,34 @@ namespace Pigeoid.Ogc
 			get { return _factor; }
 		}
 
-		public abstract IEnumerable<IUom> ConvertibleTo { get; }
+		public IUnitConversionMap<double> ConversionMap {
+			get {
+				throw new NotImplementedException();
+			}
+		}
 
-		public abstract IEnumerable<IUom> ConvertibleFrom { get; }
+		// public abstract IEnumerable<IUnit> DirectlyConvertibleTo { get; }
 
-		public IUomConversion<double> GetConversionTo(IUom uom) {
-			if (null == uom)
-				throw new ArgumentNullException("uom");
+		// public abstract IEnumerable<IUnit> DirectlyConvertibleFrom { get; }
 
-			if (ConvertibleTo.Any(x => StringComparer.OrdinalIgnoreCase.Equals(x.Name, uom.Name))) {
-// ReSharper disable CompareOfFloatsByEqualityOperator
+		/*public IUnitConversion<double> GetDirectConversionTo(IUnit unit) {
+			if (null == unit)
+				throw new ArgumentNullException("unit");
+
+			if (DirectlyConvertibleTo.Any(x => StringComparer.OrdinalIgnoreCase.Equals(x.Name, unit.Name))) {
+				// ReSharper disable CompareOfFloatsByEqualityOperator
 				if(_factor == 1.0)
-					return new UomUnityConversion(this, uom);
-				return new UomScalarConversion(this, uom, Factor);
+					return new UnitUnityConversion(this, unit);
+				return new UnitScalarConversion(this, unit, Factor);
 				// ReSharper restore CompareOfFloatsByEqualityOperator
 			}
 
 			return null;
 		}
 
-		public IUomConversion<double> GetConversionFrom(IUom uom) {
-			var conversion = GetConversionTo(uom);
+		public IUnitConversion<double> GetDirectConversionFrom(IUnit unit) {
+			var conversion = GetDirectConversionTo(unit);
 			return null != conversion && conversion.HasInverse ? conversion.GetInverse() : null;
-		}
+		}*/
 	}
 }

@@ -5,18 +5,18 @@ using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Vertesaur.Contracts;
 
-namespace Pigeoid
+namespace Pigeoid.Unit
 {
-	public class UomScalarConversion : IUomScalarConversion<double>
+	public class UnitScalarConversion : IUnitScalarConversion<double>
 	{
 
-		private class Inverse : IUomScalarConversion<double>
+		private class Inverse : IUnitScalarConversion<double>
 		{
-			private readonly UomScalarConversion _core;
+			private readonly UnitScalarConversion _core;
 			private readonly double _factor;
 			private readonly double _inverseFactor;
 
-			public Inverse([NotNull] UomScalarConversion core) {
+			public Inverse([NotNull] UnitScalarConversion core) {
 				_core = core;
 				_factor = _core.Factor;
 				_inverseFactor = 1.0 / _factor;
@@ -24,9 +24,9 @@ namespace Pigeoid
 
 			public double Factor { get { return _inverseFactor; } }
 
-			public IUom From { [ContractAnnotation("=>notnull")] get { return _core.To; } }
+			public IUnit From { [ContractAnnotation("=>notnull")] get { return _core.To; } }
 
-			public IUom To { [ContractAnnotation("=>notnull")] get { return _core.From; } }
+			public IUnit To { [ContractAnnotation("=>notnull")] get { return _core.From; } }
 
 			public void TransformValues([NotNull] double[] values) {
 				for (int i = 0; i < values.Length; i++)
@@ -41,9 +41,9 @@ namespace Pigeoid
 			public bool HasInverse { [ContractAnnotation("=>true")] get { return true; } }
 
 			[ContractAnnotation("=>notnull")] 
-			public IUomScalarConversion<double> GetInverse() { return _core; }
+			public IUnitScalarConversion<double> GetInverse() { return _core; }
 
-			IUomConversion<double> IUomConversion<double>.GetInverse() { return GetInverse(); }
+			IUnitConversion<double> IUnitConversion<double>.GetInverse() { return GetInverse(); }
 
 			ITransformation<double> ITransformation<double>.GetInverse() { return GetInverse(); }
 
@@ -53,11 +53,11 @@ namespace Pigeoid
 
 		}
 
-		private readonly IUom _from;
-		private readonly IUom _to;
+		private readonly IUnit _from;
+		private readonly IUnit _to;
 		private readonly double _factor;
 
-		public UomScalarConversion([NotNull] IUom from, [NotNull] IUom to, double factor) {
+		public UnitScalarConversion([NotNull] IUnit from, [NotNull] IUnit to, double factor) {
 			if(null == from)
 				throw new ArgumentNullException("from");
 			if(null == to)
@@ -70,9 +70,9 @@ namespace Pigeoid
 
 		public double Factor {get { return _factor; } }
 
-		public IUom From { [ContractAnnotation("=>notnull")] get { return _from; } }
+		public IUnit From { [ContractAnnotation("=>notnull")] get { return _from; } }
 
-		public IUom To { [ContractAnnotation("=>notnull")] get { return _to; } }
+		public IUnit To { [ContractAnnotation("=>notnull")] get { return _to; } }
 
 		public void TransformValues([NotNull] double[] values) {
 			for (int i = 0; i < values.Length; i++)
@@ -89,9 +89,9 @@ namespace Pigeoid
 // ReSharper restore CompareOfFloatsByEqualityOperator
 
 		[ContractAnnotation("=>notnull")] 
-		public IUomScalarConversion<double> GetInverse() { return new Inverse(this); }
+		public IUnitScalarConversion<double> GetInverse() { return new Inverse(this); }
 
-		IUomConversion<double> IUomConversion<double>.GetInverse() { return GetInverse(); }
+		IUnitConversion<double> IUnitConversion<double>.GetInverse() { return GetInverse(); }
 
 		ITransformation<double> ITransformation<double>.GetInverse() { return GetInverse(); }
 

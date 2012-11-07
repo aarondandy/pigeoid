@@ -25,9 +25,9 @@ namespace Pigeoid.Epsg
 
 		IDatum ICrsLocal.Datum { get { return _datum; } }
 
-		public EpsgUom Unit { get { return CoordinateSystem.Axes.First().Unit; } }
+		public EpsgUnit Unit { get { return CoordinateSystem.Axes.First().Unit; } }
 
-		IUom ICrsLocal.Unit { get { return Unit; } }
+		IUnit ICrsLocal.Unit { get { return Unit; } }
 
 		public IList<EpsgAxis> Axes { get { return CoordinateSystem.Axes.ToArray(); } }
 

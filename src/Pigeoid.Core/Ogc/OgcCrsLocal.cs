@@ -15,7 +15,7 @@ namespace Pigeoid.Ogc
 	{
 
 		private readonly IDatum _datum;
-		private readonly IUom _unit;
+		private readonly IUnit _unit;
 		private readonly IList<IAxis> _axes;
 
 		/// <summary>
@@ -29,7 +29,7 @@ namespace Pigeoid.Ogc
 		public OgcCrsLocal(
 			string name,
 			IDatum datum,
-			IUom unit,
+			IUnit unit,
 			[CanBeNull] IEnumerable<IAxis> axes,
 			IAuthorityTag authority
 		) : base(name, authority) {
@@ -42,7 +42,7 @@ namespace Pigeoid.Ogc
 		public IDatum Datum { get { return _datum; } }
 
 		/// <inheritdoc/>
-		public IUom Unit { get { return _unit; } }
+		public IUnit Unit { get { return _unit; } }
 
 		/// <inheritdoc/>
 		public IList<IAxis> Axes { get { return _axes; } }

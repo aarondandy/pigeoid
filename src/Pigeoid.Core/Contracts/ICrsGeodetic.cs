@@ -15,7 +15,7 @@ namespace Pigeoid.Contracts
 		/// <summary>
 		/// The angular unit of measure for this CRS.
 		/// </summary>
-		IUom Unit { get; }
+		IUnit Unit { get; }
 
 		/// <summary>
 		/// Gets a collection of axes for this CRS.

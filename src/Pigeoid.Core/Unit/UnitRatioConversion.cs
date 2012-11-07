@@ -5,27 +5,29 @@ using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Vertesaur.Contracts;
 
-namespace Pigeoid
+namespace Pigeoid.Unit
 {
-	public class UomRatioConversion : IUomScalarConversion<double>
+	public class UnitRatioConversion : IUnitScalarConversion<double>
 	{
 
 		private delegate void TransformValueInPlaceFunction(ref double value);
 
-		private readonly IUom _from;
-		private readonly IUom _to;
+		private readonly IUnit _from;
+		private readonly IUnit _to;
 		private readonly double _numerator;
 		private readonly double _denominator;
 		private readonly double _factor;
 		private readonly TransformValueInPlaceFunction _transformInPlace;
 		private readonly Func<double, double> _transform; 
 
-		public UomRatioConversion([NotNull] IUom from, [NotNull] IUom to, double numerator, double denominator) {
+		public UnitRatioConversion([NotNull] IUnit from, [NotNull] IUnit to, double numerator, double denominator) {
 			// ReSharper disable CompareOfFloatsByEqualityOperator
 			if(null == from)
 				throw new ArgumentNullException("from");
 			if(null == to)
 				throw new ArgumentNullException("to");
+			if(0 == denominator)
+				throw new ArgumentException("denominator must be non-zero", "denominator");
 
 			_from = from;
 			_to = to;
@@ -61,9 +63,9 @@ namespace Pigeoid
 
 		public double Factor { get { return _factor; } }
 
-		public IUom From { [ContractAnnotation("=>notnull")] get { return _from; } }
+		public IUnit From { [ContractAnnotation("=>notnull")] get { return _from; } }
 
-		public IUom To { [ContractAnnotation("=>notnull")] get { return _to; } }
+		public IUnit To { [ContractAnnotation("=>notnull")] get { return _to; } }
 
 		public void TransformValues([NotNull] double[] values) {
 			for (int i = 0; i < values.Length; i++)
@@ -81,13 +83,13 @@ namespace Pigeoid
 		public bool HasInverse { get { return 0 != _numerator; } }
 // ReSharper restore CompareOfFloatsByEqualityOperator
 
-		public IUomScalarConversion<double> GetInverse(){
+		public IUnitScalarConversion<double> GetInverse(){
 			if(!HasInverse)
 				throw new InvalidOperationException("No inverse.");
-			return new UomRatioConversion(To,From,_denominator,_numerator);
+			return new UnitRatioConversion(To,From,_denominator,_numerator);
 		}
 
-		IUomConversion<double> IUomConversion<double>.GetInverse() { return GetInverse(); }
+		IUnitConversion<double> IUnitConversion<double>.GetInverse() { return GetInverse(); }
 
 		ITransformation<double> ITransformation<double>.GetInverse() { return GetInverse(); }
 

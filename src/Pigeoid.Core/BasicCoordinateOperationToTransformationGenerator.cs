@@ -7,6 +7,7 @@ using Pigeoid.Interop;
 using Pigeoid.Ogc;
 using Pigeoid.Projection;
 using Pigeoid.Transformation;
+using Pigeoid.Unit;
 using Pigeoid.Utility;
 using Vertesaur;
 using Vertesaur.Contracts;
@@ -47,7 +48,7 @@ namespace Pigeoid
 				_core = core;
 				_normalizedNames = Array.ConvertAll(
 					core,
-					x => ParameterNameComparer.Default.Normalize(x.Name));
+					x => ParameterNameNormalizedComparer.Default.Normalize(x.Name));
 				_normalizedLookup = new Dictionary<string, INamedParameter>(StringComparer.OrdinalIgnoreCase);
 				for (int i = 0; i < _core.Length; i++)
 					_normalizedLookup[_normalizedNames[i]] = _core[i];
@@ -100,14 +101,16 @@ namespace Pigeoid
 
 				var latUnit = latParam.Unit;
 				if (null != latUnit){
-					var conv = latUnit.GetConversionTo(OgcAngularUnit.DefaultRadians);
-					lat = conv.TransformValue(lat);
+					var conv = SimpleUnitConversionGenerator.FindConversion(latUnit, OgcAngularUnit.DefaultRadians);
+					if(null != conv)
+						lat = conv.TransformValue(lat);
 				}
 
 				var lonUnit = lonParam.Unit;
 				if(null != lonUnit){
-					var conv = lonUnit.GetConversionTo(OgcAngularUnit.DefaultRadians);
-					lon = conv.TransformValue(lon);
+					var conv = SimpleUnitConversionGenerator.FindConversion(lonUnit, OgcAngularUnit.DefaultRadians);
+					if(null != conv)
+						lon = conv.TransformValue(lon);
 				}
 
 				result = new GeographicCoordinate(lat, lon);
@@ -479,11 +482,11 @@ namespace Pigeoid
 			return new LambertAzimuthalEqualArea(spheroid);
 		}
 
-		private readonly CoordinateOperationNameComparer _coordinateOperationNameNormalizer;
+		private readonly CoordinateOperationNameNormalizedComparer _coordinateOperationNameNormalizer;
 		private readonly Dictionary<string, Func<OperationGenerationParams, ITransformation>> _transformationCreatorLookup;
 
 		public BasicCoordinateOperationToTransformationGenerator(){
-			_coordinateOperationNameNormalizer = CoordinateOperationNameComparer.Default;
+			_coordinateOperationNameNormalizer = CoordinateOperationNameNormalizedComparer.Default;
 			_transformationCreatorLookup = new Dictionary<string, Func<OperationGenerationParams, ITransformation>>(_coordinateOperationNameNormalizer) {
 				{CoordinateOperationStandardNames.AlbersEqualAreaConic,null},
 				{CoordinateOperationStandardNames.AzimuthalEquidistant,null},

@@ -67,7 +67,7 @@ namespace Pigeoid.Epsg
 						Axes = new EpsgAxis[reader.ReadByte()]
 					};
 					for (int i = 0; i < axisSet.Axes.Length; i++) {
-						var uom = EpsgUom.Get(reader.ReadUInt16());
+						var uom = EpsgUnit.Get(reader.ReadUInt16());
 						using (var textReader = EpsgDataResource.CreateBinaryReader("axis.txt")) {
 							var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
 							var orientation = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
@@ -98,16 +98,16 @@ namespace Pigeoid.Epsg
 		private readonly string _name;
 		private readonly string _abbreviation;
 		private readonly string _orientation;
-		private readonly EpsgUom _uom;
+		private readonly EpsgUnit _unit;
 
-		private EpsgAxis(string name, string abbreviation, string orientation, EpsgUom uom) {
+		private EpsgAxis(string name, string abbreviation, string orientation, EpsgUnit unit) {
 			_name = name;
 			_abbreviation = abbreviation;
 			_orientation = orientation;
-			_uom = uom;
+			_unit = unit;
 		}
 
-		public EpsgUom  Unit { get { return _uom; } }
+		public EpsgUnit  Unit { get { return _unit; } }
 
 		public string Name { get { return _name; } }
 

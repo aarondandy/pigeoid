@@ -47,9 +47,7 @@ namespace Pigeoid.Ogc
 			: base(name, factor, authority) { }
 
 		public override string Type { get { return "angle"; } }
+ 
 
-		public override IEnumerable<IUom> ConvertibleTo { get { return DefaultBaseUnitList; } }
-
-		public override IEnumerable<IUom> ConvertibleFrom { get { return DefaultBaseUnitList; } }
 	}
 }

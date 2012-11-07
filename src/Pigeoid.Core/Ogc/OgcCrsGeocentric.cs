@@ -15,7 +15,7 @@ namespace Pigeoid.Ogc
 	{
 
 		private readonly IDatumGeodetic _datum;
-		private readonly IUom _unit;
+		private readonly IUnit _unit;
 		private readonly IList<IAxis> _axes;
 
 		/// <summary>
@@ -29,7 +29,7 @@ namespace Pigeoid.Ogc
 		public OgcCrsGeocentric(
 			string name,
 			[NotNull] IDatumGeodetic datum,
-			[NotNull] IUom linearUnit,
+			[NotNull] IUnit linearUnit,
 			IEnumerable<IAxis> axes,
 			IAuthorityTag authority
 		) : base(name, authority) {
@@ -47,7 +47,7 @@ namespace Pigeoid.Ogc
 		public IDatumGeodetic Datum { get { return _datum; } }
 
 		/// <inheritdoc/>
-		public IUom Unit { get { return _unit; } }
+		public IUnit Unit { get { return _unit; } }
 
 		/// <inheritdoc/>
 		public IList<IAxis> Axes{ get { return _axes; } }
