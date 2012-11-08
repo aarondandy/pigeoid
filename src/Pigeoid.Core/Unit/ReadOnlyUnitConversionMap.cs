@@ -10,8 +10,8 @@ namespace Pigeoid.Unit
 	{
 
 		private readonly IUnitConversion<double>[] _allConversions;
-		private readonly Dictionary<IUnit, IUnitConversion<double>[]> _fromNameMap;
-		private readonly Dictionary<IUnit, IUnitConversion<double>[]> _toNameMap;
+		private readonly Dictionary<IUnit, IUnitConversion<double>[]> _fromMap;
+		private readonly Dictionary<IUnit, IUnitConversion<double>[]> _toMap;
 		private readonly IUnit[] _allDistinctUnits;
 
 		public ReadOnlyUnitConversionMap([NotNull] IEnumerable<IUnitConversion<double>> conversions, IEqualityComparer<IUnit> unitEqualityComparer = null)
@@ -26,10 +26,10 @@ namespace Pigeoid.Unit
 				.Concat(_allConversions.Select(x => x.To))
 				.Distinct(EqualityComparer)
 				.ToArray();
-			_fromNameMap = _allConversions
+			_fromMap = _allConversions
 				.ToLookup(x => x.From, EqualityComparer)
 				.ToDictionary(x => x.Key, x => x.ToArray(), EqualityComparer);
-			_toNameMap = _allConversions
+			_toMap = _allConversions
 				.ToLookup(x => x.To, EqualityComparer)
 				.ToDictionary(x => x.Key, x => x.ToArray(), EqualityComparer);
 		}
@@ -37,11 +37,23 @@ namespace Pigeoid.Unit
 		public override IEnumerable<IUnit> AllUnits { get { return Array.AsReadOnly(_allDistinctUnits); } }
 
 		public override IEnumerable<IUnitConversion<double>> GetConversionsTo(IUnit to) {
-			throw new NotImplementedException("need to look both ways");
+			IUnitConversion<double>[] rawOperations;
+			var results = new List<IUnitConversion<double>>();
+			if (_toMap.TryGetValue(to, out rawOperations))
+				results.AddRange(rawOperations);
+			if (_fromMap.TryGetValue(to, out rawOperations))
+				results.AddRange(rawOperations.Where(x => x.HasInverse).Select(x => x.GetInverse()));
+			return results;
 		}
 
 		public override IEnumerable<IUnitConversion<double>> GetConversionsFrom(IUnit from) {
-			throw new NotImplementedException("need to look both ways");
+			IUnitConversion<double>[] rawOperations;
+			var results = new List<IUnitConversion<double>>();
+			if(_fromMap.TryGetValue(from, out rawOperations))
+				results.AddRange(rawOperations);
+			if(_toMap.TryGetValue(from, out rawOperations))
+				results.AddRange(rawOperations.Where(x => x.HasInverse).Select(x =>  x.GetInverse()));
+			return results;
 		}
 
 	}

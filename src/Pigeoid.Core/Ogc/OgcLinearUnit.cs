@@ -44,5 +44,9 @@ namespace Pigeoid.Ogc
 			get { return "length"; }
 		}
 
+		public override IUnit ReferenceUnit {
+			get { return DefaultMeter; }
+		}
+
 	}
 }

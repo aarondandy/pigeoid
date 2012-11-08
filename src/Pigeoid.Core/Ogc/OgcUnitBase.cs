@@ -1,9 +1,9 @@
 ﻿// TODO: source header
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using Pigeoid.Contracts;
+using Pigeoid.Unit;
 
 namespace Pigeoid.Ogc
 {
@@ -13,6 +13,7 @@ namespace Pigeoid.Ogc
 	public abstract class OgcUnitBase : OgcNamedAuthorityBoundEntity, IUnit
 	{
 		private readonly double _factor;
+		private readonly Lazy<IUnitConversionMap<double>> _referenceConversionMap;
 
 		protected OgcUnitBase(string name, double factor)
 			: this(name, factor, null) { }
@@ -20,9 +21,12 @@ namespace Pigeoid.Ogc
 		protected OgcUnitBase(string name, double factor, IAuthorityTag authority)
 			: base(name, authority) {
 			_factor = factor;
+			_referenceConversionMap = new Lazy<IUnitConversionMap<double>>(CreateReferenceConversionMap, LazyThreadSafetyMode.ExecutionAndPublication);
 		}
 
 		public abstract string Type { get; }
+
+		public abstract IUnit ReferenceUnit { get; }
 
 		string IUnit.Name {
 			get { return Name; }
@@ -35,34 +39,23 @@ namespace Pigeoid.Ogc
 			get { return _factor; }
 		}
 
+		private IUnitConversion<double> CreateForwardReferenceOperation() {
+			// ReSharper disable CompareOfFloatsByEqualityOperator
+			if (1.0 == Factor)
+				return new UnitUnityConversion(this, ReferenceUnit);
+			return new UnitScalarConversion(this, ReferenceUnit, Factor);
+			// ReSharper restore CompareOfFloatsByEqualityOperator
+		}
+
+		private IUnitConversionMap<double> CreateReferenceConversionMap() {
+			if (UnitEqualityComparer.Default.Equals(this, ReferenceUnit))
+				return null;
+			return new BinaryUnitConversionMap(CreateForwardReferenceOperation());
+		}
+
 		public IUnitConversionMap<double> ConversionMap {
-			get {
-				throw new NotImplementedException();
-			}
+			get { return _referenceConversionMap.Value; }
 		}
 
-		// public abstract IEnumerable<IUnit> DirectlyConvertibleTo { get; }
-
-		// public abstract IEnumerable<IUnit> DirectlyConvertibleFrom { get; }
-
-		/*public IUnitConversion<double> GetDirectConversionTo(IUnit unit) {
-			if (null == unit)
-				throw new ArgumentNullException("unit");
-
-			if (DirectlyConvertibleTo.Any(x => StringComparer.OrdinalIgnoreCase.Equals(x.Name, unit.Name))) {
-				// ReSharper disable CompareOfFloatsByEqualityOperator
-				if(_factor == 1.0)
-					return new UnitUnityConversion(this, unit);
-				return new UnitScalarConversion(this, unit, Factor);
-				// ReSharper restore CompareOfFloatsByEqualityOperator
-			}
-
-			return null;
-		}
-
-		public IUnitConversion<double> GetDirectConversionFrom(IUnit unit) {
-			var conversion = GetDirectConversionTo(unit);
-			return null != conversion && conversion.HasInverse ? conversion.GetInverse() : null;
-		}*/
 	}
 }

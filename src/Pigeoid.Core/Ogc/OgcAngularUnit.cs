@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Pigeoid.Contracts;
+using Pigeoid.Unit;
 
 namespace Pigeoid.Ogc
 {
@@ -15,8 +16,7 @@ namespace Pigeoid.Ogc
 	{
 
 		private static readonly OgcAngularUnit DefaultRadianInstance = new OgcAngularUnit("Radian", 1);
-		private static readonly ReadOnlyCollection<OgcAngularUnit> DefaultBaseUnitList = Array.AsReadOnly(new[] {DefaultRadianInstance});
-		private static readonly OgcAngularUnit DefaultDegreesInstance = new OgcAngularUnit("Degree", Math.PI / 180.0, new AuthorityTag("EPSG", "9122")); // TODO: possibly calculate the degree conversion factor from a conversion graph?
+		private static readonly OgcAngularUnit DefaultDegreesInstance = new OgcAngularUnit("Degree", Math.PI / 180.0, new AuthorityTag("EPSG", "9122"));
 
 		/// <summary>
 		/// This is the OGC reference unit for angular measure.
@@ -47,7 +47,10 @@ namespace Pigeoid.Ogc
 			: base(name, factor, authority) { }
 
 		public override string Type { get { return "angle"; } }
- 
+
+		public override IUnit ReferenceUnit {
+			get { return DefaultRadians; }
+		}
 
 	}
 }

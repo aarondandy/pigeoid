@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
+using Pigeoid.Interop;
 using Vertesaur.Search;
 
 namespace Pigeoid.Unit
@@ -31,17 +32,32 @@ namespace Pigeoid.Unit
 		}
 
 		private static IUnitConversionMap<double> BuildConversionMap([NotNull] IEnumerable<IUnit> units) {
-			var maps = units
-				.Where(x => null != x)
-				.Select(x => x.ConversionMap)
-				.Where(x => null != x)
-				.Distinct()
-				.ToList();
-			if (maps.Count == 0)
-				return null;
-			if (maps.Count == 1)
-				return maps[0];
-			return new UnitConversionMapCollection(maps);
+			return BuildConversionMap(units.Where(x => null != x).Select(x => x.ConversionMap).Where(x => null != x).Distinct());
+		}
+
+		private static IUnitConversionMap<double> BuildConversionMap([NotNull] IEnumerable<IUnitConversionMap<double>> maps) {
+			var pending = new Queue<IUnitConversionMap<double>>(maps.Where(x => null != x));
+			var visited = new HashSet<IUnitConversionMap<double>>();
+			var visitedUnits = new HashSet<IUnit>(UnitEqualityComparer.Default);
+
+			while(pending.Count > 0) {
+				var current = pending.Dequeue();
+				if(visited.Contains(current))
+					continue;
+				
+				visited.Add(current);
+				var currentUnits = current.AllUnits.Where(x => !visitedUnits.Contains(x)).ToList();
+				foreach (var unit in currentUnits)
+					visitedUnits.Add(unit);
+
+				foreach (var subMap in currentUnits.Select(x => x.ConversionMap).Where(x => null != x).Distinct()) {
+					if(visited.Contains(subMap))
+						continue;
+					pending.Enqueue(subMap);
+				}
+			}
+
+			return new UnitConversionMapCollection(visited);
 		}
 
 		public static IUnitConversion<double> FindConversion(IUnit from, IUnit to) {
@@ -73,7 +89,7 @@ namespace Pigeoid.Unit
 			var result = _conversionGraph.FindPath(from, to);
 			if (null == result)
 				return null;
-			return new ConcatenatedUnitConversion(result.Select(x => x.Edge));
+			return new ConcatenatedUnitConversion(result.Skip(1).Select(x => x.Edge));
 		}
 
 	}

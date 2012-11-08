@@ -28,7 +28,7 @@ namespace Pigeoid.Interop
 
 		private static string RemovePluralS(string text, string wordBase) {
 			int partIndex = text.LastIndexOf(wordBase, StringComparison.OrdinalIgnoreCase);
-			while(partIndex >= 0 && partIndex < text.Length) {
+			while(partIndex >= 0 && partIndex < (text.Length - wordBase.Length)) {
 				var sIndex = partIndex + wordBase.Length;
 				if(text[sIndex] == 'S') 
 					text = text.Remove(sIndex, 1);

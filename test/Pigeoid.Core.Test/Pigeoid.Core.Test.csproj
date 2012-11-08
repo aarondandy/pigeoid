@@ -54,6 +54,7 @@
     </Compile>
     <Compile Include="Mock\MockAxis.cs" />
     <Compile Include="Mock\MockDatum.cs" />
+    <Compile Include="Ogc\OgcUnitTest.cs" />
     <Compile Include="Projection\EquidistantCylindricalTest.cs" />
     <Compile Include="Projection\LambertConicNearConformalTest.cs" />
     <Compile Include="Projection\CassiniSoldnerTest.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Transformation\GeographicGeocentricTransformationTest.cs" />
     <Compile Include="Transformation\Helmert7TransformTest.cs" />
     <Compile Include="Transformation\MolodenskyBadekasTransformationTest.cs" />
+    <Compile Include="Unit\SimpleUnitConversionTests.cs" />
     <Compile Include="WktParseTest.cs" />
     <Compile Include="WktSerializeTest.cs" />
   </ItemGroup>
