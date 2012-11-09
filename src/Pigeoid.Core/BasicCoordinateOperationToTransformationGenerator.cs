@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
@@ -35,6 +36,23 @@ namespace Pigeoid
 			internal static bool AllAreSelected([NotNull] params ParamSelector[] selectors) {
 				return selectors.All(x => x.IsSelected);
 			}
+		}
+
+		[Obsolete("Where am I going with this?")]
+		public class TransformationStep
+		{
+
+			public TransformationStep(ITransformation transformation) {
+				Transformation = transformation;
+
+			}
+
+			public readonly ITransformation Transformation;
+			public Type TypeFrom;
+			public Type TypeTo;
+			public ReadOnlyCollection<IUnit> OrdinalUnitsFrom;
+			public ReadOnlyCollection<IUnit> OrdinalUnitsTo;
+
 		}
 
 		private class NamedParameterLookup
@@ -160,7 +178,7 @@ namespace Pigeoid
 			return false;
 		}
 
-		private static CassiniSoldner CreateCassiniSoldner(OperationGenerationParams opData) {
+		private static ITransformation CreateCassiniSoldner(OperationGenerationParams opData) {
 			var originLatParam = new ParamSelector("LAT", "NATURALORIGIN");
 			var originLonParam = new ParamSelector("LON", "NATURALORIGIN");
 			var offsetXParam = new ParamSelector("FALSE", "OFFSET", "X", "EAST");
@@ -551,8 +569,8 @@ namespace Pigeoid
 			if (null == lastCoordinateType)
 				return null;
 
-			var transforms = new ITransformation[allOps.Count];
-			for (int i = 0; i < transforms.Length; i++) {
+			var transformations = new List<ITransformation>();
+			for (int i = 0; i < allOps.Count; i++) {
 				var currentOperation = allOps[i];
 				var transformation = /*currentOperation as ITransformation
 					??*/ CreateTransform(currentOperation, allCrs[i], allCrs[i + 1]); // TODO: use the operation as is, only if it is a transformation already
@@ -560,10 +578,20 @@ namespace Pigeoid
 				if (null == transformation)
 					return null; // not supported
 
-				transforms[i] = transformation;
+
+
+				transformations.Add(transformation);
 			}
 
-			return null;// throw new NotImplementedException();
+			return BuildSingleTransformation(transformations);
+		}
+
+		private ITransformation BuildSingleTransformation(List<ITransformation>transformations) {
+			if (null == transformations || transformations.Count == 0)
+				return null;
+			if (transformations.Count == 1)
+				return transformations[0];
+			return new Vertesaur.Transformation.ConcatenatedTransformation(transformations); // TODO: compiled?
 		}
 
 		private bool TryGetTransformCreator(string operationName, out Func<OperationGenerationParams, ITransformation> transformationCreator){
@@ -590,6 +618,10 @@ namespace Pigeoid
 			if(normalizedName.StartsWith("POSITIONVECTORTRANSFORMATION")){
 				transformationCreator = CreatePositionVectorTransformation;
 				return true;
+			}
+			if (normalizedName.StartsWith("GEOGRAPHIC3DTOGRAVITYRELATEDHEIGHTEGM2008")) {
+				transformationCreator = null;
+				return false;
 			}
 
 			return false;
@@ -630,7 +662,8 @@ namespace Pigeoid
 		private Type ChooseGeometryType(ICrs crs) {
 			if(crs is ICrsGeodetic)
 				return ChooseGeometryType(crs as ICrsGeodetic);
-
+			if (crs is ICrsVertical)
+				return typeof(double);
 			return null;
 		}
 
