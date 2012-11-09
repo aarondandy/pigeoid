@@ -33,7 +33,9 @@ namespace Pigeoid.Interop
 				if(text[sIndex] == 'S') 
 					text = text.Remove(sIndex, 1);
 
-				partIndex = text.LastIndexOf(wordBase, partIndex - 1, StringComparison.OrdinalIgnoreCase);
+				partIndex = partIndex > 0
+					? text.LastIndexOf(wordBase, partIndex - 1, StringComparison.OrdinalIgnoreCase)
+					: -1;
 			}
 			return text;
 		}

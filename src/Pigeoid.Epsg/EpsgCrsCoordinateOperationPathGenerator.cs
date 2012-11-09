@@ -100,7 +100,7 @@ namespace Pigeoid.Epsg
 		{
 
 			public static List<CrsOperationRelation> BuildSourceSearchList(EpsgCrs source) {
-				var result = new List<CrsOperationRelation>();
+				/*var result = new List<CrsOperationRelation>();
 				var cost = 0;
 				var current = source;
 				var path = new CoordinateOperationCrsPathInfo(source);
@@ -115,11 +115,48 @@ namespace Pigeoid.Epsg
 				if(current is EpsgCrsGeodetic) {
 					result.Add(new CrsOperationRelation{ Cost = cost, RelatedCrs = current, Path = path});
 				}
+				return result;*/
+
+				var cost = 0;
+				var current = source;
+				var path = new CoordinateOperationCrsPathInfo(source);
+				var result = new List<CrsOperationRelation> {
+					new CrsOperationRelation {Cost = cost, RelatedCrs = current, Path = path}
+				};
+				while (current is EpsgCrsProjected) {
+					var projected = current as EpsgCrsProjected;
+					var projection = projected.Projection;
+					if (null == projection || !projection.HasInverse)
+						break;
+
+					cost++;
+					current = projected.BaseCrs;
+					path = path.Append(current, projection.GetInverse());
+					result.Add(new CrsOperationRelation {Cost = cost, RelatedCrs = current, Path = path});
+				}
 				return result;
 			}
 
 			public static List<CrsOperationRelation> BuildTargetSearchList(EpsgCrs target) {
-				var result = new List<CrsOperationRelation>();
+				var cost = 0;
+				var current = target;
+				var path = new CoordinateOperationCrsPathInfo(target);
+				var result = new List<CrsOperationRelation> {
+					new CrsOperationRelation {Cost = cost, RelatedCrs = current, Path = path}
+				};
+				while(current is EpsgCrsProjected) {
+					var projected = current as EpsgCrsProjected;
+					var projection = projected.Projection;
+					if (null == projection)
+						break;
+
+					cost++;
+					current = projected.BaseCrs;
+					path = path.Prepend(current, projected.Projection);
+					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path});
+				}
+				return result;
+				/*var result = new List<CrsOperationRelation>();
 				var cost = 0;
 				var current = target;
 				var path = new CoordinateOperationCrsPathInfo(target);
@@ -133,7 +170,7 @@ namespace Pigeoid.Epsg
 				if (current is EpsgCrsGeodetic) {
 					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path });
 				}
-				return result;
+				return result;*/
 			} 
 
 			public EpsgCrs RelatedCrs;

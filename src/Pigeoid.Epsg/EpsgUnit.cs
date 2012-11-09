@@ -28,6 +28,7 @@ namespace Pigeoid.Epsg
 			AllConversionMap = new ReadOnlyUnitConversionMap(
 				lookUpDictionary.Values
 					.Select(x => x.BuildConversionToBase())
+					.Where(x => null != x)
 					.Concat(new IUnitConversion<double>[] {
 						new UnitScalarConversion(LookUp.Get(9014), LookUp.Get(9002), 6), // fathom to foot
 						new UnitScalarConversion(LookUp.Get(9093), LookUp.Get(9002), 5280), // mile to foot
@@ -132,6 +133,8 @@ namespace Pigeoid.Epsg
 				return new UnitUnityConversion(this, to);
 			if(1.0 != FactorB && 1.0 == FactorC)
 				return new UnitScalarConversion(this, to, FactorB);
+			if (0 == FactorB && 0 == FactorC)
+				return null;
 			return new UnitRatioConversion(this, to, FactorB, FactorC);
 			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
