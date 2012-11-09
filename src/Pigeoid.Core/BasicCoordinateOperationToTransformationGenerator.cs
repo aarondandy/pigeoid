@@ -12,6 +12,7 @@ using Pigeoid.Unit;
 using Pigeoid.Utility;
 using Vertesaur;
 using Vertesaur.Contracts;
+using Vertesaur.Transformation;
 
 namespace Pigeoid
 {
@@ -36,23 +37,6 @@ namespace Pigeoid
 			internal static bool AllAreSelected([NotNull] params ParamSelector[] selectors) {
 				return selectors.All(x => x.IsSelected);
 			}
-		}
-
-		[Obsolete("Where am I going with this?")]
-		public class TransformationStep
-		{
-
-			public TransformationStep(ITransformation transformation) {
-				Transformation = transformation;
-
-			}
-
-			public readonly ITransformation Transformation;
-			public Type TypeFrom;
-			public Type TypeTo;
-			public ReadOnlyCollection<IUnit> OrdinalUnitsFrom;
-			public ReadOnlyCollection<IUnit> OrdinalUnitsTo;
-
 		}
 
 		private class NamedParameterLookup
@@ -106,6 +90,30 @@ namespace Pigeoid
 			public ICrs CrsTo;
 		}
 
+		private static bool ConvertIfVaild(IUnit from, IUnit to, ref double value) {
+			if (null == from || null == to)
+				return false;
+			var conv = SimpleUnitConversionGenerator.FindConversion(from, to);
+			if (null == conv)
+				return false;
+
+			value = conv.TransformValue(value);
+			return true;
+		}
+
+		private static IUnit ExtractLinearUnit(ICrs crs) {
+			var geocentric = crs as ICrsGeocentric;
+			if (null != geocentric)
+				return geocentric.Unit;
+			var projected = crs as ICrsProjected;
+			if (null != projected) {
+				var projectedUnit = projected.Unit;
+				if (null != projectedUnit && UnitNameNormalizedComparer.Default.Equals("LENGTH", projectedUnit.Type))
+					return projectedUnit;
+			}
+			return null;
+		}
+
 		private static ISpheroid<double> ExtractSpheroid(ICrs crs) {
 			var geodetic = crs as ICrsGeodetic;
 			if (geodetic != null && geodetic.Datum != null)
@@ -116,21 +124,8 @@ namespace Pigeoid
 		private static bool TryCreateGeographicCoordinate(INamedParameter latParam, INamedParameter lonParam, out GeographicCoordinate result) {
 			double lat, lon;
 			if(NamedParameter.TryGetDouble(latParam, out lat) && NamedParameter.TryGetDouble(lonParam, out lon)){
-
-				var latUnit = latParam.Unit;
-				if (null != latUnit){
-					var conv = SimpleUnitConversionGenerator.FindConversion(latUnit, OgcAngularUnit.DefaultRadians);
-					if(null != conv)
-						lat = conv.TransformValue(lat);
-				}
-
-				var lonUnit = lonParam.Unit;
-				if(null != lonUnit){
-					var conv = SimpleUnitConversionGenerator.FindConversion(lonUnit, OgcAngularUnit.DefaultRadians);
-					if(null != conv)
-						lon = conv.TransformValue(lon);
-				}
-
+				ConvertIfVaild(latParam.Unit, OgcAngularUnit.DefaultRadians, ref lat);
+				ConvertIfVaild(lonParam.Unit, OgcAngularUnit.DefaultRadians, ref lon);
 				result = new GeographicCoordinate(lat, lon);
 				return true;
 			}
@@ -139,9 +134,17 @@ namespace Pigeoid
 		}
 
 		private static bool TryCrateVector2(INamedParameter xParam, INamedParameter yParam, out Vector2 result) {
+			return TryCrateVector2(xParam, yParam, null, out result);
+		}
+
+		private static bool TryCrateVector2(INamedParameter xParam, INamedParameter yParam, IUnit linearUnit,  out Vector2 result) {
 			double x, y;
-			if(NamedParameter.TryGetDouble(xParam, out x) && NamedParameter.TryGetDouble(yParam, out y)) {
-				result = new Vector2(x,y);
+			if (NamedParameter.TryGetDouble(xParam, out x) && NamedParameter.TryGetDouble(yParam, out y)){
+				if (null != linearUnit){
+					ConvertIfVaild(xParam.Unit, linearUnit, ref x);
+					ConvertIfVaild(yParam.Unit, linearUnit, ref y);
+				}
+				result = new Vector2(x, y);
 				return true;
 			}
 			result = Vector2.Invalid;
@@ -193,14 +196,18 @@ namespace Pigeoid
 			GeographicCoordinate origin;
 			Vector2 offset;
 
+			var linearUnit = ExtractLinearUnit(opData.CrsTo);
+
 			if(
 				TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin)
-				&& TryCrateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset)
+				&& TryCrateVector2(offsetXParam.Selection, offsetYParam.Selection, linearUnit, out offset)
 			) {
 				return new CassiniSoldner(origin, offset, spheroid);
 			}
 			return null;
 		}
+
+		
 
 		private static LabordeObliqueMercator CreateLabordeObliqueMercator(OperationGenerationParams opData) {
 			return null;
@@ -218,7 +225,9 @@ namespace Pigeoid
 
 			GeographicCoordinate origin;
 			Vector2 offset;
-			double scale;
+			double scale; // TODO: units
+
+			var linearUnit = ExtractLinearUnit(opData.CrsTo);
 
 			var spheroid = ExtractSpheroid(opData.CrsFrom) ?? ExtractSpheroid(opData.CrsTo);
 			if (null == spheroid)
@@ -226,8 +235,8 @@ namespace Pigeoid
 
 			if(
 				TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin)
-				&& TryCrateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset)
-				&& ConversionUtil.TryConvertDoubleMultiCulture(originScaleFactorParam.Selection.Value, out scale)
+				&& TryCrateVector2(offsetXParam.Selection, offsetYParam.Selection,linearUnit, out offset)
+				&& ConversionUtil.TryConvertDoubleMultiCulture(originScaleFactorParam.Selection.Value, out scale) // TODO: units
 			) {
 				return new TransverseMercator(origin, offset, scale, spheroid);
 			}
@@ -569,30 +578,31 @@ namespace Pigeoid
 			if (null == lastCoordinateType)
 				return null;
 
-			var transformations = new List<ITransformation>();
+			var transformations = new ITransformation[allOps.Count];
 			for (int i = 0; i < allOps.Count; i++) {
 				var currentOperation = allOps[i];
-				var transformation = /*currentOperation as ITransformation
-					??*/ CreateTransform(currentOperation, allCrs[i], allCrs[i + 1]); // TODO: use the operation as is, only if it is a transformation already
+				// TODO: use the operation as is, only if it is a transformation already
+				var transformation = CreateTransformation(currentOperation, allCrs[i], allCrs[i + 1]);
 
 				if (null == transformation)
 					return null; // not supported
 
-
-
-				transformations.Add(transformation);
+				transformations[i] = transformation;
 			}
 
-			return BuildSingleTransformation(transformations);
+			/*var transformationPath = TransformationCastNode.FindCastPath(
+				transformations,
+				firstCoordinateType,
+				lastCoordinateType);*/
+
+			// TODO: convert angular inputs and outputs from radians to the desired units
+			// NOTE: linear units should be OK
+
+			
+			throw new NotImplementedException();
+			//return BuildSingleTransformation(transformations);
 		}
 
-		private ITransformation BuildSingleTransformation(List<ITransformation>transformations) {
-			if (null == transformations || transformations.Count == 0)
-				return null;
-			if (transformations.Count == 1)
-				return transformations[0];
-			return new Vertesaur.Transformation.ConcatenatedTransformation(transformations); // TODO: compiled?
-		}
 
 		private bool TryGetTransformCreator(string operationName, out Func<OperationGenerationParams, ITransformation> transformationCreator){
 			if (_transformationCreatorLookup.TryGetValue(operationName, out transformationCreator))
@@ -627,9 +637,9 @@ namespace Pigeoid
 			return false;
 		}
 
-		private ITransformation CreateTransform([NotNull] ICoordinateOperationInfo operationInfo, ICrs crsFrom, ICrs crsTo) {
+		private ITransformation CreateTransformation([NotNull] ICoordinateOperationInfo operationInfo, ICrs crsFrom, ICrs crsTo) {
 			if (operationInfo.IsInverseOfDefinition && operationInfo.HasInverse) {
-				var result = CreateTransform(operationInfo.GetInverse(), crsTo, crsFrom);
+				var result = CreateTransformation(operationInfo.GetInverse(), crsTo, crsFrom);
 				if(result != null && result.HasInverse)
 					return result.GetInverse();
 			}
