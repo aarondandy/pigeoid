@@ -37,6 +37,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{849B08
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Epsg.Transform.Test", "test\Pigeoid.Epsg.Transform.Test\Pigeoid.Epsg.Transform.Test.csproj", "{A580A78D-7975-42E4-89CA-831690872299}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -206,6 +208,24 @@ Global
 		{C6EAB9F1-4132-4878-BAA2-535354A68899}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{C6EAB9F1-4132-4878-BAA2-535354A68899}.Release|Win32.ActiveCfg = Release|Any CPU
 		{C6EAB9F1-4132-4878-BAA2-535354A68899}.Release|x86.ActiveCfg = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.EpsgData|Any CPU.ActiveCfg = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.EpsgData|Any CPU.Build.0 = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.EpsgData|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.EpsgData|Mixed Platforms.Build.0 = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.EpsgData|Win32.ActiveCfg = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.EpsgData|x86.ActiveCfg = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Release|Win32.ActiveCfg = Release|Any CPU
+		{A580A78D-7975-42E4-89CA-831690872299}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -220,5 +240,6 @@ Global
 		{E598B157-1063-4652-A4BE-DD54E02C23FB} = {7E955526-8715-4399-984C-CB96BF2A158B}
 		{5157ED5D-299A-4860-BA03-7AB32BC51371} = {7E955526-8715-4399-984C-CB96BF2A158B}
 		{C6EAB9F1-4132-4878-BAA2-535354A68899} = {7E955526-8715-4399-984C-CB96BF2A158B}
+		{A580A78D-7975-42E4-89CA-831690872299} = {7E955526-8715-4399-984C-CB96BF2A158B}
 	EndGlobalSection
 EndGlobal
