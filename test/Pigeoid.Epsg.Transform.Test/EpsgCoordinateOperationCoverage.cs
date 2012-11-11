@@ -36,9 +36,7 @@ namespace Pigeoid.Epsg.Transform.Test
 		public BasicCoordinateOperationToTransformationGenerator TransformationGenerator;
 		public IUnitConversion<double> DegreesToRadians;
 		public GeographicCoordinate DenverWgs84Degrees;
-		public GeographicCoordinate DenverWgs84Radians;
 		public GeographicCoordinate MadridWgs84Degrees;
-		public GeographicCoordinate MadridWgs84Radians;
 
 		[TestFixtureSetUp]
 		public void TestFixtureSetUp() {
@@ -46,13 +44,7 @@ namespace Pigeoid.Epsg.Transform.Test
 			TransformationGenerator = new BasicCoordinateOperationToTransformationGenerator();
 			DegreesToRadians = SimpleUnitConversionGenerator.FindConversion(EpsgUnit.Get(9102), EpsgUnit.Get(9101));
 			DenverWgs84Degrees = new GeographicCoordinate(39.739167, -104.984722);
-			DenverWgs84Radians = new GeographicCoordinate(
-				DegreesToRadians.TransformValue(DenverWgs84Degrees.Latitude),
-				DegreesToRadians.TransformValue(DenverWgs84Degrees.Longitude));
 			MadridWgs84Degrees = new GeographicCoordinate(40.383333, -3.716667);
-			MadridWgs84Radians = new GeographicCoordinate(
-				DegreesToRadians.TransformValue(MadridWgs84Degrees.Latitude),
-				DegreesToRadians.TransformValue(MadridWgs84Degrees.Longitude));
 		}
 
 		[Test]

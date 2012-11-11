@@ -13,7 +13,7 @@ namespace Pigeoid.Contracts
 		IDatumGeodetic Datum { get; }
 
 		/// <summary>
-		/// The angular unit of measure for this CRS.
+		/// The unit of measure for this CRS.
 		/// </summary>
 		IUnit Unit { get; }
 

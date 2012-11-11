@@ -54,6 +54,7 @@
     </Compile>
     <Compile Include="AuthorityTag.cs" />
     <Compile Include="BasicCoordinateOperationToTransformationGenerator.cs" />
+    <Compile Include="BasicCoordinateOperationToTransformationGenerator2.cs" />
     <Compile Include="ConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IAuthorityBoundEntity.cs" />
     <Compile Include="Contracts\IAuthorityResolver.cs" />
