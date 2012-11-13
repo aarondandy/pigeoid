@@ -53,7 +53,6 @@
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="AuthorityTag.cs" />
-    <Compile Include="BasicCoordinateOperationToTransformationGenerator.cs" />
     <Compile Include="BasicCoordinateOperationToTransformationGenerator2.cs" />
     <Compile Include="ConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="Contracts\IAuthorityBoundEntity.cs" />
@@ -70,7 +69,7 @@
     <Compile Include="Contracts\ICoordinateOperationPathGenerator.cs" />
     <Compile Include="Contracts\ICoordinateOperationInfo.cs" />
     <Compile Include="Contracts\ICoordinateOperationMethodInfo.cs" />
-    <Compile Include="Contracts\ICoordinateOperationToTransformationGenerator.cs" />
+    <Compile Include="Contracts\ICoordinateOperationCompiler.cs" />
     <Compile Include="Contracts\ICrs.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -120,6 +119,10 @@
     <Compile Include="Contracts\IUnitConversion.cs" />
     <Compile Include="Contracts\IUnitConversionMap.cs" />
     <Compile Include="Contracts\IUnitConversionGenerator.cs" />
+    <Compile Include="CoordinateOperationCompilation\NamedParameterLookup.cs" />
+    <Compile Include="CoordinateOperationCompilation\NamedParameterSelector.cs" />
+    <Compile Include="CoordinateOperationCompilation\StaticCoordinateOperationCompiler.cs" />
+    <Compile Include="CoordinateOperationCompilation\StaticProjectionStepCompiler.cs" />
     <Compile Include="CoordinateOperationCrsPathInfo.cs" />
     <Compile Include="CoordinateOperationInfo.cs" />
     <Compile Include="CoordinateOperationInfoInverse.cs" />
@@ -189,6 +192,7 @@
     <Compile Include="Projection\TransverseMercatorZoned.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transformation\AbridgedMolodenskyTransformation.cs" />
+    <Compile Include="Transformation\AngularElementTransformation.cs" />
     <Compile Include="Transformation\CartesianOffset2.cs" />
     <Compile Include="Transformation\GeocentricTopocentricTransformation.cs" />
     <Compile Include="Transformation\GeocentricTranslation.cs" />
@@ -200,6 +204,7 @@
     <Compile Include="Transformation\Helmert7GeographicTransformation.cs" />
     <Compile Include="Transformation\Helmert7Transformation.cs" />
     <Compile Include="Transformation\InvertedTransformationBase.cs" />
+    <Compile Include="Transformation\LinearElementTransformation.cs" />
     <Compile Include="Transformation\MolodenskyBadekasGeographicTransformation.cs" />
     <Compile Include="Transformation\MolodenskyBadekasTransformation.cs" />
     <Compile Include="Unit\ConcatenatedUnitConversion.cs" />

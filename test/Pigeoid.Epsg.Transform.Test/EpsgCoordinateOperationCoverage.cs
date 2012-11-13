@@ -1,8 +1,10 @@
 ﻿using NUnit.Framework;
 using Pigeoid.Contracts;
+using Pigeoid.CoordinateOperationCompilation;
 using Pigeoid.Unit;
 using Vertesaur;
 using Vertesaur.Contracts;
+using Vertesaur.Transformation;
 
 namespace Pigeoid.Epsg.Transform.Test
 {
@@ -32,8 +34,18 @@ namespace Pigeoid.Epsg.Transform.Test
 			Assert.AreEqual(expected.Z, actual.Z, delta);
 		}
 
+		private static ITransformation<TFrom,TTo> CreateTyped<TFrom,TTo>(ITransformation transformation){
+			if(transformation == null)
+				return null;
+			if (transformation is ITransformation<TFrom, TTo>)
+				return transformation as ITransformation<TFrom, TTo>;
+			if (transformation is ConcatenatedTransformation)
+				return new ConcatenatedTransformation<TFrom, TTo>(((ConcatenatedTransformation)(transformation)).Transformations);
+			return null;
+		}
+
 		public EpsgCrsCoordinateOperationPathGenerator PathGenerator;
-		public BasicCoordinateOperationToTransformationGenerator TransformationGenerator;
+		public StaticCoordinateOperationCompiler StaticCompiler;
 		public IUnitConversion<double> DegreesToRadians;
 		public GeographicCoordinate DenverWgs84Degrees;
 		public GeographicCoordinate MadridWgs84Degrees;
@@ -41,7 +53,7 @@ namespace Pigeoid.Epsg.Transform.Test
 		[TestFixtureSetUp]
 		public void TestFixtureSetUp() {
 			PathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
-			TransformationGenerator = new BasicCoordinateOperationToTransformationGenerator();
+			StaticCompiler = new StaticCoordinateOperationCompiler();
 			DegreesToRadians = SimpleUnitConversionGenerator.FindConversion(EpsgUnit.Get(9102), EpsgUnit.Get(9101));
 			DenverWgs84Degrees = new GeographicCoordinate(39.739167, -104.984722);
 			MadridWgs84Degrees = new GeographicCoordinate(40.383333, -3.716667);
@@ -54,7 +66,8 @@ namespace Pigeoid.Epsg.Transform.Test
 			// crs: 3857 to 4326
 			var opPath = PathGenerator.Generate(EpsgCrs.Get(3857), EpsgCrs.Get(4326));
 			Assert.IsNotNull(opPath);
-			var transformation = TransformationGenerator.Create(opPath) as ITransformation<Point2, GeographicCoordinate>;
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			
 			Assert.IsNotNull(transformation);
 			Assert.That(transformation.HasInverse);
 			var inverse = transformation.GetInverse();
@@ -75,7 +88,7 @@ namespace Pigeoid.Epsg.Transform.Test
 			// crs: 4979 to 3855
 			var opPath = PathGenerator.Generate(EpsgCrs.Get(4979), EpsgCrs.Get(3855));
 			Assert.IsNotNull(opPath);
-			var transformation = TransformationGenerator.Create(opPath) as ITransformation<Point2, GeographicCoordinate>;
+			var transformation = StaticCompiler.Compile(opPath) as ITransformation<Point2, GeographicCoordinate>;
 			Assert.IsNotNull(transformation);
 			Assert.That(transformation.HasInverse);
 			var inverse = transformation.GetInverse();
@@ -100,7 +113,7 @@ namespace Pigeoid.Epsg.Transform.Test
 
 			var opPath = PathGenerator.Generate(EpsgCrs.Get(4023), EpsgCrs.Get(4026));
 			Assert.IsNotNull(opPath);
-			var transformation = TransformationGenerator.Create(opPath) as ITransformation<Point2, GeographicCoordinate>;
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
 			Assert.IsNotNull(transformation);
 			Assert.That(transformation.HasInverse);
 			var inverse = transformation.GetInverse();

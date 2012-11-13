@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
@@ -12,11 +11,11 @@ using Pigeoid.Unit;
 using Pigeoid.Utility;
 using Vertesaur;
 using Vertesaur.Contracts;
-using Vertesaur.Transformation;
 
 namespace Pigeoid
 {
-	public class BasicCoordinateOperationToTransformationGenerator2 : ICoordinateOperationToTransformationGenerator
+	[Obsolete]
+	public class BasicCoordinateOperationToTransformationGenerator2 : ICoordinateOperationCompiler
 	{
 
 		private class ParamSelector
@@ -574,7 +573,7 @@ namespace Pigeoid
 			};
 		}
 
-		public ITransformation Create([NotNull] ICoordinateOperationCrsPathInfo operationPath) {
+		public ITransformation Compile([NotNull] ICoordinateOperationCrsPathInfo operationPath) {
 			if(null == operationPath)
 				throw new ArgumentNullException("operationPath");
 

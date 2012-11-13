@@ -17,13 +17,9 @@ namespace Pigeoid.Unit
 
 		public INameNormalizedComparer NameNormalizedComparer { get { return _nameNormalizedComparer; } }
 
-		public bool Equals(IUnit x, IUnit y) {
-			if (ReferenceEquals(x, y))
-				return true;
-			if (null == x || null == y)
-				return false;
-			return _nameNormalizedComparer.Equals(x.Name, y.Name)
-				&& _nameNormalizedComparer.Equals(x.Type, y.Type);
+		public bool Equals(IUnit x, IUnit y){
+			return AreSameType(x, y)
+				&& _nameNormalizedComparer.Equals(x.Name, y.Name);
 		}
 
 		public int GetHashCode(IUnit obj) {
@@ -32,5 +28,15 @@ namespace Pigeoid.Unit
 			return _nameNormalizedComparer.GetHashCode(obj.Name)
 				^ -_nameNormalizedComparer.GetHashCode(obj.Type);
 		}
+
+		public bool AreSameType(IUnit x, IUnit y){
+			if (ReferenceEquals(x, y))
+				return true;
+			if (null == x || null == y)
+				return false;
+			return _nameNormalizedComparer.Equals(x.Type, y.Type);
+		}
+
+
 	}
 }

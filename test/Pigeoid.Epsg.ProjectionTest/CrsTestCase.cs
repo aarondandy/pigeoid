@@ -1,4 +1,5 @@
 ﻿using Pigeoid.Contracts;
+using Pigeoid.CoordinateOperationCompilation;
 
 namespace Pigeoid.Epsg.ProjectionTest
 {
@@ -20,7 +21,7 @@ namespace Pigeoid.Epsg.ProjectionTest
 
 		public void Run(
 			EpsgCrsCoordinateOperationPathGenerator pathGenerator = null,
-			ICoordinateOperationToTransformationGenerator transformationGenerator = null
+			ICoordinateOperationCompiler transformationGenerator = null
 		) {
 			if(null == pathGenerator)
 				pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
@@ -29,9 +30,9 @@ namespace Pigeoid.Epsg.ProjectionTest
 
 			if (null != Operations) {
 				if (null == transformationGenerator)
-					transformationGenerator = new BasicCoordinateOperationToTransformationGenerator();
+					transformationGenerator = new StaticCoordinateOperationCompiler();
 
-				var transform = transformationGenerator.Create(Operations);
+				var transform = transformationGenerator.Compile(Operations);
 			}
 		}
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Pigeoid.CoordinateOperationCompilation;
 
 namespace Pigeoid.Epsg.ProjectionTest
 {
@@ -68,7 +69,7 @@ namespace Pigeoid.Epsg.ProjectionTest
 			pathGenerator.Options.IgnoreDeprecatedCrs = IgnoreDeprecated;
 			pathGenerator.Options.IgnoreDeprecatedOperations = IgnoreDeprecated;
 
-			var transformGenerator = new BasicCoordinateOperationToTransformationGenerator();
+			var transformGenerator = new StaticCoordinateOperationCompiler();
 
 			int processedItems = 0;
 			foreach (var batch in Batch(crsTestList, batchSize)) {

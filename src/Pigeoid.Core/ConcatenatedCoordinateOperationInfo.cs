@@ -10,6 +10,15 @@ namespace Pigeoid
 	public class ConcatenatedCoordinateOperationInfo : IConcatenatedCoordinateOperationInfo
 	{
 
+		public static IEnumerable<ICoordinateOperationInfo> LinearizeOperations(ICoordinateOperationInfo operation) {
+			if (null == operation)
+				return Enumerable.Empty<ICoordinateOperationInfo>();
+			var concatOperations = operation as IConcatenatedCoordinateOperationInfo;
+			if (null == concatOperations)
+				return new[] { operation };
+			return concatOperations.Steps.SelectMany(LinearizeOperations);
+		}
+
 		private class Inverse : IConcatenatedCoordinateOperationInfo {
 
 			private readonly ConcatenatedCoordinateOperationInfo _core;
