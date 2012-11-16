@@ -108,10 +108,14 @@ namespace Pigeoid.Projection
 		}
 
 		public override bool HasInverse {
-			get { return true; }
+// ReSharper disable CompareOfFloatsByEqualityOperator
+			get { return 0 != R; }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
+			if (!HasInverse)
+				throw new InvalidOperationException("No inverse.");
 			return new Inverted(this);
 		}
 

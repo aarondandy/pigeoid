@@ -16,6 +16,7 @@ namespace Pigeoid.Interop
 		public static readonly string Eckert6 = "Eckert VI";
 		public static readonly string EquidistantConic = "Equidistant Conic";
 		public static readonly string EquidistantCylindrical = "Equidistant Cylindrical";
+		public static readonly string EquidistantCylindricalSpherical = "Equidistant Cylindrical (Spherical)";
 		public static readonly string Equirectangular = "Equirectangular";
 		public static readonly string GallStereographic = "Gall Stereographic";
 		public static readonly string GeographicOffsets = "Geographic2D Offsets";
@@ -62,6 +63,7 @@ namespace Pigeoid.Interop
 				Eckert6,
 				EquidistantConic,
 				EquidistantCylindrical,
+				EquidistantCylindricalSpherical,
 				Equirectangular,
 				GallStereographic,
 				GeographicOffsets,

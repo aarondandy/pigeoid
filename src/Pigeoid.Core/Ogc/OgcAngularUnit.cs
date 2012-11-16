@@ -1,11 +1,8 @@
 ﻿// TODO: source header
 
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Pigeoid.Contracts;
-using Pigeoid.Unit;
 
 namespace Pigeoid.Ogc
 {

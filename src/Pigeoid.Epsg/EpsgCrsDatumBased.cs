@@ -42,13 +42,13 @@ namespace Pigeoid.Epsg
 					var deprecated = reader.ReadByte() == 0xff;
 					var kind = reader.ReadByte();
 					switch(kind) {
-						case (byte)'3':
-						case (byte)'2':
-						case (byte)'G':
+						case (byte)'3': // geographic3D
+						case (byte)'2': // geographic2D
+						case (byte)'G': // geocentric
 							return new EpsgCrsGeodetic(code, name, area, deprecated, cs, (EpsgDatumGeodetic) datum);
-						case (byte)'V':
+						case (byte)'V': // vertical
 							return new EpsgCrsVertical(code, name, area, deprecated, cs, (EpsgDatumVertical)datum);
-						case (byte)'E':
+						case (byte)'E': // engineering
 							return new EpsgCrsEngineering(code, name, area, deprecated, cs, (EpsgDatumEngineering)datum);
 						default:
 							return null;

@@ -159,7 +159,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 				: new LambertAzimuthalEqualArea(origin, offset, spheroid);
 		}
 
-		private EquidistantCylindrical CreateEquidistantCylindrical(ProjectionCompilationParams opData) {
+		private ProjectionBase CreateEquidistantCylindrical(ProjectionCompilationParams opData) {
 			var originLatParam = new KeywordNamedParameterSelector("LAT", "PARALLEL");
 			var originLonParam = new KeywordNamedParameterSelector("LON", "NATURALORIGIN");
 			var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
@@ -178,7 +178,11 @@ namespace Pigeoid.CoordinateOperationCompilation
 			if (!offsetXParam.IsSelected || !offsetYParam.IsSelected || !TryCrateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset))
 				offset = Vector2.Zero;
 
-			return new EquidistantCylindrical(origin, offset, spheroid);
+			var spherical = _coordinateOperationNameComparer.Normalize(opData.OperationName).EndsWith("SPHERICAL");
+
+			return spherical
+				? (ProjectionBase)new EquidistantCylindricalSpherical(origin, offset, spheroid)
+				: new EquidistantCylindrical(origin, offset, spheroid);
 		}
 
 		private readonly INameNormalizedComparer _coordinateOperationNameComparer;
@@ -195,6 +199,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 				{CoordinateOperationStandardNames.Eckert6,null},
 				{CoordinateOperationStandardNames.EquidistantConic,null},
 				{CoordinateOperationStandardNames.EquidistantCylindrical,CreateEquidistantCylindrical},
+				{CoordinateOperationStandardNames.EquidistantCylindricalSpherical,CreateEquidistantCylindrical},
 				{CoordinateOperationStandardNames.Equirectangular,null},
 				{CoordinateOperationStandardNames.GallStereographic,null},
 				{CoordinateOperationStandardNames.Geos,null},
@@ -257,7 +262,6 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var outputUnits = ExtractLinearUnit(stepParameters.RelatedOutputCrs)
 					?? ExtractLinearUnit(stepParameters.RelatedInputCrs);
 
-			// the result units will be radians
 			return new StaticCoordinateOperationCompiler.StepCompilationResult(
 				stepParameters,
 				outputUnits,

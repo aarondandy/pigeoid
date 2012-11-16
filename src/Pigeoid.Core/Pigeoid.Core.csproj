@@ -123,6 +123,7 @@
     <Compile Include="CoordinateOperationCompilation\NamedParameterSelector.cs" />
     <Compile Include="CoordinateOperationCompilation\StaticCoordinateOperationCompiler.cs" />
     <Compile Include="CoordinateOperationCompilation\StaticProjectionStepCompiler.cs" />
+    <Compile Include="CoordinateOperationCompilation\StaticTransformationStepCompiler.cs" />
     <Compile Include="CoordinateOperationCrsPathInfo.cs" />
     <Compile Include="CoordinateOperationInfo.cs" />
     <Compile Include="CoordinateOperationInfoInverse.cs" />
@@ -164,6 +165,7 @@
     <Compile Include="Ogc\WktWriter.cs" />
     <Compile Include="Projection\CassiniSoldner.cs" />
     <Compile Include="Projection\EquidistantCylindrical.cs" />
+    <Compile Include="Projection\EquidistantCylindricalSpherical.cs" />
     <Compile Include="Projection\HotineObliqueMercator.cs" />
     <Compile Include="Projection\HyperbolicCassiniSoldner.cs" />
     <Compile Include="Projection\Krovak.cs" />
@@ -207,8 +209,11 @@
     <Compile Include="Transformation\LinearElementTransformation.cs" />
     <Compile Include="Transformation\MolodenskyBadekasGeographicTransformation.cs" />
     <Compile Include="Transformation\MolodenskyBadekasTransformation.cs" />
+    <Compile Include="Unit\BasicScaleUnitConversionMap.cs" />
     <Compile Include="Unit\ConcatenatedUnitConversion.cs" />
+    <Compile Include="Unit\ScaleUnitPartsPerMillion.cs" />
     <Compile Include="Unit\ReadOnlyUnitConversionMap.cs" />
+    <Compile Include="Unit\ScaleUnitUnity.cs" />
     <Compile Include="Unit\SimpleUnitConversionMapBase.cs" />
     <Compile Include="Unit\BinaryUnitConversionMap.cs" />
     <Compile Include="Unit\SimpleUnitConversionGenerator.cs" />

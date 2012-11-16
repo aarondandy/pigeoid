@@ -143,6 +143,8 @@ namespace Pigeoid.Projection
 		}
 
 		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
+			if (!HasInverse)
+				throw new InvalidOperationException("No inverse.");
 			return new Inverted(this);
 		}
 

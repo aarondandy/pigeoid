@@ -140,13 +140,67 @@ namespace Pigeoid.Epsg.Transform.Test
 			var inverse = transformation.GetInverse();
 			Assert.IsNotNull(inverse);
 
-			var expectedGeographic = DenverWgs84Degrees;
-			var expectedProjected = new Point2(0, 0);
+			Assert.Inconclusive("Need a sample point.");
+		}
 
-			var actualGeographic = transformation.TransformValue(expectedProjected);
-			var actualprojected = inverse.TransformValue(expectedGeographic);
+		[Test]
+		public void m1029_equidistantCylindricalSpherical(){
+			// method: 1029
+			// op: 4086
+			// crs: 4088 to 4047
+
+			var opPath = PathGenerator.Generate(EpsgCrs.Get(4088), EpsgCrs.Get(4047));
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+			Assert.That(transformation.HasInverse);
+			var inverse = transformation.GetInverse();
+			Assert.IsNotNull(inverse);
 
 			Assert.Inconclusive("Need a sample point.");
+		}
+
+		[Test, Ignore]
+		public void m1030_geographic3DToGravityRelatedHeight_nz_geoid2009(){
+			Assert.Inconclusive("???");
+		}
+
+		[Test, Ignore]
+		public void m1031_geocentricTranslations_geocentricDomain() {
+			Assert.Inconclusive("???");
+		}
+
+		[Test, Ignore]
+		public void m1032_coordinateFrameRotation_geocentricDomain() {
+			Assert.Inconclusive("???");
+		}
+
+		[Test]
+		public void m1033_positionVectorTransformation_geocentricDomain() {
+			// method: 1033
+			// op: 5333
+			// crs: 4896 to 5332
+
+
+			var fromCrs = EpsgCrs.Get(4896);
+			var toCrs = EpsgCrs.Get(5332);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point3, Point3>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+			Assert.That(transformation.HasInverse);
+			var inverse = transformation.GetInverse();
+			Assert.IsNotNull(inverse);
+
+			var expectedValue4896 = new Point3(100, 100, (fromCrs as ICrsGeodetic).Datum.Spheroid.A);
+			var expectedValue5332 = expectedValue4896;
+			var actualValue4896 = transformation.TransformValue(expectedValue5332);
+			var actualValue5332 = inverse.TransformValue(expectedValue4896);
+
+			AreEqual(expectedValue4896, actualValue4896, 0);
+			AreEqual(expectedValue5332, actualValue5332, 0);
+
 		}
 
 	}

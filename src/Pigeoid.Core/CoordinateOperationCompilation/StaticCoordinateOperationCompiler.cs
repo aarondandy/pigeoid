@@ -83,7 +83,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 		public StaticCoordinateOperationCompiler(){
 			_stepCompilers = new IStepOperationCompiler[]{
-				StaticProjectionStepCompiler.Default
+				StaticProjectionStepCompiler.Default,
+				StaticTransformationStepCompiler.Default
 			};
 		}
 

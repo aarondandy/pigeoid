@@ -42,8 +42,15 @@ namespace Pigeoid.Interop
 
 		public static readonly UnitNameNormalizedComparer Default = new UnitNameNormalizedComparer();
 
-		public override string Normalize(string text) {
+		public override string Normalize(string text){
+			if (null == text)
+				return null;
+
 			text = base.Normalize(text);
+
+			// to avoid confusion, just treat coefficient as unity, just another number
+			if (text.Equals("COEFFICIENT"))
+				return "UNITY";
 
 			// uhh-mur-eh-cun-eyes the names
 			text = text.Replace("METRE", "METER");
