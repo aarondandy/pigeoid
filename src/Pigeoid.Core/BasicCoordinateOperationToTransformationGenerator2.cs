@@ -521,7 +521,7 @@ namespace Pigeoid
 				}
 			}
 
-			return new LambertAzimuthalEqualArea(spheroid);
+			return new LambertAzimuthalEqualArea(GeographicCoordinate.Zero, Vector2.Zero, spheroid);
 		}
 
 		private readonly CoordinateOperationNameNormalizedComparer _coordinateOperationNameNormalizer;

@@ -63,10 +63,31 @@ namespace Pigeoid.Projection
 			[NotNull] ISpheroid<double> spheroid
 		) : base(falseOffset, spheroid) {
 			GeographicOrigin = geogOrigin;
-			R = spheroid.A * Math.Sqrt(
+
+
+
+			/*R = spheroid.A * Math.Sqrt(
 				(1.0 - (((1.0 - ESq) / (2.0 * E)) * Math.Log((1.0 - E) / (1.0 + E))))
 				/ 2.0
-			);
+			);*/
+
+			var oneMinusESq = 1 - ESq;
+
+			if (E == 0) {
+				R = MajorAxis;
+			}
+			else {
+				R = MajorAxis * Math.Sqrt(
+					(
+						1.0
+						- (
+							(oneMinusESq / (2.0 * E))
+							* Math.Log((1 - E) / (1 + E))
+						)
+					) / 2.0
+				);
+			}
+
 			_sinLatOrg = Math.Sin(geogOrigin.Latitude);
 			_cosLatOrg = Math.Cos(geogOrigin.Latitude);
 		}

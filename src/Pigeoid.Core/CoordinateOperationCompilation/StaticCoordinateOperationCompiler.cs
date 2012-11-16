@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
@@ -21,8 +19,6 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 		public sealed class StepCompilationParameters
 		{
-
-			
 
 			public StepCompilationParameters(
 				[NotNull] ICoordinateOperationInfo coordinateOperationInfo,

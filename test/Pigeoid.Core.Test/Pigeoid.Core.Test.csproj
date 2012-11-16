@@ -55,6 +55,7 @@
     <Compile Include="Mock\MockDatum.cs" />
     <Compile Include="Ogc\OgcUnitTest.cs" />
     <Compile Include="Projection\EquidistantCylindricalTest.cs" />
+    <Compile Include="Projection\LambertAzimuthalEqualAreaTest.cs" />
     <Compile Include="Projection\LambertConicNearConformalTest.cs" />
     <Compile Include="Projection\CassiniSoldnerTest.cs" />
     <Compile Include="Projection\HyperbolicCassiniSoldnerTest.cs" />

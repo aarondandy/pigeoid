@@ -108,10 +108,31 @@ namespace Pigeoid.Epsg.Transform.Test
 		[Test]
 		public void m1027_lambertAzimuthalEqualAreaSpherical() {
 			// method: 1027
-			// op: 3999
-			// crs: 4023 to 4026
+			// op: 3899
+			// crs: 4052 to 2163
 
-			var opPath = PathGenerator.Generate(EpsgCrs.Get(4023), EpsgCrs.Get(4026));
+			var opPath = PathGenerator.Generate(EpsgCrs.Get(4052), EpsgCrs.Get(2163));
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+			Assert.That(transformation.HasInverse);
+			var inverse = transformation.GetInverse();
+			Assert.IsNotNull(inverse);
+
+			var geographic = DenverWgs84Degrees;
+			var projected = new Point2(-426348.460028, -571951.34121900005);
+
+			AreEqual(projected, transformation.TransformValue(geographic), 1);
+			AreEqual(geographic, inverse.TransformValue(projected), 0.00001);
+		}
+
+		[Test]
+		public void m1028_equidistantCylindrical() {
+			// method: 1028
+			// op: 4085
+			// crs: 4087 to 4326
+
+			var opPath = PathGenerator.Generate(EpsgCrs.Get(4087), EpsgCrs.Get(4326));
 			Assert.IsNotNull(opPath);
 			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
 			Assert.IsNotNull(transformation);
@@ -119,7 +140,13 @@ namespace Pigeoid.Epsg.Transform.Test
 			var inverse = transformation.GetInverse();
 			Assert.IsNotNull(inverse);
 
-			Assert.Inconclusive("Need some sample points.");
+			var expectedGeographic = DenverWgs84Degrees;
+			var expectedProjected = new Point2(0, 0);
+
+			var actualGeographic = transformation.TransformValue(expectedProjected);
+			var actualprojected = inverse.TransformValue(expectedGeographic);
+
+			Assert.Inconclusive("Need a sample point.");
 		}
 
 	}
