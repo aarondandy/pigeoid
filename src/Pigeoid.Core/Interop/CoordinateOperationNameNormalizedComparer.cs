@@ -14,17 +14,26 @@ namespace Pigeoid.Interop
 
 		[ContractAnnotation("=>notnull")]
 		public override string Normalize(string text) {
+			if (null == text)
+				return String.Empty;
+
 			text = base.Normalize(text);
+
+			// take the 'orientated' off the end
+			if (text.EndsWith("NORTHORIENTATED"))
+				text = text.Substring(0, text.Length - 10);
+
+			text = text.Replace("LONGITUDEROTATION", "GEOGRAPHICOFFSET");
 
 			if (CoordinateOperationStandardNames.IsNormalizedName(text))
 				return text;
 
-			var conicFlipText = text.Replace("CONFORMAL CONIC", "CONIC CONFORMAL");
+			var conicFlipText = text.Replace("CONFORMALCONIC", "CONICCONFORMAL");
 			if (CoordinateOperationStandardNames.IsNormalizedName(conicFlipText))
 				return conicFlipText;
 
 			if(text.EndsWith("AREA")) {
-				var areaConicText = text + " CONIC";
+				var areaConicText = text + "CONIC";
 				if (CoordinateOperationStandardNames.IsNormalizedName(areaConicText))
 					return areaConicText;
 			}

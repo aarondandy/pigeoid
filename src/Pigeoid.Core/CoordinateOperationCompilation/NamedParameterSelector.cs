@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using Pigeoid.Contracts;
 using JetBrains.Annotations;
 
@@ -31,7 +30,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 		public static bool AllAreSelected([NotNull] params NamedParameterSelector[] selectors){
 			if (selectors.Length == 0)
 				return false;
-			for (int i = 0; i < selectors.Length; i++ ){
+			for (var i = 0; i < selectors.Length; i++ ){
 				if (!selectors[i].IsSelected)
 					return false;
 			}
@@ -56,9 +55,24 @@ namespace Pigeoid.CoordinateOperationCompilation
 		}
 	}
 
+	public class FullMatchParameterSelector : NamedParameterSelector
+	{
+		private readonly string _match;
+
+		public FullMatchParameterSelector([NotNull] string match) {
+			if(null == match)
+				throw new ArgumentNullException("match");
+			_match = match;
+		}
+
+		public override int Score(ParameterData parameterData) {
+			var parameterName = parameterData.NormalizedName;
+			return _match.Equals(parameterName) ? 1 : 0;
+		}
+	}
+
 	public class KeywordNamedParameterSelector : NamedParameterSelector
 	{
-
 
 		private readonly string[] _keywords;
 

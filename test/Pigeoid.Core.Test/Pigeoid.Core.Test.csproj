@@ -75,6 +75,7 @@
     <Compile Include="Transformation\GeographicGeocentricTransformationTest.cs" />
     <Compile Include="Transformation\Helmert7TransformTest.cs" />
     <Compile Include="Transformation\MolodenskyBadekasTransformationTest.cs" />
+    <Compile Include="Unit\SexagesimalUnitConversionTest.cs" />
     <Compile Include="Unit\SimpleUnitConversionTests.cs" />
     <Compile Include="WktParseTest.cs" />
     <Compile Include="WktSerializeTest.cs" />

@@ -72,8 +72,10 @@ namespace Pigeoid.Epsg
 						new UnitScalarConversion(LookUp.Get(9105), LookUp.Get(9112), 100), // grad to centesimal minute
 						new UnitScalarConversion(LookUp.Get(9106), LookUp.Get(9112), 100), // gon to centesimal minute
 
-						new UnitScalarConversion(LookUp.Get(9112), LookUp.Get(9113), 100) // centesimal minute to centesimal second
+						new UnitScalarConversion(LookUp.Get(9112), LookUp.Get(9113), 100), // centesimal minute to centesimal second
 
+						new SexagesimalDmsToDecimalDegreesConversion(LookUp.Get(9110), LookUp.Get(9102)), // sexagesimal dms to dd
+						new SexagesimalDmToDecimalDegreesConversion(LookUp.Get(9111), LookUp.Get(9102)), // sexagesimal dm to dd 
 					})
 			);
 		}

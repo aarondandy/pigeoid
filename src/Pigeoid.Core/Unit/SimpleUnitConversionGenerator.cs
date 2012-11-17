@@ -89,7 +89,23 @@ namespace Pigeoid.Unit
 			var result = _conversionGraph.FindPath(from, to);
 			if (null == result)
 				return null;
-			return new ConcatenatedUnitConversion(result.Skip(1).Select(x => x.Edge));
+			var resultConversions = Linearize(result.Skip(1).Select(x => x.Edge)).ToList();
+			if (resultConversions.Count == 0)
+				return null;
+			if (resultConversions.Count == 1)
+				return resultConversions[0];
+			return new ConcatenatedUnitConversion(resultConversions);
+		}
+
+		private IEnumerable<IUnitConversion<double>> Linearize([NotNull] IEnumerable<IUnitConversion<double>> conversions) {
+			return conversions.SelectMany(Linearize);
+		}
+
+		private IEnumerable<IUnitConversion<double>> Linearize([NotNull] IUnitConversion<double> conversion) {
+			var catConv = conversion as ConcatenatedUnitConversion;
+			if (null == catConv)
+				return new[] {conversion};
+			return Linearize(catConv.Conversions);
 		}
 
 	}

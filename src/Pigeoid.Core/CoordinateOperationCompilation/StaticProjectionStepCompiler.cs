@@ -78,6 +78,14 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return true;
 		}
 
+		private static bool TryGetDouble(INamedParameter parameter, IUnit unit, out double value) {
+			if (!NamedParameter.TryGetDouble(parameter, out value))
+				return false;
+
+			ConvertIfVaild(parameter.Unit, unit, ref value);
+			return true;
+		}
+
 		private static bool TryCreateGeographicCoordinate(INamedParameter latParam, INamedParameter lonParam, out GeographicCoordinate result) {
 			double lat, lon;
 			if (NamedParameter.TryGetDouble(latParam, out lat) && NamedParameter.TryGetDouble(lonParam, out lon)) {
@@ -90,12 +98,11 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return false;
 		}
 
-
-		private static bool TryCrateVector2(INamedParameter xParam, INamedParameter yParam, out Vector2 result) {
-			return TryCrateVector2(xParam, yParam, null, out result);
+		private static bool TryCreateVector2(INamedParameter xParam, INamedParameter yParam, out Vector2 result) {
+			return TryCreateVector2(xParam, yParam, null, out result);
 		}
 
-		private static bool TryCrateVector2(INamedParameter xParam, INamedParameter yParam, IUnit linearUnit, out Vector2 result) {
+		private static bool TryCreateVector2(INamedParameter xParam, INamedParameter yParam, IUnit linearUnit, out Vector2 result) {
 			double x, y;
 			if (NamedParameter.TryGetDouble(xParam, out x) && NamedParameter.TryGetDouble(yParam, out y)) {
 				if (null != linearUnit) {
@@ -106,6 +113,24 @@ namespace Pigeoid.CoordinateOperationCompilation
 				return true;
 			}
 			result = Vector2.Invalid;
+			return false;
+		}
+
+		private static bool TryCreatePoint2(INamedParameter xParam, INamedParameter yParam, out Point2 result) {
+			return TryCreatePoint2(xParam, yParam, null, out result);
+		}
+
+		private static bool TryCreatePoint2(INamedParameter xParam, INamedParameter yParam, IUnit linearUnit, out Point2 result) {
+			double x, y;
+			if (NamedParameter.TryGetDouble(xParam, out x) && NamedParameter.TryGetDouble(yParam, out y)) {
+				if (null != linearUnit) {
+					ConvertIfVaild(xParam.Unit, linearUnit, ref x);
+					ConvertIfVaild(yParam.Unit, linearUnit, ref y);
+				}
+				result = new Point2(x, y);
+				return true;
+			}
+			result = Point2.Invalid;
 			return false;
 		}
 
@@ -126,7 +151,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			if (
 				TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin)
-				&& TryCrateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset)
+				&& TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset)
 			) {
 				return new PopularVisualizationPseudoMercator(origin, offset, spheroid);
 			}
@@ -149,7 +174,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 				origin = GeographicCoordinate.Zero;
 
 			Vector2 offset;
-			if (!offsetXParam.IsSelected || !offsetYParam.IsSelected || !TryCrateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset))
+			if (!offsetXParam.IsSelected || !offsetYParam.IsSelected || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset))
 				offset = Vector2.Zero;
 
 			var spherical = _coordinateOperationNameComparer.Normalize(opData.OperationName).EndsWith("SPHERICAL");
@@ -175,7 +200,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 				origin = GeographicCoordinate.Zero;
 
 			Vector2 offset;
-			if (!offsetXParam.IsSelected || !offsetYParam.IsSelected || !TryCrateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset))
+			if (!offsetXParam.IsSelected || !offsetYParam.IsSelected || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset))
 				offset = Vector2.Zero;
 
 			var spherical = _coordinateOperationNameComparer.Normalize(opData.OperationName).EndsWith("SPHERICAL");
@@ -183,6 +208,89 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return spherical
 				? (ProjectionBase)new EquidistantCylindricalSpherical(origin, offset, spheroid)
 				: new EquidistantCylindrical(origin, offset, spheroid);
+		}
+
+		private ITransformation<GeographicCoordinate, Point2> CreateKrovak(ProjectionCompilationParams opData) {
+			var latConeAxisParam = new KeywordNamedParameterSelector("CO","LAT","CONE","AXIS"); // Co-latitude of cone axis
+			var latProjectionCenterParam = new KeywordNamedParameterSelector("LAT", "CENTER"); // Latitude of projection centre
+			var latPseudoParallelParam = new KeywordNamedParameterSelector("LAT", "PSEUDO", "PARALLEL"); // Latitude of pseudo standard parallel
+			var scaleFactorParallelParam = new KeywordNamedParameterSelector("SCALE", "PARALLEL"); // Scale factor on pseudo standard parallel
+			var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN"); // Longitude of origin
+			var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
+			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+			var evalXParam = new KeywordNamedParameterSelector("ORDINATE1", "EVALUATION", "POINT");
+			var evalYParam = new KeywordNamedParameterSelector("ORDINATE2", "EVALUATION", "POINT");
+			opData.ParameterLookup.Assign(latConeAxisParam, latProjectionCenterParam, latPseudoParallelParam, scaleFactorParallelParam, originLonParam, offsetXParam, offsetYParam, evalXParam, evalYParam);
+
+			var spheroid = ExtractSpheroid(opData);
+			if (null == spheroid)
+				return null;
+
+			GeographicCoordinate origin;
+			if (!latProjectionCenterParam.IsSelected || !originLonParam.IsSelected || !TryCreateGeographicCoordinate(latProjectionCenterParam.Selection, originLonParam.Selection, out origin))
+				origin = GeographicCoordinate.Zero;
+
+			Vector2 offset;
+			if (!offsetXParam.IsSelected || !offsetYParam.IsSelected || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset))
+				offset = Vector2.Zero;
+
+			Point2 evalPoint;
+			if (!evalXParam.IsSelected || !evalYParam.IsSelected || !TryCreatePoint2(evalXParam.Selection, evalYParam.Selection, out evalPoint))
+				evalPoint = Point2.Zero;
+
+			double azimuthOfInitialLine;
+			if (!latConeAxisParam.IsSelected || !TryGetDouble(latConeAxisParam.Selection, OgcAngularUnit.DefaultRadians, out azimuthOfInitialLine))
+				azimuthOfInitialLine = Double.NaN;
+
+			double latitudeOfPseudoStandardParallel;
+			if (!latPseudoParallelParam.IsSelected || !TryGetDouble(latPseudoParallelParam.Selection, OgcAngularUnit.DefaultRadians, out latitudeOfPseudoStandardParallel))
+				latitudeOfPseudoStandardParallel = Double.NaN;
+
+			double scaleFactor;
+			if (!scaleFactorParallelParam.IsSelected || !TryGetDouble(scaleFactorParallelParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
+				scaleFactor = Double.NaN;
+
+			var normalizedName = _coordinateOperationNameComparer.Normalize(opData.OperationName);
+
+			double[] constants = null;
+			if (normalizedName.StartsWith("KROVAKMODIFIED")) {
+				var constantParams = new NamedParameterSelector[] {
+					new FullMatchParameterSelector("C1"),
+					new FullMatchParameterSelector("C2"),
+					new FullMatchParameterSelector("C3"),
+					new FullMatchParameterSelector("C4"),
+					new FullMatchParameterSelector("C5"),
+					new FullMatchParameterSelector("C6"),
+					new FullMatchParameterSelector("C7"),
+					new FullMatchParameterSelector("C8"),
+					new FullMatchParameterSelector("C9"),
+					new FullMatchParameterSelector("C10")
+				};
+				if (opData.ParameterLookup.Assign(constantParams)) {
+					constants = constantParams
+						.OrderBy(x => Int32.Parse(x.Selection.Name.Substring(1)))
+						.Select(p => {
+							double value;
+							TryGetDouble(p.Selection, ScaleUnitUnity.Value, out value);
+							return value;
+						})
+						.ToArray();
+				}
+			}
+
+			if (normalizedName.Equals("KROVAKNORTH")) {
+				return new KrovakNorth(origin, latitudeOfPseudoStandardParallel, azimuthOfInitialLine, scaleFactor, offset, spheroid);
+			}
+			if (null != constants) {
+				if (normalizedName.Equals("KROVAKMODIFIED")) {
+					return new KrovakModified(origin, latitudeOfPseudoStandardParallel, azimuthOfInitialLine, scaleFactor, offset, spheroid, evalPoint, constants);
+				}
+				if (normalizedName.Equals("KROVAKMODIFIEDNORTH")) {
+					return new KrovakModifiedNorth(origin, latitudeOfPseudoStandardParallel, azimuthOfInitialLine, scaleFactor, offset, spheroid, evalPoint, constants);
+				}
+			}
+
+			return null;
 		}
 
 		private readonly INameNormalizedComparer _coordinateOperationNameComparer;
@@ -205,6 +313,10 @@ namespace Pigeoid.CoordinateOperationCompilation
 				{CoordinateOperationStandardNames.Geos,null},
 				{CoordinateOperationStandardNames.Gnomonic,null},
 				{CoordinateOperationStandardNames.HotineObliqueMercator,null},
+				{CoordinateOperationStandardNames.Krovak,CreateKrovak},
+				{CoordinateOperationStandardNames.KrovakNorth,CreateKrovak},
+				{CoordinateOperationStandardNames.KrovakModifiedNorth,CreateKrovak},
+				{CoordinateOperationStandardNames.KrovakModified,CreateKrovak},
 				{CoordinateOperationStandardNames.KrovakObliqueConicConformal,null},
 				{CoordinateOperationStandardNames.LabordeObliqueMercator,null}, // CreateLabordeObliqueMercator
 				{CoordinateOperationStandardNames.LambertAzimuthalEqualArea,CreateLambertAzimuthalEqualArea},
@@ -292,15 +404,13 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			// make sure that the input units are correct
 			var actualInputUnits = stepParameters.InputUnit;
-			if (null != actualInputUnits){
-				var desiredInputUnits = ExtractLinearUnit(stepParameters.RelatedInputCrs)
-					?? ExtractLinearUnit(stepParameters.RelatedOutputCrs);
-				if(null != desiredInputUnits && !UnitEqualityComparer.Default.Equals(actualInputUnits, desiredInputUnits)){
-					var conv = SimpleUnitConversionGenerator.FindConversion(actualInputUnits, desiredInputUnits);
-					if(null != conv){
-						var conversionTransformation = new LinearElementTransformation(conv);
-						resultTransformation = new ConcatenatedTransformation(new[]{conversionTransformation, resultTransformation});
-					}
+			var desiredInputUnits = ExtractLinearUnit(stepParameters.RelatedInputCrs)
+				?? ExtractLinearUnit(stepParameters.RelatedOutputCrs);
+			if(null != desiredInputUnits && !UnitEqualityComparer.Default.Equals(actualInputUnits, desiredInputUnits)){
+				var conv = SimpleUnitConversionGenerator.FindConversion(actualInputUnits, desiredInputUnits);
+				if(null != conv){
+					var conversionTransformation = new LinearElementTransformation(conv);
+					resultTransformation = new ConcatenatedTransformation(new[]{conversionTransformation, resultTransformation});
 				}
 			}
 

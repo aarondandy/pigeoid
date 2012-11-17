@@ -2,11 +2,14 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Transformation
 {
-	public class GeographicOffset : ITransformation<GeographicCoordinate>
+	public class GeographicOffset :
+		ITransformation<GeographicCoordinate>,
+		ITransformation<GeographicHeightCoordinate>
 	{
 
 		public readonly double DLat;
@@ -24,7 +27,7 @@ namespace Pigeoid.Transformation
 		public GeographicOffset(GeographicCoordinate d)
 			: this(d.Latitude, d.Longitude) { }
 
-		public void TransformValues(GeographicCoordinate[] values) {
+		public void TransformValues([NotNull] GeographicCoordinate[] values) {
 			for (int i = 0; i < values.Length; i++)
 				TransformValue(ref values[i]);
 		}
@@ -37,7 +40,24 @@ namespace Pigeoid.Transformation
 			return new GeographicCoordinate(value.Latitude + DLat, value.Longitude + DLon);
 		}
 
-		public IEnumerable<GeographicCoordinate> TransformValues(IEnumerable<GeographicCoordinate> values) {
+		[NotNull] public IEnumerable<GeographicCoordinate> TransformValues([NotNull] IEnumerable<GeographicCoordinate> values) {
+			return values.Select(TransformValue);
+		}
+
+		public GeographicHeightCoordinate TransformValue(GeographicHeightCoordinate value) {
+			return new GeographicHeightCoordinate(value.Latitude + DLat, value.Longitude + DLon, value.Height);
+		}
+
+		private void TransformValue(ref GeographicHeightCoordinate value) {
+			value = new GeographicHeightCoordinate(value.Latitude + DLat, value.Longitude + DLon, value.Height);
+		}
+
+		public void TransformValues([NotNull] GeographicHeightCoordinate[] values) {
+			for (int i = 0; i < values.Length; i++)
+				TransformValue(ref values[i]);
+		}
+
+		[NotNull] public IEnumerable<GeographicHeightCoordinate> TransformValues([NotNull] IEnumerable<GeographicHeightCoordinate> values) {
 			return values.Select(TransformValue);
 		}
 
@@ -46,15 +66,28 @@ namespace Pigeoid.Transformation
 		}
 
 		public bool HasInverse {
-			get { return true; }
+			[Pure, ContractAnnotation("=>true")] get { return true; }
 		}
 
-		public ITransformation<GeographicCoordinate> GetInverse() {
+		[NotNull] GeographicOffset GetInverse() {
 			return new GeographicOffset(-DLat, -DLon);
+		}
+
+		ITransformation<GeographicCoordinate> ITransformation<GeographicCoordinate>.GetInverse() {
+			return GetInverse();
 		}
 
 		ITransformation ITransformation.GetInverse() {
 			return GetInverse();
 		}
+
+		ITransformation<GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate>.GetInverse() {
+			return GetInverse();
+		}
+
+		ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate>.GetInverse() {
+			return GetInverse();
+		}
+
 	}
 }

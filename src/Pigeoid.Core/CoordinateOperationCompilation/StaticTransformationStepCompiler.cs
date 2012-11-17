@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Interop;
 using Pigeoid.Ogc;
+using Pigeoid.Projection;
 using Pigeoid.Transformation;
 using Pigeoid.Unit;
 using Vertesaur;
@@ -57,6 +58,14 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return true;
 		}
 
+		private static bool TryGetDouble(INamedParameter parameter, IUnit unit, out double value) {
+			if (!NamedParameter.TryGetDouble(parameter, out value))
+				return false;
+
+			ConvertIfVaild(parameter.Unit, unit, ref value);
+			return true;
+		}
+
 		private static bool TryCrateVector3(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, out Vector3 result) {
 			return TryCrateVector2(xParam, yParam, zParam, null, out result);
 		}
@@ -76,6 +85,18 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return false;
 		}
 
+		private static bool TryCreateGeographicCoordinate(INamedParameter latParam, INamedParameter lonParam, out GeographicCoordinate result) {
+			double lat, lon;
+			if (NamedParameter.TryGetDouble(latParam, out lat) && NamedParameter.TryGetDouble(lonParam, out lon)) {
+				ConvertIfVaild(latParam.Unit, OgcAngularUnit.DefaultRadians, ref lat);
+				ConvertIfVaild(lonParam.Unit, OgcAngularUnit.DefaultRadians, ref lon);
+				result = new GeographicCoordinate(lat, lon);
+				return true;
+			}
+			result = default(GeographicCoordinate);
+			return false;
+		}
+
 		private static ISpheroidInfo ExtractSpheroid(ICrs crs) {
 			var geodetic = crs as ICrsGeodetic;
 			if (null == geodetic)
@@ -86,7 +107,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return datum.Spheroid;
 		}
 
-		private static ITransformation CreatePositionVectorTransformation(TransformationCompilationParams opData) {
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreatePositionVectorTransformation(TransformationCompilationParams opData) {
 			var xTransParam = new KeywordNamedParameterSelector("XAXIS", "TRANS");
 			var yTransParam = new KeywordNamedParameterSelector("YAXIS", "TRANS");
 			var zTransParam = new KeywordNamedParameterSelector("ZAXIS", "TRANS");
@@ -113,7 +134,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var helmert = new Helmert7Transformation(translation, rotation, scale);
 
 			if (opData.StepParams.RelatedInputCrs is ICrsGeocentric && opData.StepParams.RelatedOutputCrs is ICrsGeocentric)
-				return helmert;
+				return new StaticCoordinateOperationCompiler.StepCompilationResult(opData.StepParams, opData.StepParams.RelatedOutputCrsUnit, helmert);
 
 			var spheroidFrom = ExtractSpheroid(opData.StepParams.RelatedInputCrs) ?? ExtractSpheroid(opData.StepParams.RelatedOutputCrs);
 			if (null == spheroidFrom)
@@ -121,9 +142,87 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			var spheroidTo = ExtractSpheroid(opData.StepParams.RelatedOutputCrs) ?? spheroidFrom;
 
-			return new Helmert7GeographicTransformation(spheroidFrom, helmert, spheroidTo);
+			ITransformation transformation = new Helmert7GeographicTransformation(spheroidFrom, helmert, spheroidTo);
+			var unitConversion = CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
+			if(null != unitConversion)
+				transformation = new ConcatenatedTransformation(new[] { unitConversion, transformation});
+
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				OgcAngularUnit.DefaultRadians,
+				transformation);
 		}
 
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateGeographicOffset(TransformationCompilationParams opData) {
+			var latParam = new KeywordNamedParameterSelector("LAT");
+			var lonParam = new KeywordNamedParameterSelector("LON");
+			opData.ParameterLookup.Assign(latParam, lonParam);
+
+			ITransformation transformation = null;
+			if (latParam.IsSelected && lonParam.IsSelected) {
+				GeographicCoordinate offset;
+				if (TryCreateGeographicCoordinate(latParam.Selection, lonParam.Selection, out offset))
+					transformation = new GeographicOffset(offset);
+			}
+			else if (latParam.IsSelected) {
+				double value;
+				if(TryGetDouble(latParam.Selection, OgcAngularUnit.DefaultRadians, out value))
+					transformation = new GeographicOffset(new GeographicCoordinate(value, 0));
+			}
+			else if (lonParam.IsSelected) {
+				double value;
+				if(TryGetDouble(lonParam.Selection, OgcAngularUnit.DefaultRadians, out value))
+					transformation = new GeographicOffset(new GeographicCoordinate(0, value));
+			}
+
+			if(null == transformation)
+				return null; // no parameters
+
+			var unitConversion = CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
+			if (null != unitConversion)
+				transformation = new ConcatenatedTransformation(new[] { unitConversion, transformation });
+
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				OgcAngularUnit.DefaultRadians,
+				transformation);
+		}
+
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateGeocentricTranslation(TransformationCompilationParams opData) {
+			var xParam = new KeywordNamedParameterSelector("XAXIS", "X");
+			var yParam = new KeywordNamedParameterSelector("YAXIS", "Y");
+			var zParam = new KeywordNamedParameterSelector("ZAXIS", "Z");
+			if (!opData.ParameterLookup.Assign(xParam, yParam, zParam))
+				return null;
+
+			Vector3 delta;
+			if (!TryCrateVector3(xParam.Selection, yParam.Selection, zParam.Selection, out delta))
+				return null;
+
+			if (opData.StepParams.RelatedInputCrs is ICrsGeocentric && opData.StepParams.RelatedOutputCrs is ICrsGeocentric) {
+				// assume the units are correct
+				return new StaticCoordinateOperationCompiler.StepCompilationResult(
+					opData.StepParams,
+					opData.StepParams.RelatedOutputCrsUnit ?? opData.StepParams.RelatedInputCrsUnit ?? opData.StepParams.InputUnit,
+					new GeocentricTranslation(delta));
+			}
+
+			var inputSpheroid = opData.StepParams.RelatedInputSpheroid;
+			if (null == inputSpheroid)
+				return null;
+			var outputSpheroid = opData.StepParams.RelatedOutputSpheroid;
+			if (null == outputSpheroid)
+				return null;
+			ITransformation transformation = new GeographicGeocentricTranslation(inputSpheroid, delta, outputSpheroid);
+			var conv = CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
+			if (null != conv)
+				transformation = new ConcatenatedTransformation(new[] {conv, transformation});
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				OgcAngularUnit.DefaultRadians,
+				transformation);
+
+		}
 
 		private readonly INameNormalizedComparer _coordinateOperationNameComparer;
 
@@ -136,41 +235,30 @@ namespace Pigeoid.CoordinateOperationCompilation
 				?? CompileForwards(stepParameters);
 		}
 
-		private StaticCoordinateOperationCompiler.StepCompilationResult CompileForwards([NotNull] StaticCoordinateOperationCompiler.StepCompilationParameters stepParameters){
-			var forwardCompiledOperation = CompileForwardToTransform(stepParameters);
-			if (null == forwardCompiledOperation)
-				return null;
-
-			ITransformation resultTransformation = forwardCompiledOperation;
-
-			// make sure that the input units are correct
-			var actualInputUnits = stepParameters.InputUnit;
-			if (null != actualInputUnits) {
-				var desiredInputUnits = stepParameters.InputUnit;
-				if (null != desiredInputUnits && !UnitEqualityComparer.Default.Equals(actualInputUnits, desiredInputUnits)) {
-					var conv = SimpleUnitConversionGenerator.FindConversion(actualInputUnits, desiredInputUnits);
-					if (null != conv){
-						ITransformation conversionTransformation = null;
-						if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("LENGTH", actualInputUnits.Type)) {
-							conversionTransformation = new LinearElementTransformation(conv);
-						}
-						else if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("ANGLE", actualInputUnits.Type)) {
-							conversionTransformation = new AngularElementTransformation(conv);
-						}
-						if (null != conversionTransformation){
-							resultTransformation = new ConcatenatedTransformation(new[]{conversionTransformation, resultTransformation});
-						}
+		[CanBeNull] private static ITransformation CreateCoordinateUnitConversion([NotNull] IUnit from, [NotNull] IUnit to) {
+			if (!UnitEqualityComparer.Default.Equals(from, to)) {
+				var conv = SimpleUnitConversionGenerator.FindConversion(from, to);
+				if (null != conv) {
+					if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("LENGTH", from.Type)) {
+						return new LinearElementTransformation(conv);
+					}
+					if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("ANGLE", from.Type)) {
+						return new AngularElementTransformation(conv);
 					}
 				}
 			}
+			return null;
+		}
 
-			var outputUnits = ExtractUnit(stepParameters.RelatedOutputCrs)
-					?? ExtractUnit(stepParameters.RelatedInputCrs);
+		private StaticCoordinateOperationCompiler.StepCompilationResult CompileForwards([NotNull] StaticCoordinateOperationCompiler.StepCompilationParameters stepParameters){
+			var forwardCompiledStep = CompileForwardToTransform(stepParameters);
+			if (null == forwardCompiledStep)
+				return null;
 
 			return new StaticCoordinateOperationCompiler.StepCompilationResult(
 				stepParameters,
-				outputUnits,
-				resultTransformation
+				forwardCompiledStep.OutputUnit,
+				forwardCompiledStep.Transformation
 			);
 		}
 
@@ -185,40 +273,24 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var expectedOutputUnits = ExtractUnit(stepParameters.RelatedOutputCrs)
 				?? ExtractUnit(stepParameters.RelatedInputCrs);
 
-			var forwardCompiledOperation = CompileForwardToTransform(new StaticCoordinateOperationCompiler.StepCompilationParameters(
+			var forwardCompiledStep = CompileForwardToTransform(new StaticCoordinateOperationCompiler.StepCompilationParameters(
 				inverseOperationInfo,
 				expectedOutputUnits,
 				stepParameters.RelatedOutputCrs,
 				stepParameters.RelatedInputCrs
 			));
 
-			if (null == forwardCompiledOperation || !forwardCompiledOperation.HasInverse)
+			var forwardCompiledOperation = forwardCompiledStep.Transformation;
+			if (!forwardCompiledOperation.HasInverse)
 				return null;
 
 			var inverseCompiledOperation = forwardCompiledOperation.GetInverse();
-			ITransformation resultTransformation = inverseCompiledOperation;
+			var resultTransformation = inverseCompiledOperation;
 
 			// make sure that the input units are correct
-			var actualInputUnits = stepParameters.InputUnit;
-			if (null != actualInputUnits) {
-				var desiredInputUnits = ExtractUnit(stepParameters.RelatedInputCrs)
-					?? ExtractUnit(stepParameters.RelatedOutputCrs);
-				if (null != desiredInputUnits && !UnitEqualityComparer.Default.Equals(actualInputUnits, desiredInputUnits)) {
-					var conv = SimpleUnitConversionGenerator.FindConversion(actualInputUnits, desiredInputUnits);
-					if (null != conv) {
-						ITransformation conversionTransformation = null;
-						if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("LENGTH", actualInputUnits.Type)) {
-							conversionTransformation = new LinearElementTransformation(conv);
-						}
-						else if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("ANGLE", actualInputUnits.Type)) {
-							conversionTransformation = new AngularElementTransformation(conv);
-						}
-						if (null != conversionTransformation) {
-							resultTransformation = new ConcatenatedTransformation(new[] { conversionTransformation, resultTransformation });
-						}
-					}
-				}
-			}
+			var unitConversion = CreateCoordinateUnitConversion(stepParameters.InputUnit, forwardCompiledStep.OutputUnit);
+			if(null != unitConversion)
+				resultTransformation = new ConcatenatedTransformation(new[]{unitConversion, resultTransformation});
 
 			return new StaticCoordinateOperationCompiler.StepCompilationResult(
 				stepParameters,
@@ -227,7 +299,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			);
 		}
 
-		private ITransformation CompileForwardToTransform([NotNull] StaticCoordinateOperationCompiler.StepCompilationParameters stepParameters){
+		private StaticCoordinateOperationCompiler.StepCompilationResult CompileForwardToTransform([NotNull] StaticCoordinateOperationCompiler.StepCompilationParameters stepParameters) {
 			string operationName = null;
 			IEnumerable<INamedParameter> parameters = null;
 
@@ -251,8 +323,10 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			if (normalizedName.StartsWith("POSITIONVECTORTRANSFORMATION"))
 				return CreatePositionVectorTransformation(compilationParams);
-
-
+			if (normalizedName.Equals("GEOGRAPHICOFFSET"))
+				return CreateGeographicOffset(compilationParams);
+			if (normalizedName.StartsWith("GEOCENTRICTRANSLATION"))
+				return CreateGeocentricTranslation(compilationParams);
 			return null;
 		}
 

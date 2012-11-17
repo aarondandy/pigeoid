@@ -32,7 +32,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var paramsToSearch = _data.ToList();
 			foreach (var selector in selectors) {
 				if (paramsToSearch.Count == 0)
-					return true;
+					break;
 
 				int bestScore = 0;
 				int bestIndex = -1;
@@ -48,7 +48,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 					paramsToSearch.RemoveAt(bestIndex);
 				}
 			}
-			return paramsToSearch.Count == 0;
+			return selectors.All(x => x.IsSelected);
 		}
 
 	}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
@@ -27,6 +28,8 @@ namespace Pigeoid.Unit
 		public IUnit To {
 			get { return _conversions[_conversions.Length-1].To; }
 		}
+
+		public ReadOnlyCollection<IUnitConversion<double>> Conversions { get { return Array.AsReadOnly(_conversions); } }
 
 		public void TransformValues(double[] values) {
 			for (int i = 0; i < values.Length; i++)

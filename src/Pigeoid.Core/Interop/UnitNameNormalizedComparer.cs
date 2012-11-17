@@ -44,7 +44,7 @@ namespace Pigeoid.Interop
 
 		public override string Normalize(string text){
 			if (null == text)
-				return null;
+				return String.Empty;
 
 			text = base.Normalize(text);
 

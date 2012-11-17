@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
@@ -37,14 +38,29 @@ namespace Pigeoid.CoordinateOperationCompilation
 				RelatedOutputCrs = relatedOutputCrs;
 			}
 
-			public ICoordinateOperationInfo CoordinateOperationInfo { [ContractAnnotation("=>notnull")] get; private set; }
+			[NotNull] public ICoordinateOperationInfo CoordinateOperationInfo { get; private set; }
 
-			public IUnit InputUnit { [ContractAnnotation("=>notnull")] get; private set; }
+			[NotNull] public IUnit InputUnit { get; private set; }
 
 			public ICrs RelatedInputCrs { get; private set; }
 
 			public ICrs RelatedOutputCrs { get; private set; }
 
+			[CanBeNull] public IUnit RelatedInputCrsUnit {
+				get { return ExtractUnit(RelatedInputCrs) ?? ExtractUnit(RelatedOutputCrs) ?? InputUnit; }
+			}
+
+			[CanBeNull] public IUnit RelatedOutputCrsUnit {
+				get { return ExtractUnit(RelatedOutputCrs) ?? ExtractUnit(RelatedInputCrs) ?? InputUnit; }
+			}
+
+			[CanBeNull] public ISpheroid<double> RelatedInputSpheroid {
+				get { return ExtractSpheroid(RelatedInputCrs) ?? ExtractSpheroid(RelatedOutputCrs); }
+			}
+
+			[CanBeNull] public ISpheroid<double> RelatedOutputSpheroid {
+				get { return ExtractSpheroid(RelatedOutputCrs) ?? ExtractSpheroid(RelatedInputCrs); }
+			} 
 		}
 
 		public sealed class StepCompilationResult
@@ -65,18 +81,37 @@ namespace Pigeoid.CoordinateOperationCompilation
 				OutputUnit = outputUnit;
 			}
 
-			[Obsolete("This may be useless")]
-			public StepCompilationParameters Parameters { [ContractAnnotation("=>notnull")] get; private set; }
+			[Obsolete("This may be useless"), NotNull] public StepCompilationParameters Parameters { get; private set; }
+			[NotNull] public ITransformation Transformation { get; private set; }
+			[NotNull] public IUnit OutputUnit { get; private set; }
 
-			public ITransformation Transformation { [ContractAnnotation("=>notnull")] get; private set; }
+		}
 
-			public IUnit OutputUnit { [ContractAnnotation("=>notnull")] get; private set; }
+		public static IEnumerable<ITransformation> Linearize(IEnumerable<ITransformation> transformation) {
+			return transformation.SelectMany(Linearize);
+		}
 
+		public static IEnumerable<ITransformation> Linearize(ITransformation transformation) {
+			var concatTransformation = transformation as ConcatenatedTransformation;
+			if (concatTransformation != null) {
+				return concatTransformation.Transformations.SelectMany(Linearize);
+			}
+			return new[] {transformation};
 		}
 
 		public static IUnit ExtractUnit(ICrs crs) {
 			var crsGeodetic = crs as ICrsGeodetic;
 			return null != crsGeodetic ? crsGeodetic.Unit : null;
+		}
+
+		public static ISpheroidInfo ExtractSpheroid(ICrs crs) {
+			var geodetic = crs as ICrsGeodetic;
+			if (null == geodetic)
+				return null;
+			var datum = geodetic.Datum;
+			if (null == datum)
+				return null;
+			return datum.Spheroid;
 		}
 
 		private readonly IStepOperationCompiler[] _stepCompilers;
@@ -139,10 +174,11 @@ namespace Pigeoid.CoordinateOperationCompilation
 				}
 			}
 
-			// TODO: maybe make sure operations are linearized so they can be better optimized?
 			var resultTransformations = stepResults.Select(x => x.Transformation).ToList();
 			if(null != outputUnitConversion)
 				resultTransformations.Add(outputUnitConversion);
+
+			resultTransformations = Linearize(resultTransformations).ToList();
 
 			if (resultTransformations.Count == 0)
 				return null;

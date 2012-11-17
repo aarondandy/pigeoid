@@ -30,4 +30,17 @@ namespace Pigeoid.Epsg
 
 		IList<IAxis> ICrsGeodetic.Axes { get { return Axes.Cast<IAxis>().ToArray(); } }
 	}
+
+	public class EpsgCrsGeocentric : EpsgCrsGeodetic, ICrsGeocentric
+	{
+		internal EpsgCrsGeocentric(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum)
+			: base(code, name, area, deprecated, cs, geodeticDatum) {}
+	}
+
+	public class EpsgCrsGeographic : EpsgCrsGeodetic, ICrsGeographic
+	{
+		internal EpsgCrsGeographic(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum)
+			: base(code, name, area, deprecated, cs, geodeticDatum) { }
+	}
+
 }

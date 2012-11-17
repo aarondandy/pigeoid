@@ -23,6 +23,10 @@ namespace Pigeoid.Interop
 		public static readonly string Geos = "Geostationary Satellite View";
 		public static readonly string Gnomonic = "Gnomonic";
 		public static readonly string HotineObliqueMercator = "Hotine Oblique Mercator";
+		public static readonly string Krovak = "Krovak";
+		public static readonly string KrovakNorth = "Krovak (North Orientated)";
+		public static readonly string KrovakModified = "Krovak Modified";
+		public static readonly string KrovakModifiedNorth = "Krovak Modified (North Orientated)";
 		public static readonly string KrovakObliqueConicConformal = "Krovak Oblique Conic Conformal";
 		public static readonly string LabordeObliqueMercator = "Laborde Oblique Mercator";
 		public static readonly string LambertAzimuthalEqualArea = "Lambert Azimuthal Equal Area";
@@ -70,6 +74,10 @@ namespace Pigeoid.Interop
 				Geos,
 				Gnomonic,
 				HotineObliqueMercator,
+				Krovak,
+				KrovakModified,
+				KrovakModifiedNorth,
+				KrovakNorth,
 				KrovakObliqueConicConformal,
 				LabordeObliqueMercator,
 				LambertAzimuthalEqualArea,

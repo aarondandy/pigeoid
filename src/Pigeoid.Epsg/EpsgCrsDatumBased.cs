@@ -44,8 +44,9 @@ namespace Pigeoid.Epsg
 					switch(kind) {
 						case (byte)'3': // geographic3D
 						case (byte)'2': // geographic2D
+							return new EpsgCrsGeographic(code, name, area, deprecated, cs, (EpsgDatumGeodetic)datum);
 						case (byte)'G': // geocentric
-							return new EpsgCrsGeodetic(code, name, area, deprecated, cs, (EpsgDatumGeodetic) datum);
+							return new EpsgCrsGeocentric(code, name, area, deprecated, cs, (EpsgDatumGeodetic) datum);
 						case (byte)'V': // vertical
 							return new EpsgCrsVertical(code, name, area, deprecated, cs, (EpsgDatumVertical)datum);
 						case (byte)'E': // engineering

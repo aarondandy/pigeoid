@@ -214,6 +214,8 @@
     <Compile Include="Unit\ScaleUnitPartsPerMillion.cs" />
     <Compile Include="Unit\ReadOnlyUnitConversionMap.cs" />
     <Compile Include="Unit\ScaleUnitUnity.cs" />
+    <Compile Include="Unit\SexagesimalDmsToDecimalDegreesConversion.cs" />
+    <Compile Include="Unit\SexagesimalDmToDecimalDegreesConversion.cs" />
     <Compile Include="Unit\SimpleUnitConversionMapBase.cs" />
     <Compile Include="Unit\BinaryUnitConversionMap.cs" />
     <Compile Include="Unit\SimpleUnitConversionGenerator.cs" />
