@@ -12,6 +12,10 @@ namespace Pigeoid.Epsg.Transform.Test
 	public class EpsgCoordinateOperationCoverage
 	{
 
+		private const string NoUsages = "Can't find a use of this operation method.";
+		private const string NoSampleData = "No sample data to test with.";
+		private const string NotSupported = "This operation method is not yet supported.";
+
 		private static void AreEqual(GeographicCoordinate expected, GeographicCoordinate actual, double delta) {
 			Assert.AreEqual(expected.Latitude, actual.Latitude, delta);
 			Assert.AreEqual(expected.Longitude, actual.Longitude, delta);
@@ -85,7 +89,7 @@ namespace Pigeoid.Epsg.Transform.Test
 
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NotSupported)]
 		public void m1025_gographic3DToGravityRelatedHeightEgm2008() {
 			// method: 1025
 			// op: 3858 or 3859
@@ -102,15 +106,12 @@ namespace Pigeoid.Epsg.Transform.Test
 			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
 			Assert.IsNotNull(inverse);
 
-			Assert.Inconclusive("Uhhh...   ?");
+			Assert.Inconclusive(NoSampleData);
 		}
 
-		[Test]
+		[Test, Ignore(NoUsages)]
 		public void m1026_mercatorSpherical() {
-			// method: 1026
-			// op:
-			// crs:
-			Assert.Inconclusive("Can't find a use of this operation.");
+			Assert.Inconclusive(NoSampleData);
 		}
 
 		[Test]
@@ -155,7 +156,11 @@ namespace Pigeoid.Epsg.Transform.Test
 			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
 			Assert.IsNotNull(inverse);
 
-			Assert.Inconclusive("Need a sample point.");
+			var expected4326 = new GeographicCoordinate(55, 10);
+			var expected4087 = new Point2(1113194.91, 6097230.31);
+
+			AreEqual(expected4326, transformation.TransformValue(expected4087), 0.0000003);
+			AreEqual(expected4087, inverse.TransformValue(expected4326), 0.004);
 		}
 
 		[Test]
@@ -175,22 +180,22 @@ namespace Pigeoid.Epsg.Transform.Test
 			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
 			Assert.IsNotNull(inverse);
 
-			Assert.Inconclusive("Need a sample point.");
+			Assert.Inconclusive(NoSampleData);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NotSupported)]
 		public void m1030_geographic3DToGravityRelatedHeight_nz_geoid2009(){
-			Assert.Inconclusive("???");
+			Assert.Inconclusive(NotSupported);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m1031_geocentricTranslations_geocentricDomain() {
-			Assert.Inconclusive("???");
+			Assert.Inconclusive(NoUsages);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m1032_coordinateFrameRotation_geocentricDomain() {
-			Assert.Inconclusive("???");
+			Assert.Inconclusive(NoUsages);
 		}
 
 		[Test]
@@ -220,42 +225,42 @@ namespace Pigeoid.Epsg.Transform.Test
 			AreEqual(expectedValue4896, actualValue4896, 0.006);
 			AreEqual(expectedValue5332, actualValue5332, 0.006);
 
-			Assert.Inconclusive("Need some real test points.");
+			Assert.Inconclusive(NoSampleData);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m1034_molodenskyBadekas_geocentricDomain() {
-			Assert.Inconclusive("No operations");
+			Assert.Inconclusive(NoUsages);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m1035_geocentricTranslations_geog3DDomain() {
-			Assert.Inconclusive("No operations");
+			Assert.Inconclusive(NoUsages);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m1036_cartesianGridOffsetsFromFormFunction() {
-			Assert.Inconclusive("not yet supported");
+			Assert.Inconclusive(NoUsages);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m1037_positionVectorTransformation_geog3DDomain() {
-			Assert.Inconclusive("No operations");
+			Assert.Inconclusive(NoUsages);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m1038_coordinateFrameRotation_geog3DDomain() {
-			Assert.Inconclusive("No operations");
+			Assert.Inconclusive(NoUsages);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m1039_molodenskyBadekas_geog3DDomain() {
-			Assert.Inconclusive("No operations");
+			Assert.Inconclusive(NoUsages);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NotSupported)]
 		public void m1040_gntrans() {
-			Assert.Inconclusive("not yet supported");
+			Assert.Inconclusive(NotSupported);
 		}
 
 		[Test]
@@ -276,7 +281,11 @@ namespace Pigeoid.Epsg.Transform.Test
 			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
 			Assert.IsNotNull(inverse);
 
-			Assert.Inconclusive("Need a sample point.");
+			var expected4818 = new GeographicCoordinate(50.209012, 16.849772);
+			var expected5221 = new Point2(-568991.00, -1050538.63);
+
+			AreEqual(expected4818, transformation.TransformValue(expected5221), 0.000001);
+			AreEqual(expected5221, inverse.TransformValue(expected4818), 0.1);
 		}
 
 		[Test]
@@ -297,7 +306,11 @@ namespace Pigeoid.Epsg.Transform.Test
 			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
 			Assert.IsNotNull(inverse);
 
-			Assert.Inconclusive("Need a sample point.");
+			var expected5229 = new GeographicCoordinate(50.209012, 16.849772);
+			var exoected5224 = new Point2(6050538.71, 5568990.91);
+
+			AreEqual(expected5229, transformation.TransformValue(exoected5224), 0.000001);
+			AreEqual(exoected5224, inverse.TransformValue(expected5229), 0.1);
 		}
 
 		[Test]
@@ -318,17 +331,21 @@ namespace Pigeoid.Epsg.Transform.Test
 			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
 			Assert.IsNotNull(inverse);
 
-			Assert.Inconclusive("Need a sample point.");
+			var expected5229 = new GeographicCoordinate(50.209012, 16.849772);
+			var expected5225 = new Point2(-5568990.91, -6050538.71);
+
+			AreEqual(expected5229, transformation.TransformValue(expected5225), 0.000001);
+			AreEqual(expected5225, inverse.TransformValue(expected5229), 0.1);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m1044_mercatorVariantC() {
-			Assert.Inconclusive("No operations");
+			Assert.Inconclusive(NoUsages);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NotSupported)]
 		public void m1045_geographic3DToGravityRelatedHeightOsgm02Ire() {
-			Assert.Inconclusive("Not supported");
+			Assert.Inconclusive(NotSupported);
 		}
 
 		[Test]
@@ -356,9 +373,9 @@ namespace Pigeoid.Epsg.Transform.Test
 			AreEqual(expected4802, inverse.TransformValue(expected4218), 0.01);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m9602_geographicGeocentricConversions() {
-			Assert.Inconclusive("No operations");
+			Assert.Inconclusive(NoUsages);
 		}
 
 		[Test]
@@ -386,14 +403,14 @@ namespace Pigeoid.Epsg.Transform.Test
 			AreEqual(expected4267, inverse.TransformValue(expected4326), 0.005);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m9604_molodensky(){
-			Assert.Inconclusive("No operations");
+			Assert.Inconclusive(NoUsages);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NoUsages)]
 		public void m9605_abridgedMolodensky() {
-			Assert.Inconclusive("No operations");
+			Assert.Inconclusive(NoUsages);
 		}
 
 		[Test]
@@ -470,19 +487,19 @@ namespace Pigeoid.Epsg.Transform.Test
 			AreEqual(expected4181, inverse.TransformValue(expected4326), 0.002);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NotSupported)]
 		public void m9613_nadcon() {
-			Assert.Inconclusive("Not supported");
+			Assert.Inconclusive(NotSupported);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NotSupported)]
 		public void m9614_ntV1() {
-			Assert.Inconclusive("Not supported");
+			Assert.Inconclusive(NotSupported);
 		}
 
-		[Test, Ignore]
+		[Test, Ignore(NotSupported)]
 		public void m9615_ntv2() {
-			Assert.Inconclusive("Not supported");
+			Assert.Inconclusive(NotSupported);
 		}
 
 		[Test]
@@ -509,7 +526,6 @@ namespace Pigeoid.Epsg.Transform.Test
 
 			Assert.AreEqual(expected5797, transformation.TransformValue(expected5705));
 			Assert.AreEqual(expected5705, inverse.TransformValue(expected5797));
-
 		}
 
 		[Test]

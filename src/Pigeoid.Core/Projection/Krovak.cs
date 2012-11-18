@@ -8,6 +8,8 @@ namespace Pigeoid.Projection
 {
 	public class Krovak : ProjectionBase
 	{
+
+		internal static double KrovakLongitudeRadiansOffset =  -(17.0 + (2.0 / 3.0)) * Math.PI / 180.0;
 		
 		internal class Inverse : InvertedTransformationBase<Krovak, Point2, GeographicCoordinate>
 		{
@@ -63,7 +65,7 @@ namespace Pigeoid.Projection
 						/ Math.Cos(u)
 					) / Core.B
 				);
-				return new GeographicCoordinate(lat, lon);
+				return new GeographicCoordinate(lat, lon + KrovakLongitudeRadiansOffset);
 			}
 			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
@@ -153,7 +155,7 @@ namespace Pigeoid.Projection
 				- QuarterPi
 			) * 2.0;
 			var cosU = Math.Cos(u);
-			var v = (GeographicOrigin.Longitude - source.Longitude)*B;
+			var v = (GeographicOrigin.Longitude - (source.Longitude - KrovakLongitudeRadiansOffset)) * B;
 			var t = Math.Asin(
 				(Math.Sin(u) * CosAzimuthOfInitialLine)
 				+ (Math.Cos(v) * cosU * SinAzimuthOfInitialLine)
