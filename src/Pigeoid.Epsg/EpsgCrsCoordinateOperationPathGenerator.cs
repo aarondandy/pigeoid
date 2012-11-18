@@ -13,29 +13,120 @@ namespace Pigeoid.Epsg
 
 		public class SharedOptions
 		{
-			public bool IgnoreDeprecatedCrs { get; set; }
-			public bool IgnoreDeprecatedOperations { get; set; }
+
+			public abstract class AreaValidatorBase
+			{
+
+				protected AreaValidatorBase(EpsgArea fromArea, EpsgArea toArea) {
+					FromArea = fromArea;
+					ToArea = toArea;
+				}
+
+				public EpsgArea FromArea { get; protected set; }
+				public EpsgArea ToArea { get; protected set; }
+
+				protected virtual bool IsValid(EpsgArea area){
+					if (null == area || null == FromArea || null == ToArea)
+						return true;
+					return FromArea.Intersects(area) || ToArea.Intersects(area);
+				}
+
+			}
+
+			public class CrsValidator : AreaValidatorBase
+			{
+
+				public CrsValidator(EpsgArea fromArea, EpsgArea toArea) : base(fromArea, toArea) { }
+
+				public virtual bool IsValid([NotNull] EpsgCrs crs){
+					return IsValid(crs.Area);
+				}
+
+			}
+
+			public class OperationValidator : AreaValidatorBase
+			{
+
+				public OperationValidator(EpsgArea fromArea, EpsgArea toArea) : base(fromArea, toArea) { }
+
+				public virtual bool IsValid([NotNull] EpsgCoordinateOperationInfoBase operation) {
+					return IsValid(operation.Area);
+				}
+			}
+
+			public virtual CrsValidator CreateCrsValidator(EpsgArea fromArea, EpsgArea toArea){
+				return new CrsValidator(fromArea, toArea);
+			}
+
+			public virtual OperationValidator CreateOperationValidator(EpsgArea fromArea, EpsgArea toArea){
+				return new OperationValidator(fromArea, toArea);
+			}
+
+		}
+
+		public class SharedOptionsAreaPredicate : SharedOptions
+		{
+			private class CrsPredicateValidator : CrsValidator
+			{
+				private readonly Predicate<EpsgCrs> _predicate;
+
+				public CrsPredicateValidator([NotNull] Predicate<EpsgCrs> predicate, EpsgArea fromArea, EpsgArea toArea) : base(fromArea,toArea) {
+					_predicate = predicate;
+				}
+
+				public override bool IsValid(EpsgCrs crs) {
+					return base.IsValid(crs) && _predicate(crs);
+				}
+			}
+
+			private class OperationPredicateValidator : OperationValidator
+			{
+				private readonly Predicate<EpsgCoordinateOperationInfoBase> _predicate;
+
+				public OperationPredicateValidator([NotNull] Predicate<EpsgCoordinateOperationInfoBase> predicate, EpsgArea fromArea, EpsgArea toArea)
+					: base(fromArea, toArea) {
+					_predicate = predicate;
+				}
+
+				public override bool IsValid(EpsgCoordinateOperationInfoBase operation) {
+					return base.IsValid(operation) && _predicate(operation);
+				}
+			}
+
+			[NotNull] private readonly Predicate<EpsgCrs> _crsPredicate;
+			[NotNull] private readonly Predicate<EpsgCoordinateOperationInfoBase> _opPredicate;
+
+			public SharedOptionsAreaPredicate([NotNull] Predicate<EpsgCrs> crsPredicate, [NotNull] Predicate<EpsgCoordinateOperationInfoBase> operationPredicate){
+				if(null == crsPredicate)
+					throw new ArgumentNullException("crsPredicate");
+				if(null == operationPredicate)
+					throw new ArgumentNullException("operationPredicate");
+
+				_crsPredicate = crsPredicate;
+				_opPredicate = operationPredicate;
+			}
+
+			public override CrsValidator CreateCrsValidator(EpsgArea fromArea, EpsgArea toArea) {
+				return new CrsPredicateValidator(_crsPredicate, fromArea, toArea);
+			}
+
+			public override OperationValidator CreateOperationValidator(EpsgArea fromArea, EpsgArea toArea) {
+				return new OperationPredicateValidator(_opPredicate, fromArea, toArea);
+			}
+
 		}
 
 		private class EpsgTransformGraph : DynamicGraphBase<EpsgCrs, int, ICoordinateOperationInfo>
 		{
 
-			private readonly EpsgArea _fromArea;
-			private readonly EpsgArea _toArea;
 			private readonly SharedOptions _options;
+			private readonly SharedOptions.CrsValidator _crsValidator;
+			private readonly SharedOptions.OperationValidator _opValidator;
 
 			public EpsgTransformGraph([NotNull] EpsgArea fromArea, [NotNull] EpsgArea toArea, [NotNull] SharedOptions options) {
-				_fromArea = fromArea;
-				_toArea = toArea;
 				_options = options;
-			}
-
-			private bool AreaIntersectionPasses(EpsgArea area) {
-				return null == area
-					|| null == _fromArea
-					|| null == _toArea
-					|| _fromArea.Intersects(area)
-					|| _toArea.Intersects(area);
+				_crsValidator = _options.CreateCrsValidator(fromArea, toArea);
+				_opValidator = _options.CreateOperationValidator(fromArea, toArea);
 			}
 
 			public override IEnumerable<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>> GetNeighborInfo(EpsgCrs node, int currentCost) {
@@ -46,49 +137,41 @@ namespace Pigeoid.Epsg
 				var nodeCode = node.Code;
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedForwardReferenced(nodeCode)) {
-					if(_options.IgnoreDeprecatedOperations && op.Deprecated)
+					if (!_opValidator.IsValid(op))
 						continue;
 					var crs = op.TargetCrs;
-					if (_options.IgnoreDeprecatedCrs && crs.Deprecated)
-						continue;
-					if(!AreaIntersectionPasses(crs.Area))
+					if (!_crsValidator.IsValid(crs))
 						continue;
 					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(nodeCode)) {
-					if (_options.IgnoreDeprecatedOperations && op.Deprecated)
+					if (!_opValidator.IsValid(op))
 						continue;
 					if(!op.HasInverse)
 						continue;
 					var crs = op.SourceCrs;
-					if (_options.IgnoreDeprecatedCrs && crs.Deprecated)
-						continue;
-					if(!AreaIntersectionPasses(crs.Area))
+					if (!_crsValidator.IsValid(crs))
 						continue;
 					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced(nodeCode)) {
-					if (_options.IgnoreDeprecatedOperations && op.Deprecated)
+					if (!_opValidator.IsValid(op))
 						continue;
 					var crs = op.TargetCrs;
-					if (_options.IgnoreDeprecatedCrs && crs.Deprecated)
-						continue;
-					if(!AreaIntersectionPasses(crs.Area))
+					if(!_crsValidator.IsValid(crs))
 						continue;
 					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
 				}
 
 				foreach(var op in EpsgCoordinateOperationInfoRepository.GetTransformReverseReferenced(nodeCode)) {
-					if (_options.IgnoreDeprecatedOperations && op.Deprecated)
+					if (!_opValidator.IsValid(op))
 						continue;
 					if(!op.HasInverse)
 						continue;
 					var crs = op.SourceCrs;
-					if (_options.IgnoreDeprecatedCrs && crs.Deprecated)
-						continue;
-					if(!AreaIntersectionPasses(crs.Area))
+					if (!_crsValidator.IsValid(crs))
 						continue;
 					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
 				}
@@ -100,23 +183,6 @@ namespace Pigeoid.Epsg
 		{
 
 			public static List<CrsOperationRelation> BuildSourceSearchList(EpsgCrs source) {
-				/*var result = new List<CrsOperationRelation>();
-				var cost = 0;
-				var current = source;
-				var path = new CoordinateOperationCrsPathInfo(source);
-
-				while(current is EpsgCrsProjected) {
-					var projected = current as EpsgCrsProjected;
-					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path});
-					current = projected.BaseCrs;
-					cost++;
-					path = path.Append(current, projected.Projection.GetInverse());
-				}
-				if(current is EpsgCrsGeodetic) {
-					result.Add(new CrsOperationRelation{ Cost = cost, RelatedCrs = current, Path = path});
-				}
-				return result;*/
-
 				var cost = 0;
 				var current = source;
 				var path = new CoordinateOperationCrsPathInfo(source);
@@ -156,21 +222,6 @@ namespace Pigeoid.Epsg
 					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path});
 				}
 				return result;
-				/*var result = new List<CrsOperationRelation>();
-				var cost = 0;
-				var current = target;
-				var path = new CoordinateOperationCrsPathInfo(target);
-				while (current is EpsgCrsProjected) {
-					var projected = current as EpsgCrsProjected;
-					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path });
-					current = projected.BaseCrs;
-					cost++;
-					path = path.Prepend(current, projected.Projection);
-				}
-				if (current is EpsgCrsGeodetic) {
-					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path });
-				}
-				return result;*/
 			} 
 
 			public EpsgCrs RelatedCrs;
@@ -184,8 +235,10 @@ namespace Pigeoid.Epsg
 			public CoordinateOperationCrsPathInfo Path;
 		}
 
-		public EpsgCrsCoordinateOperationPathGenerator() {
-			Options = new SharedOptions();
+		public EpsgCrsCoordinateOperationPathGenerator() : this(null) {}
+
+		public EpsgCrsCoordinateOperationPathGenerator(SharedOptions options) {
+			Options = options ?? new SharedOptions();
 		}
 
 		public SharedOptions Options { get; private set; }

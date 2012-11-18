@@ -46,7 +46,7 @@ namespace Pigeoid.Epsg.ProjectionTest
 					yield return batch;
 				}
 			}
-		} 
+		}
 
 		public void Run(Action<IEnumerable<CrsTestCase>> saveResults) {
 			var batchBufferSize = 8;
@@ -65,9 +65,7 @@ namespace Pigeoid.Epsg.ProjectionTest
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-			var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
-			pathGenerator.Options.IgnoreDeprecatedCrs = IgnoreDeprecated;
-			pathGenerator.Options.IgnoreDeprecatedOperations = IgnoreDeprecated;
+			var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(x => !x.Deprecated, x => !x.Deprecated));
 
 			var transformGenerator = new StaticCoordinateOperationCompiler();
 

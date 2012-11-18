@@ -50,17 +50,17 @@ namespace Pigeoid.Interop.Proj4
 				),
 				new Proj4Datum(
 					"ire65", Proj4Spheroid.GetSpheroid("mod_airy"),
-					new Helmert7Transformation(new Vector3(482.530, -130.596, 564.557), new Vector3(-1.042, -0.214, -0.631), 8.15)
+					Helmert7Transformation.CreatePositionVectorFormat(new Vector3(482.530, -130.596, 564.557), new Vector3(-1.042, -0.214, -0.631), 8.15)
 				),
 				new Proj4Datum(
 					"nzgd49", Proj4Spheroid.GetSpheroid("intl"),
-					new Helmert7Transformation(new Vector3(59.47, -5.04, 187.44), new Vector3(0.47, -0.1, 1.024), -4.5993),
+					Helmert7Transformation.CreatePositionVectorFormat(new Vector3(59.47, -5.04, 187.44), new Vector3(0.47, -0.1, 1.024), -4.5993),
 					supported: false,
 					matchExplicitly: true
 				),
 				new Proj4Datum(
 					"OSGB36", Proj4Spheroid.GetSpheroid("airy"),
-					new Helmert7Transformation(new Vector3(446.448, -125.157, 542.060), new Vector3(0.1502, 0.2470, 0.8421), -20.4894),
+					Helmert7Transformation.CreatePositionVectorFormat(new Vector3(446.448, -125.157, 542.060), new Vector3(0.1502, 0.2470, 0.8421), -20.4894),
 					supported: false
 				)
 			});

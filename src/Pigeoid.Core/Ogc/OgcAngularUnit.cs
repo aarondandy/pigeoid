@@ -12,8 +12,9 @@ namespace Pigeoid.Ogc
 	public class OgcAngularUnit : OgcUnitBase
 	{
 
-		private static readonly OgcAngularUnit DefaultRadianInstance = new OgcAngularUnit("Radian", 1);
-		private static readonly OgcAngularUnit DefaultDegreesInstance = new OgcAngularUnit("Degree", Math.PI / 180.0, new AuthorityTag("EPSG", "9122"));
+		private static readonly OgcAngularUnit DefaultRadianInstance = new OgcAngularUnit("radian", 1, new AuthorityTag("EPSG", "9101"));
+		private static readonly OgcAngularUnit DefaultDegreesInstance = new OgcAngularUnit("degree", Math.PI / 180.0, new AuthorityTag("EPSG", "9122"));
+		private static readonly OgcAngularUnit DefaultArcSecondInstance = new OgcAngularUnit("arc-second", Math.PI / 648000.0, new AuthorityTag("EPSG", "9122"));
 
 		/// <summary>
 		/// This is the OGC reference unit for angular measure.
@@ -25,6 +26,12 @@ namespace Pigeoid.Ogc
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static OgcAngularUnit DefaultDegrees { get { return DefaultDegreesInstance; } }
+
+		/// <summary>
+		/// The default arc-second unit factored against radians.
+		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static OgcAngularUnit DefaultArcSeconds { get { return DefaultArcSecondInstance; } }
 
 		/// <summary>
 		/// Constructs a new unit.

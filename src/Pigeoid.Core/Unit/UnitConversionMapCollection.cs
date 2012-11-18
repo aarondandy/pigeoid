@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Unit
@@ -17,7 +18,7 @@ namespace Pigeoid.Unit
 			get { return this.SelectMany(x => x.AllUnits).Distinct(EqualityComparer); }
 		}
 
-		public IEqualityComparer<IUnit> EqualityComparer { get { return this.Select(x => x.EqualityComparer).FirstOrDefault(); } }
+		[NotNull] public IEqualityComparer<IUnit> EqualityComparer { get { return this.Select(x => x.EqualityComparer).FirstOrDefault() ?? UnitEqualityComparer.Default; } }
 
 		public IEnumerable<IUnitConversion<TValue>> GetConversionsTo(IUnit to) {
 			return this

@@ -20,6 +20,14 @@ namespace Pigeoid.Transformation
 		IParameterizedCoordinateOperationInfo
 	{
 
+		public static Helmert7Transformation CreatePositionVectorFormat(Vector3 translationVector, Vector3 rotationVector, double mppm){
+			return new Helmert7Transformation(translationVector, rotationVector, mppm);
+		}
+
+		public static Helmert7Transformation CreateCoordinateFrameRotationFormat(Vector3 translationVector, Vector3 rotationVector, double mppm){
+			return new Helmert7Transformation(translationVector, rotationVector.GetNegative(), mppm);
+		}
+
 		/// <summary>
 		/// A transformation which does nothing.
 		/// </summary>
@@ -38,18 +46,18 @@ namespace Pigeoid.Transformation
 					throw new ArgumentException("Core cannot be inverted.");
 
 				_invRot = new Matrix3(
-					1, Core.R.Z, -Core.R.Y,
-					-Core.R.Z, 1, Core.R.X,
-					Core.R.Y, -Core.R.X, 1
+					1, -Core.RotationRadians.Z, Core.RotationRadians.Y,
+					Core.RotationRadians.Z, 1, -Core.RotationRadians.X,
+					-Core.RotationRadians.Y, Core.RotationRadians.X, 1
 				);
 				_invRot.Invert();
 			}
 
 			public override Point3 TransformValue(Point3 coordinate) {
 				coordinate = new Point3(
-					(coordinate.X - Core.D.X) / Core.M,
-					(coordinate.Y - Core.D.Y) / Core.M,
-					(coordinate.Z - Core.D.Z) / Core.M
+					(coordinate.X - Core.Delta.X) / Core.ScaleFactor,
+					(coordinate.Y - Core.Delta.Y) / Core.ScaleFactor,
+					(coordinate.Z - Core.Delta.Z) / Core.ScaleFactor
 				);
 				return new Point3(
 					(coordinate.X * _invRot.E00) + (coordinate.Y * _invRot.E10) + (coordinate.Z * _invRot.E20),
@@ -64,10 +72,10 @@ namespace Pigeoid.Transformation
 
 			public bool Equals(Inverted other) {
 				return !ReferenceEquals(null, other)
-					&& Core.D.Equals(other.Core.D)
-					&& Core.R.Equals(other.Core.R)
+					&& Core.Delta.Equals(other.Core.Delta)
+					&& Core.RotationRadians.Equals(other.Core.RotationRadians)
 // ReSharper disable CompareOfFloatsByEqualityOperator
-					&& Core.M == other.Core.M
+					&& Core.ScaleFactor == other.Core.ScaleFactor
 // ReSharper restore CompareOfFloatsByEqualityOperator
 				;
 			}
@@ -98,19 +106,23 @@ namespace Pigeoid.Transformation
 		/// <summary>
 		/// Translation vector.
 		/// </summary>
-		public readonly Vector3 D;
+		public readonly Vector3 Delta;
 		/// <summary>
-		/// Rotation vector.
+		/// Rotation vector in radians.
 		/// </summary>
-		public readonly Vector3 R;
+		public readonly Vector3 RotationRadians;
+		/// <summary>
+		/// Rotation vector in arc-seconds.
+		/// </summary>
+		public readonly Vector3 RotationArcSeconds;
 		/// <summary>
 		/// Scale factor, offset in ppm from 1.
 		/// </summary>
-		public readonly double Mppm;
+		public readonly double ScaleDeltaPartsPerMillion;
 		/// <summary>
 		/// Scale factor.
 		/// </summary>
-		public readonly double M;
+		public readonly double ScaleFactor;
 
 		/// <summary>
 		/// Constructs a new Helmert 7 parameter transform.
@@ -123,33 +135,34 @@ namespace Pigeoid.Transformation
 		/// Constructs a new Helmert 7 parameter transform.
 		/// </summary>
 		/// <param name="translationVector">The vector used to translate.</param>
-		/// <param name="rotationVector">The vector containing rotation parameters.</param>
-		/// <param name="mppm">The scale factor offset in PPM.</param>
+		/// <param name="rotationVectorArcSeconds">The vector containing rotation parameters.</param>
+		/// <param name="scaleDeltaPartsPerMillion">The scale factor offset in PPM.</param>
 		public Helmert7Transformation(
 			Vector3 translationVector,
-			Vector3 rotationVector,
-			double mppm
+			Vector3 rotationVectorArcSeconds,
+			double scaleDeltaPartsPerMillion
 		) {
-			D = translationVector;
-			R = rotationVector;
-			Mppm = mppm;
-			M = 1 + (mppm / 1000000.0);
+			Delta = translationVector;
+			RotationArcSeconds = rotationVectorArcSeconds;
+			RotationRadians = RotationArcSeconds.GetScaled(Math.PI / 648000.0);
+			ScaleDeltaPartsPerMillion = scaleDeltaPartsPerMillion;
+			ScaleFactor = 1 + (scaleDeltaPartsPerMillion / 1000000.0);
 		}
 
 		private void TransformValue(ref Point3 coordinate) {
 			coordinate = new Point3(
-				((coordinate.X + (coordinate.Z * R.Y) - (coordinate.Y * R.Z)) * M) + D.X,
-				((coordinate.Y + (coordinate.X * R.Z) - (coordinate.Z * R.X)) * M) + D.Y,
-				((coordinate.Z + (coordinate.Y * R.X) - (coordinate.X * R.Y)) * M) + D.Z
+				((coordinate.X - (coordinate.Z * RotationRadians.Y) + (coordinate.Y * RotationRadians.Z)) * ScaleFactor) + Delta.X,
+				((coordinate.Y - (coordinate.X * RotationRadians.Z) + (coordinate.Z * RotationRadians.X)) * ScaleFactor) + Delta.Y,
+				((coordinate.Z - (coordinate.Y * RotationRadians.X) + (coordinate.X * RotationRadians.Y)) * ScaleFactor) + Delta.Z
 			);
 		}
 
 
 		public Point3 TransformValue(Point3 coordinate) {
 			return new Point3(
-				((coordinate.X + (coordinate.Z * R.Y) - (coordinate.Y * R.Z)) * M) + D.X,
-				((coordinate.Y + (coordinate.X * R.Z) - (coordinate.Z * R.X)) * M) + D.Y,
-				((coordinate.Z + (coordinate.Y * R.X) - (coordinate.X * R.Y)) * M) + D.Z
+				((coordinate.X - (coordinate.Z * RotationRadians.Y) + (coordinate.Y * RotationRadians.Z)) * ScaleFactor) + Delta.X,
+				((coordinate.Y - (coordinate.X * RotationRadians.Z) + (coordinate.Z * RotationRadians.X)) * ScaleFactor) + Delta.Y,
+				((coordinate.Z - (coordinate.Y * RotationRadians.X) + (coordinate.X * RotationRadians.Y)) * ScaleFactor) + Delta.Z
 			);
 		}
 
@@ -172,7 +185,7 @@ namespace Pigeoid.Transformation
 		}
 
 // ReSharper disable CompareOfFloatsByEqualityOperator
-		public bool HasInverse { get { return 0 != M; } }
+		public bool HasInverse { get { return 0 != ScaleFactor; } }
 // ReSharper restore CompareOfFloatsByEqualityOperator
 
 		ITransformation ITransformation.GetInverse() {
@@ -181,10 +194,10 @@ namespace Pigeoid.Transformation
 
 		public bool Equals(Helmert7Transformation other) {
 			return !ReferenceEquals(null, other)
-				&& D.Equals(other.D)
-				&& R.Equals(other.R)
+				&& Delta.Equals(other.Delta)
+				&& RotationRadians.Equals(other.RotationRadians)
 // ReSharper disable CompareOfFloatsByEqualityOperator
-				&& Mppm == other.Mppm
+				&& ScaleDeltaPartsPerMillion == other.ScaleDeltaPartsPerMillion
 // ReSharper restore CompareOfFloatsByEqualityOperator
 			;
 		}
@@ -194,7 +207,7 @@ namespace Pigeoid.Transformation
 		}
 
 		public override int GetHashCode() {
-			return D.GetHashCode() ^ R.GetHashCode();
+			return Delta.GetHashCode() ^ RotationRadians.GetHashCode();
 		}
 
 		[Obsolete]
@@ -206,13 +219,13 @@ namespace Pigeoid.Transformation
 		public IEnumerable<INamedParameter> Parameters {
 			get {
 				return new INamedParameter[] {
-					new NamedParameter<double>("dx",D.X),
-					new NamedParameter<double>("dy",D.Y),
-					new NamedParameter<double>("dz",D.Z),
-					new NamedParameter<double>("rx",R.X),
-					new NamedParameter<double>("ry",R.Y),
-					new NamedParameter<double>("rz",R.Z),
-					new NamedParameter<double>("m",Mppm)
+					new NamedParameter<double>("dx",Delta.X),
+					new NamedParameter<double>("dy",Delta.Y),
+					new NamedParameter<double>("dz",Delta.Z),
+					new NamedParameter<double>("rx",RotationRadians.X),
+					new NamedParameter<double>("ry",RotationRadians.Y),
+					new NamedParameter<double>("rz",RotationRadians.Z),
+					new NamedParameter<double>("m",ScaleDeltaPartsPerMillion)
 				};
 			}
 		}
@@ -232,13 +245,13 @@ namespace Pigeoid.Transformation
 
 		public override string ToString(){
 			// ReSharper disable CompareOfFloatsByEqualityOperator
-			var result = Name + ' ' + D;
-			var writeM = 0 != Mppm;
+			var result = Name + ' ' + Delta;
+			var writeM = 0 != ScaleDeltaPartsPerMillion;
 
-			if(writeM || !Vector3.Zero.Equals(R)){
-				result += ' ' + R.ToString();
+			if(writeM || !Vector3.Zero.Equals(RotationRadians)){
+				result += ' ' + RotationRadians.ToString();
 				if(writeM){
-					result += String.Concat(' ',M);
+					result += String.Concat(' ',ScaleFactor);
 				}
 			}
 			

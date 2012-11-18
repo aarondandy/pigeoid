@@ -384,8 +384,93 @@ namespace Pigeoid.Epsg.Transform.Test
 
 			AreEqual(expected4326, transformation.TransformValue(expected4267), 0.005);
 			AreEqual(expected4267, inverse.TransformValue(expected4326), 0.005);
+		}
+
+		[Test, Ignore]
+		public void m9604_molodensky(){
+			Assert.Inconclusive("No operations");
+		}
+
+		[Test, Ignore]
+		public void m9605_abridgedMolodensky() {
+			Assert.Inconclusive("No operations");
+		}
+
+		[Test]
+		public void m9606_positionVectorTransformation_geog2DDomain() {
+			// method: 9606
+			// op: 1643
+			// crs: 4181 to 4326
+
+			var fromCrs = EpsgCrs.Get(4181);
+			var toCrs = EpsgCrs.Get(4326);
+
+			var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+				x => !x.Deprecated,
+				x => {
+					var coi = x as EpsgCoordinateOperationInfo;
+					if (coi != null){
+						if (coi.Method.Code != 9606) // don't allow this one so we can instead get the 1643 operation
+							return false;
+					}
+					return true;
+				}));
+
+			var opPath = pathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = pathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(invOpPath);
+
+			var expected4181 = new GeographicCoordinate(49.843933, 6.128542);
+			var expected4326 = new GeographicCoordinate(49.845, 6.13);
+
+			AreEqual(expected4326, transformation.TransformValue(expected4181), 0.002);
+			AreEqual(expected4181, inverse.TransformValue(expected4326), 0.002);
+		}
+
+		[Test]
+		public void m9607_coordinateFrameRotation_geog2DDomain(){
+			// method: 9607
+			// op: 5486
+			// crs: 4181 to 4326
+
+			var fromCrs = EpsgCrs.Get(4181);
+			var toCrs = EpsgCrs.Get(4326);
+
+			var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+				x => !x.Deprecated,
+				x => {
+					var coi = x as EpsgCoordinateOperationInfo;
+					if (coi != null) {
+						if (coi.Method.Code != 9607) // don't allow this one so we can instead get the 1643 operation
+							return false;
+					}
+					return true;
+				}));
+
+			var opPath = pathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = pathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(invOpPath);
+
+			var expected4181 = new GeographicCoordinate(49.843933, 6.128542);
+			var expected4326 = new GeographicCoordinate(49.845, 6.13);
+
+			AreEqual(expected4326, transformation.TransformValue(expected4181), 0.002);
+			AreEqual(expected4181, inverse.TransformValue(expected4326), 0.002);
 
 		}
 
 	}
+
 }

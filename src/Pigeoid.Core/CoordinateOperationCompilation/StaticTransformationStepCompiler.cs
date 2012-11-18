@@ -67,10 +67,10 @@ namespace Pigeoid.CoordinateOperationCompilation
 		}
 
 		private static bool TryCrateVector3(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, out Vector3 result) {
-			return TryCrateVector2(xParam, yParam, zParam, null, out result);
+			return TryCrateVector3(xParam, yParam, zParam, null, out result);
 		}
 
-		private static bool TryCrateVector2(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, IUnit linearUnit, out Vector3 result) {
+		private static bool TryCrateVector3(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, IUnit linearUnit, out Vector3 result) {
 			double x, y, z;
 			if (NamedParameter.TryGetDouble(xParam, out x) && NamedParameter.TryGetDouble(yParam, out y) && NamedParameter.TryGetDouble(yParam, out z)) {
 				if (null != linearUnit) {
@@ -107,7 +107,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return datum.Spheroid;
 		}
 
-		private static StaticCoordinateOperationCompiler.StepCompilationResult CreatePositionVectorTransformation(TransformationCompilationParams opData) {
+		private static bool ExtractHelmertParams(TransformationCompilationParams opData, out Vector3 translation, out Vector3 rotation, out double scale){
 			var xTransParam = new KeywordNamedParameterSelector("XAXIS", "TRANS");
 			var yTransParam = new KeywordNamedParameterSelector("YAXIS", "TRANS");
 			var zTransParam = new KeywordNamedParameterSelector("ZAXIS", "TRANS");
@@ -116,25 +116,29 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var zRotParam = new KeywordNamedParameterSelector("ZAXIS", "ROT");
 			var scaleParam = new KeywordNamedParameterSelector("SCALE");
 
-			if (!opData.ParameterLookup.Assign(xTransParam, yTransParam, zTransParam, xRotParam, yRotParam, zRotParam, scaleParam))
-				return null;
+			translation = Vector3.Invalid;
+			rotation = Vector3.Invalid;
+			scale = Double.NaN;
 
-			Vector3 translation, rotation;
-			double scale;
-
-			if (!TryCrateVector3(xTransParam.Selection, yTransParam.Selection, zTransParam.Selection, out translation))
-				return null;
-			if (!TryCrateVector3(xRotParam.Selection, yRotParam.Selection, zRotParam.Selection, out rotation))
-				return null;
-			if (!NamedParameter.TryGetDouble(scaleParam.Selection, out scale))
-				return null;
+			if(!opData.ParameterLookup.Assign(xTransParam, yTransParam, zTransParam, xRotParam, yRotParam, zRotParam, scaleParam))
+				return false;
+			if(!TryCrateVector3(xTransParam.Selection, yTransParam.Selection, zTransParam.Selection, out translation))
+				return false;
+			if(!TryCrateVector3(xRotParam.Selection, yRotParam.Selection, zRotParam.Selection, OgcAngularUnit.DefaultArcSeconds, out rotation))
+				return false;
+			if(!NamedParameter.TryGetDouble(scaleParam.Selection, out scale))
+				return false;
 
 			ConvertIfVaild(scaleParam.Selection.Unit, ScaleUnitPartsPerMillion.Value, ref scale);
+			return true;
+		}
 
-			var helmert = new Helmert7Transformation(translation, rotation, scale);
-
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateHelmertStep(TransformationCompilationParams opData, Helmert7Transformation helmert) {
 			if (opData.StepParams.RelatedInputCrs is ICrsGeocentric && opData.StepParams.RelatedOutputCrs is ICrsGeocentric)
-				return new StaticCoordinateOperationCompiler.StepCompilationResult(opData.StepParams, opData.StepParams.RelatedOutputCrsUnit, helmert);
+				return new StaticCoordinateOperationCompiler.StepCompilationResult(
+					opData.StepParams,
+					opData.StepParams.RelatedOutputCrsUnit ?? opData.StepParams.RelatedInputCrsUnit ?? opData.StepParams.InputUnit,
+					helmert);
 
 			var spheroidFrom = ExtractSpheroid(opData.StepParams.RelatedInputCrs) ?? ExtractSpheroid(opData.StepParams.RelatedOutputCrs);
 			if (null == spheroidFrom)
@@ -144,13 +148,31 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			ITransformation transformation = new Helmert7GeographicTransformation(spheroidFrom, helmert, spheroidTo);
 			var unitConversion = CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
-			if(null != unitConversion)
-				transformation = new ConcatenatedTransformation(new[] { unitConversion, transformation});
+			if (null != unitConversion)
+				transformation = new ConcatenatedTransformation(new[] { unitConversion, transformation });
 
 			return new StaticCoordinateOperationCompiler.StepCompilationResult(
 				opData.StepParams,
 				OgcAngularUnit.DefaultRadians,
 				transformation);
+		}
+
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreatePositionVectorTransformation(TransformationCompilationParams opData) {
+			Vector3 translation, rotation;
+			double scale;
+			if (!ExtractHelmertParams(opData, out translation, out rotation, out scale))
+				return null;
+
+			return CreateHelmertStep(opData, Helmert7Transformation.CreatePositionVectorFormat(translation, rotation, scale));
+		}
+
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateCoordinateFrameRotationTransformation(TransformationCompilationParams opData) {
+			Vector3 translation, rotation;
+			double scale;
+			if (!ExtractHelmertParams(opData, out translation, out rotation, out scale))
+				return null;
+
+			return CreateHelmertStep(opData, Helmert7Transformation.CreateCoordinateFrameRotationFormat(translation, rotation, scale));
 		}
 
 		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateGeographicOffset(TransformationCompilationParams opData) {
@@ -323,6 +345,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			if (normalizedName.StartsWith("POSITIONVECTORTRANSFORMATION"))
 				return CreatePositionVectorTransformation(compilationParams);
+			if (normalizedName.StartsWith("COORDINATEFRAMEROTATION"))
+				return CreateCoordinateFrameRotationTransformation(compilationParams);
 			if (normalizedName.Equals("GEOGRAPHICOFFSET"))
 				return CreateGeographicOffset(compilationParams);
 			if (normalizedName.StartsWith("GEOCENTRICTRANSLATION"))

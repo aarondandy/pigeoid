@@ -256,19 +256,20 @@ namespace Pigeoid.Ogc
 		public void Write([NotNull] Helmert7Transformation helmert) {
 			Write(WktKeyword.ToWgs84);
 			WriteOpenParenthesis();
-			WriteValue(helmert.D.X);
+			WriteValue(helmert.Delta.X);
 			WriteComma();
-			WriteValue(helmert.D.Y);
+			WriteValue(helmert.Delta.Y);
 			WriteComma();
-			WriteValue(helmert.D.Z);
+			WriteValue(helmert.Delta.Z);
 			WriteComma();
-			WriteValue(helmert.R.X);
+
+			WriteValue(helmert.RotationArcSeconds.X);
 			WriteComma();
-			WriteValue(helmert.R.Y);
+			WriteValue(helmert.RotationArcSeconds.Y);
 			WriteComma();
-			WriteValue(helmert.R.Z);
+			WriteValue(helmert.RotationArcSeconds.Z);
 			WriteComma();
-			WriteValue(helmert.Mppm);
+			WriteValue(helmert.ScaleDeltaPartsPerMillion);
 			WriteCloseParenthesis();
 		}
 

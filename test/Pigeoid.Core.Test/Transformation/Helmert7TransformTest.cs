@@ -13,7 +13,7 @@ namespace Pigeoid.Core.Test.Transformation
 		{
 			var wgs72 = new Point3(3657660.66, 255768.55, 5201382.11);
 			var wgs84 = new Point3(3657660.78, 255778.43, 5201387.75);
-			var transform = new Helmert7Transformation(
+			var transform = Helmert7Transformation.CreateCoordinateFrameRotationFormat(
 				new Vector3(0, 0, 4.5),
 				new Vector3(0, 0, 0.000002685868),
 				0.219
@@ -31,7 +31,7 @@ namespace Pigeoid.Core.Test.Transformation
 		{
 			var wgs72 = new Point3(3657660.66, 255768.55, 5201382.11);
 			var wgs84 = new Point3(3657660.78, 255778.43, 5201387.75);
-			var transform = new Helmert7Transformation(
+			var transform = Helmert7Transformation.CreateCoordinateFrameRotationFormat(
 				new Vector3(0, 0, 4.5),
 				new Vector3(0, 0, 0.000002685868),
 				0.219
