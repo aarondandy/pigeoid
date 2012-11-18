@@ -78,7 +78,8 @@ namespace Pigeoid
 
 	public static class NamedParameter
 	{
-		public static bool TryGetDouble(INamedParameter parameter, out double value) {
+		[ContractAnnotation("parameter:null=>false")]
+		public static bool TryGetDouble([CanBeNull] INamedParameter parameter, out double value) {
 			if (null != parameter) {
 				var doubleParameter = parameter as NamedParameter<double>;
 				if (null != doubleParameter) {

@@ -63,6 +63,8 @@ namespace Pigeoid.Epsg
 
 						new UnitRatioConversion(LookUp.Get(9080), LookUp.Get(9070), 49999783, 50000000), // indian foot to british foot 1865
 
+						new UnitUnityConversion(LookUp.Get(9102), LookUp.Get(9122)), 
+
 						new UnitScalarConversion(LookUp.Get(9102), LookUp.Get(9103), 60), // degree to arc-minute
 						new UnitScalarConversion(LookUp.Get(9103), LookUp.Get(9104), 60), // arc-minute to arc-second
 

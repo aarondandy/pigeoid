@@ -207,8 +207,10 @@
     <Compile Include="Transformation\Helmert7Transformation.cs" />
     <Compile Include="Transformation\InvertedTransformationBase.cs" />
     <Compile Include="Transformation\LinearElementTransformation.cs" />
+    <Compile Include="Transformation\MadridEd50Polynomial.cs" />
     <Compile Include="Transformation\MolodenskyBadekasGeographicTransformation.cs" />
     <Compile Include="Transformation\MolodenskyBadekasTransformation.cs" />
+    <Compile Include="Transformation\VerticalOffset.cs" />
     <Compile Include="Unit\BasicScaleUnitConversionMap.cs" />
     <Compile Include="Unit\ConcatenatedUnitConversion.cs" />
     <Compile Include="Unit\ScaleUnitPartsPerMillion.cs" />

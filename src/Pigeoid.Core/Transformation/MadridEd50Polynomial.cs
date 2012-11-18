@@ -1,0 +1,100 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using JetBrains.Annotations;
+using Vertesaur.Contracts;
+
+namespace Pigeoid.Transformation
+{
+	public class MadridEd50Polynomial :
+		ITransformation<GeographicCoordinate>,
+		ITransformation<GeographicHeightCoordinate, GeographicCoordinate>
+	{
+
+		public double A0 { get; private set; }
+		public double A1 { get; private set; }
+		public double A2 { get; private set; }
+		public double A3 { get; private set; }
+
+		public double B00 { get; private set; }
+		public double B0 { get; private set; }
+		public double B1 { get; private set; }
+		public double B2 { get; private set; }
+		public double B3 { get; private set; }
+
+		private readonly double _b0Total;
+
+		public MadridEd50Polynomial(
+			double a0,
+			double a1,
+			double a2,
+			double a3,
+			double b00,
+			double b0,
+			double b1,
+			double b2,
+			double b3
+		) {
+			A0 = a0;
+			A1 = a1;
+			A2 = a2;
+			A3 = a3;
+			B00 = b00;
+			B0 = b0;
+			B1 = b1;
+			B2 = b2;
+			B3 = b3;
+			_b0Total = B00 + B0;
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="value">Coordinates in decimal degrees.</param>
+		/// <returns>result in decimal degrees.</returns>
+		public GeographicCoordinate TransformValue(GeographicHeightCoordinate value) {
+			var dLat = A0 + (A1 * value.Latitude) + (A2 * value.Longitude) + (A3 * value.Height);
+			var dLon = _b0Total + (B1 * value.Latitude) + (B2 * value.Longitude) + (B3 * value.Height);
+			// be sure to convert the delta from arc-seconds to degrees
+			return new GeographicCoordinate(value.Latitude + (dLat / 3600.0), value.Longitude + (dLon / 3600.0));
+		}
+
+		public IEnumerable<GeographicCoordinate> TransformValues([NotNull] IEnumerable<GeographicHeightCoordinate> values) {
+			return values.Select(TransformValue);
+		}
+
+		public GeographicCoordinate TransformValue(GeographicCoordinate value) {
+			return TransformValue(new GeographicHeightCoordinate(value.Latitude, value.Longitude, 0));
+		}
+
+		public IEnumerable<GeographicCoordinate> TransformValues([NotNull] IEnumerable<GeographicCoordinate> values) {
+			return values.Select(TransformValue);
+		}
+
+		public void TransformValues([NotNull] GeographicCoordinate[] values) {
+			for (int i = 0; i < values.Length; i++)
+				values[i] = TransformValue(values[i]);
+		}
+
+		ITransformation<GeographicCoordinate, GeographicCoordinate> ITransformation<GeographicCoordinate, GeographicCoordinate>.GetInverse() {
+			throw new InvalidOperationException("No inverse");
+		}
+
+		ITransformation ITransformation.GetInverse() {
+			throw new InvalidOperationException("No inverse");
+		}
+
+		ITransformation<GeographicCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicCoordinate>.GetInverse() {
+			throw new InvalidOperationException("No inverse");
+		}
+
+		ITransformation<GeographicCoordinate> ITransformation<GeographicCoordinate>.GetInverse() {
+			throw new InvalidOperationException("No inverse");
+		}
+
+		public bool HasInverse {
+			[Pure, ContractAnnotation("=>false")] get { return false; }
+		}
+
+	}
+}

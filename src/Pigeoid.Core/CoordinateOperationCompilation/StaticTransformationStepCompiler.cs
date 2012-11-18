@@ -40,13 +40,6 @@ namespace Pigeoid.CoordinateOperationCompilation
 		private static readonly StaticTransformationStepCompiler DefaultValue = new StaticTransformationStepCompiler();
 		public static StaticTransformationStepCompiler Default { get { return DefaultValue; } }
 
-		private static IUnit ExtractUnit(ICrs crs) {
-			var geodetic = crs as ICrsGeodetic;
-			if (null != geodetic)
-				return geodetic.Unit;
-			return null;
-		}
-
 		private static bool ConvertIfVaild(IUnit from, IUnit to, ref double value) {
 			if (null == from || null == to)
 				return false;
@@ -147,7 +140,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var spheroidTo = ExtractSpheroid(opData.StepParams.RelatedOutputCrs) ?? spheroidFrom;
 
 			ITransformation transformation = new Helmert7GeographicTransformation(spheroidFrom, helmert, spheroidTo);
-			var unitConversion = CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
+			var unitConversion = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
 			if (null != unitConversion)
 				transformation = new ConcatenatedTransformation(new[] { unitConversion, transformation });
 
@@ -200,7 +193,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			if(null == transformation)
 				return null; // no parameters
 
-			var unitConversion = CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
+			var unitConversion = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
 			if (null != unitConversion)
 				transformation = new ConcatenatedTransformation(new[] { unitConversion, transformation });
 
@@ -236,14 +229,72 @@ namespace Pigeoid.CoordinateOperationCompilation
 			if (null == outputSpheroid)
 				return null;
 			ITransformation transformation = new GeographicGeocentricTranslation(inputSpheroid, delta, outputSpheroid);
-			var conv = CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
+			var conv = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
 			if (null != conv)
 				transformation = new ConcatenatedTransformation(new[] {conv, transformation});
 			return new StaticCoordinateOperationCompiler.StepCompilationResult(
 				opData.StepParams,
 				OgcAngularUnit.DefaultRadians,
 				transformation);
+		}
 
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateVerticalOffset(TransformationCompilationParams opData) {
+			double offsetValue = 0;
+			
+			var offsetParam = new KeywordNamedParameterSelector("OFFSET", "VERTICAL");
+			if (opData.ParameterLookup.Assign(offsetParam)) {
+				if (!NamedParameter.TryGetDouble(offsetParam.Selection, out offsetValue))
+					offsetValue = 0;
+			}
+
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				opData.StepParams.InputUnit,
+				new VerticalOffset(offsetValue));
+		}
+
+		private static bool TryGetCoefficientValue(INamedParameter parameter, out double value) {
+			if (null != parameter && NamedParameter.TryGetDouble(parameter, out value)) {
+				ConvertIfVaild(parameter.Unit, ScaleUnitUnity.Value, ref value);
+				return true;
+			}
+			value = default(double);
+			return false;
+		}
+
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateMadridToEd50Polynomial(TransformationCompilationParams opData) {
+			var a0Param = new FullMatchParameterSelector("A0");
+			var a1Param = new FullMatchParameterSelector("A1");
+			var a2Param = new FullMatchParameterSelector("A2");
+			var a3Param = new FullMatchParameterSelector("A3");
+			var b00Param = new FullMatchParameterSelector("B00");
+			var b0Param = new FullMatchParameterSelector("B0");
+			var b1Param = new FullMatchParameterSelector("B1");
+			var b2Param = new FullMatchParameterSelector("B2");
+			var b3Param = new FullMatchParameterSelector("B3");
+			opData.ParameterLookup.Assign(a0Param, a1Param, a2Param, a3Param, b00Param, b0Param, b1Param, b2Param, b3Param);
+
+			double a0, a1, a2, a3, b00, b0, b1, b2, b3;
+			TryGetCoefficientValue(a0Param.Selection, out a0);
+			TryGetCoefficientValue(a1Param.Selection, out a1);
+			TryGetCoefficientValue(a2Param.Selection, out a2);
+			TryGetCoefficientValue(a3Param.Selection, out a3);
+			TryGetCoefficientValue(b00Param.Selection, out b00);
+			TryGetCoefficientValue(b0Param.Selection, out b0);
+			TryGetCoefficientValue(b1Param.Selection, out b1);
+			TryGetCoefficientValue(b2Param.Selection, out b2);
+			TryGetCoefficientValue(b3Param.Selection, out b3);
+
+			ITransformation transformation = new MadridEd50Polynomial(a0, a1, a2, a3, b00, b0, b1, b2, b3);
+
+			var conv = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultDegrees);
+			if (null != conv)
+				transformation = new ConcatenatedTransformation(new[] { conv, transformation });
+
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				OgcAngularUnit.DefaultDegrees,
+				transformation);
 		}
 
 		private readonly INameNormalizedComparer _coordinateOperationNameComparer;
@@ -255,21 +306,6 @@ namespace Pigeoid.CoordinateOperationCompilation
 		public StaticCoordinateOperationCompiler.StepCompilationResult Compile(StaticCoordinateOperationCompiler.StepCompilationParameters stepParameters) {
 			return CompileInverse(stepParameters)
 				?? CompileForwards(stepParameters);
-		}
-
-		[CanBeNull] private static ITransformation CreateCoordinateUnitConversion([NotNull] IUnit from, [NotNull] IUnit to) {
-			if (!UnitEqualityComparer.Default.Equals(from, to)) {
-				var conv = SimpleUnitConversionGenerator.FindConversion(from, to);
-				if (null != conv) {
-					if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("LENGTH", from.Type)) {
-						return new LinearElementTransformation(conv);
-					}
-					if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("ANGLE", from.Type)) {
-						return new AngularElementTransformation(conv);
-					}
-				}
-			}
-			return null;
 		}
 
 		private StaticCoordinateOperationCompiler.StepCompilationResult CompileForwards([NotNull] StaticCoordinateOperationCompiler.StepCompilationParameters stepParameters){
@@ -292,8 +328,9 @@ namespace Pigeoid.CoordinateOperationCompilation
 			if (null == inverseOperationInfo)
 				return null;
 
-			var expectedOutputUnits = ExtractUnit(stepParameters.RelatedOutputCrs)
-				?? ExtractUnit(stepParameters.RelatedInputCrs);
+			var expectedOutputUnits = stepParameters.RelatedOutputCrsUnit
+				?? stepParameters.RelatedInputCrsUnit
+				?? stepParameters.InputUnit;
 
 			var forwardCompiledStep = CompileForwardToTransform(new StaticCoordinateOperationCompiler.StepCompilationParameters(
 				inverseOperationInfo,
@@ -310,7 +347,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var resultTransformation = inverseCompiledOperation;
 
 			// make sure that the input units are correct
-			var unitConversion = CreateCoordinateUnitConversion(stepParameters.InputUnit, forwardCompiledStep.OutputUnit);
+			var unitConversion = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(stepParameters.InputUnit, forwardCompiledStep.OutputUnit);
 			if(null != unitConversion)
 				resultTransformation = new ConcatenatedTransformation(new[]{unitConversion, resultTransformation});
 
@@ -351,6 +388,10 @@ namespace Pigeoid.CoordinateOperationCompilation
 				return CreateGeographicOffset(compilationParams);
 			if (normalizedName.StartsWith("GEOCENTRICTRANSLATION"))
 				return CreateGeocentricTranslation(compilationParams);
+			if (normalizedName.Equals("VERTICALOFFSET"))
+				return CreateVerticalOffset(compilationParams);
+			if (normalizedName.Equals("MADRIDTOED50POLYNOMIAL"))
+				return CreateMadridToEd50Polynomial(compilationParams);
 			return null;
 		}
 

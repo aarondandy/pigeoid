@@ -410,7 +410,7 @@ namespace Pigeoid.Epsg.Transform.Test
 				x => {
 					var coi = x as EpsgCoordinateOperationInfo;
 					if (coi != null){
-						if (coi.Method.Code != 9606) // don't allow this one so we can instead get the 1643 operation
+						if (coi.Method.Code != 9606)
 							return false;
 					}
 					return true;
@@ -447,7 +447,7 @@ namespace Pigeoid.Epsg.Transform.Test
 				x => {
 					var coi = x as EpsgCoordinateOperationInfo;
 					if (coi != null) {
-						if (coi.Method.Code != 9607) // don't allow this one so we can instead get the 1643 operation
+						if (coi.Method.Code != 9607)
 							return false;
 					}
 					return true;
@@ -468,7 +468,78 @@ namespace Pigeoid.Epsg.Transform.Test
 
 			AreEqual(expected4326, transformation.TransformValue(expected4181), 0.002);
 			AreEqual(expected4181, inverse.TransformValue(expected4326), 0.002);
+		}
 
+		[Test, Ignore]
+		public void m9613_nadcon() {
+			Assert.Inconclusive("Not supported");
+		}
+
+		[Test, Ignore]
+		public void m9614_ntV1() {
+			Assert.Inconclusive("Not supported");
+		}
+
+		[Test, Ignore]
+		public void m9615_ntv2() {
+			Assert.Inconclusive("Not supported");
+		}
+
+		[Test]
+		public void m9616_verticalOffset() {
+			// method: 9616
+			// op: 5443
+			// crs: 5705 to 5797
+
+			var fromCrs = EpsgCrs.Get(5705);
+			var toCrs = EpsgCrs.Get(5797);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<double, double>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<double, double>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected5705 = 100;
+			var expected5797 = expected5705 + 26.3;
+
+			Assert.AreEqual(expected5797, transformation.TransformValue(expected5705));
+			Assert.AreEqual(expected5705, inverse.TransformValue(expected5797));
+
+		}
+
+		[Test]
+		public void m9617_madridToEd50Polynomial() {
+			// method: 9617
+			// op: 1026
+			// crs: 4903 to 4230
+
+			var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+				x => !x.Deprecated,
+				x => {
+					var coi = x as EpsgCoordinateOperationInfo;
+					return coi == null || coi.Method.Code == 9617;
+				}));
+
+			var fromCrs = EpsgCrs.Get(4903);
+			var toCrs = EpsgCrs.Get(4230);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var input = new GeographicCoordinate(42.647992, 3.659603);
+			var expectedResult = new GeographicCoordinate(42.649117, -0.026658);
+
+			var result = transformation.TransformValue(input);
+
+			Assert.AreEqual(expectedResult.Latitude, result.Latitude, 0.00005);
+			Assert.AreEqual(expectedResult.Longitude, result.Longitude, 0.00005);
 		}
 
 	}
