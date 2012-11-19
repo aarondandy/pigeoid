@@ -2,6 +2,7 @@
 using Pigeoid.Contracts;
 using Pigeoid.CoordinateOperationCompilation;
 using Pigeoid.Unit;
+using System;
 using Vertesaur;
 using Vertesaur.Contracts;
 using Vertesaur.Transformation;
@@ -544,7 +545,7 @@ namespace Pigeoid.Epsg.Transform.Test
 			var fromCrs = EpsgCrs.Get(4903);
 			var toCrs = EpsgCrs.Get(4230);
 
-			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			var opPath = pathGenerator.Generate(fromCrs, toCrs);
 			Assert.IsNotNull(opPath);
 			var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
 			Assert.IsNotNull(transformation);
@@ -556,6 +557,128 @@ namespace Pigeoid.Epsg.Transform.Test
 
 			Assert.AreEqual(expectedResult.Latitude, result.Latitude, 0.00005);
 			Assert.AreEqual(expectedResult.Longitude, result.Longitude, 0.00005);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9618_geographic2DWithHeightOffset(){
+			// method: 9618
+			// op: 1335
+			// crs: 4301 to 4326
+
+			var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+				x => !x.Deprecated,
+				x => {
+					var coi = x as EpsgCoordinateOperationInfo;
+					return coi == null || coi.Method.Code == 9618;
+				}));
+
+			var fromCrs = EpsgCrs.Get(4301);
+			var toCrs = EpsgCrs.Get(4326);
+
+			var opPath = pathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, GeographicHeightCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = pathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicHeightCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test]
+		public void m9619_geographic2DOffsets(){
+			// method: 9619
+			// op: 1891
+			// crs: 4120 to 4121
+
+			var fromCrs = EpsgCrs.Get(4120);
+			var toCrs = EpsgCrs.Get(4121);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4120 = new GeographicCoordinate(38.14349, 23.80451);
+			var expected4121 = new GeographicCoordinate(38.141863, 23.804588);
+
+			AreEqual(expected4120, transformation.TransformValue(expected4121), 0.004);
+			AreEqual(expected4121, inverse.TransformValue(expected4120), 0.004);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9620_norwayOffshoreInterpolation(){
+			Assert.Ignore(NotSupported);
+		}
+
+		[Test]
+		public void m9621_similarityTransformation(){
+			// method: 9621
+			// op: 5166
+			// crs: 23031 to 25831
+
+			var fromCrs = EpsgCrs.Get(23031);
+			var toCrs = EpsgCrs.Get(25831);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected23031 = new Point2(300000, 4500000);
+			var expected25831 = new Point2(299905.060, 4499796.515);
+
+			AreEqual(expected25831, transformation.TransformValue(expected23031), 0.001);
+			AreEqual(expected23031, inverse.TransformValue(expected25831), 0.001);
+		}
+
+		[Test, Ignore(NoUsages)]
+		public void m9622_affineOrthogonalGeometricTransformation(){
+			Assert.Inconclusive(NoUsages);
+		}
+
+		[Test, Ignore(NoUsages)]
+		public void m9623_affineGeometricTransformation(){
+			Assert.Inconclusive(NoUsages);
+		}
+
+		[Test]
+		public void m9624_affineParametricTransformation(){
+			// method: 9624
+			// op: 15857
+			// crs: 3367 to 3343
+
+			var fromCrs = EpsgCrs.Get(3367);
+			var toCrs = EpsgCrs.Get(3343);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected3367 = new Point2(500000, 2324163.285331);
+			var expected3343 = new Point2(500000, 2324361.095694);
+
+			AreEqual(expected3343, transformation.TransformValue(expected3367), 300);
+			AreEqual(expected3367, inverse.TransformValue(expected3343), 300);
 		}
 
 	}

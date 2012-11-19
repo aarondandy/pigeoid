@@ -12,16 +12,20 @@ namespace Pigeoid.Transformation
 		ITransformation<GeographicHeightCoordinate>
 	{
 
-		public readonly double DLat;
-		public readonly double DLon;
+		public readonly GeographicHeightCoordinate _delta;
 
-		public GeographicCoordinate D {
-			get { return new GeographicCoordinate(DLat, DLon); }
+		public GeographicHeightCoordinate Delta {
+			get { return _delta; }
 		}
 
-		public GeographicOffset(double dLat, double dLon) {
-			DLat = dLat;
-			DLon = dLon;
+		public GeographicOffset(double deltaLat, double deltaLon)
+			: this(deltaLat, deltaLon, 0) {}
+
+		public GeographicOffset(double deltaLat, double deltaLon, double deltaHeight)
+			: this(new GeographicHeightCoordinate(deltaLat, deltaLon, deltaHeight)) { }
+
+		public GeographicOffset(GeographicHeightCoordinate delta){
+			_delta = delta;
 		}
 
 		public GeographicOffset(GeographicCoordinate d)
@@ -33,11 +37,11 @@ namespace Pigeoid.Transformation
 		}
 
 		private void TransformValue(ref GeographicCoordinate value) {
-			value = new GeographicCoordinate(value.Latitude + DLat, value.Longitude + DLon);
+			value = new GeographicCoordinate(value.Latitude + Delta.Latitude, value.Longitude + Delta.Longitude);
 		}
 
 		public GeographicCoordinate TransformValue(GeographicCoordinate value) {
-			return new GeographicCoordinate(value.Latitude + DLat, value.Longitude + DLon);
+			return new GeographicCoordinate(value.Latitude + Delta.Latitude, value.Longitude + Delta.Longitude);
 		}
 
 		[NotNull] public IEnumerable<GeographicCoordinate> TransformValues([NotNull] IEnumerable<GeographicCoordinate> values) {
@@ -45,11 +49,11 @@ namespace Pigeoid.Transformation
 		}
 
 		public GeographicHeightCoordinate TransformValue(GeographicHeightCoordinate value) {
-			return new GeographicHeightCoordinate(value.Latitude + DLat, value.Longitude + DLon, value.Height);
+			return new GeographicHeightCoordinate(value.Latitude + Delta.Latitude, value.Longitude + Delta.Longitude, value.Height + Delta.Height);
 		}
 
 		private void TransformValue(ref GeographicHeightCoordinate value) {
-			value = new GeographicHeightCoordinate(value.Latitude + DLat, value.Longitude + DLon, value.Height);
+			value = new GeographicHeightCoordinate(value.Latitude + Delta.Latitude, value.Longitude + Delta.Longitude, value.Height + Delta.Height);
 		}
 
 		public void TransformValues([NotNull] GeographicHeightCoordinate[] values) {
@@ -70,7 +74,7 @@ namespace Pigeoid.Transformation
 		}
 
 		[NotNull] GeographicOffset GetInverse() {
-			return new GeographicOffset(-DLat, -DLon);
+			return new GeographicOffset(new GeographicHeightCoordinate(-Delta.Latitude, -Delta.Longitude, -Delta.Height));
 		}
 
 		ITransformation<GeographicCoordinate> ITransformation<GeographicCoordinate>.GetInverse() {

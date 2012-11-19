@@ -24,6 +24,8 @@ namespace Pigeoid.Interop
 				text = text.Substring(0, text.Length - 10);
 
 			text = text.Replace("LONGITUDEROTATION", "GEOGRAPHICOFFSET");
+			if (text.EndsWith("OFFSETS"))
+				text = text.Substring(0, text.Length - 1);
 
 			if (CoordinateOperationStandardNames.IsNormalizedName(text))
 				return text;

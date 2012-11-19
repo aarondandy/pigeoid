@@ -194,6 +194,7 @@
     <Compile Include="Projection\TransverseMercatorZoned.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Transformation\AbridgedMolodenskyTransformation.cs" />
+    <Compile Include="Transformation\AffineParametricTransformation.cs" />
     <Compile Include="Transformation\AngularElementTransformation.cs" />
     <Compile Include="Transformation\CartesianOffset2.cs" />
     <Compile Include="Transformation\GeocentricTopocentricTransformation.cs" />
@@ -210,6 +211,7 @@
     <Compile Include="Transformation\MadridEd50Polynomial.cs" />
     <Compile Include="Transformation\MolodenskyBadekasGeographicTransformation.cs" />
     <Compile Include="Transformation\MolodenskyBadekasTransformation.cs" />
+    <Compile Include="Transformation\SimilarityTransformation.cs" />
     <Compile Include="Transformation\VerticalOffset.cs" />
     <Compile Include="Unit\BasicScaleUnitConversionMap.cs" />
     <Compile Include="Unit\ConcatenatedUnitConversion.cs" />

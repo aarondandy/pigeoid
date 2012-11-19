@@ -59,13 +59,31 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return true;
 		}
 
-		private static bool TryCrateVector3(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, out Vector3 result) {
-			return TryCrateVector3(xParam, yParam, zParam, null, out result);
+		private static bool TryCreatePoint2(INamedParameter xParam, INamedParameter yParam, out Point2 result){
+			return TryCreatePoint2(xParam, yParam, null, out result);
 		}
 
-		private static bool TryCrateVector3(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, IUnit linearUnit, out Vector3 result) {
+		private static bool TryCreatePoint2(INamedParameter xParam, INamedParameter yParam, IUnit linearUnit, out Point2 result){
+			double x, y;
+			if (NamedParameter.TryGetDouble(xParam, out x) && NamedParameter.TryGetDouble(yParam, out y)){
+				if (null != linearUnit){
+					ConvertIfVaild(xParam.Unit, linearUnit, ref x);
+					ConvertIfVaild(yParam.Unit, linearUnit, ref y);
+				}
+				result = new Point2(x, y);
+				return true;
+			}
+			result = Point2.Invalid;
+			return false;
+		}
+
+		private static bool TryCreateVector3(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, out Vector3 result) {
+			return TryCreateVector3(xParam, yParam, zParam, null, out result);
+		}
+
+		private static bool TryCreateVector3(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, IUnit linearUnit, out Vector3 result) {
 			double x, y, z;
-			if (NamedParameter.TryGetDouble(xParam, out x) && NamedParameter.TryGetDouble(yParam, out y) && NamedParameter.TryGetDouble(yParam, out z)) {
+			if (NamedParameter.TryGetDouble(xParam, out x) && NamedParameter.TryGetDouble(yParam, out y) && NamedParameter.TryGetDouble(zParam, out z)) {
 				if (null != linearUnit) {
 					ConvertIfVaild(xParam.Unit, linearUnit, ref x);
 					ConvertIfVaild(yParam.Unit, linearUnit, ref y);
@@ -115,9 +133,9 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			if(!opData.ParameterLookup.Assign(xTransParam, yTransParam, zTransParam, xRotParam, yRotParam, zRotParam, scaleParam))
 				return false;
-			if(!TryCrateVector3(xTransParam.Selection, yTransParam.Selection, zTransParam.Selection, out translation))
+			if(!TryCreateVector3(xTransParam.Selection, yTransParam.Selection, zTransParam.Selection, out translation))
 				return false;
-			if(!TryCrateVector3(xRotParam.Selection, yRotParam.Selection, zRotParam.Selection, OgcAngularUnit.DefaultArcSeconds, out rotation))
+			if(!TryCreateVector3(xRotParam.Selection, yRotParam.Selection, zRotParam.Selection, OgcAngularUnit.DefaultArcSeconds, out rotation))
 				return false;
 			if(!NamedParameter.TryGetDouble(scaleParam.Selection, out scale))
 				return false;
@@ -171,35 +189,29 @@ namespace Pigeoid.CoordinateOperationCompilation
 		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateGeographicOffset(TransformationCompilationParams opData) {
 			var latParam = new KeywordNamedParameterSelector("LAT");
 			var lonParam = new KeywordNamedParameterSelector("LON");
+			var heightParam = new KeywordNamedParameterSelector("HEIGHT");
 			opData.ParameterLookup.Assign(latParam, lonParam);
 
-			ITransformation transformation = null;
-			if (latParam.IsSelected && lonParam.IsSelected) {
-				GeographicCoordinate offset;
-				if (TryCreateGeographicCoordinate(latParam.Selection, lonParam.Selection, out offset))
-					transformation = new GeographicOffset(offset);
-			}
-			else if (latParam.IsSelected) {
-				double value;
-				if(TryGetDouble(latParam.Selection, OgcAngularUnit.DefaultRadians, out value))
-					transformation = new GeographicOffset(new GeographicCoordinate(value, 0));
-			}
-			else if (lonParam.IsSelected) {
-				double value;
-				if(TryGetDouble(lonParam.Selection, OgcAngularUnit.DefaultRadians, out value))
-					transformation = new GeographicOffset(new GeographicCoordinate(0, value));
-			}
 
-			if(null == transformation)
-				return null; // no parameters
+			var deltaLatitude = 0.0;
+			var deltaLongitude = 0.0;
+			var deltaHeight = 0.0;
 
-			var unitConversion = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
-			if (null != unitConversion)
-				transformation = new ConcatenatedTransformation(new[] { unitConversion, transformation });
+			if (!latParam.IsSelected && !lonParam.IsSelected && !heightParam.IsSelected)
+				return null;
+
+			if (latParam.IsSelected)
+				TryGetDouble(latParam.Selection, opData.StepParams.InputUnit, out deltaLatitude);
+			if (lonParam.IsSelected)
+				TryGetDouble(lonParam.Selection, opData.StepParams.InputUnit, out deltaLongitude);
+			if (heightParam.IsSelected)
+				NamedParameter.TryGetDouble(heightParam.Selection, out deltaHeight);
+
+			var transformation = new GeographicOffset(deltaLatitude, deltaLongitude, deltaHeight);
 
 			return new StaticCoordinateOperationCompiler.StepCompilationResult(
 				opData.StepParams,
-				OgcAngularUnit.DefaultRadians,
+				opData.StepParams.InputUnit,
 				transformation);
 		}
 
@@ -211,7 +223,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 				return null;
 
 			Vector3 delta;
-			if (!TryCrateVector3(xParam.Selection, yParam.Selection, zParam.Selection, out delta))
+			if (!TryCreateVector3(xParam.Selection, yParam.Selection, zParam.Selection, out delta))
 				return null;
 
 			if (opData.StepParams.RelatedInputCrs is ICrsGeocentric && opData.StepParams.RelatedOutputCrs is ICrsGeocentric) {
@@ -295,6 +307,54 @@ namespace Pigeoid.CoordinateOperationCompilation
 				opData.StepParams,
 				OgcAngularUnit.DefaultDegrees,
 				transformation);
+		}
+
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateSimilarityTransformation(TransformationCompilationParams opData){
+			var xParam = new KeywordNamedParameterSelector("ORDINATE1");
+			var yParam = new KeywordNamedParameterSelector("ORDINATE2");
+			var mParam = new KeywordNamedParameterSelector("SCALE");
+			var rParam = new KeywordNamedParameterSelector("ROTATION");
+			if (!opData.ParameterLookup.Assign(xParam, yParam, mParam, rParam))
+				return null;
+
+			Point2 origin;
+			if (!TryCreatePoint2(xParam.Selection, yParam.Selection, out origin))
+				return null;
+
+			double scale, rotation;
+			if (!NamedParameter.TryGetDouble(mParam.Selection, out scale))
+				return null;
+			if (!NamedParameter.TryGetDouble(rParam.Selection, out rotation))
+				return null;
+
+			ConvertIfVaild(rParam.Selection.Unit, OgcAngularUnit.DefaultRadians, ref rotation);
+
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				opData.StepParams.RelatedOutputCrsUnit ?? opData.StepParams.RelatedInputCrsUnit ?? opData.StepParams.InputUnit,
+				new SimilarityTransformation(origin, scale, rotation));
+		}
+
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateAffineParametricTransformation(TransformationCompilationParams opData){
+			var a0Param = new KeywordNamedParameterSelector("A0");
+			var a1Param = new KeywordNamedParameterSelector("A1");
+			var a2Param = new KeywordNamedParameterSelector("A2");
+			var b0Param = new KeywordNamedParameterSelector("B0");
+			var b1Param = new KeywordNamedParameterSelector("B1");
+			var b2Param = new KeywordNamedParameterSelector("B2");
+			if (!opData.ParameterLookup.Assign(a0Param, a1Param, a2Param, b0Param, b1Param, b2Param))
+				return null;
+
+			Vector3 a, b;
+			if (!TryCreateVector3(a0Param.Selection, a1Param.Selection, a2Param.Selection, out a))
+				return null;
+			if(!TryCreateVector3(b0Param.Selection, b1Param.Selection, b2Param.Selection, out b))
+				return null;
+
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				opData.StepParams.InputUnit,
+				new AffineParametricTransformation(a.X, a.Y, a.Z, b.X, b.Y, b.Z));
 		}
 
 		private readonly INameNormalizedComparer _coordinateOperationNameComparer;
@@ -384,7 +444,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 				return CreatePositionVectorTransformation(compilationParams);
 			if (normalizedName.StartsWith("COORDINATEFRAMEROTATION"))
 				return CreateCoordinateFrameRotationTransformation(compilationParams);
-			if (normalizedName.Equals("GEOGRAPHICOFFSET"))
+			if (normalizedName.Equals("GEOGRAPHICOFFSET") || (normalizedName.StartsWith("GEOGRAPHIC") && normalizedName.EndsWith("OFFSET")))
 				return CreateGeographicOffset(compilationParams);
 			if (normalizedName.StartsWith("GEOCENTRICTRANSLATION"))
 				return CreateGeocentricTranslation(compilationParams);
@@ -392,6 +452,10 @@ namespace Pigeoid.CoordinateOperationCompilation
 				return CreateVerticalOffset(compilationParams);
 			if (normalizedName.Equals("MADRIDTOED50POLYNOMIAL"))
 				return CreateMadridToEd50Polynomial(compilationParams);
+			if (normalizedName.Equals("SIMILARITYTRANSFORMATION"))
+				return CreateSimilarityTransformation(compilationParams);
+			if (normalizedName.Equals("AFFINEPARAMETRICTRANSFORMATION"))
+				return CreateAffineParametricTransformation(compilationParams);
 			return null;
 		}
 
