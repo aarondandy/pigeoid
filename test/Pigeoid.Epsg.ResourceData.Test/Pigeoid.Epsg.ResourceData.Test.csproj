@@ -70,21 +70,21 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\build\Pigeoid.Epsg.DbRepository\Pigeoid.Epsg.DbRepository.csproj">
-      <Project>{4D930C82-3FDF-4B55-A57B-6295B4459CD7}</Project>
+      <Project>{4d930c82-3fdf-4b55-a57b-6295b4459cd7}</Project>
       <Name>Pigeoid.Epsg.DbRepository</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\Pigeoid.Core\Pigeoid.Core.csproj">
-      <Project>{ECDC3D02-067E-4D6F-9DF2-58015EFDAE87}</Project>
+      <Project>{ecdc3d02-067e-4d6f-9df2-58015efdae87}</Project>
       <Name>Pigeoid.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\Pigeoid.Epsg\Pigeoid.Epsg.csproj">
-      <Project>{4DB9EE8B-B0A8-4EFD-8C2B-C2DFCA51A2DE}</Project>
+      <Project>{4db9ee8b-b0a8-4efd-8c2b-c2dfca51a2de}</Project>
       <Name>Pigeoid.Epsg</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

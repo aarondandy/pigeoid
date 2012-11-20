@@ -28,7 +28,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 
 		[TestFixtureSetUp]
 		public void FixtureSetUp() {
-			_repository = new DataTransmogrifier.EpsgRepository(new FileInfo("EPSG_v7_9.mdb"));
+			_repository = new DataTransmogrifier.EpsgRepository(new FileInfo("EPSG_v8_0.mdb"));
 		}
 
 		[TestFixtureTearDown]
