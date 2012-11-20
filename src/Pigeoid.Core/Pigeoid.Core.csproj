@@ -198,13 +198,13 @@
     <Compile Include="Transformation\AngularElementTransformation.cs" />
     <Compile Include="Transformation\CartesianOffset2.cs" />
     <Compile Include="Transformation\GeocentricTopocentricTransformation.cs" />
+    <Compile Include="Transformation\GeocentricTransformationGeographicWrapper.cs" />
     <Compile Include="Transformation\GeocentricTranslation.cs" />
     <Compile Include="Transformation\GeographicDimension.cs" />
     <Compile Include="Transformation\GeographicGeocentricTransformation.cs" />
     <Compile Include="Transformation\GeographicGeocentricTransformationBase.cs" />
     <Compile Include="Transformation\GeographicOffset.cs" />
     <Compile Include="Transformation\GeographicGeocentricTranslation.cs" />
-    <Compile Include="Transformation\Helmert7GeographicTransformation.cs" />
     <Compile Include="Transformation\Helmert7Transformation.cs" />
     <Compile Include="Transformation\InvertedTransformationBase.cs" />
     <Compile Include="Transformation\LinearElementTransformation.cs" />

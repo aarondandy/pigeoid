@@ -681,6 +681,98 @@ namespace Pigeoid.Epsg.Transform.Test
 			AreEqual(expected3367, inverse.TransformValue(expected3343), 300);
 		}
 
+		[Test, Ignore(NoUsages)]
+		public void m9625_generalPolynomial2ndOrder() {
+			Assert.Inconclusive(NoUsages);
+		}
+
+		[Test, Ignore(NoUsages)]
+		public void m9626_generalPolynomial3rdOrder() {
+			Assert.Inconclusive(NoUsages);
+		}
+
+		[Test, Ignore(NoUsages)]
+		public void m9627_generalPolynomial4thOrder() {
+			Assert.Inconclusive(NoUsages);
+		}
+
+		[Test, Ignore(NoUsages)]
+		public void m9628_reversiblePolynomial2ndOrder() {
+			Assert.Inconclusive(NoUsages);
+		}
+
+		[Test, Ignore(NoUsages)]
+		public void m9629_reversiblePolynomial3rdOrder() {
+			Assert.Inconclusive(NoUsages);
+		}
+
+		[Test]
+		public void m9630_reversiblePolynomial4thOrder() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test]
+		public void m9631_complexPolynomial3rdOrder() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test]
+		public void m9632_complexPolynomial4thOrder() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test]
+		public void m9633_ordnanceSurveyNationalTransformation() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test]
+		public void m9634_maritimeProvincesPolynomialInterpolation() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test]
+		public void m9635_geographic3DToGeographic2D_gravityRelatedHeight() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test]
+		public void m9636_molodenskyBadekas_geog2DDomain() {
+			// method: 9636
+			// op: 5484
+			// crs: 4181 to 4326
+
+			var fromCrs = EpsgCrs.Get(4181);
+			var toCrs = EpsgCrs.Get(4326);
+
+			var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+				x => !x.Deprecated,
+				x => {
+					var coi = x as EpsgCoordinateOperationInfo;
+					if (coi != null) {
+						if (coi.Method.Code != 9636)
+							return false;
+					}
+					return true;
+				}));
+
+			var opPath = pathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = pathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(invOpPath);
+
+			var expected4181 = new GeographicCoordinate(49.843933, 6.128542);
+			var expected4326 = new GeographicCoordinate(49.845, 6.13);
+
+			AreEqual(expected4326, transformation.TransformValue(expected4181), 0.0001);
+			AreEqual(expected4181, inverse.TransformValue(expected4326), 0.000001);
+		}
+
 	}
 
 }

@@ -77,6 +77,25 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return false;
 		}
 
+		private static bool TryCreatePoint3(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, out Point3 result) {
+			return TryCreatePoint3(xParam, yParam, zParam, null, out result);
+		}
+
+		private static bool TryCreatePoint3(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, IUnit linearUnit, out Point3 result) {
+			double x, y, z;
+			if (NamedParameter.TryGetDouble(xParam, out x) && NamedParameter.TryGetDouble(yParam, out y) && NamedParameter.TryGetDouble(zParam, out z)) {
+				if (null != linearUnit) {
+					ConvertIfVaild(xParam.Unit, linearUnit, ref x);
+					ConvertIfVaild(yParam.Unit, linearUnit, ref y);
+					ConvertIfVaild(zParam.Unit, linearUnit, ref z);
+				}
+				result = new Point3(x, y, z);
+				return true;
+			}
+			result = Point3.Invalid;
+			return false;
+		}
+
 		private static bool TryCreateVector3(INamedParameter xParam, INamedParameter yParam, INamedParameter zParam, out Vector3 result) {
 			return TryCreateVector3(xParam, yParam, zParam, null, out result);
 		}
@@ -157,7 +176,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			var spheroidTo = ExtractSpheroid(opData.StepParams.RelatedOutputCrs) ?? spheroidFrom;
 
-			ITransformation transformation = new Helmert7GeographicTransformation(spheroidFrom, helmert, spheroidTo);
+			ITransformation transformation = new GeocentricTransformationGeographicWrapper<Helmert7Transformation>(spheroidFrom, spheroidTo, helmert);
 			var unitConversion = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
 			if (null != unitConversion)
 				transformation = new ConcatenatedTransformation(new[] { unitConversion, transformation });
@@ -357,6 +376,61 @@ namespace Pigeoid.CoordinateOperationCompilation
 				new AffineParametricTransformation(a.X, a.Y, a.Z, b.X, b.Y, b.Z));
 		}
 
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateMolodenskyBadekas(TransformationCompilationParams opData) {
+			var xTransParam = new KeywordNamedParameterSelector("XAXIS", "TRANS");
+			var yTransParam = new KeywordNamedParameterSelector("YAXIS", "TRANS");
+			var zTransParam = new KeywordNamedParameterSelector("ZAXIS", "TRANS");
+			var xRotParam = new KeywordNamedParameterSelector("XAXIS", "ROT");
+			var yRotParam = new KeywordNamedParameterSelector("YAXIS", "ROT");
+			var zRotParam = new KeywordNamedParameterSelector("ZAXIS", "ROT");
+			var scaleParam = new KeywordNamedParameterSelector("SCALE");
+			var ord1Param = new KeywordNamedParameterSelector("ORDINATE1");
+			var ord2Param = new KeywordNamedParameterSelector("ORDINATE2");
+			var ord3Param = new KeywordNamedParameterSelector("ORDINATE3");
+
+			if (!opData.ParameterLookup.Assign(xTransParam, yTransParam, zTransParam, xRotParam, yRotParam, zRotParam, scaleParam, ord1Param, ord2Param, ord3Param))
+				return null;
+
+			Vector3 translation, rotation;
+			Point3 ordinate;
+			double scale;
+
+			if (!TryCreateVector3(xTransParam.Selection, yTransParam.Selection, zTransParam.Selection, out translation))
+				return null;
+			if (!TryCreateVector3(xRotParam.Selection, yRotParam.Selection, zRotParam.Selection, OgcAngularUnit.DefaultRadians, out rotation))
+				return null;
+			if (!TryCreatePoint3(ord1Param.Selection, ord2Param.Selection, ord3Param.Selection, out ordinate))
+				return null;
+			if (!NamedParameter.TryGetDouble(scaleParam.Selection, out scale))
+				return null;
+
+			var molodensky = new MolodenskyBadekasTransformation(translation, rotation, ordinate, scale);
+
+			if (opData.StepParams.RelatedInputCrs is ICrsGeocentric && opData.StepParams.RelatedOutputCrs is ICrsGeocentric)
+				return new StaticCoordinateOperationCompiler.StepCompilationResult(
+					opData.StepParams,
+					opData.StepParams.RelatedOutputCrsUnit ?? opData.StepParams.RelatedInputCrsUnit ?? opData.StepParams.InputUnit,
+					molodensky);
+
+			var spheroidFrom = opData.StepParams.RelatedInputSpheroid;
+			if (null == spheroidFrom)
+				return null;
+
+			var spheroidTo = opData.StepParams.RelatedOutputSpheroid;
+			if (null == spheroidTo)
+				return null;
+
+			ITransformation transformation = new GeocentricTransformationGeographicWrapper<MolodenskyBadekasTransformation>(spheroidFrom, spheroidTo, molodensky);
+			var conv = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
+			if (null != conv)
+				transformation = new ConcatenatedTransformation(new[] { conv, transformation });
+
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				OgcAngularUnit.DefaultRadians,
+				transformation);
+		}
+
 		private readonly INameNormalizedComparer _coordinateOperationNameComparer;
 
 		public StaticTransformationStepCompiler(INameNormalizedComparer coordinateOperationNameComparer = null){
@@ -444,6 +518,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 				return CreatePositionVectorTransformation(compilationParams);
 			if (normalizedName.StartsWith("COORDINATEFRAMEROTATION"))
 				return CreateCoordinateFrameRotationTransformation(compilationParams);
+			if (normalizedName.StartsWith("MOLODENSKYBADEKAS"))
+				return CreateMolodenskyBadekas(compilationParams);
 			if (normalizedName.Equals("GEOGRAPHICOFFSET") || (normalizedName.StartsWith("GEOGRAPHIC") && normalizedName.EndsWith("OFFSET")))
 				return CreateGeographicOffset(compilationParams);
 			if (normalizedName.StartsWith("GEOCENTRICTRANSLATION"))

@@ -394,7 +394,7 @@ namespace Pigeoid
 
 			var spheroidTo = ExtractSpheroid(opData.CrsTo) ?? spheroidFrom;
 
-			return new Helmert7GeographicTransformation(spheroidFrom, helmert, spheroidTo);
+			return new GeocentricTransformationGeographicWrapper<Helmert7Transformation>(spheroidFrom, spheroidTo, helmert);
 		}
 
 		private static ITransformation CreateCoordinateFrameTransformation(OperationGenerationParams opData){
@@ -430,7 +430,7 @@ namespace Pigeoid
 
 			var spheroidTo = ExtractSpheroid(opData.CrsTo) ?? spheroidFrom;
 
-			return new Helmert7GeographicTransformation(spheroidFrom, helmert, spheroidTo);
+			return new GeocentricTransformationGeographicWrapper<Helmert7Transformation>(spheroidFrom, spheroidTo, helmert);
 		}
 
 		private static ITransformation CreateMolodenskyBadekasTransformation(OperationGenerationParams opData) {
