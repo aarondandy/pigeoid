@@ -4,6 +4,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
+using Vertesaur;
 using Vertesaur.Contracts;
 using Vertesaur.Transformation;
 using Pigeoid.Unit;
@@ -60,7 +61,26 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			[CanBeNull] public ISpheroid<double> RelatedOutputSpheroid {
 				get { return ExtractSpheroid(RelatedOutputCrs) ?? ExtractSpheroid(RelatedInputCrs); }
-			} 
+			}
+
+			[CanBeNull] public ISpheroid<double> RelatedInputCrsUnitConvertedSpheroid {
+				get {
+					var spheroid = RelatedInputSpheroid;
+					if (null != spheroid)
+						return ConvertSpheroidUnit(spheroid, RelatedInputCrsUnit);
+					return spheroid;
+				}
+			}
+
+			[CanBeNull] public ISpheroid<double> RelatedOutputCrsUnitConvertedSpheroid {
+				get {
+					var spheroid = RelatedOutputSpheroid;
+					if (null != spheroid)
+						return ConvertSpheroidUnit(spheroid, RelatedOutputCrsUnit);
+					return spheroid;
+				}
+			}
+
 		}
 
 		public sealed class StepCompilationResult
@@ -97,6 +117,23 @@ namespace Pigeoid.CoordinateOperationCompilation
 				return concatTransformation.Transformations.SelectMany(Linearize);
 			}
 			return new[] {transformation};
+		}
+
+		private static ISpheroid<double> ConvertSpheroidUnit(ISpheroid<double> spheroid, IUnit toUnit) {
+			if (null == toUnit)
+				return spheroid;
+
+			var spheroidInfo = spheroid as ISpheroidInfo;
+			if (null == spheroidInfo)
+				return spheroid;
+
+			var fromUnit = spheroidInfo.AxisUnit;
+			if (null != fromUnit && !UnitEqualityComparer.Default.Equals(fromUnit, toUnit) && UnitEqualityComparer.Default.AreSameType(fromUnit, toUnit)) {
+				var conversion = SimpleUnitConversionGenerator.FindConversion(spheroidInfo.AxisUnit, toUnit);
+				if (null != conversion && !(conversion is UnitUnityConversion))
+					return new SpheroidLinearUnitConversionWrapper(spheroidInfo, conversion);
+			}
+			return spheroid;
 		}
 
 		public static IUnit ExtractUnit(ICrs crs) {

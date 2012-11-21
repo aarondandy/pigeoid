@@ -193,6 +193,7 @@
     <Compile Include="Projection\TransverseMercatorSouth.cs" />
     <Compile Include="Projection\TransverseMercatorZoned.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpheroidLinearUnitConversionWrapper.cs" />
     <Compile Include="Transformation\AbridgedMolodenskyTransformation.cs" />
     <Compile Include="Transformation\AffineParametricTransformation.cs" />
     <Compile Include="Transformation\AngularElementTransformation.cs" />
@@ -200,7 +201,7 @@
     <Compile Include="Transformation\GeocentricTopocentricTransformation.cs" />
     <Compile Include="Transformation\GeocentricTransformationGeographicWrapper.cs" />
     <Compile Include="Transformation\GeocentricTranslation.cs" />
-    <Compile Include="Transformation\GeographicDimension.cs" />
+    <Compile Include="Transformation\GeographicDimensionChange.cs" />
     <Compile Include="Transformation\GeographicGeocentricTransformation.cs" />
     <Compile Include="Transformation\GeographicGeocentricTransformationBase.cs" />
     <Compile Include="Transformation\GeographicOffset.cs" />

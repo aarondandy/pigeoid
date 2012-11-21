@@ -764,13 +764,234 @@ namespace Pigeoid.Epsg.Transform.Test
 			var invOpPath = pathGenerator.Generate(toCrs, fromCrs);
 			Assert.IsNotNull(invOpPath);
 			var inverse = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
-			Assert.IsNotNull(invOpPath);
+			Assert.IsNotNull(inverse);
 
 			var expected4181 = new GeographicCoordinate(49.843933, 6.128542);
 			var expected4326 = new GeographicCoordinate(49.845, 6.13);
 
 			AreEqual(expected4326, transformation.TransformValue(expected4181), 0.0001);
 			AreEqual(expected4181, inverse.TransformValue(expected4326), 0.000001);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9637_degreeRepresentationConversion_degtoDMSH() {
+			Assert.Inconclusive(NotSupported);
+		}
+		[Test, Ignore(NotSupported)]
+		public void m9638_degreeRepresentationConversion_degHtoDMSH() {
+			Assert.Inconclusive(NotSupported);
+		}
+		[Test, Ignore(NotSupported)]
+		public void m9639_degreeRepresentationConversion_HdegtoDMSH() {
+			Assert.Inconclusive(NotSupported);
+		}
+		[Test, Ignore(NotSupported)]
+		public void m9640_degreeRepresentationConversion_DMtoDMSH() {
+			Assert.Inconclusive(NotSupported);
+		}
+		[Test, Ignore(NotSupported)]
+		public void m9641_degreeRepresentationConversion_DMHtoDMSH() {
+			Assert.Inconclusive(NotSupported);
+		}
+		[Test, Ignore(NotSupported)]
+		public void m9642_degreeRepresentationConversion_HDMtoDMSH() {
+			Assert.Inconclusive(NotSupported);
+		}
+		[Test, Ignore(NotSupported)]
+		public void m9643_degreeRepresentationConversion_DMStoDMSH() {
+			Assert.Inconclusive(NotSupported);
+		}
+		[Test, Ignore(NotSupported)]
+		public void m9644_degreeRepresentationConversion_HDMStoDMSH() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9645_generalPolynomialOfDegree2() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9646_generalPolynomialOfDegree3() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9647_generalPolynomialOfDegree4() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9648_generalPolynomialOfDegree6() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9649_reversiblePolynomialOfDegree2() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9650_reversiblePolynomialOfDegree3() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9651_reversiblePolynomialOfDegree4() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9652_complexPolynomialOfDegree3() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9653_complexPolynomialOfDegree4() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9654_reversiblePolynomialOfDegree13() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9655_franceGeocentricInterpolation() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9656_cartesianGridOffsets() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9657_verticalOffsetAndSlope() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9658_vertcon() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test]
+		public void m9659_geographic3DTo2D() {
+			// method: 9659
+			// op: 15539
+			// crs: 4645 to 4969
+
+			var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+				x => !x.Deprecated,
+				x =>  !(x is EpsgCoordinateOperationInfo) || ((EpsgCoordinateOperationInfo)x).Method.Code == 9659
+			));
+
+			var fromCrs = EpsgCrs.Get(4645);
+			var toCrs = EpsgCrs.Get(4969);
+
+			var opPath = pathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicHeightCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = pathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, GeographicHeightCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4645 = new GeographicHeightCoordinate(-20.36, 165.49, 42);
+			var expected4969 = new GeographicCoordinate(expected4645.Latitude, expected4645.Longitude);
+
+			AreEqual(expected4969, transformation.TransformValue(expected4645), 0);
+			AreEqual(new GeographicHeightCoordinate(expected4645.Latitude, expected4645.Longitude, 0), inverse.TransformValue(expected4969), 0);
+		}
+
+		[Test, Ignore(NoUsages)]
+		public void m9660_geographic3DOffsets() {
+			Assert.Inconclusive(NoUsages);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9661_geographic3DToGravityRelatedHeightEGM() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9662_geographic3DToGravityRelatedHeightAusgeoid98() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9663_geographic3DToGravityRelatedHeightOSGM02Gb() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9664_geographic3DToGravityRelatedHeightIgn() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9665_geographic3DToGravityRelatedHeightUs() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9666_p6IEqualsJPlus90DegreesSeismicBinGridTransformation() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test]
+		public void m9801_lambertConicConformal1Sp() {
+			// method: 9801
+			// op: 19910
+			// crs: 24200 to 4242
+
+			var fromCrs = EpsgCrs.Get(24200);
+			var toCrs = EpsgCrs.Get(4242);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected24200 = new Point2(255966.58, 142493.51);
+			var expected4242 = new GeographicCoordinate(17.932167,-76.943683);
+
+			AreEqual(expected4242, transformation.TransformValue(expected24200), 0.000001);
+			AreEqual(expected24200, inverse.TransformValue(expected4242), 0.04);
+		}
+
+		[Test]
+		public void m9802_lambertConicConformal2Sp() {
+			// method: 9802
+			// op: 14204
+			// crs: 32040 to 4267
+
+			var fromCrs = EpsgCrs.Get(32040);
+			var toCrs = EpsgCrs.Get(4267);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected32040 = new Point2(2963503.91, 254759.80);
+			var expected4267 = new GeographicCoordinate(28.5,-96);
+
+			AreEqual(expected4267, transformation.TransformValue(expected32040), 0.000000009);
+			AreEqual(expected32040, inverse.TransformValue(expected4267), 0.003);
 		}
 
 	}

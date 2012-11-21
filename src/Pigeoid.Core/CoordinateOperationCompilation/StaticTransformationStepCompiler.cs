@@ -253,12 +253,18 @@ namespace Pigeoid.CoordinateOperationCompilation
 					new GeocentricTranslation(delta));
 			}
 
+			// TODO: need to handle unit here
 			var inputSpheroid = opData.StepParams.RelatedInputSpheroid;
 			if (null == inputSpheroid)
 				return null;
+
+			// TODO: may even need to convert units while translating
+
+			// TODO: need to handle unit here
 			var outputSpheroid = opData.StepParams.RelatedOutputSpheroid;
 			if (null == outputSpheroid)
 				return null;
+
 			ITransformation transformation = new GeographicGeocentricTranslation(inputSpheroid, delta, outputSpheroid);
 			var conv = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
 			if (null != conv)
@@ -412,10 +418,12 @@ namespace Pigeoid.CoordinateOperationCompilation
 					opData.StepParams.RelatedOutputCrsUnit ?? opData.StepParams.RelatedInputCrsUnit ?? opData.StepParams.InputUnit,
 					molodensky);
 
+			// TODO: need to handle units here
 			var spheroidFrom = opData.StepParams.RelatedInputSpheroid;
 			if (null == spheroidFrom)
 				return null;
 
+			// TODO: need to handle units here
 			var spheroidTo = opData.StepParams.RelatedOutputSpheroid;
 			if (null == spheroidTo)
 				return null;
@@ -431,17 +439,26 @@ namespace Pigeoid.CoordinateOperationCompilation
 				transformation);
 		}
 
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateGeographicDimensionChange(TransformationCompilationParams opData) {
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				opData.StepParams.InputUnit,
+				new GeographicDimensionChange());
+		}
+
 		private readonly INameNormalizedComparer _coordinateOperationNameComparer;
 
 		public StaticTransformationStepCompiler(INameNormalizedComparer coordinateOperationNameComparer = null){
 			_coordinateOperationNameComparer = coordinateOperationNameComparer ?? CoordinateOperationNameNormalizedComparer.Default;
 		}
 
+		[CanBeNull]
 		public StaticCoordinateOperationCompiler.StepCompilationResult Compile(StaticCoordinateOperationCompiler.StepCompilationParameters stepParameters) {
 			return CompileInverse(stepParameters)
 				?? CompileForwards(stepParameters);
 		}
 
+		[CanBeNull]
 		private StaticCoordinateOperationCompiler.StepCompilationResult CompileForwards([NotNull] StaticCoordinateOperationCompiler.StepCompilationParameters stepParameters){
 			var forwardCompiledStep = CompileForwardToTransform(stepParameters);
 			if (null == forwardCompiledStep)
@@ -454,6 +471,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			);
 		}
 
+		[CanBeNull]
 		private StaticCoordinateOperationCompiler.StepCompilationResult CompileInverse([NotNull] StaticCoordinateOperationCompiler.StepCompilationParameters stepParameters){
 			if (!stepParameters.CoordinateOperationInfo.IsInverseOfDefinition || !stepParameters.CoordinateOperationInfo.HasInverse)
 				return null;
@@ -472,6 +490,9 @@ namespace Pigeoid.CoordinateOperationCompilation
 				stepParameters.RelatedOutputCrs,
 				stepParameters.RelatedInputCrs
 			));
+
+			if (null == forwardCompiledStep)
+				return null;
 
 			var forwardCompiledOperation = forwardCompiledStep.Transformation;
 			if (!forwardCompiledOperation.HasInverse)
@@ -492,6 +513,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			);
 		}
 
+		[CanBeNull]
 		private StaticCoordinateOperationCompiler.StepCompilationResult CompileForwardToTransform([NotNull] StaticCoordinateOperationCompiler.StepCompilationParameters stepParameters) {
 			string operationName = null;
 			IEnumerable<INamedParameter> parameters = null;
@@ -532,6 +554,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 				return CreateSimilarityTransformation(compilationParams);
 			if (normalizedName.Equals("AFFINEPARAMETRICTRANSFORMATION"))
 				return CreateAffineParametricTransformation(compilationParams);
+			if (normalizedName.Equals("GEOGRAPHIC3DTO2DCONVERSION") || normalizedName.Equals("GEOGRAPHIC2DTO3DCONVERSION"))
+				return CreateGeographicDimensionChange(compilationParams);
 			return null;
 		}
 

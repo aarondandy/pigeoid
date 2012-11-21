@@ -40,19 +40,6 @@ namespace Pigeoid.CoordinateOperationCompilation
 		private static readonly StaticProjectionStepCompiler DefaultValue = new StaticProjectionStepCompiler();
 		public static StaticProjectionStepCompiler Default { get { return DefaultValue;  } }
 
-		private static ISpheroidInfo ExtractSpheroid(ICrs crs) {
-			var geodetic = crs as ICrsGeodetic;
-			if (null == geodetic)
-				return null;
-			var datum = geodetic.Datum;
-			if (null == datum)
-				return null;
-			return datum.Spheroid;
-		}
-
-		private static ISpheroidInfo ExtractSpheroid([NotNull] ProjectionCompilationParams projectionParams) {
-			return ExtractSpheroid(projectionParams.StepParams.RelatedInputCrs) ?? ExtractSpheroid(projectionParams.StepParams.RelatedOutputCrs);
-		}
 
 		private static IUnit ExtractLinearUnit(ICrs crs) {
 			var geocentric = crs as ICrsGeocentric;
@@ -142,7 +129,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			if (!opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam))
 				return null;
 
-			var spheroid = ExtractSpheroid(opData);
+			var spheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
 			if (null == spheroid)
 				return null;
 
@@ -165,7 +152,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
-			var spheroid = ExtractSpheroid(opData);
+			var spheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
 			if (null == spheroid)
 				return null;
 
@@ -191,7 +178,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
-			var spheroid = ExtractSpheroid(opData);
+			var spheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
 			if (null == spheroid)
 				return null;
 
@@ -210,6 +197,40 @@ namespace Pigeoid.CoordinateOperationCompilation
 				: new EquidistantCylindrical(origin, offset, spheroid);
 		}
 
+		private ITransformation<GeographicCoordinate, Point2> CreateLambertConicConformal(ProjectionCompilationParams opData) {
+			var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
+			var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
+			var parallel1Param = new KeywordNamedParameterSelector("LAT", "1", "PARALLEL");
+			var parallel2Param = new KeywordNamedParameterSelector("LAT", "2", "PARALLEL");
+			var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
+			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+			var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
+			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam, parallel1Param, parallel2Param);
+
+			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
+			if (null == fromSpheroid)
+				return null;
+
+			GeographicCoordinate origin;
+			if (!(originLatParam.IsSelected || originLonParam.IsSelected) || !TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin))
+				origin = GeographicCoordinate.Zero;
+
+			Vector2 offset;
+			if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
+				offset = Vector2.Zero;
+
+			double parallel1, parallel2;
+			if(parallel1Param.IsSelected && parallel2Param.IsSelected && TryGetDouble(parallel1Param.Selection, OgcAngularUnit.DefaultRadians, out parallel1) && TryGetDouble(parallel2Param.Selection, OgcAngularUnit.DefaultRadians, out parallel2))
+				return new LambertConicConformal2Sp(origin, parallel1, parallel2, offset, fromSpheroid);
+
+			// TODO: need this method to also handle 2SP
+			double scaleFactor;
+			if(scaleFactorParam.IsSelected && TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
+				return new LambertConicConformal1Sp(origin, scaleFactor, offset, fromSpheroid);
+
+			return null;
+		}
+
 		private ITransformation<GeographicCoordinate, Point2> CreateKrovak(ProjectionCompilationParams opData) {
 			var latConeAxisParam = new KeywordNamedParameterSelector("CO","LAT","CONE","AXIS"); // Co-latitude of cone axis
 			var latProjectionCenterParam = new KeywordNamedParameterSelector("LAT", "CENTER"); // Latitude of projection centre
@@ -222,7 +243,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var evalYParam = new KeywordNamedParameterSelector("ORDINATE2", "EVALUATION", "POINT");
 			opData.ParameterLookup.Assign(latConeAxisParam, latProjectionCenterParam, latPseudoParallelParam, scaleFactorParallelParam, originLonParam, offsetXParam, offsetYParam, evalXParam, evalYParam);
 
-			var spheroid = ExtractSpheroid(opData);
+			var spheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
 			if (null == spheroid)
 				return null;
 
@@ -321,8 +342,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 				{CoordinateOperationStandardNames.LabordeObliqueMercator,null}, // CreateLabordeObliqueMercator
 				{CoordinateOperationStandardNames.LambertAzimuthalEqualArea,CreateLambertAzimuthalEqualArea},
 				{CoordinateOperationStandardNames.LambertAzimuthalEqualAreaSpherical,CreateLambertAzimuthalEqualArea}, // CreateLambertAzimuthalEqualArea
-				{CoordinateOperationStandardNames.LambertConicConformal1Sp,null},
-				{CoordinateOperationStandardNames.LambertConicConformal2Sp,null},
+				{CoordinateOperationStandardNames.LambertConicConformal1Sp,CreateLambertConicConformal},
+				{CoordinateOperationStandardNames.LambertConicConformal2Sp,CreateLambertConicConformal},
 				{CoordinateOperationStandardNames.Mercator1Sp,null}, // CreateMercator
 				{CoordinateOperationStandardNames.Mercator2Sp,null}, // CreateMercator
 				{CoordinateOperationStandardNames.MillerCylindrical,null},
@@ -404,8 +425,11 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			// make sure that the input units are correct
 			var actualInputUnits = stepParameters.InputUnit;
-			var desiredInputUnits = ExtractLinearUnit(stepParameters.RelatedInputCrs)
-				?? ExtractLinearUnit(stepParameters.RelatedOutputCrs);
+			/*var projectionSpheroid = stepParameters.RelatedInputSpheroid as ISpheroidInfo;
+			var desiredInputUnits = null == projectionSpheroid
+				? stepParameters.RelatedInputCrsUnit
+				: projectionSpheroid.AxisUnit;*/
+			var desiredInputUnits = stepParameters.RelatedInputCrsUnit;
 			if(null != desiredInputUnits && !UnitEqualityComparer.Default.Equals(actualInputUnits, desiredInputUnits)){
 				var conv = SimpleUnitConversionGenerator.FindConversion(actualInputUnits, desiredInputUnits);
 				if(null != conv){
