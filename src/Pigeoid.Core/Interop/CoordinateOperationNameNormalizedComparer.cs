@@ -30,6 +30,18 @@ namespace Pigeoid.Interop
 			if (CoordinateOperationStandardNames.IsNormalizedName(text))
 				return text;
 
+			var orientated = text.Replace("ORIENTED", "ORIENTATED");
+			if (CoordinateOperationStandardNames.IsNormalizedName(orientated))
+				return orientated;
+
+			var sp1Replace = text.Replace("VARIANTA","1SP");
+			if (CoordinateOperationStandardNames.IsNormalizedName(sp1Replace))
+				return sp1Replace;
+
+			var sp2Replace = text.Replace("VARIANTB", "2SP");
+			if (CoordinateOperationStandardNames.IsNormalizedName(sp2Replace))
+				return sp2Replace;
+
 			var conicFlipText = text.Replace("CONFORMALCONIC", "CONICCONFORMAL");
 			if (CoordinateOperationStandardNames.IsNormalizedName(conicFlipText))
 				return conicFlipText;

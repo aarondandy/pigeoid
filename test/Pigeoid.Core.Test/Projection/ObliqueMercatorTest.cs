@@ -7,8 +7,7 @@ namespace Pigeoid.Core.Test.Projection
 	[TestFixture]
 	public class ObliqueMercatorTest
 	{
-
-		[Ignore("The test data... or my interpretation of it seems wrong.")]
+ 
 		[Test]
 		public void Epsg_1_3_6_1_Test()
 		{

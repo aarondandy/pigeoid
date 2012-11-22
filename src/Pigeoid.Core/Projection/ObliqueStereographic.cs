@@ -14,10 +14,41 @@ namespace Pigeoid.Projection
 		private class Inverted : InvertedTransformationBase<ObliqueStereographic,Point2,GeographicCoordinate>
 		{
 
-			public Inverted([NotNull] ObliqueStereographic core) : base(core) { }
+			private readonly double _halfChiOrigin;
+			private readonly double _rk4;
+
+			public Inverted([NotNull] ObliqueStereographic core) : base(core) {
+				_halfChiOrigin = Core.ChiOrigin / 2.0;
+				_rk4 = Core.Rk2 * 2.0;
+			}
 
 			public override GeographicCoordinate TransformValue(Point2 source) {
-				throw new NotImplementedException();
+				// ReSharper disable CompareOfFloatsByEqualityOperator
+				var dy = source.Y - Core.FalseProjectedOffset.Y;
+				var dx = source.X - Core.FalseProjectedOffset.X;
+				var g = Core.Rk2 * Math.Tan(QuarterPi - _halfChiOrigin);
+				var h = (_rk4 * Math.Tan(Core.ChiOrigin)) + g;
+				var i = Math.Atan(dx / (h + dy));
+				var j = Math.Atan(dx / (g - dy)) - i;
+				var chi = Core.ChiOrigin + 2.0 * Math.Atan(
+					(dy - (dx * Math.Tan(j / 2.0)))/Core.Rk2);
+				var sinChi = Math.Sin(chi);
+				var lambda = j + (2.0 * i) + Core.GeographicOrigin.Longitude;
+				var lon = ((lambda - Core.GeographicOrigin.Longitude) / Core.N) + Core.GeographicOrigin.Longitude;
+				var isometricLat = Math.Log((1 + sinChi)/(Core.C * (1 - sinChi))) / (2.0 * Core.N);
+				var lat = (2.0 * Math.Atan(Math.Pow(Math.E, isometricLat))) - HalfPi;
+				for (int convergeIndex = 0; convergeIndex < 8; convergeIndex++) {
+					var eSinLat = Core.E * Math.Sin(lat);
+					var isoLatI = Math.Log(
+						Math.Tan((lat / 2.0) + QuarterPi)
+						* Math.Pow((1 - eSinLat)/(1 + eSinLat),Core.EHalf)
+					);
+					var temp = lat - ((isoLatI - isometricLat) * Math.Cos(lat) * (1 - (eSinLat * eSinLat)) / (1.0 - Core.ESq));
+					if (temp == lat) break;
+					lat = temp;
+				}
+				return new GeographicCoordinate(lat,lon);
+				// ReSharper restore CompareOfFloatsByEqualityOperator
 			}
 		}
 
@@ -26,8 +57,10 @@ namespace Pigeoid.Projection
 		protected readonly double R;
 		protected readonly double N;
 		protected readonly double C;
+		protected readonly double ChiOrigin;
 		protected readonly double SinChiOrigin;
 		protected readonly double CosChiOrigin;
+		protected readonly double Rk2;
 
 		public ObliqueStereographic(
 			GeographicCoordinate geographicOrigin,
@@ -51,45 +84,49 @@ namespace Pigeoid.Projection
 			SinChiOrigin = (w1 - 1)/(w1 + 1);
 			C = (N + sinLat) * (1 - SinChiOrigin) / ((N - sinLat) * (1 + SinChiOrigin));
 			var w2 = C*w1;
-			var chiOrigin = Math.Asin((w2 - 1)/(w2 + 1));
-			CosChiOrigin = Math.Cos(chiOrigin);
+			ChiOrigin = Math.Asin((w2 - 1) / (w2 + 1));
+			SinChiOrigin = Math.Sin(ChiOrigin);
+			CosChiOrigin = Math.Cos(ChiOrigin);
+			Rk2 = R * scaleFactor * 2.0;
 		}
 
-		public override Point2 TransformValue(GeographicCoordinate source)
-		{
-			var lambda = (N*(source.Longitude - GeographicOrigin.Longitude)) + GeographicOrigin.Longitude;
-			var lambdaDelta = lambda - GeographicOrigin.Longitude;
-			var sinLat = Math.Sin(GeographicOrigin.Latitude);
-			var eSinLat = E*sinLat;
+		public override Point2 TransformValue(GeographicCoordinate source) {
+			var sinLat = Math.Sin(source.Latitude);
+			var eSinLat = E * sinLat;
 			var sa = (1 + sinLat) / (1 - sinLat);
 			var sb = (1 - eSinLat) / (1 + eSinLat);
-			var w1 = Math.Pow(sa*Math.Pow(sb, E), N);
-			var sinChi = (w1 - 1)/(w1 + 1);
-			var c = (N + sinLat)*(1 - sinChi)/((N - sinLat)*(1 + sinChi));
-			var w2 = c*w1;
-			var chi = Math.Asin((w2 - 1)/(w2 + 1));
+			var w = C * Math.Pow(sa * Math.Pow(sb, E), N);
+			var chi = Math.Asin((w - 1) / (w + 1));
+			var sinChi = Math.Sin(chi);
+			//var sinChi = (w - 1) / (w + 1);
 			var cosChi = Math.Cos(chi);
-			
+
+			var lambda = ((source.Longitude - GeographicOrigin.Longitude) * N) + GeographicOrigin.Longitude;
+			var lambdaDelta = lambda - GeographicOrigin.Longitude;
+
 			var beta = 1
 				+ (sinChi * SinChiOrigin)
-				+ (cosChi * CosChiOrigin * Math.Cos(lambdaDelta)
-			);
-			var x = (2.0 * R * ScaleFactor * cosChi * Math.Sin(lambdaDelta) / beta)
+				+ (cosChi * CosChiOrigin * Math.Cos(lambdaDelta));
+
+			var x = (Rk2 * cosChi * Math.Sin(lambdaDelta) / beta)
 				+ FalseProjectedOffset.X;
-			var y = (2.0 * R * ScaleFactor * (
+			var y = (Rk2 * (
 				(sinChi * CosChiOrigin)
-				- (cosChi * sinChi * Math.Cos(lambdaDelta))
+				- (cosChi * SinChiOrigin * Math.Cos(lambdaDelta))
 			) / beta) + FalseProjectedOffset.Y;
-			throw new NotImplementedException("This is way off from the example.");
-			return new Point2(x,y);
+			return new Point2(x, y);
 		}
 
 		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
+			if (!HasInverse)
+				throw new InvalidOperationException("No inverse.");
 			return new Inverted(this);
 		}
 
 		public override bool HasInverse {
-			get { throw new NotImplementedException(); }
+// ReSharper disable CompareOfFloatsByEqualityOperator
+			get { return 0 != Rk2 && 0 != N; }
+// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 	}

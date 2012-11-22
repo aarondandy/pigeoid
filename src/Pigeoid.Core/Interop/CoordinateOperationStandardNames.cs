@@ -33,6 +33,7 @@ namespace Pigeoid.Interop
 		public static readonly string LambertAzimuthalEqualAreaSpherical = "Lambert Azimuthal Equal Area Spherical";
 		public static readonly string LambertConicConformal1Sp = "Lambert Conic Conformal (1SP)";
 		public static readonly string LambertConicConformal2Sp = "Lambert Conic Conformal (2SP)";
+		public static readonly string LambertConicConformal2SpBelgium = "Lambert Conic Conformal (2SP Belgium)";
 		public static readonly string Mercator1Sp = "Mercator (1SP)";
 		public static readonly string Mercator2Sp = "Mercator (2SP)";
 		public static readonly string MillerCylindrical = "Miller Cylindrical";
@@ -42,6 +43,9 @@ namespace Pigeoid.Interop
 		public static readonly string ObliqueStereographic = "Oblique Stereographic";
 		public static readonly string Orthographic = "Orthographic";
 		public static readonly string PolarStereographic = "Polar Stereographic";
+		public static readonly string PolarStereographicA = "Polar Stereographic Variant A";
+		public static readonly string PolarStereographicB = "Polar Stereographic Variant B";
+		public static readonly string PolarStereographicC = "Polar Stereographic Variant C";
 		public static readonly string Polyconic = "Polyconic";
 		public static readonly string PopularVisualisationPseudoMercator = "Popular Visualisation Pseudo Mercator";
 		public static readonly string Robinson = "Robinson";
@@ -50,7 +54,7 @@ namespace Pigeoid.Interop
 		public static readonly string SwissObliqueCylindrical = "Swiss Oblique Cylindrical";
 		public static readonly string Stereographic = "Stereographic";
 		public static readonly string TransverseMercator = "Transverse Mercator";
-		public static readonly string TransverseMercatorSouthOriented = "Transverse Mercator (South Oriented)";
+		public static readonly string TransverseMercatorSouthOriented = "Transverse Mercator (South Orientated)";
 		public static readonly string TunisiaMiningGrid = "Tunisia Mining Grid";
 		public static readonly string VanDerGrinten = "VanDerGrinten";
 
@@ -84,6 +88,7 @@ namespace Pigeoid.Interop
 				LambertAzimuthalEqualAreaSpherical,
 				LambertConicConformal1Sp,
 				LambertConicConformal2Sp,
+				LambertConicConformal2SpBelgium,
 				Mercator1Sp,
 				Mercator2Sp,
 				MillerCylindrical,
@@ -93,6 +98,9 @@ namespace Pigeoid.Interop
 				ObliqueStereographic,
 				Orthographic,
 				PolarStereographic,
+				PolarStereographicA,
+				PolarStereographicB,
+				PolarStereographicC,
 				Polyconic,
 				PopularVisualisationPseudoMercator,
 				Robinson,

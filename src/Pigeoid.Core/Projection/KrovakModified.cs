@@ -158,12 +158,6 @@ namespace Pigeoid.Projection
 			get { return Core.HasInverse; }
 		}
 
-		public string Name
-		{
-			get { return "Krovak Modified"; }
-		}
-
-
 		public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values)
 		{
 			return values.Select(TransformValue);

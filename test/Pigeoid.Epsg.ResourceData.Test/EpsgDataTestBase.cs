@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using NUnit.Framework;
 
@@ -28,7 +29,9 @@ namespace Pigeoid.Epsg.ResourceData.Test
 
 		[TestFixtureSetUp]
 		public void FixtureSetUp() {
-			_repository = new DataTransmogrifier.EpsgRepository(new FileInfo("EPSG_v8_0.mdb"));
+			var asmDirectory = new FileInfo(typeof(EpsgDataTestBase<,>).Assembly.Location).Directory;
+			var file = asmDirectory.GetFiles("EPSG_v*.mdb").First();
+			_repository = new DataTransmogrifier.EpsgRepository(file);
 		}
 
 		[TestFixtureTearDown]

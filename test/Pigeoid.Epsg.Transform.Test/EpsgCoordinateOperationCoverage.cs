@@ -2,7 +2,6 @@
 using Pigeoid.Contracts;
 using Pigeoid.CoordinateOperationCompilation;
 using Pigeoid.Unit;
-using System;
 using Vertesaur;
 using Vertesaur.Contracts;
 using Vertesaur.Transformation;
@@ -164,7 +163,7 @@ namespace Pigeoid.Epsg.Transform.Test
 			AreEqual(expected4087, inverse.TransformValue(expected4326), 0.004);
 		}
 
-		[Test]
+		[Test, Ignore(NoSampleData)]
 		public void m1029_equidistantCylindricalSpherical(){
 			// method: 1029
 			// op: 4086
@@ -181,7 +180,6 @@ namespace Pigeoid.Epsg.Transform.Test
 			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
 			Assert.IsNotNull(inverse);
 
-			Assert.Inconclusive(NoSampleData);
 		}
 
 		[Test, Ignore(NotSupported)]
@@ -225,8 +223,6 @@ namespace Pigeoid.Epsg.Transform.Test
 
 			AreEqual(expectedValue4896, actualValue4896, 0.006);
 			AreEqual(expectedValue5332, actualValue5332, 0.006);
-
-			Assert.Inconclusive(NoSampleData);
 		}
 
 		[Test, Ignore(NoUsages)]
@@ -522,8 +518,8 @@ namespace Pigeoid.Epsg.Transform.Test
 			var inverse = CreateTyped<double, double>(StaticCompiler.Compile(invOpPath));
 			Assert.IsNotNull(inverse);
 
-			var expected5705 = 100;
-			var expected5797 = expected5705 + 26.3;
+			const int expected5705 = 100;
+			const double expected5797 = expected5705 + 26.3;
 
 			Assert.AreEqual(expected5797, transformation.TransformValue(expected5705));
 			Assert.AreEqual(expected5705, inverse.TransformValue(expected5797));
@@ -682,56 +678,56 @@ namespace Pigeoid.Epsg.Transform.Test
 		}
 
 		[Test, Ignore(NoUsages)]
-		public void m9625_generalPolynomial2ndOrder() {
+		public void m9625_generalPolynomial2NdOrder() {
 			Assert.Inconclusive(NoUsages);
 		}
 
 		[Test, Ignore(NoUsages)]
-		public void m9626_generalPolynomial3rdOrder() {
+		public void m9626_generalPolynomial3RdOrder() {
 			Assert.Inconclusive(NoUsages);
 		}
 
 		[Test, Ignore(NoUsages)]
-		public void m9627_generalPolynomial4thOrder() {
+		public void m9627_generalPolynomial4ThOrder() {
 			Assert.Inconclusive(NoUsages);
 		}
 
 		[Test, Ignore(NoUsages)]
-		public void m9628_reversiblePolynomial2ndOrder() {
+		public void m9628_reversiblePolynomial2NdOrder() {
 			Assert.Inconclusive(NoUsages);
 		}
 
 		[Test, Ignore(NoUsages)]
-		public void m9629_reversiblePolynomial3rdOrder() {
+		public void m9629_reversiblePolynomial3RdOrder() {
 			Assert.Inconclusive(NoUsages);
 		}
 
-		[Test]
-		public void m9630_reversiblePolynomial4thOrder() {
+		[Test, Ignore(NotSupported)]
+		public void m9630_reversiblePolynomial4ThOrder() {
 			Assert.Inconclusive(NotSupported);
 		}
 
-		[Test]
-		public void m9631_complexPolynomial3rdOrder() {
+		[Test, Ignore(NotSupported)]
+		public void m9631_complexPolynomial3RdOrder() {
 			Assert.Inconclusive(NotSupported);
 		}
 
-		[Test]
-		public void m9632_complexPolynomial4thOrder() {
+		[Test, Ignore(NotSupported)]
+		public void m9632_complexPolynomial4ThOrder() {
 			Assert.Inconclusive(NotSupported);
 		}
 
-		[Test]
+		[Test, Ignore(NotSupported)]
 		public void m9633_ordnanceSurveyNationalTransformation() {
 			Assert.Inconclusive(NotSupported);
 		}
 
-		[Test]
+		[Test, Ignore(NotSupported)]
 		public void m9634_maritimeProvincesPolynomialInterpolation() {
 			Assert.Inconclusive(NotSupported);
 		}
 
-		[Test]
+		[Test, Ignore(NotSupported)]
 		public void m9635_geographic3DToGeographic2D_gravityRelatedHeight() {
 			Assert.Inconclusive(NotSupported);
 		}
@@ -774,35 +770,35 @@ namespace Pigeoid.Epsg.Transform.Test
 		}
 
 		[Test, Ignore(NotSupported)]
-		public void m9637_degreeRepresentationConversion_degtoDMSH() {
+		public void m9637_degreeRepresentationConversion_deg_dmsh() {
 			Assert.Inconclusive(NotSupported);
 		}
 		[Test, Ignore(NotSupported)]
-		public void m9638_degreeRepresentationConversion_degHtoDMSH() {
+		public void m9638_degreeRepresentationConversion_degH_dmsh() {
 			Assert.Inconclusive(NotSupported);
 		}
 		[Test, Ignore(NotSupported)]
-		public void m9639_degreeRepresentationConversion_HdegtoDMSH() {
+		public void m9639_degreeRepresentationConversion_hDeg_dmsh() {
 			Assert.Inconclusive(NotSupported);
 		}
 		[Test, Ignore(NotSupported)]
-		public void m9640_degreeRepresentationConversion_DMtoDMSH() {
+		public void m9640_degreeRepresentationConversion_dm_dmsh() {
 			Assert.Inconclusive(NotSupported);
 		}
 		[Test, Ignore(NotSupported)]
-		public void m9641_degreeRepresentationConversion_DMHtoDMSH() {
+		public void m9641_degreeRepresentationConversion_dmh_dmsh() {
 			Assert.Inconclusive(NotSupported);
 		}
 		[Test, Ignore(NotSupported)]
-		public void m9642_degreeRepresentationConversion_HDMtoDMSH() {
+		public void m9642_degreeRepresentationConversion_hDm_dmsh() {
 			Assert.Inconclusive(NotSupported);
 		}
 		[Test, Ignore(NotSupported)]
-		public void m9643_degreeRepresentationConversion_DMStoDMSH() {
+		public void m9643_degreeRepresentationConversion_dms_dmsh() {
 			Assert.Inconclusive(NotSupported);
 		}
 		[Test, Ignore(NotSupported)]
-		public void m9644_degreeRepresentationConversion_HDMStoDMSH() {
+		public void m9644_degreeRepresentationConversion_hDms_dmsh() {
 			Assert.Inconclusive(NotSupported);
 		}
 
@@ -913,7 +909,7 @@ namespace Pigeoid.Epsg.Transform.Test
 		}
 
 		[Test, Ignore(NotSupported)]
-		public void m9661_geographic3DToGravityRelatedHeightEGM() {
+		public void m9661_geographic3DToGravityRelatedHeightEgm() {
 			Assert.Inconclusive(NotSupported);
 		}
 
@@ -923,7 +919,7 @@ namespace Pigeoid.Epsg.Transform.Test
 		}
 
 		[Test, Ignore(NotSupported)]
-		public void m9663_geographic3DToGravityRelatedHeightOSGM02Gb() {
+		public void m9663_geographic3DToGravityRelatedHeightOsgm02Gb() {
 			Assert.Inconclusive(NotSupported);
 		}
 
@@ -992,6 +988,250 @@ namespace Pigeoid.Epsg.Transform.Test
 
 			AreEqual(expected4267, transformation.TransformValue(expected32040), 0.000000009);
 			AreEqual(expected32040, inverse.TransformValue(expected4267), 0.003);
+		}
+
+		[Test]
+		public void m9803_lamberConicConformal2SpBelgium() {
+			// method: 9803
+			// op: 19902
+			// crs: 31300 to 4313
+
+			var fromCrs = EpsgCrs.Get(31300);
+			var toCrs = EpsgCrs.Get(4313);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected31300 = new Point2(251763.20, 153034.13);
+			var expected4313 = new GeographicCoordinate(50.679573, 5.80737);
+
+			AreEqual(expected4313, transformation.TransformValue(expected31300), 0.0000006);
+			AreEqual(expected31300, inverse.TransformValue(expected4313), 0.06);
+		}
+
+		[Test]
+		public void m9804_mercator_variantA() {
+			// method: 9804
+			// op: 19905
+			// crs: 3002 to 4257
+
+			var fromCrs = EpsgCrs.Get(3002);
+			var toCrs = EpsgCrs.Get(4257);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected5331 = new Point2(5009726.58, 569150.82);
+			var expected4804 = new GeographicCoordinate(-3, 120);
+
+			AreEqual(expected4804, transformation.TransformValue(expected5331), 0.00000003);
+			AreEqual(expected5331, inverse.TransformValue(expected4804), 0.004);
+		}
+
+		[Test]
+		public void m9805_mercator_variantB() {
+			// method: 9805
+			// op: 19884
+			// crs: 3388 to 4284
+
+			var fromCrs = EpsgCrs.Get(3388);
+			var toCrs = EpsgCrs.Get(4284);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected3388 = new Point2(165704.29, 5171848.07);
+			var expected4284 = new GeographicCoordinate(53,53);
+
+			AreEqual(expected4284, transformation.TransformValue(expected3388), 0.00000004);
+			AreEqual(expected3388, inverse.TransformValue(expected4284), 0.004);
+		}
+
+		[Test]
+		public void m9806_cassiniSoldner() {
+			// method: 9806
+			// op: 19925
+			// crs: 30200 to 4302
+
+			var fromCrs = EpsgCrs.Get(30200);
+			var toCrs = EpsgCrs.Get(4302);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected30200 = new Point2(66644.94, 82536.22);
+			var expected4302 = new GeographicCoordinate(10, -62);
+
+			AreEqual(expected4302, transformation.TransformValue(expected30200), 0.000003);
+			AreEqual(expected30200, inverse.TransformValue(expected4302), 0.002);
+		}
+
+		[Test]
+		public void m9807_transverseMercator() {
+			// method: 9807
+			// op: 19916
+			// crs: 27700 to 4277
+
+			var fromCrs = EpsgCrs.Get(27700);
+			var toCrs = EpsgCrs.Get(4277);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected27700 = new Point2(577274.99, 69740.50);
+			var expected4277 = new GeographicCoordinate(50.5,0.5);
+
+			AreEqual(expected4277, transformation.TransformValue(expected27700), 0.0000001);
+			AreEqual(expected27700, inverse.TransformValue(expected4277), 0.008);
+		}
+
+		[Test]
+		public void m9808_transverseMercator_sourceOrientated() {
+			// method: 9808
+			// op: 17529
+			// crs: 2053 to 4148
+
+			var fromCrs = EpsgCrs.Get(2053);
+			var toCrs = EpsgCrs.Get(4148);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected2053 = new Point2(-2847342.74, 71984.49);
+			var expected4148 = new GeographicCoordinate(25.732028, 28.282633);
+
+			AreEqual(expected4148, transformation.TransformValue(expected2053), 0.0000004);
+			AreEqual(expected2053, inverse.TransformValue(expected4148), 0.05);
+		}
+
+		[Test]
+		public void m9809_obliqueStereographic() {
+			// method: 9809
+			// op: 19914
+			// crs: 28992 to 4289
+
+			var fromCrs = EpsgCrs.Get(28992);
+			var toCrs = EpsgCrs.Get(4289);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected28992 = new Point2(196105.283, 557057.739);
+			var expected4289 = new GeographicCoordinate(53, 6);
+
+			AreEqual(expected4289, transformation.TransformValue(expected28992), 0.000000004);
+			AreEqual(expected28992, inverse.TransformValue(expected4289), 0.0004);
+		}
+
+		[Test]
+		public void m9810_polarStereographic_variantA() {
+			// method: 9810
+			// op: 16061
+			// crs: 5041 to 4326
+
+			var fromCrs = EpsgCrs.Get(5041);
+			var toCrs = EpsgCrs.Get(4326);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected5041 = new Point2(3320416.75, 632668.43);
+			var expected4326 = new GeographicCoordinate(73, 44);
+
+			AreEqual(expected4326, transformation.TransformValue(expected5041), 0.00000004);
+			AreEqual(expected5041, inverse.TransformValue(expected4326), 0.003);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9811_newZealandMapGrid() {
+			Assert.Ignore(NotSupported);
+		}
+
+		[Test, Ignore(NoSampleData)]
+		public void m9812_hotineObliqueMercator_variantA() {
+			Assert.Inconclusive(NoSampleData);
+		}
+
+		[Test]
+		public void m9813_labordeObliqueMercator() {
+			// method: 9813
+			// op: 19861
+			// crs: 29701 to 4810
+
+			var fromCrs = EpsgCrs.Get(29701);
+			var toCrs = EpsgCrs.Get(4810);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected29701 = new Point2(188333.848, 1098841.091);
+			var expected4810 = new GeographicCoordinate(-17.9886666667, 46.800381173); // grads
+
+			AreEqual(expected4810, transformation.TransformValue(expected29701), 0.01);
+			AreEqual(expected29701, inverse.TransformValue(expected4810), 50);
 		}
 
 	}
