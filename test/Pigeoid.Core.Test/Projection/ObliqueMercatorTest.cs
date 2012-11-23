@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Pigeoid.Projection;
 using Vertesaur;
 
@@ -11,7 +12,8 @@ namespace Pigeoid.Core.Test.Projection
 		[Test]
 		public void Epsg_1_3_6_1_Test()
 		{
-			var projection = new HotineObliqueMercator(
+			throw new NotImplementedException("redo...");
+			var projection = new HotineObliqueMercator.VariantA(
 				new GeographicCoordinate(0.069813170, 2.007128640),
 				0.930536611,
 				0.927295218,

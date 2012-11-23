@@ -192,6 +192,7 @@
     <Compile Include="Projection\TransverseMercator.cs" />
     <Compile Include="Projection\TransverseMercatorSouth.cs" />
     <Compile Include="Projection\TransverseMercatorZoned.cs" />
+    <Compile Include="Projection\TunisiaMiningGrid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpheroidLinearUnitConversionWrapper.cs" />
     <Compile Include="Transformation\AbridgedMolodenskyTransformation.cs" />

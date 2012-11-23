@@ -43,9 +43,6 @@ namespace Pigeoid.Interop
 		public static readonly string ObliqueStereographic = "Oblique Stereographic";
 		public static readonly string Orthographic = "Orthographic";
 		public static readonly string PolarStereographic = "Polar Stereographic";
-		public static readonly string PolarStereographicA = "Polar Stereographic Variant A";
-		public static readonly string PolarStereographicB = "Polar Stereographic Variant B";
-		public static readonly string PolarStereographicC = "Polar Stereographic Variant C";
 		public static readonly string Polyconic = "Polyconic";
 		public static readonly string PopularVisualisationPseudoMercator = "Popular Visualisation Pseudo Mercator";
 		public static readonly string Robinson = "Robinson";
@@ -98,9 +95,6 @@ namespace Pigeoid.Interop
 				ObliqueStereographic,
 				Orthographic,
 				PolarStereographic,
-				PolarStereographicA,
-				PolarStereographicB,
-				PolarStereographicC,
 				Polyconic,
 				PopularVisualisationPseudoMercator,
 				Robinson,

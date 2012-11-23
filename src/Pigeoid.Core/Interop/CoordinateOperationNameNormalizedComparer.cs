@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
 namespace Pigeoid.Interop
 {
 	public class CoordinateOperationNameNormalizedComparer : NameNormalizedComparerBase
 	{
+
+		private static readonly Regex VariantEndingRegex = new Regex("VARIANT([A-Z])", RegexOptions.Compiled);
 
 		public static readonly CoordinateOperationNameNormalizedComparer Default = new CoordinateOperationNameNormalizedComparer();
 
@@ -34,13 +37,26 @@ namespace Pigeoid.Interop
 			if (CoordinateOperationStandardNames.IsNormalizedName(orientated))
 				return orientated;
 
-			var sp1Replace = text.Replace("VARIANTA","1SP");
-			if (CoordinateOperationStandardNames.IsNormalizedName(sp1Replace))
-				return sp1Replace;
+			var variantMatch = VariantEndingRegex.Match(text);
+			if (variantMatch.Success){
+				var variantLetter = variantMatch.Groups[1].Value;
+				var nonVariant = text.Substring(0, variantMatch.Index);
 
-			var sp2Replace = text.Replace("VARIANTB", "2SP");
-			if (CoordinateOperationStandardNames.IsNormalizedName(sp2Replace))
-				return sp2Replace;
+				if (variantLetter == "A"){
+					var sp1Replace = String.Concat(nonVariant, "1SP");
+					if (CoordinateOperationStandardNames.IsNormalizedName(sp1Replace))
+						return sp1Replace;
+				}
+
+				if (variantLetter == "B"){
+					var sp2Replace = String.Concat(nonVariant, "2SP");
+					if (CoordinateOperationStandardNames.IsNormalizedName(sp2Replace))
+						return sp2Replace;
+				}
+
+				if (CoordinateOperationStandardNames.IsNormalizedName(nonVariant))
+					return nonVariant;
+			}
 
 			var conicFlipText = text.Replace("CONFORMALCONIC", "CONICCONFORMAL");
 			if (CoordinateOperationStandardNames.IsNormalizedName(conicFlipText))

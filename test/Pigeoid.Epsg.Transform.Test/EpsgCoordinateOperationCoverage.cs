@@ -1234,6 +1234,59 @@ namespace Pigeoid.Epsg.Transform.Test
 			AreEqual(expected29701, inverse.TransformValue(expected4810), 50);
 		}
 
+		[Test, Ignore(NoUsages)]
+		public void m9814_swissObliqueCylindrical(){
+			Assert.Inconclusive(NoUsages);
+		}
+
+		[Test]
+		public void m9815_hotineObliqueMercator_variantB(){
+			// method: 9815
+			// op: 19958
+			// crs: 4298 to 29873
+
+			var fromCrs = EpsgCrs.Get(4298);
+			var toCrs = EpsgCrs.Get(29873);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4298 = new GeographicCoordinate(5.387254, 115.805506); // dd
+			var expected29873 = new Point2(679245.73, 596562.78); // m
+
+			AreEqual(expected29873, transformation.TransformValue(expected4298), 0.06);
+			AreEqual(expected4298, inverse.TransformValue(expected29873),  0.0005);
+		}
+
+		[Test]
+		public void m9816_tunisiaMiningGrid(){
+			// method: 9816
+			// op: 19937
+			// crs: 4816 to 22300
+
+			var fromCrs = EpsgCrs.Get(4816);
+			var toCrs = EpsgCrs.Get(22300);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			
+		}
+
 	}
 
 }

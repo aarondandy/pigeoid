@@ -484,6 +484,45 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return new LabordeObliqueMercator(origin,azimuth,scaleFactor,fromSpheroid, offset);
 		}
 
+		private ProjectionBase CreateHotineObliqueMercator(ProjectionCompilationParams opData){
+			var originLatParam = new KeywordNamedParameterSelector("LAT", "CENTER");
+			var originLonParam = new KeywordNamedParameterSelector("LON", "CENTER");
+			var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
+			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+			var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
+			var azimuthParam = new KeywordNamedParameterSelector("AZIMUTH");
+			var angleSkewParam = new KeywordNamedParameterSelector("ANGLE","SKEW");
+			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam, azimuthParam, angleSkewParam);
+
+			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
+			if (null == fromSpheroid)
+				return null;
+
+			GeographicCoordinate origin;
+			if (!(originLatParam.IsSelected || originLonParam.IsSelected) || !TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin))
+				origin = GeographicCoordinate.Zero;
+
+			Vector2 offset;
+			if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
+				offset = Vector2.Zero;
+
+			double scaleFactor;
+			if (!scaleFactorParam.IsSelected || !TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
+				scaleFactor = 1.0;
+
+			double azimuth;
+			if (!azimuthParam.IsSelected || !TryGetDouble(azimuthParam.Selection, OgcAngularUnit.DefaultRadians, out azimuth))
+				azimuth = 0;
+
+			double angleSkew;
+			if (!angleSkewParam.IsSelected || !TryGetDouble(angleSkewParam.Selection, OgcAngularUnit.DefaultRadians, out angleSkew))
+				angleSkew = 0;
+
+			// TODO: in which cases would variant A be used?
+
+			return new HotineObliqueMercator.VariantB(origin, azimuth, angleSkew, scaleFactor, offset, fromSpheroid);
+		}
+
 		private readonly INameNormalizedComparer _coordinateOperationNameComparer;
 		private readonly Dictionary<string, Func<ProjectionCompilationParams, ITransformation<GeographicCoordinate, Point2>>> _transformationCreatorLookup;
 
@@ -503,7 +542,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 				{CoordinateOperationStandardNames.GallStereographic,null},
 				{CoordinateOperationStandardNames.Geos,null},
 				{CoordinateOperationStandardNames.Gnomonic,null},
-				{CoordinateOperationStandardNames.HotineObliqueMercator,null},
+				{CoordinateOperationStandardNames.HotineObliqueMercator,CreateHotineObliqueMercator},
 				{CoordinateOperationStandardNames.Krovak,CreateKrovak},
 				{CoordinateOperationStandardNames.KrovakNorth,CreateKrovak},
 				{CoordinateOperationStandardNames.KrovakModifiedNorth,CreateKrovak},
@@ -524,9 +563,6 @@ namespace Pigeoid.CoordinateOperationCompilation
 				{CoordinateOperationStandardNames.ObliqueStereographic,CreateObliqueStereographic},
 				{CoordinateOperationStandardNames.Orthographic,null},
 				{CoordinateOperationStandardNames.PolarStereographic,CreatePolarStereographic},
-				{CoordinateOperationStandardNames.PolarStereographicA,CreatePolarStereographic},
-				{CoordinateOperationStandardNames.PolarStereographicB,CreatePolarStereographic},
-				{CoordinateOperationStandardNames.PolarStereographicC,CreatePolarStereographic},
 				{CoordinateOperationStandardNames.Polyconic,null},
 				{CoordinateOperationStandardNames.PopularVisualisationPseudoMercator, CreatePopularVisualisationPseudoMercator},
 				{CoordinateOperationStandardNames.Robinson,null},
