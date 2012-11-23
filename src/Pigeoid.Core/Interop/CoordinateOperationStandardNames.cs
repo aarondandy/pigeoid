@@ -34,6 +34,7 @@ namespace Pigeoid.Interop
 		public static readonly string LambertConicConformal1Sp = "Lambert Conic Conformal (1SP)";
 		public static readonly string LambertConicConformal2Sp = "Lambert Conic Conformal (2SP)";
 		public static readonly string LambertConicConformal2SpBelgium = "Lambert Conic Conformal (2SP Belgium)";
+		public static readonly string LambertConicNearConformal = "Lambert Conic Near Conformal";
 		public static readonly string Mercator1Sp = "Mercator (1SP)";
 		public static readonly string Mercator2Sp = "Mercator (2SP)";
 		public static readonly string MillerCylindrical = "Miller Cylindrical";
@@ -86,6 +87,7 @@ namespace Pigeoid.Interop
 				LambertConicConformal1Sp,
 				LambertConicConformal2Sp,
 				LambertConicConformal2SpBelgium,
+				LambertConicNearConformal,
 				Mercator1Sp,
 				Mercator2Sp,
 				MillerCylindrical,

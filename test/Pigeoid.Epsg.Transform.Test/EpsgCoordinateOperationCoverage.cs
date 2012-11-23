@@ -1265,7 +1265,7 @@ namespace Pigeoid.Epsg.Transform.Test
 			AreEqual(expected4298, inverse.TransformValue(expected29873),  0.0005);
 		}
 
-		[Test]
+		[Test,Ignore(NotSupported)]
 		public void m9816_tunisiaMiningGrid(){
 			// method: 9816
 			// op: 19937
@@ -1284,7 +1284,64 @@ namespace Pigeoid.Epsg.Transform.Test
 			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
 			Assert.IsNotNull(inverse);
 
-			
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test]
+		public void m9817_lamberConicNearConformal() {
+			// method: 9817
+			// op: 19940
+			// crs: 4227 to 22700
+
+			var fromCrs = EpsgCrs.Get(4227);
+			var toCrs = EpsgCrs.Get(22700);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4227 = new GeographicCoordinate(37.521563, 34.13647);
+			var expected22700 = new Point2(15707.96, 623165.96);
+
+			AreEqual(expected22700, transformation.TransformValue(expected4227), 0.06);
+			AreEqual(expected4227, inverse.TransformValue(expected22700), 0.0000006);
+		}
+
+		[Test, Ignore(NoSampleData)]
+		public void m9818_americalPolyconic() {
+			Assert.Inconclusive(NoSampleData);
+		}
+
+		[Test]
+		public void m9819_krovak() {
+			// method: 9819
+			// op: 19952
+			// crs: 4818 to 2065
+
+			var fromCrs = EpsgCrs.Get(4818);
+			var toCrs = EpsgCrs.Get(2065);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4818 = new GeographicCoordinate(50.209012, 16.849772);
+			var expected2065 = new Point2(1050538.63, 568991.00);
+
+			AreEqual(expected2065, transformation.TransformValue(expected4818), 0.04);
+			AreEqual(expected4818, inverse.TransformValue(expected2065), 0.000001);
 		}
 
 	}

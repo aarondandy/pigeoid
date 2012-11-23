@@ -342,6 +342,33 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return null;
 		}
 
+		private ProjectionBase CreateLambertConicNearConformal(ProjectionCompilationParams opData) {
+			var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
+			var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
+			var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
+			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+			var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
+			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
+
+			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
+			if (null == fromSpheroid)
+				return null;
+
+			GeographicCoordinate origin;
+			if (!(originLatParam.IsSelected || originLonParam.IsSelected) || !TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin))
+				origin = GeographicCoordinate.Zero;
+
+			Vector2 offset;
+			if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
+				offset = Vector2.Zero;
+
+			double scaleFactor;
+			if (scaleFactorParam.IsSelected && TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
+				return new LambertConicNearConformal(origin, scaleFactor, offset, fromSpheroid);
+
+			return null;
+		}
+
 		private ITransformation<GeographicCoordinate, Point2> CreateKrovak(ProjectionCompilationParams opData) {
 			var latConeAxisParam = new KeywordNamedParameterSelector("CO","LAT","CONE","AXIS"); // Co-latitude of cone axis
 			var latProjectionCenterParam = new KeywordNamedParameterSelector("LAT", "CENTER"); // Latitude of projection centre
@@ -422,7 +449,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 				}
 			}
 
-			return null;
+			return new Krovak(origin, latitudeOfPseudoStandardParallel, azimuthOfInitialLine, scaleFactor, offset, spheroid);
 		}
 
 		private ProjectionBase CreateObliqueStereographic(ProjectionCompilationParams opData) {
@@ -554,6 +581,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 				{CoordinateOperationStandardNames.LambertConicConformal1Sp,CreateLambertConicConformal},
 				{CoordinateOperationStandardNames.LambertConicConformal2Sp,CreateLambertConicConformal},
 				{CoordinateOperationStandardNames.LambertConicConformal2SpBelgium,CreateLambertConicConformal},
+				{CoordinateOperationStandardNames.LambertConicNearConformal,CreateLambertConicNearConformal},
 				{CoordinateOperationStandardNames.Mercator1Sp,CreateMercator},
 				{CoordinateOperationStandardNames.Mercator2Sp,CreateMercator},
 				{CoordinateOperationStandardNames.MillerCylindrical,null},
