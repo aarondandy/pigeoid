@@ -64,7 +64,7 @@ namespace Pigeoid.Transformation
 		}
 
 		public GeographicCoordinate TransformValue(GeographicCoordinate value) {
-			return TransformValue(new GeographicHeightCoordinate(value.Latitude, value.Longitude, 0));
+			return TransformValue(new GeographicHeightCoordinate(value.Latitude, value.Longitude));
 		}
 
 		public IEnumerable<GeographicCoordinate> TransformValues([NotNull] IEnumerable<GeographicCoordinate> values) {

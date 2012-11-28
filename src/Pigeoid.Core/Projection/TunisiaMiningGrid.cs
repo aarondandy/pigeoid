@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using JetBrains.Annotations;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Projection
 {
-	public class TunisiaMiningGrid : ProjectionBase
+	public class TunisiaMiningGrid : ITransformation<GeographicCoordinate, Point2>
 	{
 
 		private class Inverse : InvertedTransformationBase<TunisiaMiningGrid,Point2,GeographicCoordinate>
@@ -16,32 +15,39 @@ namespace Pigeoid.Projection
 			public Inverse(TunisiaMiningGrid core) : base(core) { }
 
 			public override GeographicCoordinate TransformValue(Point2 value) {
-				throw new NotImplementedException();
+				var lat = 36.5964 + ((value.Y - 360.0) * (value.Y > 360.0 ? 0.010015 : 0.01002));
+				var lon = 7.83445 + ((value.X - 270.0) * 0.012185);
+				return new GeographicCoordinate(lat, lon);
 			}
 		}
 
-		public static Vector2 GridReferenceToOffset(int gridReference){
+		public static Point2 GridReferenceToLocation(int gridReference){
 			var easting = gridReference / 1000;
 			var northing = gridReference - (easting * 1000);
-			return new Vector2(easting, northing);
+			return new Point2(easting, northing);
 		}
 
-		public TunisiaMiningGrid(int gridReference, ISpheroid<double> spheroid) : this(GridReferenceToOffset(gridReference), spheroid) { }
-
-		public TunisiaMiningGrid(Vector2 offset, ISpheroid<double> spheroid) : base(offset,spheroid){
-			
+		public Point2 TransformValue(GeographicCoordinate source) {
+			var x = 270.0 + ((source.Longitude - 7.83445)/0.012185);
+			var y = 360.0 + ((source.Latitude - 36.5964) / (source.Latitude > 36.5964 ? 0.010015 : 0.01002));
+			return new Point2(x,y);
 		}
 
-		public override Point2 TransformValue(GeographicCoordinate source) {
-			throw new NotImplementedException();
+		public bool HasInverse {
+			get { return true; }
 		}
 
-		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
-			throw new NotImplementedException();
+		[NotNull] public IEnumerable<Point2> TransformValues([NotNull] IEnumerable<GeographicCoordinate> values) {
+			return values.Select(TransformValue);
 		}
 
-		public override bool HasInverse {
-			get { throw new NotImplementedException(); }
+		public ITransformation<Point2, GeographicCoordinate> GetInverse() {
+			return new Inverse(this);
 		}
+
+		ITransformation ITransformation.GetInverse() {
+			return GetInverse();
+		}
+
 	}
 }

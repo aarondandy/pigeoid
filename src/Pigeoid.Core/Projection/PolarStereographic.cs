@@ -108,6 +108,14 @@ namespace Pigeoid.Projection
 
 		private static readonly PeriodicOperations LongitudePeriod = new PeriodicOperations(-Math.PI, Math.PI * 2.0);
 
+		public static PolarStereographic CreateFromStandardParallel(double standardParallel, double longitude, Vector2 falseProjectedOffset, [NotNull] ISpheroid<double> spheroid) {
+			return CreateFromStandardParallel(
+				new GeographicCoordinate(standardParallel < 0 ? -Math.PI / 2.0 : Math.PI / 2.0, longitude),
+				standardParallel,
+				falseProjectedOffset,
+				spheroid);
+		}
+
 		public static PolarStereographic CreateFromStandardParallel(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffset, [NotNull] ISpheroid<double> spheroid)
 		{
 			var sinLat = Math.Sin(standardParallel);
@@ -133,6 +141,14 @@ namespace Pigeoid.Projection
 				scaleFactor = CalculateCrazyEValue(e) * mf / (2 * tf);
 			}
 			return new PolarStereographic(geographicOrigin, scaleFactor, falseProjectedOffset, spheroid);
+		}
+
+		public static PolarStereographic CreateFromStandardParallelAndFalseOffsetAtOrigin(double standardParallel, double longitude, Vector2 falseProjectedOffset, [NotNull] ISpheroid<double> spheroid) {
+			return CreateFromStandardParallelAndFalseOffsetAtOrigin(
+				new GeographicCoordinate(standardParallel < 0 ? -Math.PI / 2.0 : Math.PI / 2.0, longitude),
+				standardParallel,
+				falseProjectedOffset,
+				spheroid);
 		}
 
 		public static PolarStereographic CreateFromStandardParallelAndFalseOffsetAtOrigin(GeographicCoordinate geographicOrigin, double standardParallel, Vector2 falseProjectedOffsetAtOrigin, [NotNull] ISpheroid<double> spheroid)

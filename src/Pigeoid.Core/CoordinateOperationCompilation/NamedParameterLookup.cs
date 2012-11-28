@@ -11,13 +11,17 @@ namespace Pigeoid.CoordinateOperationCompilation
 	{
 
 		private readonly NamedParameterSelector.ParameterData[] _data;
+		private readonly ParameterNameNormalizedComparer _parameterNameNormalizedComparer;
 
 		public NamedParameterLookup([NotNull] params INamedParameter[] parameters) {
+			_parameterNameNormalizedComparer = ParameterNameNormalizedComparer.Default;
 			_data = Array.ConvertAll(
 				parameters,
-				x => new NamedParameterSelector.ParameterData(x, ParameterNameNormalizedComparer.Default.Normalize(x.Name))
+				x => new NamedParameterSelector.ParameterData(x, _parameterNameNormalizedComparer.Normalize(x.Name))
 			);
 		}
+
+		public ParameterNameNormalizedComparer ParameterNameNormalizedComparer { get { return _parameterNameNormalizedComparer; } }
 
 		public NamedParameterLookup(ICoordinateOperationInfo operationInfo)
 			: this(operationInfo as IParameterizedCoordinateOperationInfo) { }

@@ -13,8 +13,9 @@ namespace Pigeoid.Ogc
 	{
 
 		private static readonly OgcAngularUnit DefaultRadianInstance = new OgcAngularUnit("radian", 1, new AuthorityTag("EPSG", "9101"));
-		private static readonly OgcAngularUnit DefaultDegreesInstance = new OgcAngularUnit("degree", Math.PI / 180.0, new AuthorityTag("EPSG", "9122"));
-		private static readonly OgcAngularUnit DefaultArcSecondInstance = new OgcAngularUnit("arc-second", Math.PI / 648000.0, new AuthorityTag("EPSG", "9122"));
+		private static readonly OgcAngularUnit DefaultDegreesInstance = new OgcAngularUnit("degree", Math.PI / 180.0, new AuthorityTag("EPSG", "9102"));
+		private static readonly OgcAngularUnit DefaultGradsInstance = new OgcAngularUnit("grad", Math.PI / 200.0, new AuthorityTag("EPSG", "9105"));
+		private static readonly OgcAngularUnit DefaultArcSecondInstance = new OgcAngularUnit("arc-second", Math.PI / 648000.0, new AuthorityTag("EPSG", "9104"));
 
 		/// <summary>
 		/// This is the OGC reference unit for angular measure.
@@ -26,12 +27,16 @@ namespace Pigeoid.Ogc
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static OgcAngularUnit DefaultDegrees { get { return DefaultDegreesInstance; } }
-
 		/// <summary>
 		/// The default arc-second unit factored against radians.
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static OgcAngularUnit DefaultArcSeconds { get { return DefaultArcSecondInstance; } }
+		/// <summary>
+		/// The default grad unit factored against radians.
+		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static OgcAngularUnit DefaultGrads { get { return DefaultGradsInstance; } }
 
 		/// <summary>
 		/// Constructs a new unit.

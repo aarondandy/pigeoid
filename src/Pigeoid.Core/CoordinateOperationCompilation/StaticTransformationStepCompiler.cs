@@ -382,6 +382,18 @@ namespace Pigeoid.CoordinateOperationCompilation
 				new AffineParametricTransformation(a.X, a.Y, a.Z, b.X, b.Y, b.Z));
 		}
 
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateTunisiaMiningGrid(TransformationCompilationParams opData) {
+			ITransformation transformation = new TunisiaMiningGrid();
+			var conv = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultGrads);
+			if (null != conv)
+				transformation = new ConcatenatedTransformation(new[] { conv, transformation });
+
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				OgcLinearUnit.DefaultKilometer,
+				transformation);
+		}
+
 		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateMolodenskyBadekas(TransformationCompilationParams opData) {
 			var xTransParam = new KeywordNamedParameterSelector("XAXIS", "TRANS");
 			var yTransParam = new KeywordNamedParameterSelector("YAXIS", "TRANS");
@@ -556,6 +568,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 				return CreateAffineParametricTransformation(compilationParams);
 			if (normalizedName.Equals("GEOGRAPHIC3DTO2DCONVERSION") || normalizedName.Equals("GEOGRAPHIC2DTO3DCONVERSION"))
 				return CreateGeographicDimensionChange(compilationParams);
+			if (normalizedName.Equals("TUNISIAMININGGRID"))
+				return CreateTunisiaMiningGrid(compilationParams);
 			return null;
 		}
 

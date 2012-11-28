@@ -163,6 +163,7 @@
     <Compile Include="Ogc\WktReader.cs" />
     <Compile Include="Ogc\WktSerializer.cs" />
     <Compile Include="Ogc\WktWriter.cs" />
+    <Compile Include="Projection\Bonne.cs" />
     <Compile Include="Projection\CassiniSoldner.cs" />
     <Compile Include="Projection\EquidistantCylindrical.cs" />
     <Compile Include="Projection\EquidistantCylindricalSpherical.cs" />
@@ -191,7 +192,6 @@
     <Compile Include="Projection\ProjectionBase.cs" />
     <Compile Include="Projection\TransverseMercator.cs" />
     <Compile Include="Projection\TransverseMercatorSouth.cs" />
-    <Compile Include="Projection\TransverseMercatorZoned.cs" />
     <Compile Include="Projection\TunisiaMiningGrid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpheroidLinearUnitConversionWrapper.cs" />
@@ -207,6 +207,7 @@
     <Compile Include="Transformation\GeographicGeocentricTransformationBase.cs" />
     <Compile Include="Transformation\GeographicOffset.cs" />
     <Compile Include="Transformation\GeographicGeocentricTranslation.cs" />
+    <Compile Include="Transformation\GeographicProjectedCastTransformation.cs" />
     <Compile Include="Transformation\Helmert7Transformation.cs" />
     <Compile Include="Transformation\InvertedTransformationBase.cs" />
     <Compile Include="Transformation\LinearElementTransformation.cs" />

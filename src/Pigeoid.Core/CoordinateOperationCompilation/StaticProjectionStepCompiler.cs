@@ -98,14 +98,14 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return false;
 		}
 
-		private static ProjectionBase CreatePolarStereographic(ProjectionCompilationParams opData) {
+		private ProjectionBase CreatePolarStereographic(ProjectionCompilationParams opData) {
 			var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
+			var parallelLatParam = new KeywordNamedParameterSelector("LAT", "PARALLEL");
 			var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
 			var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
 			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
 			var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
-			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
-
+			opData.ParameterLookup.Assign(originLatParam, originLonParam, parallelLatParam, offsetXParam, offsetYParam, scaleFactorParam);
 
 			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
 			if (null == fromSpheroid)
@@ -119,11 +119,23 @@ namespace Pigeoid.CoordinateOperationCompilation
 			if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
 				offset = Vector2.Zero;
 
-			double scaleFactor;
-			if (scaleFactorParam.IsSelected && TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
-				return new PolarStereographic(origin, scaleFactor, offset, fromSpheroid);
+			double latParallel;
+			if (!parallelLatParam.IsSelected || !TryGetDouble(parallelLatParam.Selection, OgcAngularUnit.DefaultRadians, out latParallel))
+				latParallel = origin.Latitude;
 
-			return null;
+			double scaleFactor;
+			if (scaleFactorParam.IsSelected && TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor)) {
+				return new PolarStereographic(origin, scaleFactor, offset, fromSpheroid);
+			}
+
+			if (
+				(offsetXParam.IsSelected && opData.ParameterLookup.ParameterNameNormalizedComparer.Normalize(offsetXParam.Selection.Name).Contains("ORIGIN"))
+				|| (offsetYParam.IsSelected && opData.ParameterLookup.ParameterNameNormalizedComparer.Normalize(offsetYParam.Selection.Name).Contains("ORIGIN"))
+			) {
+				return PolarStereographic.CreateFromStandardParallelAndFalseOffsetAtOrigin(latParallel, origin.Longitude, offset, fromSpheroid);
+			}
+
+			return PolarStereographic.CreateFromStandardParallel(latParallel, origin.Longitude, offset, fromSpheroid);
 		}
 
 		private static ProjectionBase CreateTransverseMercator(ProjectionCompilationParams opData) {
@@ -153,7 +165,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return null;
 		}
 
-		private static ProjectionBase CreateTransverseMercatorSource(ProjectionCompilationParams opData) {
+		private static ProjectionBase CreateTransverseMercatorSouth(ProjectionCompilationParams opData) {
 			var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
 			var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
 			var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
@@ -599,7 +611,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 				{CoordinateOperationStandardNames.SwissObliqueCylindrical,null},
 				{CoordinateOperationStandardNames.Stereographic,null},
 				{CoordinateOperationStandardNames.TransverseMercator,CreateTransverseMercator},
-				{CoordinateOperationStandardNames.TransverseMercatorSouthOriented,CreateTransverseMercatorSource},
+				{CoordinateOperationStandardNames.TransverseMercatorZonedGridSystem,CreateTransverseMercator},
+				{CoordinateOperationStandardNames.TransverseMercatorSouthOriented,CreateTransverseMercatorSouth},
 				{CoordinateOperationStandardNames.TunisiaMiningGrid,null},
 				{CoordinateOperationStandardNames.VanDerGrinten,null}
 			};

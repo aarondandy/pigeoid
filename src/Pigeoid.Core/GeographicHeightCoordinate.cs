@@ -72,6 +72,20 @@ namespace Pigeoid
 		}
 
 		/// <summary>
+		/// Creates a new geographical coordinate with default height.
+		/// </summary>
+		/// <param name="latitude">The latitude.</param>
+		/// <param name="longitude">The longitude.</param>
+		/// <remarks>
+		/// The default height is 0.
+		/// </remarks>
+		public GeographicHeightCoordinate(double latitude, double longitude) {
+			Latitude = latitude;
+			Longitude = longitude;
+			Height = 0.0;
+		}
+
+		/// <summary>
 		/// Creates a new geographical coordinate with height.
 		/// </summary>
 		/// <param name="coordinate">The latitude and longitude.</param>

@@ -52,6 +52,7 @@ namespace Pigeoid.Interop
 		public static readonly string SwissObliqueCylindrical = "Swiss Oblique Cylindrical";
 		public static readonly string Stereographic = "Stereographic";
 		public static readonly string TransverseMercator = "Transverse Mercator";
+		public static readonly string TransverseMercatorZonedGridSystem = "Transverse Mercator Zoned Grid System";
 		public static readonly string TransverseMercatorSouthOriented = "Transverse Mercator (South Orientated)";
 		public static readonly string TunisiaMiningGrid = "Tunisia Mining Grid";
 		public static readonly string VanDerGrinten = "VanDerGrinten";
@@ -105,6 +106,7 @@ namespace Pigeoid.Interop
 				SwissObliqueCylindrical,
 				Stereographic,
 				TransverseMercator,
+				TransverseMercatorZonedGridSystem,
 				TransverseMercatorSouthOriented,
 				TunisiaMiningGrid,
 				VanDerGrinten

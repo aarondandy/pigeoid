@@ -15,13 +15,19 @@ namespace Pigeoid.Ogc
 	{
 
 		private static readonly OgcLinearUnit DefaultMeterUnit = new OgcLinearUnit("Meter", 1, new AuthorityTag("EPSG","9001"));
-		private static readonly ReadOnlyCollection<OgcLinearUnit> DefaultBaseUnitList = Array.AsReadOnly(new[]{DefaultMeterUnit});
+		private static readonly OgcLinearUnit DefaultKilometerUnit = new OgcLinearUnit("Kilometer", 1000, new AuthorityTag("EPSG","9036"));
 
 		/// <summary>
 		/// The default OGC reference unit for length measures.
 		/// </summary>
 		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
 		public static OgcLinearUnit DefaultMeter { get { return DefaultMeterUnit; } }
+
+		/// <summary>
+		/// The default kilometer unit.
+		/// </summary>
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		public static OgcLinearUnit DefaultKilometer { get { return DefaultKilometerUnit; } }
 
 		/// <summary>
 		/// Constructs a new unit.

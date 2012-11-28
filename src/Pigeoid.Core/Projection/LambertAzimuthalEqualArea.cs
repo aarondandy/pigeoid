@@ -57,7 +57,7 @@ namespace Pigeoid.Projection
 		protected readonly double RadiusQ;
 		protected readonly double D;
 		protected readonly double OneMinusESq;
-		protected readonly double OneMinuseSqSinLatOriginSq;
+		protected readonly double OneMinusESqSinLatOriginSq;
 		protected readonly double OneOverTwoE;
 
 		public LambertAzimuthalEqualArea(
@@ -70,11 +70,11 @@ namespace Pigeoid.Projection
 			var sinLatOrigin = Math.Sin(geogOrigin.Latitude);
 			var cosLatOrigin = Math.Cos(geogOrigin.Latitude);
 			var eSqSinLatOriginSq = ESq * sinLatOrigin * sinLatOrigin;
-			OneMinuseSqSinLatOriginSq = 1.0 - eSqSinLatOriginSq;
+			OneMinusESqSinLatOriginSq = 1.0 - eSqSinLatOriginSq;
 			OneOverTwoE = 1.0 / (2.0 * E);
 			var sinLatOriginE = sinLatOrigin * E;
 			var qOrigin = OneMinusESq * (
-				(sinLatOrigin / OneMinuseSqSinLatOriginSq)
+				(sinLatOrigin / OneMinusESqSinLatOriginSq)
 				- (OneOverTwoE * Math.Log((1 - sinLatOriginE) / (1 + sinLatOriginE)))
 			);
 			QParallel = OneMinusESq * (
@@ -115,7 +115,7 @@ namespace Pigeoid.Projection
 			var sinLat = Math.Sin(source.Latitude);
 			var eSinLat = sinLat * E;
 			var q = OneMinusESq * (
-				(sinLat / OneMinuseSqSinLatOriginSq)
+				(sinLat / (1 - (ESq * sinLat * sinLat)))
 				- (OneOverTwoE * Math.Log((1 - eSinLat)/(1 + eSinLat)))
 			);
 			var beta = Math.Asin(q / QParallel);
