@@ -81,7 +81,7 @@ namespace Pigeoid.Projection
 
 			var e4 = ESq * ESq;
 			var e6 = e4 * ESq;
-			MLineCoefficient1 = 1.0 - (ESq / 4.0) - (3.0 * e4 / 64.0) - (5.0 * e6 / 256.0);
+			MLineCoefficient1 = 1.0 - (ESq / 4.0) - (e4 * 3.0 / 64.0) - (e6 * 5.0 / 256.0);
 			MLineCoefficient1Major = MLineCoefficient1 * MajorAxis;
 			MLineCoefficient2 = (3.0 * ESq / 8.0) + (3.0 * e4 / 32.0) + (45.0 * e6 / 1024.0);
 			MLineCoefficient3 = (15.0 * e4 / 256.0) + (45.0 * e6 / 1024.0);

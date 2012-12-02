@@ -74,7 +74,8 @@ namespace Pigeoid.Transformation
 		}
 
 		public GeographicHeightCoordinate TransformValue(Point3 geocentric) {
-			double p = Math.Sqrt((geocentric.X * geocentric.X) + (geocentric.Y * geocentric.Y));
+			var p = Math.Sqrt((geocentric.X * geocentric.X) + (geocentric.Y * geocentric.Y));
+
 			double cosQ = Math.Atan((geocentric.Z * MajorAxis) / (p * MinorAxis));
 			double sinQ = Math.Sin(cosQ);
 			cosQ = Math.Cos(cosQ);

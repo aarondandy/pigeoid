@@ -29,6 +29,12 @@ namespace Pigeoid.Epsg.Transform.Test
 			Assert.AreEqual(expected.Height, actual.Height, delta);
 		}
 
+		private static void AreEqual(GeographicHeightCoordinate expected, GeographicHeightCoordinate actual, double angleDelta, double linearDelta) {
+			Assert.AreEqual(expected.Latitude, actual.Latitude, angleDelta);
+			Assert.AreEqual(expected.Longitude, actual.Longitude, angleDelta);
+			Assert.AreEqual(expected.Height, actual.Height, linearDelta);
+		}
+
 		private static void AreEqual(Point2 expected, Point2 actual, double delta) {
 			Assert.AreEqual(expected.X, actual.X, delta);
 			Assert.AreEqual(expected.Y, actual.Y, delta);
@@ -1466,6 +1472,269 @@ namespace Pigeoid.Epsg.Transform.Test
 
 			AreEqual(expected2985, transformation.TransformValue(expected4636), 0.03);
 			AreEqual(expected4636, inverse.TransformValue(expected2985), 0.0000003);
+		}
+
+		[Test]
+		public void m9831_guamProjection() {
+			// method: 9831
+			// op: 15400
+			// crs: 4675 to 3993
+
+			var fromCrs = EpsgCrs.Get(4675);
+			var toCrs = EpsgCrs.Get(3993);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4675 = new GeographicCoordinate(13.3390, 144.6353);
+			var expected3993 = new Point2(37712.48, 35242.00);
+
+			AreEqual(expected3993, transformation.TransformValue(expected4675), 5);
+			AreEqual(expected4675, inverse.TransformValue(expected3993), 0.05);
+		}
+
+		[Test]
+		public void m9832_modifiedAzimuthalEquidistant() {
+			// method: 9832
+			// op: 15399
+			// crs: 4675 to 3295
+
+			var fromCrs = EpsgCrs.Get(4675);
+			var toCrs = EpsgCrs.Get(3295);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4675 = new GeographicCoordinate(9.5965258333333333333333333333333, 138.19303);
+			var expected3295 = new Point2(42665.90, 65509.82);
+
+			AreEqual(expected3295, transformation.TransformValue(expected4675), 0.005);
+			AreEqual(expected4675, inverse.TransformValue(expected3295), 0.00000004);
+		}
+
+		[Test]
+		public void m9833_hyperbolicCassiniSoldner() {
+			// method: 9833
+			// op: 19878
+			// crs: 4748 to 3139
+
+			var fromCrs = EpsgCrs.Get(4748);
+			var toCrs = EpsgCrs.Get(3139);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4748 = new GeographicCoordinate(-16.841456527777777777777777777778, 179.99433652777777777777777777778);
+			var expected3139 = new Point2(16015.2890 * 100, 13369.6601 * 100); // test data is defined in chains but the CRS is in links
+
+			AreEqual(expected3139, transformation.TransformValue(expected4748), 0.005);
+			AreEqual(expected4748, inverse.TransformValue(expected3139), 0.000003);
+		}
+
+		[Test]
+		public void m9834_lambertCylindricalEqualArea_spherical() {
+			// method: 9834
+			// op: 19869
+			// crs: 4053 to 3410
+
+			var fromCrs = EpsgCrs.Get(4053);
+			var toCrs = EpsgCrs.Get(3410);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4053 = DenverWgs84Degrees;
+			var expected3410 = new Point2(-10173682.187651999, 4649673.6115910001);
+
+			AreEqual(expected3410, transformation.TransformValue(expected4053), 70000);
+			AreEqual(expected4053, inverse.TransformValue(expected3410), 0.7);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9835_lambertCylindricalEqualArea() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test]
+		public void m9836_geocentricTopocentricConversions() {
+			// method: 9836
+			// op: 15593
+			// crs: 4978 to 5820
+
+			var fromCrs = EpsgCrs.Get(4978);
+			var toCrs = EpsgCrs.Get(5820);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<Point3, Point3>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point3, Point3>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4978 = new Point3(3652755.3058, 319574.6799, 5201547.3536);
+			var expected5820 = new Point3(189013.869, 128642.040, 4220.171);
+
+			AreEqual(expected5820, transformation.TransformValue(expected4978), 9000);
+			AreEqual(expected4978, inverse.TransformValue(expected5820), 11000);
+
+			Assert.Inconclusive("The EPSG data seems wrong.");
+			Assert.Inconclusive(NoSampleData);
+		}
+
+		[Test]
+		public void m9837_geographicTopocentricConversions() {
+			// method: 9837
+			// op: 15594
+			// crs: 4979 to 5819
+
+			var fromCrs = EpsgCrs.Get(4979);
+			var toCrs = EpsgCrs.Get(5819);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicHeightCoordinate, Point3>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point3, GeographicHeightCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4979 = new GeographicHeightCoordinate(53.809394444444444444444444444444, 2.12955, 73);
+			var expected5819 = new Point3(-189013.869, -128642.040, -4220.171);
+
+			AreEqual(expected5819, transformation.TransformValue(expected4979), 300);
+			AreEqual(expected4979, inverse.TransformValue(expected5819), 0.0001, 300);
+
+			Assert.Inconclusive("Accuracy problems");
+		}
+
+		[Test]
+		public void m9838_verticalPerspective() {
+			// method: 9838
+			// op: 19850
+			// crs: 5819 to 5821
+			
+			Assert.Inconclusive("The EPSG data seems wrong.");
+
+			var fromCrs = EpsgCrs.Get(5819);
+			var toCrs = EpsgCrs.Get(5821);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicHeightCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+
+			var expected5819 = new GeographicHeightCoordinate(0.939151101, 0.037167659, 73); // radians & meters (the epsg operation seems messed up)
+			var expected5821 = new Point2(-188878.767,-128550.090);
+
+			AreEqual(expected5821, transformation.TransformValue(expected5819), 0);
+		}
+
+		[Test, Ignore(NotSupported)]
+		public void m9839_verticalPerspectiveOrthographic() {
+			Assert.Inconclusive(NotSupported);
+		}
+
+		[Test, Ignore(NoUsages)]
+		public void m9840_orthographic() {
+			Assert.Inconclusive(NoUsages);
+		}
+
+		[Test]
+		public void m9841_mercator_1Sp_spherical() {
+			// method: 9841
+			// op: 19847
+			// crs: 4055 to 3785
+
+			var fromCrs = EpsgCrs.Get(4055);
+			var toCrs = EpsgCrs.Get(3785);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4055 = new GeographicCoordinate(39.55009499999999, -104.984722);
+			var expected3785 = new Point2(-11686845.794113001, 4800777.1091670003);
+
+			AreEqual(expected3785, transformation.TransformValue(expected4055), 0.02);
+			AreEqual(expected4055, inverse.TransformValue(expected3785), 0.0000002);
+		}
+
+		[Test, Ignore(NoSampleData)]
+		public void m9842_equidistantCylindrical() {
+			// method: 9842
+			// op: 19846
+			// crs: 4326 to 32663
+
+			var fromCrs = EpsgCrs.Get(4326);
+			var toCrs = EpsgCrs.Get(32663);
+
+			var opPath = PathGenerator.Generate(fromCrs, toCrs);
+			Assert.IsNotNull(opPath);
+			var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
+			Assert.IsNotNull(transformation);
+
+			var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+			Assert.IsNotNull(invOpPath);
+			var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
+			Assert.IsNotNull(inverse);
+
+			var expected4326 = DenverWgs84Degrees;
+			var expected32663 = new Point2(-11686845.794113001, 4423743.8349890001);
+
+			Assert.Inconclusive("Accuracy issues.");
+
+			AreEqual(expected32663, transformation.TransformValue(expected4326), 30000);
+			AreEqual(expected4326, inverse.TransformValue(expected32663), 1);
+		}
+
+		[Test, Ignore(NoUsages)]
+		public void m9843_geographic2DAxisOrderReversal() {
+			Assert.Inconclusive(NoUsages);
+		}
+
+		[Test, Ignore(NoUsages)]
+		public void m9844_geographic3DCrsAxisOrderChange() {
+			Assert.Inconclusive(NoUsages);
 		}
 
 	}

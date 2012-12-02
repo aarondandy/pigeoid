@@ -107,7 +107,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, parallelLatParam, offsetXParam, offsetYParam, scaleFactorParam);
 
-			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
+			var fromSpheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
 			if (null == fromSpheroid)
 				return null;
 
@@ -146,7 +146,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
 
-			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
+			var fromSpheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
 			if (null == fromSpheroid)
 				return null;
 
@@ -173,7 +173,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
 
-			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
+			var fromSpheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
 			if (null == fromSpheroid)
 				return null;
 
@@ -200,7 +200,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			if (!opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam))
 				return null;
 
-			var spheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
 			if (null == spheroid)
 				return null;
 
@@ -223,7 +223,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
-			var spheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
 			if (null == spheroid)
 				return null;
 
@@ -249,7 +249,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
-			var spheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
 			if (null == spheroid)
 				return null;
 
@@ -261,7 +261,10 @@ namespace Pigeoid.CoordinateOperationCompilation
 			if (!offsetXParam.IsSelected || !offsetYParam.IsSelected || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset))
 				offset = Vector2.Zero;
 
-			var spherical = _coordinateOperationNameComparer.Normalize(opData.OperationName).EndsWith("SPHERICAL");
+			// ReSharper disable CompareOfFloatsByEqualityOperator
+			var spherical = _coordinateOperationNameComparer.Normalize(opData.OperationName).EndsWith("SPHERICAL")
+				|| spheroid.E == 0;
+			// ReSharper restore CompareOfFloatsByEqualityOperator
 
 			return spherical
 				? (ProjectionBase)new EquidistantCylindricalSpherical(origin, offset, spheroid)
@@ -275,8 +278,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
-			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
-			if (null == fromSpheroid)
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+			if (null == spheroid)
 				return null;
 
 			GeographicCoordinate origin;
@@ -287,7 +290,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
 				offset = Vector2.Zero;
 
-			return new CassiniSoldner(origin, offset, fromSpheroid);
+			return new CassiniSoldner(origin, offset, spheroid);
 		}
 
 		private ITransformation<GeographicCoordinate, Point2> CreateMercator(ProjectionCompilationParams opData) {
@@ -298,8 +301,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
 
-			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
-			if (null == fromSpheroid)
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+			if (null == spheroid)
 				return null;
 
 			GeographicCoordinate origin;
@@ -310,11 +313,18 @@ namespace Pigeoid.CoordinateOperationCompilation
 			if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
 				offset = Vector2.Zero;
 
+			// ReSharper disable CompareOfFloatsByEqualityOperator
 			double scaleFactor;
-			if (scaleFactorParam.IsSelected && TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
-				return new Mercator(origin.Longitude, scaleFactor, offset, fromSpheroid);
+			if (scaleFactorParam.IsSelected && TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor)) {
+				if (1 == scaleFactor && 0 == spheroid.E)
+					return new MercatorSpherical(offset, origin.Longitude, spheroid.A);
+				return new Mercator(origin.Longitude, scaleFactor, offset, spheroid);
+			}
 
-			return new Mercator(origin, offset, fromSpheroid);
+			if (0 == spheroid.E)
+				return new MercatorSpherical(offset, origin.Longitude, spheroid.A);
+			return new Mercator(origin, offset, spheroid);
+			// ReSharper restore CompareOfFloatsByEqualityOperator
 		}
 
 		private ITransformation<GeographicCoordinate, Point2> CreateLambertConicConformal(ProjectionCompilationParams opData) {
@@ -327,8 +337,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam, parallel1Param, parallel2Param);
 
-			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
-			if (null == fromSpheroid)
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+			if (null == spheroid)
 				return null;
 
 			GeographicCoordinate origin;
@@ -342,14 +352,14 @@ namespace Pigeoid.CoordinateOperationCompilation
 			double parallel1, parallel2;
 			if (parallel1Param.IsSelected && parallel2Param.IsSelected && TryGetDouble(parallel1Param.Selection, OgcAngularUnit.DefaultRadians, out parallel1) && TryGetDouble(parallel2Param.Selection, OgcAngularUnit.DefaultRadians, out parallel2)) {
 				if (_coordinateOperationNameComparer.Normalize(opData.OperationName).EndsWith("BELGIUM"))
-					return new LambertConicConformalBelgium(origin, parallel1, parallel2, offset, fromSpheroid);
+					return new LambertConicConformalBelgium(origin, parallel1, parallel2, offset, spheroid);
 
-				return new LambertConicConformal2Sp(origin, parallel1, parallel2, offset, fromSpheroid);
+				return new LambertConicConformal2Sp(origin, parallel1, parallel2, offset, spheroid);
 			}
 
 			double scaleFactor;
 			if(scaleFactorParam.IsSelected && TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
-				return new LambertConicConformal1Sp(origin, scaleFactor, offset, fromSpheroid);
+				return new LambertConicConformal1Sp(origin, scaleFactor, offset, spheroid);
 
 			return null;
 		}
@@ -362,8 +372,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
 
-			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
-			if (null == fromSpheroid)
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+			if (null == spheroid)
 				return null;
 
 			GeographicCoordinate origin;
@@ -376,7 +386,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			double scaleFactor;
 			if (scaleFactorParam.IsSelected && TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
-				return new LambertConicNearConformal(origin, scaleFactor, offset, fromSpheroid);
+				return new LambertConicNearConformal(origin, scaleFactor, offset, spheroid);
 
 			return null;
 		}
@@ -393,7 +403,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var evalYParam = new KeywordNamedParameterSelector("ORDINATE2", "EVALUATION", "POINT");
 			opData.ParameterLookup.Assign(latConeAxisParam, latProjectionCenterParam, latPseudoParallelParam, scaleFactorParallelParam, originLonParam, offsetXParam, offsetYParam, evalXParam, evalYParam);
 
-			var spheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
 			if (null == spheroid)
 				return null;
 
@@ -472,8 +482,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
 
-			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
-			if (null == fromSpheroid)
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+			if (null == spheroid)
 				return null;
 
 			GeographicCoordinate origin;
@@ -486,9 +496,97 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			double scaleFactor;
 			if (scaleFactorParam.IsSelected && TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
-				return new ObliqueStereographic(origin, scaleFactor, offset, fromSpheroid);
+				return new ObliqueStereographic(origin, scaleFactor, offset, spheroid);
 
 			return null;
+		}
+
+		private static ProjectionBase CreateGuam(ProjectionCompilationParams opData) {
+			var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
+			var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
+			var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
+			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
+
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+			if (null == spheroid)
+				return null;
+
+			GeographicCoordinate origin;
+			if (!(originLatParam.IsSelected || originLonParam.IsSelected) || !TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin))
+				origin = GeographicCoordinate.Zero;
+
+			Vector2 offset;
+			if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
+				offset = Vector2.Zero;
+
+			return new Guam(origin, offset, spheroid);
+		}
+
+		private static ProjectionBase CreateHyperbolicCassiniSoldner(ProjectionCompilationParams opData) {
+			var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
+			var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
+			var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
+			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
+
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+			if (null == spheroid)
+				return null;
+
+			GeographicCoordinate origin;
+			if (!(originLatParam.IsSelected || originLonParam.IsSelected) || !TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin))
+				origin = GeographicCoordinate.Zero;
+
+			Vector2 offset;
+			if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
+				offset = Vector2.Zero;
+
+			return new HyperbolicCassiniSoldner(origin, offset, spheroid);
+		}
+
+		private static ProjectionBase CreateModifiedAzimuthalEquidistant(ProjectionCompilationParams opData) {
+			var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
+			var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
+			var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
+			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
+
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+			if (null == spheroid)
+				return null;
+
+			GeographicCoordinate origin;
+			if (!(originLatParam.IsSelected || originLonParam.IsSelected) || !TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin))
+				origin = GeographicCoordinate.Zero;
+
+			Vector2 offset;
+			if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
+				offset = Vector2.Zero;
+
+			return new ModifiedAzimuthalEquidistant(origin, offset, spheroid);
+		}
+
+		private static ProjectionBase CreateLambertCylindricalEqualAreaSpherical(ProjectionCompilationParams opData) {
+			var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
+			var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
+			var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
+			var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
+
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+			if (null == spheroid)
+				return null;
+
+			GeographicCoordinate origin;
+			if (!(originLatParam.IsSelected || originLonParam.IsSelected) || !TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin))
+				origin = GeographicCoordinate.Zero;
+
+			Vector2 offset;
+			if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
+				offset = Vector2.Zero;
+
+			return new LambertCylindricalEqualAreaSpherical(origin, offset, spheroid);
 		}
 
 		private ProjectionBase CreateLabordeObliqueMercator(ProjectionCompilationParams opData) {
@@ -500,8 +598,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var azimuthParam = new KeywordNamedParameterSelector("AZIMUTH");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam, azimuthParam);
 
-			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
-			if (null == fromSpheroid)
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+			if (null == spheroid)
 				return null;
 
 			GeographicCoordinate origin;
@@ -520,7 +618,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			if (!azimuthParam.IsSelected || !TryGetDouble(azimuthParam.Selection, OgcAngularUnit.DefaultRadians, out azimuth))
 				azimuth = 0;
 
-			return new LabordeObliqueMercator(origin,azimuth,scaleFactor,fromSpheroid, offset);
+			return new LabordeObliqueMercator(origin,azimuth,scaleFactor,spheroid, offset);
 		}
 
 		private ProjectionBase CreateHotineObliqueMercator(ProjectionCompilationParams opData){
@@ -533,8 +631,8 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var angleSkewParam = new KeywordNamedParameterSelector("ANGLE","SKEW");
 			opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam, azimuthParam, angleSkewParam);
 
-			var fromSpheroid = opData.StepParams.RelatedOutputCrsUnitConvertedSpheroid;
-			if (null == fromSpheroid)
+			var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+			if (null == spheroid)
 				return null;
 
 			GeographicCoordinate origin;
@@ -559,7 +657,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			// TODO: in which cases would variant A be used?
 
-			return new HotineObliqueMercator.VariantB(origin, azimuth, angleSkew, scaleFactor, offset, fromSpheroid);
+			return new HotineObliqueMercator.VariantB(origin, azimuth, angleSkew, scaleFactor, offset, spheroid);
 		}
 
 		private readonly INameNormalizedComparer _coordinateOperationNameComparer;
@@ -581,7 +679,9 @@ namespace Pigeoid.CoordinateOperationCompilation
 				{CoordinateOperationStandardNames.GallStereographic,null},
 				{CoordinateOperationStandardNames.Geos,null},
 				{CoordinateOperationStandardNames.Gnomonic,null},
+				{CoordinateOperationStandardNames.Guam,CreateGuam},
 				{CoordinateOperationStandardNames.HotineObliqueMercator,CreateHotineObliqueMercator},
+				{CoordinateOperationStandardNames.HyperbolicCassiniSoldner,CreateHyperbolicCassiniSoldner},
 				{CoordinateOperationStandardNames.Krovak,CreateKrovak},
 				{CoordinateOperationStandardNames.KrovakNorth,CreateKrovak},
 				{CoordinateOperationStandardNames.KrovakModifiedNorth,CreateKrovak},
@@ -594,9 +694,11 @@ namespace Pigeoid.CoordinateOperationCompilation
 				{CoordinateOperationStandardNames.LambertConicConformal2Sp,CreateLambertConicConformal},
 				{CoordinateOperationStandardNames.LambertConicConformal2SpBelgium,CreateLambertConicConformal},
 				{CoordinateOperationStandardNames.LambertConicNearConformal,CreateLambertConicNearConformal},
+				{CoordinateOperationStandardNames.LambertCylindricalEqualAreaSpherical, CreateLambertCylindricalEqualAreaSpherical},
 				{CoordinateOperationStandardNames.Mercator1Sp,CreateMercator},
 				{CoordinateOperationStandardNames.Mercator2Sp,CreateMercator},
 				{CoordinateOperationStandardNames.MillerCylindrical,null},
+				{CoordinateOperationStandardNames.ModifiedAzimuthalEquidistant,CreateModifiedAzimuthalEquidistant},
 				{CoordinateOperationStandardNames.Mollweide,null},
 				{CoordinateOperationStandardNames.NewZealandMapGrid,null},
 				{CoordinateOperationStandardNames.ObliqueMercator,null},

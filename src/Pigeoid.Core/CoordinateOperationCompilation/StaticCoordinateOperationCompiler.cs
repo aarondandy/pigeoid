@@ -4,7 +4,6 @@ using System.Linq;
 using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
-using Vertesaur;
 using Vertesaur.Contracts;
 using Vertesaur.Transformation;
 using Pigeoid.Unit;
@@ -63,22 +62,35 @@ namespace Pigeoid.CoordinateOperationCompilation
 				get { return ExtractSpheroid(RelatedOutputCrs) ?? ExtractSpheroid(RelatedInputCrs); }
 			}
 
-			[CanBeNull] public ISpheroid<double> RelatedInputCrsUnitConvertedSpheroid {
-				get {
-					var spheroid = RelatedInputSpheroid;
-					if (null != spheroid)
-						return ConvertSpheroidUnit(spheroid, RelatedInputCrsUnit);
-					return spheroid;
-				}
+			[CanBeNull] public ISpheroid<double> ConvertRelatedInputSpheroidUnit(IUnit unit) {
+				var spheroid = RelatedInputSpheroid;
+				return null != spheroid && null != unit
+					? ConvertSpheroidUnit(spheroid, unit)
+					: spheroid;
 			}
 
-			[CanBeNull] public ISpheroid<double> RelatedOutputCrsUnitConvertedSpheroid {
-				get {
-					var spheroid = RelatedOutputSpheroid;
-					if (null != spheroid)
-						return ConvertSpheroidUnit(spheroid, RelatedOutputCrsUnit);
+			[CanBeNull] public ISpheroid<double> ConvertRelatedOutputSpheroidUnit(IUnit unit) {
+				var spheroid = RelatedOutputSpheroid;
+				return null != spheroid && null != unit
+					? ConvertSpheroidUnit(spheroid, unit)
+					: spheroid;
+			}
+
+			private static ISpheroid<double> ConvertSpheroidUnit(ISpheroid<double> spheroid, IUnit toUnit) {
+				if (null == toUnit)
 					return spheroid;
+
+				var spheroidInfo = spheroid as ISpheroidInfo;
+				if (null == spheroidInfo)
+					return spheroid;
+
+				var fromUnit = spheroidInfo.AxisUnit;
+				if (null != fromUnit && !UnitEqualityComparer.Default.Equals(fromUnit, toUnit) && UnitEqualityComparer.Default.AreSameType(fromUnit, toUnit)) {
+					var conversion = SimpleUnitConversionGenerator.FindConversion(spheroidInfo.AxisUnit, toUnit);
+					if (null != conversion && !(conversion is UnitUnityConversion))
+						return new SpheroidLinearUnitConversionWrapper(spheroidInfo, conversion);
 				}
+				return spheroid;
 			}
 
 		}
@@ -117,23 +129,6 @@ namespace Pigeoid.CoordinateOperationCompilation
 				return concatTransformation.Transformations.SelectMany(Linearize);
 			}
 			return new[] {transformation};
-		}
-
-		private static ISpheroid<double> ConvertSpheroidUnit(ISpheroid<double> spheroid, IUnit toUnit) {
-			if (null == toUnit)
-				return spheroid;
-
-			var spheroidInfo = spheroid as ISpheroidInfo;
-			if (null == spheroidInfo)
-				return spheroid;
-
-			var fromUnit = spheroidInfo.AxisUnit;
-			if (null != fromUnit && !UnitEqualityComparer.Default.Equals(fromUnit, toUnit) && UnitEqualityComparer.Default.AreSameType(fromUnit, toUnit)) {
-				var conversion = SimpleUnitConversionGenerator.FindConversion(spheroidInfo.AxisUnit, toUnit);
-				if (null != conversion && !(conversion is UnitUnityConversion))
-					return new SpheroidLinearUnitConversionWrapper(spheroidInfo, conversion);
-			}
-			return spheroid;
 		}
 
 		public static IUnit ExtractUnit(ICrs crs) {
@@ -222,24 +217,6 @@ namespace Pigeoid.CoordinateOperationCompilation
 
 			// make sure that the output units are correct
 			ITransformation outputUnitConversion = CreateCoordinateUnitConversion(currentUnit, ExtractUnit(lastCrs));
-			/*if (null != currentUnit) {
-				var desiredOutputUnits = ExtractUnit(lastCrs);
-				if (
-					null != desiredOutputUnits
-					&& !UnitEqualityComparer.Default.Equals(currentUnit, desiredOutputUnits)
-					&& UnitEqualityComparer.Default.AreSameType(currentUnit, desiredOutputUnits)
-				) {
-					var conv = SimpleUnitConversionGenerator.FindConversion(currentUnit, desiredOutputUnits);
-					if (null != conv) {
-						if(UnitEqualityComparer.Default.NameNormalizedComparer.Equals("LENGTH", currentUnit.Type)){
-							outputUnitConversion = new LinearElementTransformation(conv);
-						}
-						else if(UnitEqualityComparer.Default.NameNormalizedComparer.Equals("ANGLE", currentUnit.Type)){
-							outputUnitConversion = new AngularElementTransformation(conv);
-						}
-					}
-				}
-			}*/
 
 			var resultTransformations = stepResults.Select(x => x.Transformation).ToList();
 			if(null != outputUnitConversion)

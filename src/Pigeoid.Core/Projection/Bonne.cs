@@ -62,7 +62,7 @@ namespace Pigeoid.Projection
 		private double CalculateM(double latitude) {
 			return MajorAxis * (
 				(MCalculationConstant1 * latitude)
-				- (((ESq * 3.0 / 8.9) + (E4 * 3.0 / 32.0) + (E6 * 45.0 / 1024.0)) * Math.Sin(2.0 * latitude))
+				- (((ESq * 3.0 / 8.0) + (E4 * 3.0 / 32.0) + (E6 * 45.0 / 1024.0)) * Math.Sin(2.0 * latitude))
 				+ (((E4 * 15.0 / 256.0) + (E6 * 45.0 / 1024.0)) * Math.Sin(4.0 * latitude))
 				- ((E6 * 35.0 / 3072.0) * Math.Sin(6.0 * latitude))
 			);

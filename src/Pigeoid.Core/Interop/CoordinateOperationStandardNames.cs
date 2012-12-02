@@ -21,8 +21,10 @@ namespace Pigeoid.Interop
 		public static readonly string GallStereographic = "Gall Stereographic";
 		public static readonly string GeographicOffsets = "Geographic2D Offsets";
 		public static readonly string Geos = "Geostationary Satellite View";
+		public static readonly string Guam = "Guam";
 		public static readonly string Gnomonic = "Gnomonic";
 		public static readonly string HotineObliqueMercator = "Hotine Oblique Mercator";
+		public static readonly string HyperbolicCassiniSoldner = "Hyperbolic Cassini-Soldner";
 		public static readonly string Krovak = "Krovak";
 		public static readonly string KrovakNorth = "Krovak (North Orientated)";
 		public static readonly string KrovakModified = "Krovak Modified";
@@ -35,9 +37,11 @@ namespace Pigeoid.Interop
 		public static readonly string LambertConicConformal2Sp = "Lambert Conic Conformal (2SP)";
 		public static readonly string LambertConicConformal2SpBelgium = "Lambert Conic Conformal (2SP Belgium)";
 		public static readonly string LambertConicNearConformal = "Lambert Conic Near Conformal";
+		public static readonly string LambertCylindricalEqualAreaSpherical = "Lambert Cylindrical Equal Area (Spherical)";
 		public static readonly string Mercator1Sp = "Mercator (1SP)";
 		public static readonly string Mercator2Sp = "Mercator (2SP)";
 		public static readonly string MillerCylindrical = "Miller Cylindrical";
+		public static readonly string ModifiedAzimuthalEquidistant = "Modified Azimuthal Equidistant";
 		public static readonly string Mollweide = "Mollweide";
 		public static readonly string NewZealandMapGrid = "New Zealand Map Grid";
 		public static readonly string ObliqueMercator = "Oblique Mercator";
@@ -76,7 +80,9 @@ namespace Pigeoid.Interop
 				GeographicOffsets,
 				Geos,
 				Gnomonic,
+				Guam,
 				HotineObliqueMercator,
+				HyperbolicCassiniSoldner,
 				Krovak,
 				KrovakModified,
 				KrovakModifiedNorth,
@@ -89,9 +95,11 @@ namespace Pigeoid.Interop
 				LambertConicConformal2Sp,
 				LambertConicConformal2SpBelgium,
 				LambertConicNearConformal,
+				LambertCylindricalEqualAreaSpherical,
 				Mercator1Sp,
 				Mercator2Sp,
 				MillerCylindrical,
+				ModifiedAzimuthalEquidistant,
 				Mollweide,
 				NewZealandMapGrid,
 				ObliqueMercator,

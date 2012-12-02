@@ -167,6 +167,7 @@
     <Compile Include="Projection\CassiniSoldner.cs" />
     <Compile Include="Projection\EquidistantCylindrical.cs" />
     <Compile Include="Projection\EquidistantCylindricalSpherical.cs" />
+    <Compile Include="Projection\Guam.cs" />
     <Compile Include="Projection\HotineObliqueMercator.cs" />
     <Compile Include="Projection\HyperbolicCassiniSoldner.cs" />
     <Compile Include="Projection\Krovak.cs" />
@@ -183,8 +184,10 @@
     <Compile Include="Projection\LambertConicConformal2Sp.cs" />
     <Compile Include="Projection\LambertConicConformalBelgium.cs" />
     <Compile Include="Projection\LambertConicNearConformal.cs" />
+    <Compile Include="Projection\LambertCylindricalEqualAreaSpherical.cs" />
     <Compile Include="Projection\Mercator.cs" />
     <Compile Include="Projection\MercatorSpherical.cs" />
+    <Compile Include="Projection\ModifiedAzimuthalEquidistant.cs" />
     <Compile Include="Projection\NeysProjection.cs" />
     <Compile Include="Projection\ObliqueStereographic.cs" />
     <Compile Include="Projection\PolarStereographic.cs" />
@@ -216,6 +219,8 @@
     <Compile Include="Transformation\MolodenskyBadekasTransformation.cs" />
     <Compile Include="Transformation\SimilarityTransformation.cs" />
     <Compile Include="Transformation\VerticalOffset.cs" />
+    <Compile Include="Transformation\VerticalPerspective.cs" />
+    <Compile Include="Transformation\VerticalPerspectiveOrthographic.cs" />
     <Compile Include="Unit\BasicScaleUnitConversionMap.cs" />
     <Compile Include="Unit\ConcatenatedUnitConversion.cs" />
     <Compile Include="Unit\ScaleUnitPartsPerMillion.cs" />

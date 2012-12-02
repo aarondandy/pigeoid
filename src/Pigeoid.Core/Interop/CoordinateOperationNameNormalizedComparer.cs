@@ -58,6 +58,20 @@ namespace Pigeoid.Interop
 					return nonVariant;
 			}
 
+			if (text.EndsWith("PROJECTION")) {
+				var removedProjectionText = text.Substring(0, text.Length - 10);
+				if (CoordinateOperationStandardNames.IsNormalizedName(removedProjectionText))
+					return removedProjectionText;
+			}
+
+			if (text.EndsWith("SPHERICAL")) {
+				if (text.StartsWith("MERCATOR")) {
+					var nonSpherical = text.Substring(0, text.Length - 9);
+					if (CoordinateOperationStandardNames.IsNormalizedName(nonSpherical))
+						return nonSpherical;
+				}
+			}
+
 			var conicFlipText = text.Replace("CONFORMALCONIC", "CONICCONFORMAL");
 			if (CoordinateOperationStandardNames.IsNormalizedName(conicFlipText))
 				return conicFlipText;

@@ -115,15 +115,13 @@ namespace Pigeoid.CoordinateOperationCompilation
 			return false;
 		}
 
-		private static bool TryCreateGeographicCoordinate(INamedParameter latParam, INamedParameter lonParam, out GeographicCoordinate result) {
-			double lat, lon;
-			if (NamedParameter.TryGetDouble(latParam, out lat) && NamedParameter.TryGetDouble(lonParam, out lon)) {
-				ConvertIfVaild(latParam.Unit, OgcAngularUnit.DefaultRadians, ref lat);
-				ConvertIfVaild(lonParam.Unit, OgcAngularUnit.DefaultRadians, ref lon);
-				result = new GeographicCoordinate(lat, lon);
+		private static bool TryCreateGeographicHeightCoordinate([CanBeNull] INamedParameter latParam, [CanBeNull] INamedParameter lonParam, [CanBeNull] INamedParameter heightParam, IUnit angularUnit, IUnit linearUnit, out GeographicHeightCoordinate result) {
+			double lat, lon, h;
+			if (TryGetDouble(latParam, angularUnit, out lat) | TryGetDouble(lonParam, angularUnit, out lon) | TryGetDouble(heightParam, linearUnit, out h)) {
+				result = new GeographicHeightCoordinate(lat, lon, h);
 				return true;
 			}
-			result = default(GeographicCoordinate);
+			result = GeographicHeightCoordinate.Invalid;
 			return false;
 		}
 
@@ -238,8 +236,7 @@ namespace Pigeoid.CoordinateOperationCompilation
 			var xParam = new KeywordNamedParameterSelector("XAXIS", "X");
 			var yParam = new KeywordNamedParameterSelector("YAXIS", "Y");
 			var zParam = new KeywordNamedParameterSelector("ZAXIS", "Z");
-			if (!opData.ParameterLookup.Assign(xParam, yParam, zParam))
-				return null;
+			opData.ParameterLookup.Assign(xParam, yParam, zParam);
 
 			Vector3 delta;
 			if (!TryCreateVector3(xParam.Selection, yParam.Selection, zParam.Selection, out delta))
@@ -288,6 +285,99 @@ namespace Pigeoid.CoordinateOperationCompilation
 				opData.StepParams,
 				opData.StepParams.InputUnit,
 				new VerticalOffset(offsetValue));
+		}
+
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateVerticalPerspective(TransformationCompilationParams opData) {
+			var outputUnit = opData.StepParams.RelatedOutputCrsUnit;
+			if (null == outputUnit)
+				return null;
+
+			var latParam = new KeywordNamedParameterSelector("LAT");
+			var lonParam = new KeywordNamedParameterSelector("LON");
+			var hOriginParam = new KeywordNamedParameterSelector("H", "HEIGHT", "ORIGIN");
+			var hViewParam = new KeywordNamedParameterSelector("H", "HEIGHT", "VIEW");
+			opData.ParameterLookup.Assign(latParam, lonParam, hOriginParam, hViewParam);
+
+			GeographicHeightCoordinate origin;
+			if (!TryCreateGeographicHeightCoordinate(latParam.Selection, lonParam.Selection, hOriginParam.Selection, OgcAngularUnit.DefaultRadians, outputUnit, out origin))
+				origin = GeographicHeightCoordinate.Zero;
+
+			double viewHeight;
+			if (!TryGetDouble(hViewParam.Selection, outputUnit, out viewHeight))
+				viewHeight = Double.NaN;
+
+			var spheroidIn = opData.StepParams.ConvertRelatedInputSpheroidUnit(outputUnit);
+			if (null == spheroidIn)
+				return null;
+
+			ITransformation transformation = new VerticalPerspective(origin, viewHeight, spheroidIn);
+
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				outputUnit,
+				transformation
+			);
+		}
+
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateGeographicTopocentric(TransformationCompilationParams opData) {
+			var outputUnit = opData.StepParams.RelatedOutputCrsUnit;
+			if (null == outputUnit)
+				return null;
+			
+			var latParam = new KeywordNamedParameterSelector("LAT");
+			var lonParam = new KeywordNamedParameterSelector("LON");
+			var hParam = new KeywordNamedParameterSelector("H");
+			opData.ParameterLookup.Assign(latParam, lonParam, hParam);
+
+			GeographicHeightCoordinate origin;
+			if (!TryCreateGeographicHeightCoordinate(latParam.Selection, lonParam.Selection, hParam.Selection, OgcAngularUnit.DefaultRadians, opData.StepParams.RelatedOutputCrsUnit, out origin))
+				origin = GeographicHeightCoordinate.Zero;
+
+			var spheroidIn = opData.StepParams.ConvertRelatedInputSpheroidUnit(outputUnit);
+			if (null == spheroidIn)
+				return null;
+
+			var spheroidOut = opData.StepParams.ConvertRelatedOutputSpheroidUnit(outputUnit);
+			if (null == spheroidOut)
+				return null;
+
+			var geographicGeocentric = new GeographicGeocentricTransformation(spheroidIn);
+			var topocentricOrigin = geographicGeocentric.TransformValue(origin);
+
+			var transformations = new List<ITransformation>() {
+				geographicGeocentric,
+				new GeocentricTopocentricTransformation(topocentricOrigin, spheroidOut)
+			};
+
+			var inputUnitConversion = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
+			if (null != inputUnitConversion)
+				transformations.Insert(0, inputUnitConversion);
+
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				outputUnit,
+				new ConcatenatedTransformation(transformations)
+			);
+		}
+
+		private static StaticCoordinateOperationCompiler.StepCompilationResult CreateGeocentricTopocentric(TransformationCompilationParams opData) {
+			var xParam = new KeywordNamedParameterSelector("XAXIS", "X");
+			var yParam = new KeywordNamedParameterSelector("YAXIS", "Y");
+			var zParam = new KeywordNamedParameterSelector("ZAXIS", "Z");
+			opData.ParameterLookup.Assign(xParam, yParam, zParam);
+
+			Point3 origin;
+			if (!TryCreatePoint3(xParam.Selection, yParam.Selection, zParam.Selection, opData.StepParams.InputUnit, out origin))
+				origin = Point3.Zero;
+
+			var spheroid = opData.StepParams.ConvertRelatedInputSpheroidUnit(opData.StepParams.InputUnit);
+			if (null == spheroid)
+				return null;
+
+			return new StaticCoordinateOperationCompiler.StepCompilationResult(
+				opData.StepParams,
+				opData.StepParams.InputUnit,
+				new GeocentricTopocentricTransformation(origin, spheroid));
 		}
 
 		private static bool TryGetCoefficientValue(INamedParameter parameter, out double value) {
@@ -570,6 +660,13 @@ namespace Pigeoid.CoordinateOperationCompilation
 				return CreateGeographicDimensionChange(compilationParams);
 			if (normalizedName.Equals("TUNISIAMININGGRID"))
 				return CreateTunisiaMiningGrid(compilationParams);
+			if (normalizedName.StartsWith("GEOCENTRICTOPOCENTRIC"))
+				return CreateGeocentricTopocentric(compilationParams);
+			if (normalizedName.StartsWith("GEOGRAPHICTOPOCENTRIC"))
+				return CreateGeographicTopocentric(compilationParams);
+			if (normalizedName.StartsWith("VERTICALPERSPECTIVE")) {
+				return CreateVerticalPerspective(compilationParams);
+			}
 			return null;
 		}
 
