@@ -1,6 +1,4 @@
-﻿// TODO: source header
-
-namespace Pigeoid.Ogc
+﻿namespace Pigeoid.Ogc
 {
 	/// <summary>
 	/// A direction an object can be oriented in, usually referring to an axis.

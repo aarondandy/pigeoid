@@ -1,12 +1,10 @@
-﻿// TODO: source header
-
-namespace Pigeoid.Contracts
+﻿namespace Pigeoid.Contracts
 {
-	public interface IDatum : IAuthorityBoundEntity
-	{
+    public interface IDatum : IAuthorityBoundEntity
+    {
 
-		string Name { get; }
-		string Type { get; }
+        string Name { get; }
+        string Type { get; }
 
-	}
+    }
 }

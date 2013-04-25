@@ -1,74 +1,85 @@
-﻿// TODO: source header
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Transformation
 {
-	internal abstract class InvertedTransformationBase<TCore, TSource, TTarget> :
-		ITransformation<TSource, TTarget>
-		where TCore : ITransformation<TTarget, TSource>
-	{
+    internal abstract class InvertedTransformationBase<TCore, TSource, TTarget> :
+        ITransformation<TSource, TTarget>
+        where TCore : ITransformation<TTarget, TSource>
+    {
 
-		private readonly TCore _core;
+        private readonly TCore _core;
 
-		protected InvertedTransformationBase([NotNull] TCore core) {
-			if (!core.HasInverse)
-				throw new ArgumentException("Core cannot be inverted.");
-			_core = core;
-		}
+        protected InvertedTransformationBase(TCore core) {
+            if(core == null) throw new ArgumentNullException("core");
+            Contract.EndContractBlock();
+            _core = core;
+        }
 
-		public TCore Core {
-			get { return _core; }
-		}
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(_core != null);
+        }
 
-		public ITransformation<TTarget, TSource> GetInverse() {
-			return _core;
-		}
+        public TCore Core {
+            get {
+                Contract.Ensures(Contract.Result<TCore>() != null);
+                return _core;
+            }
+        }
 
-		public bool HasInverse
-		{
-			get { return true; }
-		}
+        public ITransformation<TTarget, TSource> GetInverse() {
+            Contract.Ensures(Contract.Result<ITransformation<TTarget, TSource>>() != null);
+            return _core;
+        }
 
-		ITransformation ITransformation.GetInverse() {
-			return GetInverse();
-		}
+        public bool HasInverse {
+            [Pure] get { return true; }
+        }
 
-		public abstract TTarget TransformValue(TSource value);
+        ITransformation ITransformation.GetInverse() {
+            return GetInverse();
+        }
 
-		public IEnumerable<TTarget> TransformValues([NotNull] IEnumerable<TSource> values) {
-			return values.Select(TransformValue);
-		}
+        public abstract TTarget TransformValue(TSource value);
 
-	}
+        public IEnumerable<TTarget> TransformValues(IEnumerable<TSource> values) {
+            Contract.Requires(values != null);
+            Contract.Ensures(Contract.Result<IEnumerable<TTarget>>() != null);
+            return values.Select(TransformValue);
+        }
 
-	internal abstract class InvertedTransformationBase<TCore, TCoordinate> :
-		InvertedTransformationBase<TCore, TCoordinate, TCoordinate>,
-		ITransformation<TCoordinate>
-		where TCore : ITransformation<TCoordinate>
-	{
+    }
 
-		protected InvertedTransformationBase([NotNull] TCore core)
-			: base(core) { }
+    internal abstract class InvertedTransformationBase<TCore, TCoordinate> :
+        InvertedTransformationBase<TCore, TCoordinate, TCoordinate>,
+        ITransformation<TCoordinate>
+        where TCore : ITransformation<TCoordinate>
+    {
 
-		public override abstract TCoordinate TransformValue(TCoordinate value);
+        protected InvertedTransformationBase(TCore core)
+            : base(core) {
+            Contract.Requires(core != null);
+        }
 
-		public new ITransformation<TCoordinate> GetInverse() {
-			return base.GetInverse() as ITransformation<TCoordinate>;
-		}
+        public override abstract TCoordinate TransformValue(TCoordinate value);
 
-		public void TransformValues([NotNull] TCoordinate[] values) {
-			for (int i = 0; i < values.Length; i++) {
-				TransformValue(ref values[i]);
-			}
-		}
+        public new ITransformation<TCoordinate> GetInverse() {
+            return base.GetInverse() as ITransformation<TCoordinate>;
+        }
 
-		public void TransformValue(ref TCoordinate value) {
-			value = TransformValue(value);
-		}
-	}
+        public void TransformValues(TCoordinate[] values) {
+            Contract.Requires(values != null);
+            for (int i = 0; i < values.Length; i++) {
+                TransformValue(ref values[i]);
+            }
+        }
+
+        public void TransformValue(ref TCoordinate value) {
+            value = TransformValue(value);
+        }
+    }
 }

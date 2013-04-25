@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
 using Vertesaur.Contracts;
@@ -10,267 +10,305 @@ using Pigeoid.Unit;
 
 namespace Pigeoid.CoordinateOperationCompilation
 {
-	public class StaticCoordinateOperationCompiler : ICoordinateOperationCompiler
-	{
+    public class StaticCoordinateOperationCompiler : ICoordinateOperationCompiler
+    {
 
-		public interface IStepOperationCompiler
-		{
-			StepCompilationResult Compile(StepCompilationParameters stepParameters);
-		}
+        public interface IStepOperationCompiler
+        {
+            StepCompilationResult Compile(StepCompilationParameters stepParameters);
+        }
 
-		public sealed class StepCompilationParameters
-		{
+        public sealed class StepCompilationParameters
+        {
 
-			public StepCompilationParameters(
-				[NotNull] ICoordinateOperationInfo coordinateOperationInfo,
-				[NotNull] IUnit inputUnit,
-				ICrs relatedInputCrs,
-				ICrs relatedOutputCrs
-			){
-				if (null == coordinateOperationInfo)
-					throw new ArgumentNullException("coordinateOperationInfo");
-				if(null == inputUnit)
-					throw new ArgumentNullException("inputUnit");
+            public StepCompilationParameters(
+                ICoordinateOperationInfo coordinateOperationInfo,
+                IUnit inputUnit,
+                ICrs relatedInputCrs,
+                ICrs relatedOutputCrs
+            ) {
+                if (null == coordinateOperationInfo) throw new ArgumentNullException("coordinateOperationInfo");
+                if (null == inputUnit) throw new ArgumentNullException("inputUnit");
+                Contract.EndContractBlock();
 
-				CoordinateOperationInfo = coordinateOperationInfo;
-				InputUnit = inputUnit;
-				RelatedInputCrs = relatedInputCrs;
-				RelatedOutputCrs = relatedOutputCrs;
-			}
+                CoordinateOperationInfo = coordinateOperationInfo;
+                InputUnit = inputUnit;
+                RelatedInputCrs = relatedInputCrs;
+                RelatedOutputCrs = relatedOutputCrs;
+            }
 
-			[NotNull] public ICoordinateOperationInfo CoordinateOperationInfo { get; private set; }
+            [ContractInvariantMethod]
+            private void CodeContractInvariants() {
+                Contract.Invariant(CoordinateOperationInfo != null);
+                Contract.Invariant(InputUnit != null);
+            }
 
-			[NotNull] public IUnit InputUnit { get; private set; }
+            public ICoordinateOperationInfo CoordinateOperationInfo { get; private set; }
 
-			public ICrs RelatedInputCrs { get; private set; }
+            public IUnit InputUnit { get; private set; }
 
-			public ICrs RelatedOutputCrs { get; private set; }
+            public ICrs RelatedInputCrs { get; private set; }
 
-			[CanBeNull] public IUnit RelatedInputCrsUnit {
-				get { return ExtractUnit(RelatedInputCrs) ?? ExtractUnit(RelatedOutputCrs) ?? InputUnit; }
-			}
+            public ICrs RelatedOutputCrs { get; private set; }
 
-			[CanBeNull] public IUnit RelatedOutputCrsUnit {
-				get { return ExtractUnit(RelatedOutputCrs) ?? ExtractUnit(RelatedInputCrs) ?? InputUnit; }
-			}
+            public IUnit RelatedInputCrsUnit {
+                get {
+                    Contract.Ensures(Contract.Result<IUnit>() != null);
+                    return ExtractUnit(RelatedInputCrs)
+                        ?? ExtractUnit(RelatedOutputCrs)
+                        ?? InputUnit;
+                }
+            }
 
-			[CanBeNull] public ISpheroid<double> RelatedInputSpheroid {
-				get { return ExtractSpheroid(RelatedInputCrs) ?? ExtractSpheroid(RelatedOutputCrs); }
-			}
+            public IUnit RelatedOutputCrsUnit {
+                get {
+                    Contract.Ensures(Contract.Result<IUnit>() != null);
+                    return ExtractUnit(RelatedOutputCrs)
+                        ?? ExtractUnit(RelatedInputCrs)
+                        ?? InputUnit;
+                }
+            }
 
-			[CanBeNull] public ISpheroid<double> RelatedOutputSpheroid {
-				get { return ExtractSpheroid(RelatedOutputCrs) ?? ExtractSpheroid(RelatedInputCrs); }
-			}
+            public ISpheroid<double> RelatedInputSpheroid {
+                get { return ExtractSpheroid(RelatedInputCrs) ?? ExtractSpheroid(RelatedOutputCrs); }
+            }
 
-			[CanBeNull] public ISpheroid<double> ConvertRelatedInputSpheroidUnit(IUnit unit) {
-				var spheroid = RelatedInputSpheroid;
-				return null != spheroid && null != unit
-					? ConvertSpheroidUnit(spheroid, unit)
-					: spheroid;
-			}
+            public ISpheroid<double> RelatedOutputSpheroid {
+                get { return ExtractSpheroid(RelatedOutputCrs) ?? ExtractSpheroid(RelatedInputCrs); }
+            }
 
-			[CanBeNull] public ISpheroid<double> ConvertRelatedOutputSpheroidUnit(IUnit unit) {
-				var spheroid = RelatedOutputSpheroid;
-				return null != spheroid && null != unit
-					? ConvertSpheroidUnit(spheroid, unit)
-					: spheroid;
-			}
+            public ISpheroid<double> ConvertRelatedInputSpheroidUnit(IUnit unit) {
+                var spheroid = RelatedInputSpheroid;
+                return null != spheroid && null != unit
+                    ? ConvertSpheroidUnit(spheroid, unit)
+                    : spheroid;
+            }
 
-			private static ISpheroid<double> ConvertSpheroidUnit(ISpheroid<double> spheroid, IUnit toUnit) {
-				if (null == toUnit)
-					return spheroid;
+            public ISpheroid<double> ConvertRelatedOutputSpheroidUnit(IUnit unit) {
+                var spheroid = RelatedOutputSpheroid;
+                return null != spheroid && null != unit
+                    ? ConvertSpheroidUnit(spheroid, unit)
+                    : spheroid;
+            }
 
-				var spheroidInfo = spheroid as ISpheroidInfo;
-				if (null == spheroidInfo)
-					return spheroid;
+            private static ISpheroid<double> ConvertSpheroidUnit(ISpheroid<double> spheroid, IUnit toUnit) {
+                Contract.Requires(spheroid != null);
+                Contract.Ensures(Contract.Result<ISpheroid<double>>() != null);
+                if (null == toUnit)
+                    return spheroid;
 
-				var fromUnit = spheroidInfo.AxisUnit;
-				if (null != fromUnit && !UnitEqualityComparer.Default.Equals(fromUnit, toUnit) && UnitEqualityComparer.Default.AreSameType(fromUnit, toUnit)) {
-					var conversion = SimpleUnitConversionGenerator.FindConversion(spheroidInfo.AxisUnit, toUnit);
-					if (null != conversion && !(conversion is UnitUnityConversion))
-						return new SpheroidLinearUnitConversionWrapper(spheroidInfo, conversion);
-				}
-				return spheroid;
-			}
+                var spheroidInfo = spheroid as ISpheroidInfo;
+                if (null == spheroidInfo)
+                    return spheroid;
 
-		}
+                var fromUnit = spheroidInfo.AxisUnit;
+                if (null != fromUnit && !UnitEqualityComparer.Default.Equals(fromUnit, toUnit) && UnitEqualityComparer.Default.AreSameType(fromUnit, toUnit)) {
+                    var conversion = SimpleUnitConversionGenerator.FindConversion(spheroidInfo.AxisUnit, toUnit);
+                    if (null != conversion && !(conversion is UnitUnityConversion))
+                        return new SpheroidLinearUnitConversionWrapper(spheroidInfo, conversion);
+                }
+                return spheroid;
+            }
 
-		public sealed class StepCompilationResult
-		{
+        }
 
-			public StepCompilationResult(
-				[NotNull] StepCompilationParameters parameters,
-				[NotNull] IUnit outputUnit,
-				[NotNull] ITransformation transformation
-			){
-				if(null == parameters)
-					throw new ArgumentNullException("parameters");
-				if(null == outputUnit)
-					throw new ArgumentNullException("outputUnit");
+        public sealed class StepCompilationResult
+        {
 
-				Parameters = parameters;
-				Transformation = transformation;
-				OutputUnit = outputUnit;
-			}
+            public StepCompilationResult(
+                StepCompilationParameters parameters,
+                IUnit outputUnit,
+                ITransformation transformation
+            ) {
+                if (null == parameters) throw new ArgumentNullException("parameters");
+                if (null == outputUnit) throw new ArgumentNullException("outputUnit");
+                if (null == transformation) throw new ArgumentNullException("transformation");
+                Contract.EndContractBlock();
 
-			[Obsolete("This may be useless"), NotNull] public StepCompilationParameters Parameters { get; private set; }
-			[NotNull] public ITransformation Transformation { get; private set; }
-			[NotNull] public IUnit OutputUnit { get; private set; }
+                Parameters = parameters;
+                Transformation = transformation;
+                OutputUnit = outputUnit;
+            }
 
-		}
+            [ContractInvariantMethod]
+            private void CodeContractInvariants() {
+                Contract.Invariant(Parameters != null);
+                Contract.Invariant(Transformation != null);
+                Contract.Invariant(OutputUnit != null);
+            }
 
-		public static IEnumerable<ITransformation> Linearize(IEnumerable<ITransformation> transformation) {
-			return transformation.SelectMany(Linearize);
-		}
+            [Obsolete("This may be useless")]
+            public StepCompilationParameters Parameters { get; private set; }
+            public ITransformation Transformation { get; private set; }
+            public IUnit OutputUnit { get; private set; }
 
-		public static IEnumerable<ITransformation> Linearize(ITransformation transformation) {
-			var concatTransformation = transformation as ConcatenatedTransformation;
-			if (concatTransformation != null) {
-				return concatTransformation.Transformations.SelectMany(Linearize);
-			}
-			return new[] {transformation};
-		}
+        }
 
-		public static IUnit ExtractUnit(ICrs crs) {
-			var crsGeodetic = crs as ICrsGeodetic;
-			if (null != crsGeodetic)
-				return crsGeodetic.Unit;
-			var crsVertical = crs as ICrsVertical;
-			if (null != crsVertical)
-				return crsVertical.Unit;
-			var crsFitted = crs as ICrsFitted;
-			if (null != crsFitted)
-				return ExtractUnit(crsFitted.BaseCrs);
-			var crsLocal = crs as ICrsLocal;
-			if (null != crsLocal)
-				return crsLocal.Unit;
-			return null;
-		}
+        public static IEnumerable<ITransformation> Linearize(IEnumerable<ITransformation> transformation) {
+            Contract.Requires(transformation != null);
+            Contract.Ensures(Contract.Result<IEnumerable<ITransformation>>() != null);
+            return transformation.SelectMany(Linearize);
+        }
 
-		public static ISpheroidInfo ExtractSpheroid(ICrs crs) {
-			var geodetic = crs as ICrsGeodetic;
-			if (null == geodetic)
-				return null;
-			var datum = geodetic.Datum;
-			if (null == datum)
-				return null;
-			return datum.Spheroid;
-		}
+        public static IEnumerable<ITransformation> Linearize(ITransformation transformation) {
+            Contract.Requires(transformation != null);
+            Contract.Ensures(Contract.Result<IEnumerable<ITransformation>>() != null);
+            var concatTransformation = transformation as ConcatenatedTransformation;
+            if (concatTransformation != null) {
+                return concatTransformation.Transformations.SelectMany(Linearize);
+            }
+            return new[] { transformation };
+        }
 
-		private readonly IStepOperationCompiler[] _stepCompilers;
+        public static IUnit ExtractUnit(ICrs crs) {
+            var crsGeodetic = crs as ICrsGeodetic;
+            if (null != crsGeodetic)
+                return crsGeodetic.Unit;
+            var crsVertical = crs as ICrsVertical;
+            if (null != crsVertical)
+                return crsVertical.Unit;
+            var crsFitted = crs as ICrsFitted;
+            if (null != crsFitted)
+                return ExtractUnit(crsFitted.BaseCrs);
+            var crsLocal = crs as ICrsLocal;
+            if (null != crsLocal)
+                return crsLocal.Unit;
+            return null;
+        }
 
-		public StaticCoordinateOperationCompiler(){
-			_stepCompilers = new IStepOperationCompiler[]{
-				StaticProjectionStepCompiler.Default,
-				StaticTransformationStepCompiler.Default
-			};
-		}
+        public static ISpheroidInfo ExtractSpheroid(ICrs crs) {
+            var geodetic = crs as ICrsGeodetic;
+            if (null == geodetic)
+                return null;
+            var datum = geodetic.Datum;
+            if (null == datum)
+                return null;
+            return datum.Spheroid;
+        }
 
-		[CanBeNull]
-		[ContractAnnotation("to:null=>null;from:null=>null;")]
-		public static ITransformation CreateCoordinateUnitConversion([CanBeNull] IUnit from, [CanBeNull] IUnit to) {
-			if (null == from || null == to)
-				return null;
-			if (!UnitEqualityComparer.Default.Equals(from, to) && UnitEqualityComparer.Default.AreSameType(from, to)) {
-				var conv = SimpleUnitConversionGenerator.FindConversion(from, to);
-				if (null != conv && !(conv is UnitUnityConversion)) {
-					if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("LENGTH", from.Type)) {
-						return new LinearElementTransformation(conv);
-					}
-					if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("ANGLE", from.Type)) {
-						return new AngularElementTransformation(conv);
-					}
-				}
-			}
-			return null;
-		}
+        private readonly IStepOperationCompiler[] _stepCompilers;
 
-		public ITransformation Compile(ICoordinateOperationCrsPathInfo operationPath) {
-			if (null == operationPath)
-				throw new ArgumentNullException("operationPath");
+        public StaticCoordinateOperationCompiler() {
+            _stepCompilers = new IStepOperationCompiler[]{
+                StaticProjectionStepCompiler.Default,
+                StaticTransformationStepCompiler.Default
+            };
+        }
 
-			var allOps = operationPath.CoordinateOperations.ToList();
-			var allCrs = operationPath.CoordinateReferenceSystems.ToList();
-			if (allCrs.Count == 0)
-				throw new ArgumentException("operationPath contains no CRSs", "operationPath");
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(_stepCompilers != null);
+        }
 
-			var firstCrs = allCrs[0];
-			var lastCrs = allCrs[allCrs.Count - 1];
+        public static ITransformation CreateCoordinateUnitConversion(IUnit from, IUnit to) {
+            if (from == null) throw new ArgumentNullException("from");
+            if (to == null) throw new ArgumentNullException("to");
+            Contract.EndContractBlock();
+            // if (null == from || null == to)
+            //    return null;
+            if (!UnitEqualityComparer.Default.Equals(from, to) && UnitEqualityComparer.Default.AreSameType(from, to)) {
+                var conv = SimpleUnitConversionGenerator.FindConversion(from, to);
+                if (null != conv && !(conv is UnitUnityConversion)) {
+                    if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("LENGTH", from.Type)) {
+                        return new LinearElementTransformation(conv);
+                    }
+                    if (UnitEqualityComparer.Default.NameNormalizedComparer.Equals("ANGLE", from.Type)) {
+                        return new AngularElementTransformation(conv);
+                    }
+                }
+            }
+            return null;
+        }
 
-			var stepResults = new StepCompilationResult[allOps.Count];
-			var currentUnit = ExtractUnit(firstCrs);
+        public ITransformation Compile(ICoordinateOperationCrsPathInfo operationPath) {
+            if (operationPath == null) throw new ArgumentNullException("operationPath");
+            Contract.EndContractBlock();
 
-			for (int operationIndex = 0; operationIndex < stepResults.Length; operationIndex++) {
-				var stepResult = CompileStep(new StepCompilationParameters(
-					allOps[operationIndex],
-					currentUnit,
-					allCrs[operationIndex],
-					allCrs[operationIndex+1]
-				));
+            var allOps = operationPath.CoordinateOperations.ToList();
+            var allCrs = operationPath.CoordinateReferenceSystems.ToList();
+            if (allCrs.Count == 0)
+                throw new ArgumentException("operationPath contains no CRSs", "operationPath");
 
-				if (null == stepResult)
-					return null; // not supported
+            var firstCrs = allCrs[0];
+            var lastCrs = allCrs[allCrs.Count - 1];
 
-				stepResults[operationIndex] = stepResult;
-				currentUnit = stepResult.OutputUnit;
-			}
+            var stepResults = new StepCompilationResult[allOps.Count];
+            var currentUnit = ExtractUnit(firstCrs);
 
-			// make sure that the output units are correct
-			ITransformation outputUnitConversion = CreateCoordinateUnitConversion(currentUnit, ExtractUnit(lastCrs));
+            for (int operationIndex = 0; operationIndex < stepResults.Length; operationIndex++) {
+                var stepResult = CompileStep(new StepCompilationParameters(
+                    allOps[operationIndex],
+                    currentUnit,
+                    allCrs[operationIndex],
+                    allCrs[operationIndex + 1]
+                ));
 
-			var resultTransformations = stepResults.Select(x => x.Transformation).ToList();
-			if(null != outputUnitConversion)
-				resultTransformations.Add(outputUnitConversion);
+                if (null == stepResult)
+                    return null; // not supported
 
-			resultTransformations = Linearize(resultTransformations).ToList();
+                stepResults[operationIndex] = stepResult;
+                currentUnit = stepResult.OutputUnit;
+            }
 
-			if (resultTransformations.Count == 0)
-				return null;
-			if (resultTransformations.Count == 1)
-				return resultTransformations[0];
-			return new ConcatenatedTransformation(resultTransformations);
-		}
+            // make sure that the output units are correct
+            ITransformation outputUnitConversion = CreateCoordinateUnitConversion(currentUnit, ExtractUnit(lastCrs));
 
-		private StepCompilationResult CompileStep([NotNull] StepCompilationParameters stepParams){
-			var operations = ConcatenatedCoordinateOperationInfo.LinearizeOperations(stepParams.CoordinateOperationInfo).ToArray();
-			if (operations.Length == 0)
-				return null;
+            var resultTransformations = stepResults.Select(x => x.Transformation).ToList();
+            if (null != outputUnitConversion)
+                resultTransformations.Add(outputUnitConversion);
 
-			var currentUnit = stepParams.InputUnit;
-			var partResults = new StepCompilationResult[operations.Length];
-			for (int operationIndex = 0; operationIndex < operations.Length; operationIndex++){
-				var partResult = CompilePart(new StepCompilationParameters(
-					operations[operationIndex],
-					currentUnit,
-					stepParams.RelatedInputCrs,
-					stepParams.RelatedOutputCrs
-				));
+            resultTransformations = Linearize(resultTransformations).ToList();
 
-				if (null == partResult)
-					return null; // not supported
+            if (resultTransformations.Count == 0)
+                return null;
+            if (resultTransformations.Count == 1)
+                return resultTransformations[0];
+            return new ConcatenatedTransformation(resultTransformations);
+        }
 
-				partResults[operationIndex] = partResult;
-				currentUnit = partResult.OutputUnit;
-			}
+        private StepCompilationResult CompileStep(StepCompilationParameters stepParams) {
+            Contract.Requires(stepParams != null);
 
-			ITransformation transformation = partResults.Length == 1
-				? partResults[0].Transformation
-				: new ConcatenatedTransformation(Array.ConvertAll(partResults, x => x.Transformation));
+            var operations = ConcatenatedCoordinateOperationInfo.LinearizeOperations(stepParams.CoordinateOperationInfo).ToArray();
+            if (operations.Length == 0)
+                return null;
 
-			return new StepCompilationResult(
-				stepParams,
-				currentUnit,
-				transformation);
-		}
+            var currentUnit = stepParams.InputUnit;
+            var partResults = new StepCompilationResult[operations.Length];
+            for (int operationIndex = 0; operationIndex < operations.Length; operationIndex++) {
+                var partResult = CompilePart(new StepCompilationParameters(
+                    operations[operationIndex],
+                    currentUnit,
+                    stepParams.RelatedInputCrs,
+                    stepParams.RelatedOutputCrs
+                ));
 
-		private StepCompilationResult CompilePart([NotNull] StepCompilationParameters partParams){
-			for (int compilerIndex = 0; compilerIndex < _stepCompilers.Length; compilerIndex++){
-				var stepCompiler = _stepCompilers[compilerIndex];
-				var compiledStep = stepCompiler.Compile(partParams);
-				if (null != compiledStep)
-					return compiledStep;
-			}
-			return null;
-		}
-	}
+                if (null == partResult)
+                    return null; // not supported
+
+                partResults[operationIndex] = partResult;
+                currentUnit = partResult.OutputUnit;
+            }
+
+            ITransformation transformation = partResults.Length == 1
+                ? partResults[0].Transformation
+                : new ConcatenatedTransformation(Array.ConvertAll(partResults, x => x.Transformation));
+
+            return new StepCompilationResult(
+                stepParams,
+                currentUnit,
+                transformation);
+        }
+
+        private StepCompilationResult CompilePart(StepCompilationParameters partParams) {
+            Contract.Requires(partParams != null);
+            for (int compilerIndex = 0; compilerIndex < _stepCompilers.Length; compilerIndex++) {
+                var stepCompiler = _stepCompilers[compilerIndex];
+                var compiledStep = stepCompiler.Compile(partParams);
+                if (null != compiledStep)
+                    return compiledStep;
+            }
+            return null;
+        }
+    }
 }

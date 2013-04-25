@@ -1,53 +1,57 @@
-﻿// TODO: source header
-
-using JetBrains.Annotations;
+﻿using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
 {
-	/// <summary>
-	/// A prime meridian.
-	/// </summary>
-	public class OgcPrimeMeridian :
-		OgcNamedAuthorityBoundEntity,
-		IPrimeMeridianInfo
-	{
+    /// <summary>
+    /// A prime meridian.
+    /// </summary>
+    public class OgcPrimeMeridian :
+        OgcNamedAuthorityBoundEntity,
+        IPrimeMeridianInfo
+    {
 
-		public static readonly OgcPrimeMeridian DefaultGreenwich = new OgcPrimeMeridian("Greenwich", 0, new AuthorityTag("EPSG","8901"));
+        public static OgcPrimeMeridian DefaultGreenwich { get; private set; }
 
-		private readonly double _longitude;
-		private readonly IUnit _unit;
+        static OgcPrimeMeridian() {
+            DefaultGreenwich = new OgcPrimeMeridian("Greenwich", 0, new AuthorityTag("EPSG", "8901"));
+        }
 
-		/// <summary>
-		/// Constructs a prime meridian.
-		/// </summary>
-		/// <param name="name">The name of the prime meridian.</param>
-		/// <param name="longitude">The longitude location of the meridian.</param>
-		/// <param name="authority">The authority.</param>
-		public OgcPrimeMeridian(string name, double longitude, IAuthorityTag authority = null)
-			: this(name, longitude, null, authority) { }
+        /// <summary>
+        /// Constructs a prime meridian.
+        /// </summary>
+        /// <param name="name">The name of the prime meridian.</param>
+        /// <param name="longitude">The longitude location of the meridian.</param>
+        /// <param name="authority">The authority.</param>
+        public OgcPrimeMeridian(string name, double longitude, IAuthorityTag authority = null)
+            : this(name, longitude, null, authority)
+        {
+            Contract.Requires(name != null);
+        }
 
-		/// <summary>
-		/// Constructs a prime meridian.
-		/// </summary>
-		/// <param name="name">The name of the prime meridian.</param>
-		/// <param name="longitude">The longitude location of the meridian.</param>
-		/// <param name="angularUnit">The angular unit of the longitude value.</param>
-		/// <param name="authority">The authority.</param>
-		public OgcPrimeMeridian(string name, double longitude, [CanBeNull] IUnit angularUnit, IAuthorityTag authority = null)
-			: base(name, authority) {
-			_longitude = longitude;
-			_unit = angularUnit ?? OgcAngularUnit.DefaultDegrees;
-		}
+        /// <summary>
+        /// Constructs a prime meridian.
+        /// </summary>
+        /// <param name="name">The name of the prime meridian.</param>
+        /// <param name="longitude">The longitude location of the meridian.</param>
+        /// <param name="angularUnit">The angular unit of the longitude value.</param>
+        /// <param name="authority">The authority.</param>
+        public OgcPrimeMeridian(string name, double longitude, IUnit angularUnit, IAuthorityTag authority = null)
+            : base(name, authority)
+        {
+            Contract.Requires(name != null);
+            Longitude = longitude;
+            Unit = angularUnit ?? OgcAngularUnit.DefaultDegrees;
+        }
 
-		public double Longitude {
-			get { return _longitude; }
-		}
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(Unit != null);
+        }
 
-		public IUnit Unit {
-			get { return _unit; }
-		}
+        public double Longitude { get; private set; }
 
-		
-	}
+        public IUnit Unit { get; private set; }
+
+    }
 }

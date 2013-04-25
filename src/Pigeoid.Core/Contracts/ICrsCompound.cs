@@ -1,16 +1,14 @@
-﻿// TODO: source header
-
-namespace Pigeoid.Contracts
+﻿namespace Pigeoid.Contracts
 {
-	/// <summary>
-	/// A compound coordinate reference system composed of multiple other coordinate reference systems.
-	/// </summary>
-	public interface ICrsCompound : ICrs
-	{
+    /// <summary>
+    /// A compound coordinate reference system composed of multiple other coordinate reference systems.
+    /// </summary>
+    public interface ICrsCompound : ICrs
+    {
 
-		ICrs Head { get; }
+        ICrs Head { get; }
 
-		ICrs Tail { get; }
+        ICrs Tail { get; }
 
-	}
+    }
 }

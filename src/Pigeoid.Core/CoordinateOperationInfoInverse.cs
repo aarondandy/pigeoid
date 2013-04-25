@@ -1,51 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid
 {
-	public class CoordinateOperationInfoInverse : IParameterizedCoordinateOperationInfo
-	{
+    public class CoordinateOperationInfoInverse : IParameterizedCoordinateOperationInfo
+    {
 
-		public ICoordinateOperationInfo Core { [ContractAnnotation("=>notnull")] get; private set; }
+        public CoordinateOperationInfoInverse(ICoordinateOperationInfo core) {
+            if (null == core) throw new ArgumentNullException("core");
+            Contract.EndContractBlock();
+            Core = core;
+        }
 
-		public IParameterizedCoordinateOperationInfo ParameterizedCore { get { return Core as IParameterizedCoordinateOperationInfo; } }
+        private void CodeContractInvariants() {
+            Contract.Invariant(Core != null);
+        }
 
-		public CoordinateOperationInfoInverse([NotNull] ICoordinateOperationInfo core) {
-			if(null == core)
-				throw new ArgumentNullException("core");
+        public ICoordinateOperationInfo Core { get; private set; }
 
-			Core = core;
-		}
+        public IParameterizedCoordinateOperationInfo ParameterizedCore { get { return Core as IParameterizedCoordinateOperationInfo; } }
 
-		public string Name { get { return "Inverse " + Core.Name; } }
+        public string Name { get { return "Inverse " + Core.Name; } }
 
-		public IEnumerable<INamedParameter> Parameters {
-			get {
-				var parameterizedOperationInfo = ParameterizedCore;
-				return null != parameterizedOperationInfo
-					? parameterizedOperationInfo.Parameters
-					: Enumerable.Empty<INamedParameter>();
-			}
-		}
+        public IEnumerable<INamedParameter> Parameters {
+            get {
+                var parameterizedOperationInfo = ParameterizedCore;
+                return null != parameterizedOperationInfo
+                    ? parameterizedOperationInfo.Parameters
+                    : Enumerable.Empty<INamedParameter>();
+            }
+        }
 
-		public bool HasInverse { [ContractAnnotation("=>true")]get { return true; } }
+        public bool HasInverse { [Pure] get { return true; } }
 
-		[ContractAnnotation("=>notnull")]
-		public ICoordinateOperationInfo GetInverse() { return Core; }
+        public ICoordinateOperationInfo GetInverse() {
+            Contract.Ensures(Contract.Result<ICoordinateOperationInfo>() != null);
+            return Core;
+        }
 
-		public bool IsInverseOfDefinition { [ContractAnnotation("=>true")] get { return true; } }
+        public bool IsInverseOfDefinition { [Pure] get { return true; } }
 
-		public ICoordinateOperationMethodInfo Method {
-			get{
-				var paramOp = ParameterizedCore;
-				return null != paramOp
-					? paramOp.Method
-					: null;
-			}
-		}
-	}
+        public ICoordinateOperationMethodInfo Method {
+            get {
+                var paramOp = ParameterizedCore;
+                return null != paramOp
+                    ? paramOp.Method
+                    : null;
+            }
+        }
+    }
 
 }

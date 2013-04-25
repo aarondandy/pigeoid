@@ -1,78 +1,105 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid
 {
-	public class ConcatenatedCoordinateOperationInfo : IConcatenatedCoordinateOperationInfo
-	{
+    public class ConcatenatedCoordinateOperationInfo : IConcatenatedCoordinateOperationInfo
+    {
 
-		public static IEnumerable<ICoordinateOperationInfo> LinearizeOperations(ICoordinateOperationInfo operation) {
-			if (null == operation)
-				return Enumerable.Empty<ICoordinateOperationInfo>();
-			var concatOperations = operation as IConcatenatedCoordinateOperationInfo;
-			if (null == concatOperations)
-				return new[] { operation };
-			return concatOperations.Steps.SelectMany(LinearizeOperations);
-		}
+        public static IEnumerable<ICoordinateOperationInfo> LinearizeOperations(ICoordinateOperationInfo operation) {
+            if (null == operation)
+                return Enumerable.Empty<ICoordinateOperationInfo>();
+            var concatOperations = operation as IConcatenatedCoordinateOperationInfo;
+            if (null == concatOperations)
+                return new[] { operation };
+            return concatOperations.Steps.SelectMany(LinearizeOperations);
+        }
 
-		private class Inverse : IConcatenatedCoordinateOperationInfo {
+        private class Inverse : IConcatenatedCoordinateOperationInfo
+        {
 
-			private readonly ConcatenatedCoordinateOperationInfo _core;
+            private readonly ConcatenatedCoordinateOperationInfo _core;
 
-			public Inverse([NotNull] ConcatenatedCoordinateOperationInfo core){
-				_core = core;
-			}
+            public Inverse(ConcatenatedCoordinateOperationInfo core) {
+                Contract.Requires(core != null);
+                _core = core;
+            }
 
-			public IEnumerable<ICoordinateOperationInfo> Steps{
-				[ContractAnnotation("=>notnull")] get { return _core.Steps.Reverse().Select(x => x.GetInverse()); }
-			}
+            [ContractInvariantMethod]
+            private void CodeContractInvariants() {
+                Contract.Invariant(_core != null);
+            }
 
-			string ICoordinateOperationInfo.Name { get { return "Inverse " + ((ICoordinateOperationInfo)_core).Name; } }
+            public IEnumerable<ICoordinateOperationInfo> Steps {
+                get {
+                    Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>() != null);
+                    Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<ICoordinateOperationInfo>>(), x => x != null));
+                    return _core.Steps.Reverse().Select(x => x.GetInverse());
+                }
+            }
 
-			public bool HasInverse { [ContractAnnotation("=>true")] get { return true; } }
+            string ICoordinateOperationInfo.Name {
+                get {
+                    Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
+                    return "Inverse " + ((ICoordinateOperationInfo)_core).Name;
+                }
+            }
 
-			[ContractAnnotation("=>notnull")]
-			public ICoordinateOperationInfo GetInverse() { return _core; }
+            public bool HasInverse { [Pure] get { return true; } }
 
-			public bool IsInverseOfDefinition { [ContractAnnotation("=>true")] get { return true; } }
+            public ICoordinateOperationInfo GetInverse() {
+                Contract.Ensures(Contract.Result<ICoordinateOperationInfo>() != null);
+                return _core;
+            }
 
-		}
+            public bool IsInverseOfDefinition { [Pure] get { return true; } }
 
-		private readonly ReadOnlyCollection<ICoordinateOperationInfo> _coordinateOperations;
+        }
 
-		public ConcatenatedCoordinateOperationInfo([NotNull] IEnumerable<ICoordinateOperationInfo> coordinateOperations) {
-			if(null == coordinateOperations)
-				throw new ArgumentNullException("coordinateOperations");
+        private readonly ReadOnlyCollection<ICoordinateOperationInfo> _coordinateOperations;
 
-			_coordinateOperations = Array.AsReadOnly(coordinateOperations.ToArray());
-			if(_coordinateOperations.Count == 0)
-				throw new ArgumentException("coordinateOperations must have at least one element", "coordinateOperations");
-		}
+        public ConcatenatedCoordinateOperationInfo(IEnumerable<ICoordinateOperationInfo> coordinateOperations) {
+            if (null == coordinateOperations) throw new ArgumentNullException("coordinateOperations");
+            Contract.EndContractBlock();
 
-		string ICoordinateOperationInfo.Name {
-			get { return "Concatenated Operation"; }
-		}
+            _coordinateOperations = Array.AsReadOnly(coordinateOperations.ToArray());
+            if (_coordinateOperations.Count == 0)
+                throw new ArgumentException("coordinateOperations must have at least one element", "coordinateOperations");
+        }
 
-		public bool HasInverse {
-			get { return _coordinateOperations.All(x => x.HasInverse); }
-		}
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(_coordinateOperations != null);
+        }
 
-		[ContractAnnotation("=>notnull")]
-		public ICoordinateOperationInfo GetInverse() {
-			return new Inverse(this);
-		}
+        string ICoordinateOperationInfo.Name {
+            get { return "Concatenated Operation"; }
+        }
 
-		public IEnumerable<ICoordinateOperationInfo> Steps {
-			[ContractAnnotation("=>notnull")] get { return _coordinateOperations; }
-		}
+        public bool HasInverse {
+            get { return _coordinateOperations.All(x => x.HasInverse); }
+        }
 
-		public bool IsInverseOfDefinition {
-			[ContractAnnotation("=>false")] get { return false; }
-		}
+        public ICoordinateOperationInfo GetInverse() {
+            Contract.Ensures(Contract.Result<ICoordinateOperationInfo>() != null);
+            return new Inverse(this);
+        }
 
-	}
+        public IEnumerable<ICoordinateOperationInfo> Steps {
+            get {
+                Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>() != null);
+                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<ICoordinateOperationInfo>>(), x => x != null));
+                return _coordinateOperations;
+            }
+        }
+
+        public bool IsInverseOfDefinition {
+            [Pure] get { return false; }
+        }
+
+    }
 }

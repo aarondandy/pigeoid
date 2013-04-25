@@ -1,132 +1,150 @@
-﻿// TODO: source header
-
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Transformation
 {
-	/// <summary>
-	/// An abridged Molodensky transformation.
-	/// </summary>
-	public class AbridgedMolodenskyTransformation : ITransformation<GeographicHeightCoordinate>
-	{
+    /// <summary>
+    /// An abridged Molodensky transformation.
+    /// </summary>
+    public class AbridgedMolodenskyTransformation : ITransformation<GeographicHeightCoordinate>
+    {
 
-		private static readonly double SinOne = Math.Sin(1);
+        private static readonly double SinOne = Math.Sin(1);
 
-		public readonly Vector3 D;
-		protected readonly double Da;
-		protected readonly double SeSq;
-		protected readonly double SaDfSfDa;
-		protected readonly double OneMinusESqsaSinOne;
-		protected readonly double SaSinOne;
+        public readonly Vector3 D;
+        protected readonly double Da;
+        protected readonly double SeSq;
+        protected readonly double SaDfSfDa;
+        protected readonly double OneMinusESqsaSinOne;
+        protected readonly double SaSinOne;
 
-		public readonly ISpheroid<double> SourceSpheroid;
-		public readonly ISpheroid<double> TargetSpheroid;
+        public ISpheroid<double> SourceSpheroid { get; private set; }
+        public ISpheroid<double> TargetSpheroid { get; private set; }
 
-		/// <summary>
-		/// Constructs an abridged molodensky transformation.
-		/// </summary>
-		/// <param name="translation">The amount to translate.</param>
-		/// <param name="sourceSpheroid">The source CRS spheroid.</param>
-		/// <param name="targetSpheroid">The destination CRS spheroid.</param>
-		public AbridgedMolodenskyTransformation(
-			Vector3 translation,
-			[NotNull] ISpheroid<double> sourceSpheroid,
-			[NotNull] ISpheroid<double> targetSpheroid
-		) {
-			SourceSpheroid = sourceSpheroid;
-			TargetSpheroid = targetSpheroid;
-			D = translation;
-			var sf = sourceSpheroid.F;
-			var tf = targetSpheroid.F;
-			var df = tf - sf;
-			var sa = sourceSpheroid.A;
-			var ta = targetSpheroid.A;
-			Da = ta - sa;
-			SeSq = sourceSpheroid.ESquared;
-			SaDfSfDa = (sa * df) + (sf * Da);
-			SaSinOne = sa * SinOne;
-			OneMinusESqsaSinOne = SaSinOne * (1.0 - SeSq);
-			
-// ReSharper disable CompareOfFloatsByEqualityOperator
-			if (0 == OneMinusESqsaSinOne || 0 == SaSinOne)
-				throw new ArgumentException("Invalid spheroid.", "sourceSpheroid");
-// ReSharper restore CompareOfFloatsByEqualityOperator
-		}
+        /// <summary>
+        /// Constructs an abridged molodensky transformation.
+        /// </summary>
+        /// <param name="translation">The amount to translate.</param>
+        /// <param name="sourceSpheroid">The source CRS spheroid.</param>
+        /// <param name="targetSpheroid">The destination CRS spheroid.</param>
+        public AbridgedMolodenskyTransformation(
+            Vector3 translation,
+            ISpheroid<double> sourceSpheroid,
+            ISpheroid<double> targetSpheroid
+        ) {
+            if(sourceSpheroid == null) throw new ArgumentNullException("sourceSpheroid");
+            if(targetSpheroid == null) throw new ArgumentNullException("targetSpheroid");
+            Contract.EndContractBlock();
+            SourceSpheroid = sourceSpheroid;
+            TargetSpheroid = targetSpheroid;
+            D = translation;
+            var sf = sourceSpheroid.F;
+            var tf = targetSpheroid.F;
+            var df = tf - sf;
+            var sa = sourceSpheroid.A;
+            var ta = targetSpheroid.A;
+            Da = ta - sa;
+            SeSq = sourceSpheroid.ESquared;
+            SaDfSfDa = (sa * df) + (sf * Da);
+            SaSinOne = sa * SinOne;
+            OneMinusESqsaSinOne = SaSinOne * (1.0 - SeSq);
 
-		public GeographicHeightCoordinate TransformValue(GeographicHeightCoordinate coordinate) {
-			var sinLatitude = Math.Sin(coordinate.Latitude);
-			var sinLatitudeSquared = sinLatitude * sinLatitude;
-			var cosLatitude = Math.Cos(coordinate.Latitude);
-			var sinLongitude = Math.Sin(coordinate.Longitude);
-			var cosLongitude = Math.Cos(coordinate.Longitude);
-			var c = 1.0 - (SeSq * sinLatitudeSquared);
-			var cSq = Math.Sqrt(c);
-			var dxdy = (D.X * cosLongitude) + (D.Y * sinLongitude);
-			return new GeographicHeightCoordinate(
-				coordinate.Latitude + (
-					(
-						(
-							(D.Z * cosLatitude)
-							+ (SaDfSfDa * Math.Sin(2.0 * coordinate.Latitude))
-							- (sinLatitude * dxdy)
-						)
-						* c * cSq
-					)
-					/ OneMinusESqsaSinOne
-				),
-				coordinate.Longitude + (
-					(
-						((D.Y * cosLongitude) - (D.X * sinLongitude))
-						* cSq
-					)
-					/ (cosLatitude * SaSinOne)
-				),
-				coordinate.Height + (
-					+(cosLatitude * dxdy)
-					+ (D.Z * sinLatitude)
-					+ (SaDfSfDa * sinLatitudeSquared)
-					- Da
-				)
-			);
-		}
+            // ReSharper disable CompareOfFloatsByEqualityOperator
+            if (0 == OneMinusESqsaSinOne || Double.IsNaN(OneMinusESqsaSinOne) || 0 == SaSinOne || Double.IsNaN(SaSinOne))
+                throw new ArgumentException("Invalid spheroid.", "sourceSpheroid");
+            // ReSharper restore CompareOfFloatsByEqualityOperator
+        }
 
-		public void TransformValues(GeographicHeightCoordinate[] values) {
-			for (int i = 0; i < values.Length; i++) {
-				TransformValue(ref values[i]);
-			}
-		}
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(SourceSpheroid != null);
+            Contract.Invariant(TargetSpheroid != null);
+        }
 
-		private void TransformValue(ref GeographicHeightCoordinate value) {
-			value = TransformValue(value);
-		}
+        public GeographicHeightCoordinate TransformValue(GeographicHeightCoordinate coordinate) {
+            var sinLatitude = Math.Sin(coordinate.Latitude);
+            var sinLatitudeSquared = sinLatitude * sinLatitude;
+            var cosLatitude = Math.Cos(coordinate.Latitude);
+            var sinLongitude = Math.Sin(coordinate.Longitude);
+            var cosLongitude = Math.Cos(coordinate.Longitude);
+            var c = 1.0 - (SeSq * sinLatitudeSquared);
+            var cSq = Math.Sqrt(c);
+            var dxdy = (D.X * cosLongitude) + (D.Y * sinLongitude);
+            return new GeographicHeightCoordinate(
+                coordinate.Latitude + (
+                    (
+                        (
+                            (D.Z * cosLatitude)
+                            + (SaDfSfDa * Math.Sin(2.0 * coordinate.Latitude))
+                            - (sinLatitude * dxdy)
+                        )
+                        * c * cSq
+                    )
+                    / OneMinusESqsaSinOne
+                ),
+                coordinate.Longitude + (
+                    (
+                        ((D.Y * cosLongitude) - (D.X * sinLongitude))
+                        * cSq
+                    )
+                    / (cosLatitude * SaSinOne)
+                ),
+                coordinate.Height + (
+                    +(cosLatitude * dxdy)
+                    + (D.Z * sinLatitude)
+                    + (SaDfSfDa * sinLatitudeSquared)
+                    - Da
+                )
+            );
+        }
 
-		public ITransformation<GeographicHeightCoordinate> GetInverse() {
-			return new AbridgedMolodenskyTransformation(D.GetNegative(), TargetSpheroid, SourceSpheroid);
-		}
+        public void TransformValues(GeographicHeightCoordinate[] values) {
+            Contract.Requires(values != null);
+            for (int i = 0; i < values.Length; i++) {
+                TransformValue(ref values[i]);
+            }
+        }
 
-		public bool HasInverse {
-// ReSharper disable CompareOfFloatsByEqualityOperator
-			get { return (0 != TargetSpheroid.A && 0 != (1.0 - TargetSpheroid.ESquared)); }
-// ReSharper restore CompareOfFloatsByEqualityOperator
-		}
+        private void TransformValue(ref GeographicHeightCoordinate value) {
+            value = TransformValue(value);
+        }
 
-		ITransformation ITransformation.GetInverse() {
-			return GetInverse();
-		}
+        public AbridgedMolodenskyTransformation GetInverse() {
+            Contract.Ensures(Contract.Result<AbridgedMolodenskyTransformation>() != null);
+            return new AbridgedMolodenskyTransformation(D.GetNegative(), TargetSpheroid, SourceSpheroid);
+        }
 
-		ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate>.GetInverse() {
-			return GetInverse();
-		}
+        ITransformation<GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate>.GetInverse() {
+            Contract.Ensures(Contract.Result<ITransformation<GeographicHeightCoordinate>>() != null);
+            return GetInverse();
+        }
 
-		public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
-			return values.Select(TransformValue);
-		}
+        public bool HasInverse {
+            // ReSharper disable CompareOfFloatsByEqualityOperator
+            [Pure] get {
+                return 0 != TargetSpheroid.A && !Double.IsNaN(TargetSpheroid.A)
+                    && 0 != (1.0 - TargetSpheroid.ESquared) && !Double.IsNaN(TargetSpheroid.ESquared);
+            }
+            // ReSharper restore CompareOfFloatsByEqualityOperator
+        }
 
+        ITransformation ITransformation.GetInverse() {
+            return GetInverse();
+        }
 
-	}
+        ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate>.GetInverse() {
+            return GetInverse();
+        }
+
+        public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
+            Contract.Requires(values != null);
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+            return values.Select(TransformValue);
+        }
+
+    }
 }

@@ -2,10 +2,10 @@
 
 namespace Pigeoid.Contracts
 {
-	public interface IConcatenatedCoordinateOperationInfo : ICoordinateOperationInfo
-	{
+    public interface IConcatenatedCoordinateOperationInfo : ICoordinateOperationInfo
+    {
 
-		IEnumerable<ICoordinateOperationInfo> Steps { get; } 
+        IEnumerable<ICoordinateOperationInfo> Steps { get; }
 
-	}
+    }
 }

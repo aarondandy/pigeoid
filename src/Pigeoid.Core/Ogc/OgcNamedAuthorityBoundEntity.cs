@@ -1,31 +1,29 @@
-﻿// TODO: source header
-
+﻿using System;
+using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
 {
-	/// <summary>
-	/// An OGC entity with a name and an authority tag.
-	/// </summary>
-	public abstract class OgcNamedAuthorityBoundEntity : IAuthorityBoundEntity
-	{
-		/// <summary>
-		/// The entity name.
-		/// </summary>
-		private readonly string _name;
-		private readonly IAuthorityTag _authorityTag;
+    /// <summary>
+    /// An OGC entity with a name and an authority tag.
+    /// </summary>
+    public abstract class OgcNamedAuthorityBoundEntity : IAuthorityBoundEntity
+    {
 
-		protected OgcNamedAuthorityBoundEntity(string name, IAuthorityTag authorityTag) {
-			_name = name;
-			_authorityTag = authorityTag;
-		}
+        protected OgcNamedAuthorityBoundEntity(string name, IAuthorityTag authorityTag) {
+            if (name == null) throw new ArgumentNullException("name");
+            Contract.EndContractBlock();
+            Name = name;
+            Authority = authorityTag;
+        }
 
-		public IAuthorityTag Authority {
-			get { return _authorityTag; }
-		}
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(Name != null);
+        }
 
-		public string Name {
-			get { return _name; }
-		}
-	}
+        public IAuthorityTag Authority { get; private set; }
+
+        public string Name { get; private set; }
+    }
 }

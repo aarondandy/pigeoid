@@ -1,19 +1,19 @@
 ﻿namespace Pigeoid.Contracts
 {
-	public interface IAuthorityResolver
-	{
-		IAuthorityTag GetAuthorityTag(string authorityName, string code);
+    public interface IAuthorityResolver
+    {
+        IAuthorityTag GetAuthorityTag(string authorityName, string code);
 
-		ICrs GetCrs(IAuthorityTag tag);
+        ICrs GetCrs(IAuthorityTag tag);
 
-		ISpheroidInfo GetSpheroid(IAuthorityTag tag);
+        ISpheroidInfo GetSpheroid(IAuthorityTag tag);
 
-		IPrimeMeridianInfo GetPrimeMeridian(IAuthorityTag tag);
+        IPrimeMeridianInfo GetPrimeMeridian(IAuthorityTag tag);
 
-		IDatum GetDatum(IAuthorityTag tag);
+        IDatum GetDatum(IAuthorityTag tag);
 
-		IUnit GetUom(IAuthorityTag tag);
+        IUnit GetUom(IAuthorityTag tag);
 
-		ICoordinateOperationMethodInfo GetCoordinateOperationMethod(IAuthorityTag tag);
-	}
+        ICoordinateOperationMethodInfo GetCoordinateOperationMethod(IAuthorityTag tag);
+    }
 }

@@ -1,83 +1,97 @@
 ﻿// TODO: source header
 
 using System;
+using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
 using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Ogc
 {
-	/// <summary>
-	/// A spheroid.
-	/// </summary>
-	public class OgcSpheroid : OgcNamedAuthorityBoundEntity, ISpheroidInfo
-	{
+    /// <summary>
+    /// A spheroid.
+    /// </summary>
+    public class OgcSpheroid : OgcNamedAuthorityBoundEntity, ISpheroidInfo
+    {
 
-		public static readonly OgcSpheroid DefaultWgs84 = new OgcSpheroid(
-			new SpheroidEquatorialInvF(6378137, 298.257223563),
-			"WGS 84",
-			OgcLinearUnit.DefaultMeter,
-			new AuthorityTag("EPSG","7030")
-		);
+        public static OgcSpheroid DefaultWgs84 { get; private set; }
 
-		/// <summary>
-		/// The spheroid data this OGC spheroid is based on.
-		/// </summary>
-		public readonly ISpheroid<double> Spheroid;
+        static OgcSpheroid() {
+            DefaultWgs84 = new OgcSpheroid(
+                new SpheroidEquatorialInvF(6378137, 298.257223563),
+                "WGS 84",
+                OgcLinearUnit.DefaultMeter,
+                new AuthorityTag("EPSG", "7030")
+            );
+        }
 
-		/// <summary>
-		/// Constructs a new spheroid.
-		/// </summary>
-		/// <param name="spheroid">The spheroid this spheroid is based on.</param>
-		/// <param name="name">The name of this spheroid.</param>
-		/// <param name="axisUnit">The unit the axis is measured in.</param>
-		/// <param name="authority">The authority.</param>
-		public OgcSpheroid(ISpheroid<double> spheroid, string name, IUnit axisUnit, IAuthorityTag authority = null)
-			: base(name, authority) {
-			Spheroid = spheroid;
-			AxisUnit = axisUnit;
-		}
+        /// <summary>
+        /// Constructs a new spheroid.
+        /// </summary>
+        /// <param name="spheroid">The spheroid this spheroid is based on.</param>
+        /// <param name="name">The name of this spheroid.</param>
+        /// <param name="axisUnit">The unit the axis is measured in.</param>
+        /// <param name="authority">The authority.</param>
+        public OgcSpheroid(ISpheroid<double> spheroid, string name, IUnit axisUnit, IAuthorityTag authority = null)
+            : base(name, authority)
+        {
+            if(spheroid == null) throw new ArgumentNullException("spheroid");
+            Contract.Requires(name != null);
+            Spheroid = spheroid;
+            AxisUnit = axisUnit;
+        }
 
-		public IUnit AxisUnit { get; private set; }
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(Spheroid != null);
+        }
 
-		public double A {
-			get { return Spheroid.A; }
-		}
+        /// <summary>
+        /// The spheroid data this OGC spheroid is based on.
+        /// </summary>
+        public ISpheroid<double> Spheroid { get; private set; }
 
-		public double B {
-			get { return Spheroid.B; }
-		}
+        public IUnit AxisUnit { get; private set; }
 
-		double ISpheroid<double>.F {
-			get { return Spheroid.F; }
-		}
+        public double A {
+            get { return Spheroid.A; }
+        }
 
-		public double InvF {
-			get { return Spheroid.InvF; }
-		}
+        public double B {
+            get { return Spheroid.B; }
+        }
 
-		double ISpheroid<double>.E {
-			get { return Spheroid.E; }
-		}
+        double ISpheroid<double>.F {
+            get { return Spheroid.F; }
+        }
 
-		double ISpheroid<double>.ESquared {
-			get { return Spheroid.ESquared; }
-		}
+        public double InvF {
+            get { return Spheroid.InvF; }
+        }
 
-		double ISpheroid<double>.ESecond {
-			get { return Spheroid.ESecond; }
-		}
+        double ISpheroid<double>.E {
+            get { return Spheroid.E; }
+        }
 
-		double ISpheroid<double>.ESecondSquared {
-			get { return Spheroid.ESecondSquared; }
-		}
+        double ISpheroid<double>.ESquared {
+            get { return Spheroid.ESquared; }
+        }
 
-		public override string ToString(){
-			var result = "MajorAxis: " + A + " InverseF: " + B;
-			if (!String.IsNullOrEmpty(Name))
-				result += " (" + Name + ')';
+        double ISpheroid<double>.ESecond {
+            get { return Spheroid.ESecond; }
+        }
 
-			return result;
-		}
-	}
+        double ISpheroid<double>.ESecondSquared {
+            get { return Spheroid.ESecondSquared; }
+        }
+
+        public override string ToString() {
+            Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
+            var result = "MajorAxis: " + A + " InverseF: " + B;
+            if (!String.IsNullOrEmpty(Name))
+                result += " (" + Name + ')';
+
+            return result;
+        }
+    }
 }

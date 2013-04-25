@@ -1,54 +1,61 @@
-﻿// TODO: source header
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Transformation
 {
-	public class CartesianOffset2 : ITransformation<Point2>
-	{
+    public class CartesianOffset2 : ITransformation<Point2>
+    {
 
-		public readonly Vector2 Offset;
+        public readonly Vector2 Offset;
 
-		public CartesianOffset2(Vector2 offset) {
-			Offset = offset;
-		}
+        public CartesianOffset2(Vector2 offset) {
+            Offset = offset;
+        }
 
-		public void TransformValues(Point2[] values) {
-			for (int i = 0; i < values.Length; i++) {
-				TransformValue(ref values[i]);
-			}
-		}
+        public void TransformValues(Point2[] values) {
+            Contract.Requires(values != null);
+            for (int i = 0; i < values.Length; i++) {
+                TransformValue(ref values[i]);
+            }
+        }
 
-		private void TransformValue(ref Point2 value) {
-			value = value.Add(Offset);
-		}
+        private void TransformValue(ref Point2 value) {
+            value = value.Add(Offset);
+        }
 
-		public ITransformation<Point2> GetInverse() {
-			return new CartesianOffset2(Offset.GetNegative());
-		}
+        public CartesianOffset2 GetInverse() {
+            Contract.Ensures(Contract.Result<CartesianOffset2>() != null);
+            return new CartesianOffset2(Offset.GetNegative());
+        }
 
-		public Point2 TransformValue(Point2 value) {
-			return value.Add(Offset);
-		}
+        ITransformation<Point2> ITransformation<Point2>.GetInverse() {
+            return GetInverse();
+        }
 
-		public IEnumerable<Point2> TransformValues(IEnumerable<Point2> values) {
-			return values.Select(Offset.Add);
-		}
+        public Point2 TransformValue(Point2 value) {
+            return value.Add(Offset);
+        }
 
-		public bool HasInverse {
-			get { return true; }
-		}
+        public IEnumerable<Point2> TransformValues(IEnumerable<Point2> values) {
+            Contract.Requires(values != null);
+            Contract.Ensures(Contract.Result<IEnumerable<Point2>>() != null);
+            return values.Select(Offset.Add);
+        }
 
-		ITransformation ITransformation.GetInverse() {
-			return GetInverse();
-		}
+        public bool HasInverse {
+            get { return true; }
+        }
 
-		ITransformation<Point2, Point2> ITransformation<Point2, Point2>.GetInverse() {
-			return GetInverse();
-		}
+        ITransformation ITransformation.GetInverse() {
+            return GetInverse();
+        }
 
-	}
+        ITransformation<Point2, Point2> ITransformation<Point2, Point2>.GetInverse() {
+            return GetInverse();
+        }
+
+    }
 }

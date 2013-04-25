@@ -1,107 +1,133 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Transformation
 {
-	public abstract class GeographicGeocentricTransformationBase :
-		ITransformation<GeographicCoordinate>,
-		ITransformation<GeographicHeightCoordinate>,
-		ITransformation<GeographicCoordinate, GeographicHeightCoordinate>,
-		ITransformation<GeographicHeightCoordinate, GeographicCoordinate>
-	{
+    public abstract class GeographicGeocentricTransformationBase :
+        ITransformation<GeographicCoordinate>,
+        ITransformation<GeographicHeightCoordinate>,
+        ITransformation<GeographicCoordinate, GeographicHeightCoordinate>,
+        ITransformation<GeographicHeightCoordinate, GeographicCoordinate>
+    {
 
-		protected GeographicGeocentricTransformationBase([NotNull] ISpheroid<double> spheroidFrom, [NotNull] ISpheroid<double> spheroidTo)
-			:this(new GeographicGeocentricTransformation(spheroidFrom),new GeocentricGeographicTransformation(spheroidTo)) { }
+        protected GeographicGeocentricTransformationBase(ISpheroid<double> spheroidFrom, ISpheroid<double> spheroidTo)
+            : this(new GeographicGeocentricTransformation(spheroidFrom), new GeocentricGeographicTransformation(spheroidTo)) {
+            Contract.Requires(spheroidFrom != null);
+            Contract.Requires(spheroidTo != null);
+        }
 
-		protected GeographicGeocentricTransformationBase([NotNull] GeographicGeocentricTransformation geographicGeocentric, [NotNull] GeocentricGeographicTransformation geocentricGeographic) {
-			if(null == geographicGeocentric)
-				throw new ArgumentNullException("geographicGeocentric");
-			if(null == geocentricGeographic)
-				throw new ArgumentNullException("geocentricGeographic");
-			GeographicToGeocentric = geographicGeocentric;
-			GeocentricToGeographic = geocentricGeographic;
-		}
+        protected GeographicGeocentricTransformationBase(GeographicGeocentricTransformation geographicGeocentric, GeocentricGeographicTransformation geocentricGeographic) {
+            if (null == geographicGeocentric) throw new ArgumentNullException("geographicGeocentric");
+            if (null == geocentricGeographic) throw new ArgumentNullException("geocentricGeographic");
+            Contract.EndContractBlock();
+            GeographicToGeocentric = geographicGeocentric;
+            GeocentricToGeographic = geocentricGeographic;
+        }
 
-		protected GeographicGeocentricTransformation GeographicToGeocentric { get; private set; }
-		protected GeocentricGeographicTransformation GeocentricToGeographic { get; private set; }
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(GeographicToGeocentric != null);
+            Contract.Invariant(GeocentricToGeographic != null);
+        }
 
-		public ISpheroid<double> SpheroidFrom { get { return GeographicToGeocentric.Spheroid; } }
-		public ISpheroid<double> SpheroidTo { get { return GeocentricToGeographic.Spheroid; } }
+        protected GeographicGeocentricTransformation GeographicToGeocentric { get; private set; }
+        protected GeocentricGeographicTransformation GeocentricToGeographic { get; private set; }
 
-		public abstract GeographicCoordinate TransformValue(GeographicCoordinate value);
-		public abstract GeographicHeightCoordinate TransformValue(GeographicHeightCoordinate value);
-		public abstract GeographicHeightCoordinate TransformValue3D(GeographicCoordinate value);
-		public abstract GeographicCoordinate TransformValue2D(GeographicHeightCoordinate value);
+        public ISpheroid<double> SpheroidFrom {
+            get {
+                Contract.Ensures(Contract.Result<ISpheroid<double>>() != null);
+                return GeographicToGeocentric.Spheroid;
+            }
+        }
+        public ISpheroid<double> SpheroidTo {
+            get {
+                Contract.Ensures(Contract.Result<ISpheroid<double>>() != null);
+                return GeocentricToGeographic.Spheroid;
+            }
+        }
 
-		public IEnumerable<GeographicCoordinate> TransformValues([NotNull] IEnumerable<GeographicCoordinate> values) {
-			return values.Select(TransformValue);
-		}
+        public abstract GeographicCoordinate TransformValue(GeographicCoordinate value);
+        public abstract GeographicHeightCoordinate TransformValue(GeographicHeightCoordinate value);
+        public abstract GeographicHeightCoordinate TransformValue3D(GeographicCoordinate value);
+        public abstract GeographicCoordinate TransformValue2D(GeographicHeightCoordinate value);
 
-		public void TransformValues([NotNull] GeographicCoordinate[] values) {
-			for (var i = 0; i < values.Length; i++)
-				values[i] = TransformValue(values[i]);
-		}
+        public IEnumerable<GeographicCoordinate> TransformValues(IEnumerable<GeographicCoordinate> values) {
+            Contract.Requires(values != null);
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicCoordinate>>() != null);
+            return values.Select(TransformValue);
+        }
 
-		public IEnumerable<GeographicHeightCoordinate> TransformValues([NotNull] IEnumerable<GeographicHeightCoordinate> values) {
-			return values.Select(TransformValue);
-		}
+        public void TransformValues(GeographicCoordinate[] values) {
+            Contract.Requires(values != null);
+            for (var i = 0; i < values.Length; i++)
+                values[i] = TransformValue(values[i]);
+        }
 
-		public void TransformValues([NotNull] GeographicHeightCoordinate[] values) {
-			for (var i = 0; i < values.Length; i++)
-				values[i] = TransformValue(values[i]);
-		}
+        public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
+            Contract.Requires(values != null);
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+            return values.Select(TransformValue);
+        }
 
-		IEnumerable<GeographicHeightCoordinate> ITransformation<GeographicCoordinate, GeographicHeightCoordinate>.TransformValues([NotNull] IEnumerable<GeographicCoordinate> values) {
-			return values.Select(TransformValue3D);
-		}
+        public void TransformValues(GeographicHeightCoordinate[] values) {
+            Contract.Requires(values != null);
+            for (var i = 0; i < values.Length; i++)
+                values[i] = TransformValue(values[i]);
+        }
 
-		GeographicHeightCoordinate ITransformation<GeographicCoordinate, GeographicHeightCoordinate>.TransformValue(GeographicCoordinate value) {
-			return TransformValue3D(value);
-		}
+        IEnumerable<GeographicHeightCoordinate> ITransformation<GeographicCoordinate, GeographicHeightCoordinate>.TransformValues(IEnumerable<GeographicCoordinate> values) {
+            Contract.Requires(values != null);
+            return values.Select(TransformValue3D);
+        }
 
-		IEnumerable<GeographicCoordinate> ITransformation<GeographicHeightCoordinate, GeographicCoordinate>.TransformValues([NotNull] IEnumerable<GeographicHeightCoordinate> values) {
-			return values.Select(TransformValue2D);
-		}
+        GeographicHeightCoordinate ITransformation<GeographicCoordinate, GeographicHeightCoordinate>.TransformValue(GeographicCoordinate value) {
+            return TransformValue3D(value);
+        }
 
-		GeographicCoordinate ITransformation<GeographicHeightCoordinate, GeographicCoordinate>.TransformValue(GeographicHeightCoordinate value) {
-			return TransformValue2D(value);
-		}
+        IEnumerable<GeographicCoordinate> ITransformation<GeographicHeightCoordinate, GeographicCoordinate>.TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
+            Contract.Requires(values != null);
+            return values.Select(TransformValue2D);
+        }
 
-		public abstract ITransformation GetInverse();
+        GeographicCoordinate ITransformation<GeographicHeightCoordinate, GeographicCoordinate>.TransformValue(GeographicHeightCoordinate value) {
+            return TransformValue2D(value);
+        }
 
-		ITransformation<GeographicCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicCoordinate>.GetInverse() {
-			return (ITransformation<GeographicCoordinate, GeographicHeightCoordinate>)GetInverse();
-		}
+        public abstract ITransformation GetInverse();
 
-		ITransformation<GeographicHeightCoordinate, GeographicCoordinate> ITransformation<GeographicCoordinate, GeographicHeightCoordinate>.GetInverse() {
-			return (ITransformation<GeographicHeightCoordinate, GeographicCoordinate>)GetInverse();
-		}
+        ITransformation<GeographicCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicCoordinate>.GetInverse() {
+            return (ITransformation<GeographicCoordinate, GeographicHeightCoordinate>)GetInverse();
+        }
 
-		ITransformation<GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate>.GetInverse() {
-			return (ITransformation<GeographicHeightCoordinate>)GetInverse();
-		}
+        ITransformation<GeographicHeightCoordinate, GeographicCoordinate> ITransformation<GeographicCoordinate, GeographicHeightCoordinate>.GetInverse() {
+            return (ITransformation<GeographicHeightCoordinate, GeographicCoordinate>)GetInverse();
+        }
 
-		ITransformation<GeographicCoordinate, GeographicCoordinate> ITransformation<GeographicCoordinate, GeographicCoordinate>.GetInverse() {
-			return (ITransformation<GeographicCoordinate, GeographicCoordinate>)GetInverse();
-		}
+        ITransformation<GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate>.GetInverse() {
+            return (ITransformation<GeographicHeightCoordinate>)GetInverse();
+        }
 
-		ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate>.GetInverse() {
-			return (ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate>)GetInverse();
-		}
+        ITransformation<GeographicCoordinate, GeographicCoordinate> ITransformation<GeographicCoordinate, GeographicCoordinate>.GetInverse() {
+            return (ITransformation<GeographicCoordinate, GeographicCoordinate>)GetInverse();
+        }
 
-		ITransformation<GeographicCoordinate> ITransformation<GeographicCoordinate>.GetInverse() {
-			return (ITransformation<GeographicCoordinate>)GetInverse();
-		}
+        ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate>.GetInverse() {
+            return (ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate>)GetInverse();
+        }
 
-		public virtual bool HasInverse {
-			get {
-				return GeographicToGeocentric.HasInverse
-					&& GeocentricToGeographic.HasInverse;
-			}
-		}
+        ITransformation<GeographicCoordinate> ITransformation<GeographicCoordinate>.GetInverse() {
+            return (ITransformation<GeographicCoordinate>)GetInverse();
+        }
 
-	}
+        public virtual bool HasInverse {
+            [Pure] get {
+                return GeographicToGeocentric.HasInverse
+                    && GeocentricToGeographic.HasInverse;
+            }
+        }
+
+    }
 }

@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+﻿using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
 using System;
 using System.Collections.Generic;
@@ -7,53 +7,66 @@ using Pigeoid.Interop;
 
 namespace Pigeoid.CoordinateOperationCompilation
 {
-	public class NamedParameterLookup
-	{
+    public class NamedParameterLookup
+    {
 
-		private readonly NamedParameterSelector.ParameterData[] _data;
-		private readonly ParameterNameNormalizedComparer _parameterNameNormalizedComparer;
+        private readonly NamedParameterSelector.ParameterData[] _data;
 
-		public NamedParameterLookup([NotNull] params INamedParameter[] parameters) {
-			_parameterNameNormalizedComparer = ParameterNameNormalizedComparer.Default;
-			_data = Array.ConvertAll(
-				parameters,
-				x => new NamedParameterSelector.ParameterData(x, _parameterNameNormalizedComparer.Normalize(x.Name))
-			);
-		}
+        public NamedParameterLookup(params INamedParameter[] parameters) {
+            if(parameters == null) throw new ArgumentNullException("parameters");
+            Contract.EndContractBlock();
 
-		public ParameterNameNormalizedComparer ParameterNameNormalizedComparer { get { return _parameterNameNormalizedComparer; } }
+            ParameterNameNormalizedComparer = ParameterNameNormalizedComparer.Default;
+            _data = Array.ConvertAll(
+                parameters,
+                x => new NamedParameterSelector.ParameterData(x, ParameterNameNormalizedComparer.Normalize(x.Name))
+            );
+        }
 
-		public NamedParameterLookup(ICoordinateOperationInfo operationInfo)
-			: this(operationInfo as IParameterizedCoordinateOperationInfo) { }
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(_data != null);
+            Contract.Invariant(ParameterNameNormalizedComparer != null);
+        }
 
-		public NamedParameterLookup(IParameterizedCoordinateOperationInfo operationInfo)
-			: this(null == operationInfo ? Enumerable.Empty<INamedParameter>() : operationInfo.Parameters) { }
+        public ParameterNameNormalizedComparer ParameterNameNormalizedComparer { get; private set; }
 
-		public NamedParameterLookup([NotNull, InstantHandle] IEnumerable<INamedParameter> parameters)
-			: this(parameters.ToArray()) { }
+        [Obsolete]
+        public NamedParameterLookup(ICoordinateOperationInfo operationInfo)
+            : this(operationInfo as IParameterizedCoordinateOperationInfo) { }
 
-		public bool Assign(params NamedParameterSelector[] selectors) {
-			var paramsToSearch = _data.ToList();
-			foreach (var selector in selectors) {
-				if (paramsToSearch.Count == 0)
-					break;
+        [Obsolete]
+        public NamedParameterLookup(IParameterizedCoordinateOperationInfo operationInfo)
+            : this(null == operationInfo ? Enumerable.Empty<INamedParameter>() : operationInfo.Parameters) { }
 
-				int bestScore = 0;
-				int bestIndex = -1;
-				for (int i = 0; i < paramsToSearch.Count; i++) {
-					int score = selector.Score(paramsToSearch[i]);
-					if (score > 0 && score > bestScore) {
-						bestScore = score;
-						bestIndex = i;
-					}
-				}
-				if (bestIndex >= 0) {
-					selector.Select(paramsToSearch[bestIndex].NamedParameter);
-					paramsToSearch.RemoveAt(bestIndex);
-				}
-			}
-			return selectors.All(x => x.IsSelected);
-		}
+        public NamedParameterLookup(IEnumerable<INamedParameter> parameters) : this(parameters.ToArray()) {
+            Contract.Requires(parameters != null);
+        }
 
-	}
+        public bool Assign(params NamedParameterSelector[] selectors) {
+            if(selectors == null) throw new ArgumentNullException("selectors");
+            Contract.EndContractBlock();
+            var paramsToSearch = _data.ToList();
+            foreach (var selector in selectors) {
+                if (paramsToSearch.Count == 0)
+                    break;
+
+                int bestScore = 0;
+                int bestIndex = -1;
+                for (int i = 0; i < paramsToSearch.Count; i++) {
+                    int score = selector.Score(paramsToSearch[i]);
+                    if (score > 0 && score > bestScore) {
+                        bestScore = score;
+                        bestIndex = i;
+                    }
+                }
+                if (bestIndex >= 0) {
+                    selector.Select(paramsToSearch[bestIndex].NamedParameter);
+                    paramsToSearch.RemoveAt(bestIndex);
+                }
+            }
+            return selectors.All(x => x.IsSelected);
+        }
+
+    }
 }

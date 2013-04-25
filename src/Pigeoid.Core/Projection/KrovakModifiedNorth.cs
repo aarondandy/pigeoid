@@ -1,81 +1,93 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Projection
 {
-	public class KrovakModifiedNorth : ITransformation<GeographicCoordinate, Point2>
-	{
+    public class KrovakModifiedNorth : ITransformation<GeographicCoordinate, Point2>
+    {
 
-		protected readonly KrovakModified Core;
+        protected readonly KrovakModified Core;
 
-		public KrovakModifiedNorth(
-			GeographicCoordinate geographicOrigin,
-			double latitudeOfPseudoStandardParallel,
-			double azimuthOfInitialLine,
-			double scaleFactor,
-			Vector2 falseProjectedOffset,
-			[NotNull] ISpheroid<double> spheroid,
-			Point2 evaluationPoint,
-			[NotNull] double[] constants
-		)
-			: this(new KrovakModified(
-			geographicOrigin,
-			latitudeOfPseudoStandardParallel,
-			azimuthOfInitialLine,
-			scaleFactor,
-			falseProjectedOffset,
-			spheroid,
-			evaluationPoint,
-			constants
-		)) { }
+        public KrovakModifiedNorth(
+            GeographicCoordinate geographicOrigin,
+            double latitudeOfPseudoStandardParallel,
+            double azimuthOfInitialLine,
+            double scaleFactor,
+            Vector2 falseProjectedOffset,
+            ISpheroid<double> spheroid,
+            Point2 evaluationPoint,
+            double[] constants
+        ) : this(new KrovakModified(
+            geographicOrigin,
+            latitudeOfPseudoStandardParallel,
+            azimuthOfInitialLine,
+            scaleFactor,
+            falseProjectedOffset,
+            spheroid,
+            evaluationPoint,
+            constants
+        ))
+        {
+            Contract.Requires(spheroid != null);
+            Contract.Requires(constants != null);
+            Contract.Requires(constants.Length == 10);
+        }
 
-		public KrovakModifiedNorth([NotNull] KrovakModified core)
-		{
-			if(null == core) throw new ArgumentNullException("core");
-			Core = core;
-		}
+        public KrovakModifiedNorth(KrovakModified core) {
+            if (null == core) throw new ArgumentNullException("core");
+            Contract.EndContractBlock();
+            Core = core;
+        }
 
-		internal class Inverse : KrovakModified.Inverse
-		{
-			public Inverse([NotNull] KrovakModified core) : base(core) { }
+        private void CodeContractInvariants() {
+            Contract.Invariant(Core != null);
+        }
 
-			public override GeographicCoordinate TransformValue(Point2 value)
-			{
-				return base.TransformValue(new Point2(-value.Y, -value.X));
-			}
-		}
+        internal class Inverse : KrovakModified.Inverse
+        {
+            public Inverse(KrovakModified core) : base(core) {
+                Contract.Requires(core != null);
+            }
 
-		public ITransformation<Point2, GeographicCoordinate> GetInverse()
-		{
-			return new Inverse(Core);
-		}
+            public override GeographicCoordinate TransformValue(Point2 value) {
+                return base.TransformValue(new Point2(-value.Y, -value.X));
+            }
+        }
 
-		public Point2 TransformValue(GeographicCoordinate source)
-		{
-			var p = Core.TransformValue(source);
-			return new Point2(-p.Y, -p.X);
-		}
+        public ITransformation<Point2, GeographicCoordinate> GetInverse() {
+            Contract.Ensures(Contract.Result<ITransformation<Point2, GeographicCoordinate>>() != null);
+            return new Inverse(Core);
+        }
 
-		public string Name { get { return "Krovak Modified North"; } }
+        public Point2 TransformValue(GeographicCoordinate source) {
+            var p = Core.TransformValue(source);
+            return new Point2(-p.Y, -p.X);
+        }
 
-		public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values)
-		{
-			return values.Select(TransformValue);
-		}
+        public string Name {
+            get {
+                Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
+                return "Krovak Modified North";
+            }
+        }
 
-		ITransformation ITransformation.GetInverse()
-		{
-			return GetInverse();
-		}
+        public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values) {
+            if(values == null) throw new ArgumentNullException("values");
+            Contract.Ensures(Contract.Result<IEnumerable<Point2>>() != null);
+            return values.Select(TransformValue);
+        }
 
-		public bool HasInverse
-		{
-			get { return Core.HasInverse; }
-		}
+        ITransformation ITransformation.GetInverse() {
+            return GetInverse();
+        }
 
-	}
+        public bool HasInverse {
+            [Pure] get { return Core.HasInverse; }
+        }
+
+    }
 }

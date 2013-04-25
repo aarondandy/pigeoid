@@ -2,16 +2,16 @@
 
 namespace Pigeoid.Contracts
 {
-	public interface IUnitConversionMap<TValue>
-	{
+    public interface IUnitConversionMap<TValue>
+    {
 
-		IEnumerable<IUnit> AllUnits { get; }
+        IEnumerable<IUnit> AllUnits { get; }
 
-		IEnumerable<IUnitConversion<TValue>> GetConversionsTo(IUnit to);
+        IEnumerable<IUnitConversion<TValue>> GetConversionsTo(IUnit to);
 
-		IEnumerable<IUnitConversion<TValue>> GetConversionsFrom(IUnit from);
+        IEnumerable<IUnitConversion<TValue>> GetConversionsFrom(IUnit from);
 
-		IEqualityComparer<IUnit> EqualityComparer { get; }
+        IEqualityComparer<IUnit> EqualityComparer { get; }
 
-	}
+    }
 }

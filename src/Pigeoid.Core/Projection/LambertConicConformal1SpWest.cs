@@ -1,57 +1,60 @@
-﻿// TODO: source header
-
-using System.Diagnostics;
-using JetBrains.Annotations;
+﻿using System.Diagnostics;
+using System.Diagnostics.Contracts;
 using Pigeoid.Transformation;
 using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Projection
 {
-	public class LambertConicConformal1SpWest :
-		LambertConicConformal1Sp
-	{
+    public class LambertConicConformal1SpWest :
+        LambertConicConformal1Sp
+    {
 
-		private class Inverted : InvertedTransformationBase<LambertConicConformal1SpWest,Point2,GeographicCoordinate>
-		{
+        private class Inverted : InvertedTransformationBase<LambertConicConformal1SpWest, Point2, GeographicCoordinate>
+        {
 
-			private readonly InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoordinate> _baseInv;
+            private readonly InvertedTransformationBase<LambertConicConformal, Point2, GeographicCoordinate> _baseInv;
 
-			public Inverted([NotNull] LambertConicConformal1SpWest core) : base(core) {
-				_baseInv = core.BaseInverse;
-			}
+            public Inverted(LambertConicConformal1SpWest core) : base(core) {
+                Contract.Requires(core != null);
+                _baseInv = core.BaseInverse;
+            }
 
-			public override GeographicCoordinate TransformValue(Point2 source) {
-				return _baseInv.TransformValue(new Point2(-source.X, source.Y));
-			}
-		}
+            public override GeographicCoordinate TransformValue(Point2 source) {
+                return _baseInv.TransformValue(new Point2(-source.X, source.Y));
+            }
+        }
 
-		public LambertConicConformal1SpWest(
-			GeographicCoordinate geographicOrigin,
-			double originScaleFactor,
-			Vector2 falseProjectedOffset,
-			[NotNull] ISpheroid<double> spheroid
-		)
-			: base(
-			  geographicOrigin,
-			  originScaleFactor,
-			  new Vector2(-falseProjectedOffset.X, falseProjectedOffset.Y),
-			  spheroid
-			) { }
+        public LambertConicConformal1SpWest(
+            GeographicCoordinate geographicOrigin,
+            double originScaleFactor,
+            Vector2 falseProjectedOffset,
+            ISpheroid<double> spheroid
+        ) : base(
+            geographicOrigin,
+            originScaleFactor,
+            new Vector2(-falseProjectedOffset.X, falseProjectedOffset.Y),
+            spheroid
+        ) {
+            Contract.Requires(spheroid != null);
+        }
 
-		public override Point2 TransformValue(GeographicCoordinate coordinate) {
-			Point2 p = base.TransformValue(coordinate);
-			return new Point2(-p.X, p.Y);
-		}
+        public override Point2 TransformValue(GeographicCoordinate coordinate) {
+            var p = base.TransformValue(coordinate);
+            return new Point2(-p.X, p.Y);
+        }
 
-		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
-		private InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoordinate> BaseInverse {
-			get { return base.GetInverse() as InvertedTransformationBase<LambertConicConformal,Point2,GeographicCoordinate>; }
-		}
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private InvertedTransformationBase<LambertConicConformal, Point2, GeographicCoordinate> BaseInverse {
+            get {
+                return base.GetInverse() as InvertedTransformationBase<LambertConicConformal, Point2, GeographicCoordinate>;
+            }
+        }
 
-		public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
-			return new Inverted(this);
-		}
+        public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
+            Contract.Ensures(Contract.Result<ITransformation<Point2, GeographicCoordinate>>() != null);
+            return new Inverted(this);
+        }
 
-	}
+    }
 }

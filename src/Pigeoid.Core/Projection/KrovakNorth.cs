@@ -1,75 +1,87 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Projection
 {
-	public class KrovakNorth : ITransformation<GeographicCoordinate, Point2>
-	{
+    public class KrovakNorth : ITransformation<GeographicCoordinate, Point2>
+    {
 
-		protected readonly Krovak Core;
+        protected readonly Krovak Core;
 
-		public KrovakNorth(
-			GeographicCoordinate geographicOrigin,
-			double latitudeOfPseudoStandardParallel,
-			double azimuthOfInitialLine,
-			double scaleFactor,
-			Vector2 falseProjectedOffset,
-			[NotNull] ISpheroid<double> spheroid
-		) : this(new Krovak(
-			geographicOrigin,
-			latitudeOfPseudoStandardParallel,
-			azimuthOfInitialLine,
-			scaleFactor,
-			falseProjectedOffset,
-			spheroid
-		)) { }
+        public KrovakNorth(
+            GeographicCoordinate geographicOrigin,
+            double latitudeOfPseudoStandardParallel,
+            double azimuthOfInitialLine,
+            double scaleFactor,
+            Vector2 falseProjectedOffset,
+            ISpheroid<double> spheroid
+        ) : this(new Krovak(
+            geographicOrigin,
+            latitudeOfPseudoStandardParallel,
+            azimuthOfInitialLine,
+            scaleFactor,
+            falseProjectedOffset,
+            spheroid
+        ))
+        {
+            Contract.Requires(spheroid != null);
+        }
 
-		public KrovakNorth([NotNull] Krovak core)
-		{
-			if(null == core) throw new ArgumentNullException("core");
-			Core = core;
-		}
+        public KrovakNorth(Krovak core) {
+            if (null == core) throw new ArgumentNullException("core");
+            Contract.EndContractBlock();
+            Core = core;
+        }
 
-		internal class Inverse : Krovak.Inverse
-		{
-			public Inverse([NotNull] Krovak core) : base(core) { }
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(Core != null);
+        }
 
-			public override GeographicCoordinate TransformValue(Point2 value)
-			{
-				return base.TransformValue(new Point2(-value.Y,-value.X));
-			}
-		}
+        internal class Inverse : Krovak.Inverse
+        {
+            public Inverse(Krovak core) : base(core) {
+                Contract.Requires(core != null);
+            }
 
-		public ITransformation<Point2, GeographicCoordinate> GetInverse()
-		{
-			return new Inverse(Core);
-		}
+            public override GeographicCoordinate TransformValue(Point2 value) {
+                return base.TransformValue(new Point2(-value.Y, -value.X));
+            }
+        }
 
-		public Point2 TransformValue(GeographicCoordinate source)
-		{
-			var p = Core.TransformValue(source);
-			return new Point2(-p.Y, -p.X);
-		}
+        public ITransformation<Point2, GeographicCoordinate> GetInverse() {
+            Contract.Ensures(Contract.Result<ITransformation<Point2, GeographicCoordinate>>() != null);
+            return new Inverse(Core);
+        }
 
-		public string Name { get { return "Krovak North"; } }
+        public Point2 TransformValue(GeographicCoordinate source) {
+            var p = Core.TransformValue(source);
+            return new Point2(-p.Y, -p.X);
+        }
 
-		public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values)
-		{
-			return values.Select(TransformValue);
-		}
+        public string Name {
+            get {
+                Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
+                return "Krovak North";
+            }
+        }
 
-		ITransformation ITransformation.GetInverse()
-		{
-			return GetInverse();
-		}
+        public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values) {
+            if(values == null) throw new ArgumentNullException("values");
+            Contract.Ensures(Contract.Result<IEnumerable<Point2>>() != null);
+            return values.Select(TransformValue);
+        }
 
-		public bool HasInverse
-		{
-			get { return Core.HasInverse; }
-		}
-	}
+        ITransformation ITransformation.GetInverse() {
+            return GetInverse();
+        }
+
+        public bool HasInverse {
+            [Pure] get { return Core.HasInverse; }
+        }
+    }
 }

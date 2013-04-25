@@ -1,17 +1,26 @@
-﻿using Pigeoid.Contracts;
+﻿using System;
+using System.Diagnostics.Contracts;
+using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc
 {
-	public class OgcCoordinateOperationMethodInfo : ICoordinateOperationMethodInfo
-	{
+    public class OgcCoordinateOperationMethodInfo : ICoordinateOperationMethodInfo
+    {
 
-		public OgcCoordinateOperationMethodInfo(string name, IAuthorityTag authorityTag = null) {
-			Name = name;
-			Authority = authorityTag;
-		}
+        public OgcCoordinateOperationMethodInfo(string name, IAuthorityTag authorityTag = null) {
+            if(name == null) throw new ArgumentNullException("name");
+            Contract.EndContractBlock();
+            Name = name;
+            Authority = authorityTag;
+        }
 
-		public string Name { get; private set; }
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(Name != null);
+        }
 
-		public IAuthorityTag Authority { get; private set; }
-	}
+        public string Name { get; private set; }
+
+        public IAuthorityTag Authority { get; private set; }
+    }
 }

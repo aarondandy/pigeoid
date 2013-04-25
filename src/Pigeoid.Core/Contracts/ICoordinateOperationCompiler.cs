@@ -3,9 +3,9 @@
 namespace Pigeoid.Contracts
 {
 
-	public interface ICoordinateOperationCompiler
-	{
-		ITransformation Compile(ICoordinateOperationCrsPathInfo operationPath);
-	}
+    public interface ICoordinateOperationCompiler
+    {
+        ITransformation Compile(ICoordinateOperationCrsPathInfo operationPath);
+    }
 
 }
