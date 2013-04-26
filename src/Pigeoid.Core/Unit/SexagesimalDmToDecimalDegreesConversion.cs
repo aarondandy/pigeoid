@@ -1,147 +1,178 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Text;
-using JetBrains.Annotations;
 using Pigeoid.Contracts;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Unit
 {
 
-	/// <summary>
-	/// Converts from sexagesimal DDD.MMm format to decimal degrees.
-	/// </summary>
-	public class SexagesimalDmToDecimalDegreesConversion : IUnitConversion<double>
-	{
+    /// <summary>
+    /// Converts from sexagesimal DDD.MMm format to decimal degrees.
+    /// </summary>
+    public class SexagesimalDmToDecimalDegreesConversion : IUnitConversion<double>
+    {
 
-		private class Inverse : IUnitConversion<double>
-		{
+        private class Inverse : IUnitConversion<double>
+        {
 
-			private readonly SexagesimalDmToDecimalDegreesConversion _core;
+            private readonly SexagesimalDmToDecimalDegreesConversion _core;
 
-			public Inverse([NotNull] SexagesimalDmToDecimalDegreesConversion core) {
-				_core = core;
-			}
+            public Inverse(SexagesimalDmToDecimalDegreesConversion core) {
+                Contract.Requires(core != null);
+                _core = core;
+            }
 
-			public IUnit From {
-				get { return _core.To; }
-			}
+            [ContractInvariantMethod]
+            private void CodeContractInvariants() {
+                Contract.Invariant(_core != null);
+            }
 
-			public IUnit To {
-				get { return _core.From; }
-			}
+            public IUnit From {
+                get {
+                    Contract.Ensures(Contract.Result<IUnit>() != null);
+                    return _core.To;
+                }
+            }
 
-			public double TransformValue(double value) {
-				return (double)TransformValue((decimal)value);
-			}
+            public IUnit To {
+                get {
+                    Contract.Ensures(Contract.Result<IUnit>() != null);
+                    return _core.From;
+                }
+            }
 
-			public decimal TransformValue(decimal value) {
-				// ReSharper disable CompareOfFloatsByEqualityOperator
-				var result = (decimal)(int)value; // get the whole degrees
-				value -= result; // take the whole degrees out
-				if (0 == value)
-					return result;
+            public double TransformValue(double value) {
+                return (double)TransformValue((decimal)value);
+            }
 
-				return result + (value * 0.6m);
-				// ReSharper restore CompareOfFloatsByEqualityOperator
-			}
+            public decimal TransformValue(decimal value) {
+                // ReSharper disable CompareOfFloatsByEqualityOperator
+                var result = (decimal)(int)value; // get the whole degrees
+                value -= result; // take the whole degrees out
+                if (0 == value)
+                    return result;
 
-			public void TransformValues([NotNull] double[] values) {
-				for (int i = 0; i < values.Length; i++)
-					values[i] = TransformValue(values[i]);
-			}
+                return result + (value * 0.6m);
+                // ReSharper restore CompareOfFloatsByEqualityOperator
+            }
 
-			public IEnumerable<double> TransformValues(IEnumerable<double> values) {
-				return values.Select(TransformValue);
-			}
+            public void TransformValues(double[] values) {
+                Contract.Requires(values != null);
+                for (int i = 0; i < values.Length; i++)
+                    values[i] = TransformValue(values[i]);
+            }
 
-			public IUnitConversion<double> GetInverse() {
-				return _core;
-			}
+            public IEnumerable<double> TransformValues(IEnumerable<double> values) {
+                Contract.Requires(values != null);
+                Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
+                return values.Select(TransformValue);
+            }
 
-			ITransformation<double> ITransformation<double>.GetInverse() {
-				return _core;
-			}
+            public IUnitConversion<double> GetInverse() {
+                Contract.Ensures(Contract.Result<IUnitConversion<double>>() != null);
+                return _core;
+            }
 
-			ITransformation<double, double> ITransformation<double, double>.GetInverse() {
-				return _core;
-			}
+            ITransformation<double> ITransformation<double>.GetInverse() {
+                return _core;
+            }
 
-			ITransformation ITransformation.GetInverse() {
-				return _core;
-			}
+            ITransformation<double, double> ITransformation<double, double>.GetInverse() {
+                return _core;
+            }
 
-			public bool HasInverse {
-				get { throw new NotImplementedException(); }
-			}
-		}
+            ITransformation ITransformation.GetInverse() {
+                return _core;
+            }
 
-		private readonly IUnit _from;
-		private readonly IUnit _to;
-		private readonly Inverse _inverse;
+            bool ITransformation.HasInverse {
+                get { return true; }
+            }
+        }
 
-		public SexagesimalDmToDecimalDegreesConversion([NotNull] IUnit from, [NotNull] IUnit to) {
-			if(null == from)
-				throw new ArgumentNullException("from");
-			if(null == to)
-				throw new ArgumentNullException("to");
+        private readonly IUnit _from;
+        private readonly IUnit _to;
+        private readonly Inverse _inverse;
 
-			_from = from;
-			_to = to;
-			_inverse = new Inverse(this);
-		}
+        public SexagesimalDmToDecimalDegreesConversion(IUnit from, IUnit to) {
+            if (null == from) throw new ArgumentNullException("from");
+            if (null == to) throw new ArgumentNullException("to");
+            Contract.EndContractBlock();
 
-		[NotNull] public IUnit From {
-			[Pure] get { return _from; }
-		}
+            _from = from;
+            _to = to;
+            _inverse = new Inverse(this);
+        }
 
-		[NotNull] public IUnit To {
-			[Pure] get { return _to; }
-		}
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(_from != null);
+            Contract.Invariant(_to != null);
+            Contract.Invariant(_inverse != null);
+        }
 
-		public double TransformValue(double value) {
-			return (double)TransformValue((decimal)value);
-		}
+        public IUnit From {
+            [Pure] get {
+                Contract.Ensures(Contract.Result<IUnit>() != null);
+                return _from;
+            }
+        }
 
-		public decimal TransformValue(decimal value) {
-			// ReSharper disable CompareOfFloatsByEqualityOperator
-			var result = (decimal)(int)value; // get the whole degrees
-			value -= result; // remove the whole degrees from the value
-			if (0 == value)
-				return result;
+        public IUnit To {
+            [Pure] get {
+                Contract.Ensures(Contract.Result<IUnit>() != null);
+                return _to;
+            }
+        }
 
-			return result + (value / 0.6m); // add on the minutes
-			// ReSharper restore CompareOfFloatsByEqualityOperator
-		}
+        public double TransformValue(double value) {
+            return (double)TransformValue((decimal)value);
+        }
 
-		public void TransformValues([NotNull] double[] values) {
-			for (int i = 0; i < values.Length; i++)
-				values[i] = TransformValue(values[i]);
-		}
+        public decimal TransformValue(decimal value) {
+            // ReSharper disable CompareOfFloatsByEqualityOperator
+            var result = (decimal)(int)value; // get the whole degrees
+            value -= result; // remove the whole degrees from the value
+            if (0 == value)
+                return result;
 
-		public IEnumerable<double> TransformValues(IEnumerable<double> values) {
-			return values.Select(TransformValue);
-		}
+            return result + (value / 0.6m); // add on the minutes
+            // ReSharper restore CompareOfFloatsByEqualityOperator
+        }
 
-		[NotNull] public IUnitConversion<double> GetInverse() {
-			return _inverse;
-		}
+        public void TransformValues(double[] values) {
+            Contract.Requires(values != null);
+            for (int i = 0; i < values.Length; i++)
+                values[i] = TransformValue(values[i]);
+        }
 
-		ITransformation<double> ITransformation<double>.GetInverse() {
-			return _inverse;
-		}
+        public IEnumerable<double> TransformValues(IEnumerable<double> values) {
+            Contract.Requires(values != null);
+            Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
+            return values.Select(TransformValue);
+        }
 
-		ITransformation<double, double> ITransformation<double, double>.GetInverse() {
-			return _inverse;
-		}
+        public IUnitConversion<double> GetInverse() {
+            Contract.Ensures(Contract.Result<IUnitConversion<double>>() != null);
+            return _inverse;
+        }
 
-		ITransformation ITransformation.GetInverse() {
-			return _inverse;
-		}
+        ITransformation<double> ITransformation<double>.GetInverse() {
+            return _inverse;
+        }
 
-		public bool HasInverse {
-			[Pure, ContractAnnotation("=>true")] get { return true; }
-		}
-	}
+        ITransformation<double, double> ITransformation<double, double>.GetInverse() {
+            return _inverse;
+        }
+
+        ITransformation ITransformation.GetInverse() {
+            return _inverse;
+        }
+
+        bool ITransformation.HasInverse {
+            [Pure] get { return true; }
+        }
+    }
 }

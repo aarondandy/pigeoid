@@ -1,49 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Unit
 {
 
-	public class BinaryUnitConversionMap : SimpleUnitConversionMapBase
-	{
+    public class BinaryUnitConversionMap : SimpleUnitConversionMapBase
+    {
 
-		private readonly IUnitConversion<double> _forwardOperation;
+        private readonly IUnitConversion<double> _forwardOperation;
 
-		public BinaryUnitConversionMap([NotNull] IUnitConversion<double> forwardOperation, IEqualityComparer<IUnit> unitEqualityComparer = null)
-			: base(unitEqualityComparer)
-		{
-			if (null == forwardOperation)
-				throw new ArgumentNullException("forwardOperation");
-			_forwardOperation = forwardOperation;
-		}
+        public BinaryUnitConversionMap(IUnitConversion<double> forwardOperation, IEqualityComparer<IUnit> unitEqualityComparer = null)
+            : base(unitEqualityComparer) {
+            if (null == forwardOperation) throw new ArgumentNullException("forwardOperation");
+            Contract.EndContractBlock();
+            _forwardOperation = forwardOperation;
+        }
 
-		private IUnit FromDefined { get { return _forwardOperation.From; } }
+        private void CodeContractInvariants() {
+            Contract.Invariant(_forwardOperation != null);
+        }
 
-		private IUnit ToDefined { get { return _forwardOperation.To; } }
+        private IUnit FromDefined {
+            get {
+                Contract.Ensures(Contract.Result<IUnit>() != null);
+                return _forwardOperation.From;
+            }
+        }
 
-		public override IEnumerable<IUnit> AllUnits {
-			get { return new[] { FromDefined, ToDefined }.Distinct(EqualityComparer); }
-		}
+        private IUnit ToDefined {
+            get {
+                Contract.Ensures(Contract.Result<IUnit>() != null);
+                return _forwardOperation.To;
+            }
+        }
 
-		public override IEnumerable<IUnitConversion<double>> GetConversionsTo(IUnit to) {
-			if (AreUnitsMatching(ToDefined, to))
-				return new[] { _forwardOperation };
-			if (_forwardOperation.HasInverse && AreUnitsMatching(FromDefined, to))
-				return new[] { _forwardOperation.GetInverse() };
-			return Enumerable.Empty<IUnitConversion<double>>();
-		}
+        public override IEnumerable<IUnit> AllUnits {
+            get {
+                Contract.Ensures(Contract.Result<IEnumerable<IUnit>>() != null);
+                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IUnit>>(), x => x != null));
+                return new[] { FromDefined, ToDefined }.Distinct(EqualityComparer);
+            }
+        }
 
-		public override IEnumerable<IUnitConversion<double>> GetConversionsFrom(IUnit from) {
-			if (AreUnitsMatching(FromDefined, from))
-				return new[] { _forwardOperation };
-			if (_forwardOperation.HasInverse && AreUnitsMatching(ToDefined, from))
-				return new[] { _forwardOperation.GetInverse() };
-			return Enumerable.Empty<IUnitConversion<double>>();
-		}
+        public override IEnumerable<IUnitConversion<double>> GetConversionsTo(IUnit to) {
+            Contract.Ensures(Contract.Result<IEnumerable<IUnitConversion<double>>>() != null);
+            if (AreUnitsMatching(ToDefined, to))
+                return new[] { _forwardOperation };
+            if (_forwardOperation.HasInverse && AreUnitsMatching(FromDefined, to))
+                return new[] { _forwardOperation.GetInverse() };
+            return Enumerable.Empty<IUnitConversion<double>>();
+        }
 
-	}
+        public override IEnumerable<IUnitConversion<double>> GetConversionsFrom(IUnit from) {
+            Contract.Ensures(Contract.Result<IEnumerable<IUnitConversion<double>>>() != null);
+            if (AreUnitsMatching(FromDefined, from))
+                return new[] { _forwardOperation };
+            if (_forwardOperation.HasInverse && AreUnitsMatching(ToDefined, from))
+                return new[] { _forwardOperation.GetInverse() };
+            return Enumerable.Empty<IUnitConversion<double>>();
+        }
+
+    }
 
 }

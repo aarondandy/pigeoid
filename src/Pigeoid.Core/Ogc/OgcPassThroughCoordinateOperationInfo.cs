@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
+using Vertesaur;
 
 namespace Pigeoid.Ogc
 {
@@ -43,8 +44,8 @@ namespace Pigeoid.Ogc
         }
 
         public ICoordinateOperationInfo GetInverse() {
-            if (!HasInverse) throw new InvalidOperationException("No inverse.");
-            Contract.EndContractBlock();
+            if (!HasInverse) throw new NoInverseException();
+            Contract.Ensures(Contract.Result<ICoordinateOperationInfo>() != null);
             return Core.GetInverse();
         }
 

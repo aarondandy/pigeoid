@@ -1,6 +1,6 @@
-﻿// TODO: source header
-
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
 using Pigeoid.Epsg.Resources;
 using Vertesaur;
@@ -8,102 +8,101 @@ using Vertesaur.Contracts;
 
 namespace Pigeoid.Epsg
 {
-	public class EpsgEllipsoid : ISpheroidInfo
-	{
+    public class EpsgEllipsoid : ISpheroidInfo
+    {
 
-		internal static readonly EpsgFixedLookUpBase<ushort, EpsgEllipsoid> LookUp;
+        internal static readonly EpsgFixedLookUpBase<ushort, EpsgEllipsoid> LookUp;
 
-		static EpsgEllipsoid() {
-			var lookUpDictionary = new SortedDictionary<ushort, EpsgEllipsoid>();
-			using (var readerTxt = EpsgDataResource.CreateBinaryReader("ellipsoids.txt"))
-			using (var numberLookUp = new EpsgNumberLookUp())
-			using (var readerDat = EpsgDataResource.CreateBinaryReader("ellipsoids.dat")) {
-				for (int i = readerDat.ReadUInt16(); i > 0; i--) {
-					var code = readerDat.ReadUInt16();
-					var semiMajorAxis = numberLookUp.Get(readerDat.ReadUInt16());
-					var valueB = numberLookUp.Get(readerDat.ReadUInt16());
-					var name = EpsgTextLookUp.GetString(readerDat.ReadUInt16(), readerTxt);
-					var uom = EpsgUnit.Get(readerDat.ReadByte() + 9000);
-// ReSharper disable CompareOfFloatsByEqualityOperator
-					lookUpDictionary.Add(code, new EpsgEllipsoid(
-						code, name, uom,
-						(valueB == semiMajorAxis)
-							? new Sphere(semiMajorAxis)
-						: (valueB < semiMajorAxis / 10.0)
-							? new SpheroidEquatorialInvF(semiMajorAxis, valueB) as ISpheroid<double>
-						: new SpheroidEquatorialPolar(semiMajorAxis, valueB)
-					));
-// ReSharper restore CompareOfFloatsByEqualityOperator
-				}
-			}
-			LookUp = new EpsgFixedLookUpBase<ushort, EpsgEllipsoid>(lookUpDictionary);
-		}
+        static EpsgEllipsoid() {
+            var lookUpDictionary = new SortedDictionary<ushort, EpsgEllipsoid>();
+            using (var readerTxt = EpsgDataResource.CreateBinaryReader("ellipsoids.txt"))
+            using (var numberLookUp = new EpsgNumberLookUp())
+            using (var readerDat = EpsgDataResource.CreateBinaryReader("ellipsoids.dat")) {
+                for (int i = readerDat.ReadUInt16(); i > 0; i--) {
+                    var code = readerDat.ReadUInt16();
+                    var semiMajorAxis = numberLookUp.Get(readerDat.ReadUInt16());
+                    var valueB = numberLookUp.Get(readerDat.ReadUInt16());
+                    var name = EpsgTextLookUp.GetString(readerDat.ReadUInt16(), readerTxt);
+                    var uom = EpsgUnit.Get(readerDat.ReadByte() + 9000);
+                    // ReSharper disable CompareOfFloatsByEqualityOperator
+                    lookUpDictionary.Add(code, new EpsgEllipsoid(
+                        code, name, uom,
+                        (valueB == semiMajorAxis)
+                            ? new Sphere(semiMajorAxis)
+                        : (valueB < semiMajorAxis / 10.0)
+                            ? new SpheroidEquatorialInvF(semiMajorAxis, valueB) as ISpheroid<double>
+                        : new SpheroidEquatorialPolar(semiMajorAxis, valueB)
+                    ));
+                    // ReSharper restore CompareOfFloatsByEqualityOperator
+                }
+            }
+            LookUp = new EpsgFixedLookUpBase<ushort, EpsgEllipsoid>(lookUpDictionary);
+        }
 
-		public static EpsgEllipsoid Get(int code) {
-			return code >= 0 && code < ushort.MaxValue
-				? LookUp.Get((ushort) code)
-				: null;
-		}
+        public static EpsgEllipsoid Get(int code) {
+            return code >= 0 && code < ushort.MaxValue
+                ? LookUp.Get((ushort)code)
+                : null;
+        }
 
-		public static IEnumerable<EpsgEllipsoid> Values { get { return LookUp.Values; } }
+        public static IEnumerable<EpsgEllipsoid> Values {
+            get {
+                Contract.Ensures(Contract.Result<IEnumerable<EpsgEllipsoid>>() != null);
+                return LookUp.Values;
+            }
+        }
 
-		private readonly ushort _code;
-		private readonly ISpheroid<double> _core;
-		private readonly string _name;
-		private readonly EpsgUnit _unit;
+        private readonly ushort _code;
 
-		private EpsgEllipsoid(ushort code, string name, EpsgUnit unit, ISpheroid<double> core) {
-			_code = code;
-			_name = name;
-			_core = core;
-			_unit = unit;
-		}
+        private EpsgEllipsoid(ushort code, string name, EpsgUnit unit, ISpheroid<double> core) {
+            Contract.Requires(!String.IsNullOrEmpty(name));
+            Contract.Requires(unit != null);
+            Contract.Requires(core != null);
+            _code = code;
+            Name = name;
+            Core = core;
+            AxisUnit = unit;
+        }
 
-		public int Code { get { return _code; } }
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(!String.IsNullOrEmpty(Name));
+            Contract.Invariant(AxisUnit != null);
+            Contract.Invariant(Core != null);
+        }
 
-		public string Name { get { return _name; } }
+        public int Code { get { return _code; } }
 
-		public EpsgUnit AxisUnit { get { return _unit; } }
+        public string Name { get; private set; }
 
-		IUnit ISpheroidInfo.AxisUnit { get { return AxisUnit; } }
+        public EpsgUnit AxisUnit { get; private set; }
 
-		public ISpheroid<double> Core { get { return _core; } }
+        IUnit ISpheroidInfo.AxisUnit { get { return AxisUnit; } }
 
-		public double A {
-			get { return _core.A; }
-		}
+        public ISpheroid<double> Core { get; private set; }
 
-		public double B {
-			get { return _core.B; }
-		}
+        public double A { get { return Core.A; } }
 
-		public double E {
-			get { return _core.E; }
-		}
+        public double B { get { return Core.B; } }
 
-		public double ESecond {
-			get { return _core.ESecond; }
-		}
+        public double E { get { return Core.E; } }
 
-		public double ESecondSquared {
-			get { return _core.ESecondSquared; }
-		}
+        public double ESecond { get { return Core.ESecond; } }
 
-		public double ESquared {
-			get { return _core.ESquared; }
-		}
+        public double ESecondSquared { get { return Core.ESecondSquared; } }
 
-		public double F {
-			get { return _core.F; }
-		}
+        public double ESquared { get { return Core.ESquared; } }
 
-		public double InvF {
-			get { return _core.InvF; }
-		}
+        public double F { get { return Core.F; } }
 
-		public IAuthorityTag Authority {
-			get { return new EpsgAuthorityTag(_code); }
-		}
+        public double InvF { get { return Core.InvF; } }
 
-	}
+        public IAuthorityTag Authority {
+            get {
+                Contract.Ensures(Contract.Result<IAuthorityTag>() != null);
+                return new EpsgAuthorityTag(_code);
+            }
+        }
+
+    }
 }

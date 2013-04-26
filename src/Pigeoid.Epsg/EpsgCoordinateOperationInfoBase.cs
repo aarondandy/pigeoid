@@ -1,44 +1,53 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
+using Vertesaur;
 
 namespace Pigeoid.Epsg
 {
-	public abstract class EpsgCoordinateOperationInfoBase : ICoordinateOperationInfo, IAuthorityBoundEntity
-	{
+    public abstract class EpsgCoordinateOperationInfoBase : ICoordinateOperationInfo, IAuthorityBoundEntity
+    {
 
-		private readonly ushort _code;
-		private readonly ushort _areaCode;
-		private readonly string _name;
-		private readonly bool _deprecated;
+        private readonly ushort _code;
+        private readonly ushort _areaCode;
+        private readonly bool _deprecated;
 
-		internal EpsgCoordinateOperationInfoBase(ushort code, ushort areaCode, bool deprecated, string name) {
-			_code = code;
-			_areaCode = areaCode;
-			_deprecated = deprecated;
-			_name = name;
-		}
+        internal EpsgCoordinateOperationInfoBase(ushort code, ushort areaCode, bool deprecated, string name) {
+            Contract.Requires(!String.IsNullOrEmpty(name));
+            _code = code;
+            _areaCode = areaCode;
+            _deprecated = deprecated;
+            Name = name;
+        }
 
-		public int Code { get { return _code; } }
-		public string Name { get { return _name; } }
-		public EpsgArea Area { get { return EpsgArea.Get(_areaCode); } }
-		public bool Deprecated { get { return _deprecated; } }
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(!String.IsNullOrEmpty(Name));
+        }
 
-		public abstract bool HasInverse { get; }
+        public string Name { get; private set; }
+        public int Code { get { return _code; } }
+        public EpsgArea Area { get { return EpsgArea.Get(_areaCode); } }
+        public bool Deprecated { get { return _deprecated; } }
 
-		public ICoordinateOperationInfo GetInverse() {
-			if(HasInverse)
-				return new EpsgCoordinateOperationInverse(this);
+        public abstract bool HasInverse { get; }
 
-			throw new InvalidOperationException("Operation does not have an inverse.");
-		}
+        public ICoordinateOperationInfo GetInverse() {
+            if (!HasInverse) throw new NoInverseException();
+            Contract.Ensures(Contract.Result<ICoordinateOperationInfo>() != null);
+            return new EpsgCoordinateOperationInverse(this);
+        }
 
-		public bool IsInverseOfDefinition {
-			get { return false; }
-		}
+        bool ICoordinateOperationInfo.IsInverseOfDefinition {
+            get { return false; }
+        }
 
-		public IAuthorityTag Authority {
-			get { return new EpsgAuthorityTag(_code); }
-		}
-	}
+        public IAuthorityTag Authority {
+            get {
+                Contract.Ensures(Contract.Result<IAuthorityTag>() != null);
+                return new EpsgAuthorityTag(_code);
+            }
+        }
+    }
 
 }

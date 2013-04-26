@@ -1,25 +1,28 @@
-﻿using Pigeoid.Contracts;
-using System;
+﻿using System.Diagnostics.Contracts;
+using Pigeoid.Contracts;
 
 namespace Pigeoid.Unit
 {
-	public class ScaleUnitPartsPerMillion : IUnit
-	{
+    public class ScaleUnitPartsPerMillion : IUnit
+    {
 
-		public static readonly ScaleUnitPartsPerMillion Value = new ScaleUnitPartsPerMillion();
+        public static readonly ScaleUnitPartsPerMillion Value = new ScaleUnitPartsPerMillion();
 
-		private ScaleUnitPartsPerMillion() { }
+        private ScaleUnitPartsPerMillion() { }
 
-		public string Name {
-			get { return "parts per million"; }
-		}
+        public string Name {
+            get { return "parts per million"; }
+        }
 
-		public string Type {
-			get { return "Scale"; }
-		}
+        public string Type {
+            get { return "Scale"; }
+        }
 
-		public IUnitConversionMap<double> ConversionMap {
-			get { return BasicScaleUnitConversionMap.Default; }
-		}
-	}
+        public IUnitConversionMap<double> ConversionMap {
+            get {
+                Contract.Ensures(Contract.Result<IUnitConversionMap<double>>() != null);
+                return BasicScaleUnitConversionMap.Default;
+            }
+        }
+    }
 }

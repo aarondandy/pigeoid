@@ -1,42 +1,45 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
 using Pigeoid.Interop;
 
 namespace Pigeoid.Unit
 {
-	public class UnitEqualityComparer : IEqualityComparer<IUnit>
-	{
+    public class UnitEqualityComparer : IEqualityComparer<IUnit>
+    {
 
-		public static readonly UnitEqualityComparer Default = new UnitEqualityComparer();
+        public static readonly UnitEqualityComparer Default = new UnitEqualityComparer();
 
-		private readonly INameNormalizedComparer _nameNormalizedComparer;
+        public UnitEqualityComparer(INameNormalizedComparer nameNormalizedComparer = null) {
+            NameNormalizedComparer = nameNormalizedComparer ?? UnitNameNormalizedComparer.Default;
+        }
 
-		public UnitEqualityComparer(INameNormalizedComparer nameNormalizedComparer = null) {
-			_nameNormalizedComparer = nameNormalizedComparer ?? UnitNameNormalizedComparer.Default;
-		}
+        private void CodeContractInvariants() {
+            Contract.Invariant(NameNormalizedComparer != null);
+        }
 
-		public INameNormalizedComparer NameNormalizedComparer { get { return _nameNormalizedComparer; } }
+        public INameNormalizedComparer NameNormalizedComparer { get; private set; }
 
-		public bool Equals(IUnit x, IUnit y){
-			return AreSameType(x, y)
-				&& _nameNormalizedComparer.Equals(x.Name, y.Name);
-		}
+        public bool Equals(IUnit x, IUnit y) {
+            return AreSameType(x, y)
+                && NameNormalizedComparer.Equals(x.Name, y.Name);
+        }
 
-		public int GetHashCode(IUnit obj) {
-			if (null == obj)
-				return 0;
-			return _nameNormalizedComparer.GetHashCode(obj.Name)
-				^ -_nameNormalizedComparer.GetHashCode(obj.Type);
-		}
+        public int GetHashCode(IUnit obj) {
+            if (null == obj)
+                return 0;
+            return NameNormalizedComparer.GetHashCode(obj.Name)
+                ^ -NameNormalizedComparer.GetHashCode(obj.Type);
+        }
 
-		public bool AreSameType(IUnit x, IUnit y){
-			if (ReferenceEquals(x, y))
-				return true;
-			if (null == x || null == y)
-				return false;
-			return _nameNormalizedComparer.Equals(x.Type, y.Type);
-		}
+        public bool AreSameType(IUnit x, IUnit y) {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (null == x || null == y)
+                return false;
+            return NameNormalizedComparer.Equals(x.Type, y.Type);
+        }
 
 
-	}
+    }
 }

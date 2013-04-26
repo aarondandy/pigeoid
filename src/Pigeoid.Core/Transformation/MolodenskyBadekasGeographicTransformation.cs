@@ -1,83 +1,94 @@
 ﻿using System;
-using JetBrains.Annotations;
+using System.Diagnostics.Contracts;
 using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Transformation
 {
-	public class MolodenskyBadekasGeographicTransformation : GeographicGeocentricTransformationBase
-	{
+    public class MolodenskyBadekasGeographicTransformation : GeographicGeocentricTransformationBase
+    {
 
-		private class Inverse : GeographicGeocentricTransformationBase
-		{
-			private readonly MolodenskyBadekasGeographicTransformation _core;
-			private readonly ITransformation<Point3> _mbInverse;
+        private class Inverse : GeographicGeocentricTransformationBase
+        {
+            private readonly MolodenskyBadekasGeographicTransformation _core;
+            private readonly ITransformation<Point3> _mbInverse;
 
-			public Inverse([NotNull] MolodenskyBadekasGeographicTransformation core)
-				: base(core.GeocentricToGeographic.GetInverse(), core.GeographicToGeocentric.GetInverse())
-			{
-				_core = core;
-				_mbInverse = _core.MolodenskyBadekas.GetInverse();
-			}
+            public Inverse(MolodenskyBadekasGeographicTransformation core)
+                : base(core.GeocentricToGeographic.GetInverse(), core.GeographicToGeocentric.GetInverse()) {
+                _core = core;
+                Contract.Requires(core != null);
+                _mbInverse = _core.MolodenskyBadekas.GetInverse();
+            }
 
-			public override GeographicCoordinate TransformValue(GeographicCoordinate value) {
-				return GeocentricToGeographic.TransformValue2D(_mbInverse.TransformValue(GeographicToGeocentric.TransformValue(value)));
-			}
+            [ContractInvariantMethod]
+            private void CodeContractInvariants() {
+                Contract.Invariant(_core != null);
+                Contract.Invariant(_mbInverse != null);
+            }
 
-			public override GeographicHeightCoordinate TransformValue(GeographicHeightCoordinate value) {
-				return GeocentricToGeographic.TransformValue(_mbInverse.TransformValue(GeographicToGeocentric.TransformValue(value)));
-			}
+            public override GeographicCoordinate TransformValue(GeographicCoordinate value) {
+                return GeocentricToGeographic.TransformValue2D(_mbInverse.TransformValue(GeographicToGeocentric.TransformValue(value)));
+            }
 
-			public override GeographicHeightCoordinate TransformValue3D(GeographicCoordinate value) {
-				return GeocentricToGeographic.TransformValue(_mbInverse.TransformValue(GeographicToGeocentric.TransformValue(value)));
-			}
+            public override GeographicHeightCoordinate TransformValue(GeographicHeightCoordinate value) {
+                return GeocentricToGeographic.TransformValue(_mbInverse.TransformValue(GeographicToGeocentric.TransformValue(value)));
+            }
 
-			public override GeographicCoordinate TransformValue2D(GeographicHeightCoordinate value) {
-				return GeocentricToGeographic.TransformValue2D(_mbInverse.TransformValue(GeographicToGeocentric.TransformValue(value)));
-			}
+            public override GeographicHeightCoordinate TransformValue3D(GeographicCoordinate value) {
+                return GeocentricToGeographic.TransformValue(_mbInverse.TransformValue(GeographicToGeocentric.TransformValue(value)));
+            }
 
-			public override bool HasInverse { get { return true; } }
+            public override GeographicCoordinate TransformValue2D(GeographicHeightCoordinate value) {
+                return GeocentricToGeographic.TransformValue2D(_mbInverse.TransformValue(GeographicToGeocentric.TransformValue(value)));
+            }
 
-			public override ITransformation GetInverse() {
-				return _core;
-			}
-		}
+            public override bool HasInverse { get { return true; } }
 
-		public MolodenskyBadekasGeographicTransformation([NotNull] ISpheroid<double> spheroidFrom, [NotNull] MolodenskyBadekasTransformation molodenskyBadekas, [NotNull] ISpheroid<double> spheroidTo)
-			: base(spheroidFrom, spheroidTo)
-		{
-			if (null == molodenskyBadekas)
-				throw new ArgumentNullException("molodenskyBadekas");
-			MolodenskyBadekas = molodenskyBadekas;
-		}
+            public override ITransformation GetInverse() {
+                return _core;
+            }
+        }
 
-		public MolodenskyBadekasTransformation MolodenskyBadekas { get; private set; }
+        public MolodenskyBadekasGeographicTransformation(ISpheroid<double> spheroidFrom, MolodenskyBadekasTransformation molodenskyBadekas, ISpheroid<double> spheroidTo)
+            : base(spheroidFrom, spheroidTo) {
+            if (null == molodenskyBadekas) throw new ArgumentNullException("molodenskyBadekas");
+            Contract.Requires(spheroidFrom != null);
+            Contract.Requires(spheroidTo != null);
+            MolodenskyBadekas = molodenskyBadekas;
+        }
 
-		public override GeographicCoordinate TransformValue(GeographicCoordinate value) {
-			return GeocentricToGeographic.TransformValue2D(MolodenskyBadekas.TransformValue(GeographicToGeocentric.TransformValue(value)));
-		}
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(MolodenskyBadekas != null);
+        }
 
-		public override GeographicHeightCoordinate TransformValue(GeographicHeightCoordinate value) {
-			return GeocentricToGeographic.TransformValue(MolodenskyBadekas.TransformValue(GeographicToGeocentric.TransformValue(value)));
-		}
+        public MolodenskyBadekasTransformation MolodenskyBadekas { get; private set; }
 
-		public override GeographicHeightCoordinate TransformValue3D(GeographicCoordinate value) {
-			return GeocentricToGeographic.TransformValue(MolodenskyBadekas.TransformValue(GeographicToGeocentric.TransformValue(value)));
-		}
+        public override GeographicCoordinate TransformValue(GeographicCoordinate value) {
+            return GeocentricToGeographic.TransformValue2D(MolodenskyBadekas.TransformValue(GeographicToGeocentric.TransformValue(value)));
+        }
 
-		public override GeographicCoordinate TransformValue2D(GeographicHeightCoordinate value) {
-			return GeocentricToGeographic.TransformValue2D(MolodenskyBadekas.TransformValue(GeographicToGeocentric.TransformValue(value)));
-		}
+        public override GeographicHeightCoordinate TransformValue(GeographicHeightCoordinate value) {
+            return GeocentricToGeographic.TransformValue(MolodenskyBadekas.TransformValue(GeographicToGeocentric.TransformValue(value)));
+        }
 
-		public override ITransformation GetInverse() {
-			if (!HasInverse)
-				throw new InvalidOperationException("No inverse.");
-			return new Inverse(this);
-		}
+        public override GeographicHeightCoordinate TransformValue3D(GeographicCoordinate value) {
+            return GeocentricToGeographic.TransformValue(MolodenskyBadekas.TransformValue(GeographicToGeocentric.TransformValue(value)));
+        }
 
-		public override bool HasInverse {
-			get { return base.HasInverse && MolodenskyBadekas.HasInverse; }
-		}
+        public override GeographicCoordinate TransformValue2D(GeographicHeightCoordinate value) {
+            return GeocentricToGeographic.TransformValue2D(MolodenskyBadekas.TransformValue(GeographicToGeocentric.TransformValue(value)));
+        }
 
-	}
+        public override ITransformation GetInverse() {
+            if (!HasInverse) throw new NoInverseException();
+            Contract.Ensures(Contract.Result<ITransformation>() != null);
+            return new Inverse(this);
+        }
+
+        public override bool HasInverse {
+            [Pure] get { return base.HasInverse && MolodenskyBadekas.HasInverse; }
+        }
+
+    }
 }

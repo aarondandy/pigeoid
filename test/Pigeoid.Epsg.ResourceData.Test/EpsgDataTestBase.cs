@@ -29,7 +29,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 
 		[TestFixtureSetUp]
 		public void FixtureSetUp() {
-			var asmDirectory = new FileInfo(typeof(EpsgDataTestBase<,>).Assembly.Location).Directory;
+			var asmDirectory = new FileInfo(new Uri(typeof(EpsgDataTestBase<,>).Assembly.CodeBase).LocalPath).Directory;
 			var file = asmDirectory.GetFiles("EPSG_v*.mdb").First();
 			_repository = new DataTransmogrifier.EpsgRepository(file);
 		}

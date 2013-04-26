@@ -115,7 +115,7 @@ namespace Pigeoid.Transformation
         }
 
         public ITransformation<Point2> GetInverse() {
-            if (!HasInverse) throw new InvalidOperationException("No inverse.");
+            if (!HasInverse) throw new NoInverseException();
             Contract.Ensures(Contract.Result<ITransformation<Point2>>() != null);
             return new Inverse(this);
         }

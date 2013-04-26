@@ -1,40 +1,46 @@
-﻿// TODO: source header
-
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Epsg
 {
 
-	public class EpsgCoordinateOperationInfo : EpsgCoordinateOperationInfoBase, IParameterizedCoordinateOperationInfo
-	{
+    public class EpsgCoordinateOperationInfo : EpsgCoordinateOperationInfoBase, IParameterizedCoordinateOperationInfo
+    {
 
-		private readonly ushort _opMethodCode;
+        private readonly ushort _opMethodCode;
 
-		internal EpsgCoordinateOperationInfo(ushort code, ushort opMethodCode, ushort areaCode, bool deprecated, string name)
-			: base(code, areaCode, deprecated, name) {
-			_opMethodCode = opMethodCode;
-		}
+        internal EpsgCoordinateOperationInfo(ushort code, ushort opMethodCode, ushort areaCode, bool deprecated, string name)
+            : base(code, areaCode, deprecated, name) {
+            Contract.Requires(!String.IsNullOrEmpty(name));
+            _opMethodCode = opMethodCode;
+        }
 
-		public EpsgCoordinateOperationMethodInfo Method { get { return EpsgCoordinateOperationMethodInfo.Get(_opMethodCode); } }
+        public EpsgCoordinateOperationMethodInfo Method {
+            get {
+                Contract.Ensures(Contract.Result<EpsgCoordinateOperationMethodInfo>() != null);
+                return EpsgCoordinateOperationMethodInfo.Get(_opMethodCode);
+            }
+        }
 
-		ICoordinateOperationMethodInfo IParameterizedCoordinateOperationInfo.Method {
-			get { return Method; }
-		}
+        ICoordinateOperationMethodInfo IParameterizedCoordinateOperationInfo.Method { get { return Method; } }
 
-		public IEnumerable<INamedParameter> Parameters {
-			get {
-				var opMethodInfo = Method; // make a local copy to prevent another call to 'Get'
-				return null != opMethodInfo ? opMethodInfo.GetOperationParameters(Code) : null;
-			}
-		}
+        public IEnumerable<INamedParameter> Parameters {
+            get {
+                Contract.Ensures(Contract.Result<IEnumerable<INamedParameter>>() != null);
+                /*var opMethodInfo = Method; // make a local copy to prevent another call to 'Get'
+                return null != opMethodInfo ? opMethodInfo.GetOperationParameters(Code) : null;*/
+                return Method.GetOperationParameters(Code);
+            }
+        }
 
-		public override bool HasInverse {
-			get { return Method.CanReverse; }
-		}
+        public override bool HasInverse {
+            get { return Method.CanReverse; }
+        }
 
 
-		
-	}
+
+    }
 
 }

@@ -1,30 +1,32 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
-using Pigeoid.Interop;
 
 namespace Pigeoid.Unit
 {
-	public abstract class SimpleUnitConversionMapBase : IUnitConversionMap<double>
-	{
+    public abstract class SimpleUnitConversionMapBase : IUnitConversionMap<double>
+    {
 
-		private readonly IEqualityComparer<IUnit> _unitEqualityComparer;
+        protected SimpleUnitConversionMapBase(IEqualityComparer<IUnit> unitEqualityComparer = null) {
+            EqualityComparer = unitEqualityComparer ?? UnitEqualityComparer.Default;
+        }
 
-		protected SimpleUnitConversionMapBase(IEqualityComparer<IUnit> unitEqualityComparer = null) {
-			_unitEqualityComparer = unitEqualityComparer ?? UnitEqualityComparer.Default;
-		}
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(EqualityComparer != null);
+        }
 
-		public IEqualityComparer<IUnit> EqualityComparer { get { return _unitEqualityComparer; } }
+        public IEqualityComparer<IUnit> EqualityComparer { get; private set; }
 
-		protected bool AreUnitsMatching(IUnit a, IUnit b) {
-			return _unitEqualityComparer.Equals(a, b);
-		}
+        protected bool AreUnitsMatching(IUnit a, IUnit b) {
+            return EqualityComparer.Equals(a, b);
+        }
 
-		public abstract IEnumerable<IUnit> AllUnits { get; }
+        public abstract IEnumerable<IUnit> AllUnits { get; }
 
-		public abstract IEnumerable<IUnitConversion<double>> GetConversionsTo(IUnit to);
+        public abstract IEnumerable<IUnitConversion<double>> GetConversionsTo(IUnit to);
 
-		public abstract IEnumerable<IUnitConversion<double>> GetConversionsFrom(IUnit from);
+        public abstract IEnumerable<IUnitConversion<double>> GetConversionsFrom(IUnit from);
 
-	}
+    }
 }

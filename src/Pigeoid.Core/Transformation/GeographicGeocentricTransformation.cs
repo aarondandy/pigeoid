@@ -114,7 +114,7 @@ namespace Pigeoid.Transformation
         // ReSharper restore CompareOfFloatsByEqualityOperator
 
         public GeographicGeocentricTransformation GetInverse() {
-            if (!HasInverse) throw new InvalidOperationException("no inverse");
+            if (!HasInverse) throw new NoInverseException();
             Contract.Ensures(Contract.Result<GeographicGeocentricTransformation>() != null);
             return new GeographicGeocentricTransformation(Spheroid, !IsInverseOfDefinition);
         }
@@ -244,7 +244,7 @@ namespace Pigeoid.Transformation
         /// </summary>
         /// <returns>A transformation.</returns>
         public GeocentricGeographicTransformation GetInverse() {
-            if (!HasInverse) throw new InvalidOperationException("no inverse");
+            if (!HasInverse) throw new NoInverseException();
             Contract.Ensures(Contract.Result<GeocentricGeographicTransformation>() != null);
             return new GeocentricGeographicTransformation(Spheroid, !IsInverseOfDefinition);
         }

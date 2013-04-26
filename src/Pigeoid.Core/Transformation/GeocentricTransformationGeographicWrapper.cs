@@ -103,7 +103,7 @@ namespace Pigeoid.Transformation
         }
 
         public override ITransformation GetInverse() {
-            if (!HasInverse) throw new InvalidOperationException("No inverse.");
+            if (!HasInverse) throw new NoInverseException();
             Contract.Ensures(Contract.Result<ITransformation>() != null);
             return new Inverse(this);
         }

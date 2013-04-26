@@ -1,76 +1,87 @@
-﻿// TODO: source header
-
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
 using Pigeoid.Epsg.Resources;
 
 namespace Pigeoid.Epsg
 {
 
-	public class EpsgParameterInfo
-	{
+    public class EpsgParameterInfo
+    {
 
-		internal class EpsgParameterInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgParameterInfo>
-		{
-			private const string DatFileName = "parameters.dat";
-			private const string TxtFileName = "parameters.txt";
-			private const int FileHeaderSize = sizeof(ushort);
-			private const int RecordDataSize = sizeof(short);
-			private const int RecordSize = sizeof(ushort) + RecordDataSize;
-			private const int CodeSize = sizeof(ushort);
+        internal class EpsgParameterInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgParameterInfo>
+        {
+            private const string DatFileName = "parameters.dat";
+            private const string TxtFileName = "parameters.txt";
+            private const int FileHeaderSize = sizeof(ushort);
+            private const int RecordDataSize = sizeof(short);
+            private const int RecordSize = sizeof(ushort) + RecordDataSize;
+            private const int CodeSize = sizeof(ushort);
 
-			private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
+            private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
 
-			private static ushort[] GetKeys() {
-				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-					var keys = new ushort[reader.ReadUInt16()];
-					for (int i = 0; i < keys.Length; i++) {
-						keys[i] = reader.ReadUInt16();
-						reader.BaseStream.Seek(RecordDataSize, SeekOrigin.Current);
-					}
-					return keys;
-				}
-			}
+            private static ushort[] GetKeys() {
+                Contract.Ensures(Contract.Result<ushort[]>() != null);
+                using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
+                    var keys = new ushort[reader.ReadUInt16()];
+                    for (int i = 0; i < keys.Length; i++) {
+                        keys[i] = reader.ReadUInt16();
+                        reader.BaseStream.Seek(RecordDataSize, SeekOrigin.Current);
+                    }
+                    return keys;
+                }
+            }
 
-			public EpsgParameterInfoLookUp() : base(GetKeys()) { }
+            public EpsgParameterInfoLookUp() : base(GetKeys()) { }
 
-			protected override EpsgParameterInfo Create(ushort key, int index) {
-				using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-					reader.BaseStream.Seek((index * RecordSize) + FileHeaderSize + CodeSize, SeekOrigin.Begin);
-					var name = TextLookUp.GetString(reader.ReadUInt16());
-					return new EpsgParameterInfo(key, name);
-				}
-			}
-			
-			protected override ushort GetKeyForItem(EpsgParameterInfo value) {
-				return value._code;
-			}
-		}
+            protected override EpsgParameterInfo Create(ushort key, int index) {
+                Contract.Ensures(Contract.Result<EpsgParameterInfo>() != null);
+                using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
+                    reader.BaseStream.Seek((index * RecordSize) + FileHeaderSize + CodeSize, SeekOrigin.Begin);
+                    var name = TextLookUp.GetString(reader.ReadUInt16());
+                    return new EpsgParameterInfo(key, name);
+                }
+            }
 
-		internal static readonly EpsgParameterInfoLookUp LookUp = new EpsgParameterInfoLookUp();
+            protected override ushort GetKeyForItem(EpsgParameterInfo value) {
+                Contract.Requires(value != null);
+                return value._code;
+            }
+        }
 
-		public static EpsgParameterInfo Get(int code) {
-			return LookUp.Get(checked((ushort)code));
-		}
+        internal static readonly EpsgParameterInfoLookUp LookUp = new EpsgParameterInfoLookUp();
 
-		public static IEnumerable<EpsgParameterInfo> Values { get { return LookUp.Values; } }
+        public static EpsgParameterInfo Get(int code) {
+            return code >= 0 && code <= UInt16.MaxValue
+                ? LookUp.Get(unchecked((ushort)code))
+                : null;
+        }
 
-		private readonly ushort _code;
-		private readonly string _name;
+        public static IEnumerable<EpsgParameterInfo> Values {
+            get {
+                Contract.Ensures(Contract.Result<IEnumerable<EpsgParameterInfo>>() != null);
+                return LookUp.Values;
+            }
+        }
 
-		internal EpsgParameterInfo(ushort code, string name) {
-			_code = code;
-			_name = name;
-		}
+        private readonly ushort _code;
 
-		public int Code {
-			get { return _code; }
-		}
+        internal EpsgParameterInfo(ushort code, string name) {
+            Contract.Requires(!String.IsNullOrEmpty(Name));
+            _code = code;
+            Name = name;
+        }
 
-		public string Name {
-			get { return _name; }
-		}
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(!String.IsNullOrEmpty(Name));
+        }
 
-	}
+        public int Code { get { return _code; } }
+
+        public string Name { get; private set; }
+
+    }
 
 }

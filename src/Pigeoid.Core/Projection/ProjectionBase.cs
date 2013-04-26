@@ -78,7 +78,7 @@ namespace Pigeoid.Projection
         }
 
         public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
-            if (!HasInverse) throw new InvalidOperationException();
+            if (!HasInverse) throw new NoInverseException();
             Contract.Ensures(Contract.Result<ITransformation<Point2, GeographicCoordinate>>() != null);
             Contract.EndContractBlock();
             return default(ITransformation<Point2, GeographicCoordinate>);

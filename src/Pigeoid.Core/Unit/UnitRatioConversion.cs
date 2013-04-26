@@ -1,101 +1,116 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Pigeoid.Contracts;
+using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Unit
 {
-	public class UnitRatioConversion : IUnitScalarConversion<double>
-	{
+    public class UnitRatioConversion : IUnitScalarConversion<double>
+    {
 
-		private delegate void TransformValueInPlaceFunction(ref double value);
+        private delegate void TransformValueInPlaceFunction(ref double value);
 
-		private readonly IUnit _from;
-		private readonly IUnit _to;
-		private readonly double _numerator;
-		private readonly double _denominator;
-		private readonly double _factor;
-		private readonly TransformValueInPlaceFunction _transformInPlace;
-		private readonly Func<double, double> _transform; 
+        private readonly double _numerator;
+        private readonly double _denominator;
+        private readonly double _factor;
+        private readonly TransformValueInPlaceFunction _transformInPlace;
+        private readonly Func<double, double> _transform;
 
-		public UnitRatioConversion([NotNull] IUnit from, [NotNull] IUnit to, double numerator, double denominator) {
-			// ReSharper disable CompareOfFloatsByEqualityOperator
-			if(null == from)
-				throw new ArgumentNullException("from");
-			if(null == to)
-				throw new ArgumentNullException("to");
-			if(0 == denominator)
-				throw new ArgumentException("denominator must be non-zero", "denominator");
+        public UnitRatioConversion(IUnit from, IUnit to, double numerator, double denominator) {
+            // ReSharper disable CompareOfFloatsByEqualityOperator
+            if (null == from) throw new ArgumentNullException("from");
+            if (null == to) throw new ArgumentNullException("to");
+            if (0 == denominator || Double.IsNaN(denominator)) throw new ArgumentException("denominator must be non-zero", "denominator");
+            Contract.EndContractBlock();
 
-			_from = from;
-			_to = to;
-			_numerator = numerator;
-			_denominator = denominator;
-			_factor = _numerator / _denominator;
+            From = from;
+            To = to;
+            _numerator = numerator;
+            _denominator = denominator;
+            _factor = _numerator / _denominator;
 
-			if(1.0 == _numerator && 1.0 != _denominator) {
-				_transform = Divide;
-				_transformInPlace = DivideInPlace;
-			}else {
-				_transform = Multiply;
-				_transformInPlace = MultiplyInPlace;
-			}
-			// ReSharper restore CompareOfFloatsByEqualityOperator
-		}
+            if (1.0 == _numerator && 1.0 != _denominator) {
+                _transform = Divide;
+                _transformInPlace = DivideInPlace;
+            }
+            else {
+                _transform = Multiply;
+                _transformInPlace = MultiplyInPlace;
+            }
+            // ReSharper restore CompareOfFloatsByEqualityOperator
+        }
 
-		private void MultiplyInPlace(ref double value) {
-			value *= _factor;
-		}
+        private void CodeContractInvariants() {
+            Contract.Invariant(From != null);
+            Contract.Invariant(To != null);
+            Contract.Invariant(_denominator != 0 && !Double.IsNaN(_denominator));
+            Contract.Invariant(_transformInPlace != null);
+            Contract.Invariant(_transform != null);
+        }
 
-		private double Multiply(double value) {
-			return value * _factor;
-		}
+        private void MultiplyInPlace(ref double value) {
+            value *= _factor;
+        }
 
-		private void DivideInPlace(ref double value) {
-			value /= _denominator;
-		}
+        private double Multiply(double value) {
+            return value * _factor;
+        }
 
-		private double Divide(double value) {
-			return value / _denominator;
-		}
+        private void DivideInPlace(ref double value) {
+            value /= _denominator;
+        }
 
-		public double Factor { get { return _factor; } }
+        private double Divide(double value) {
+            return value / _denominator;
+        }
 
-		public IUnit From { [ContractAnnotation("=>notnull")] get { return _from; } }
+        public double Factor { get { return _factor; } }
 
-		public IUnit To { [ContractAnnotation("=>notnull")] get { return _to; } }
+        public IUnit From { get; private set; }
 
-		public void TransformValues([NotNull] double[] values) {
-			for (int i = 0; i < values.Length; i++)
-				_transformInPlace(ref values[i]);
-		}
+        public IUnit To { get; private set; }
 
-		public double TransformValue(double value) {
-			return _transform(value);
-		}
+        public void TransformValues(double[] values) {
+            Contract.Requires(values != null);
+            for (int i = 0; i < values.Length; i++)
+                _transformInPlace(ref values[i]);
+        }
 
-		[ContractAnnotation("=>notnull")]
-		public IEnumerable<double> TransformValues([NotNull] IEnumerable<double> values) { return values.Select(_transform); }
+        public double TransformValue(double value) {
+            return _transform(value);
+        }
 
-// ReSharper disable CompareOfFloatsByEqualityOperator
-		public bool HasInverse { get { return 0 != _numerator; } }
-// ReSharper restore CompareOfFloatsByEqualityOperator
+        public IEnumerable<double> TransformValues(IEnumerable<double> values) {
+            Contract.Requires(values != null);
+            Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
+            return values.Select(_transform);
+        }
 
-		public IUnitScalarConversion<double> GetInverse(){
-			if(!HasInverse)
-				throw new InvalidOperationException("No inverse.");
-			return new UnitRatioConversion(To,From,_denominator,_numerator);
-		}
+        // ReSharper disable CompareOfFloatsByEqualityOperator
+        public bool HasInverse {
+            [Pure] get {
+                return 0 != _numerator
+                    && !Double.IsNaN(_numerator);
+            }
+        }
+        // ReSharper restore CompareOfFloatsByEqualityOperator
 
-		IUnitConversion<double> IUnitConversion<double>.GetInverse() { return GetInverse(); }
+        public IUnitScalarConversion<double> GetInverse() {
+            if (!HasInverse) throw new NoInverseException();
+            Contract.Ensures(Contract.Result<IUnitScalarConversion<double>>() != null);
+            return new UnitRatioConversion(To, From, _denominator, _numerator);
+        }
 
-		ITransformation<double> ITransformation<double>.GetInverse() { return GetInverse(); }
+        IUnitConversion<double> IUnitConversion<double>.GetInverse() { return GetInverse(); }
 
-		ITransformation<double, double> ITransformation<double, double>.GetInverse() { return GetInverse(); }
+        ITransformation<double> ITransformation<double>.GetInverse() { return GetInverse(); }
 
-		ITransformation ITransformation.GetInverse() { return GetInverse(); }
+        ITransformation<double, double> ITransformation<double, double>.GetInverse() { return GetInverse(); }
 
-	}
+        ITransformation ITransformation.GetInverse() { return GetInverse(); }
+
+    }
 }

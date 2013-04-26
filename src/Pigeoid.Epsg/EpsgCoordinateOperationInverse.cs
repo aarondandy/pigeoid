@@ -1,14 +1,17 @@
-﻿namespace Pigeoid.Epsg
+﻿using System.Diagnostics.Contracts;
+
+namespace Pigeoid.Epsg
 {
-	public class EpsgCoordinateOperationInverse : CoordinateOperationInfoInverse
-	{
+    public class EpsgCoordinateOperationInverse : CoordinateOperationInfoInverse
+    {
 
-		internal EpsgCoordinateOperationInverse(EpsgCoordinateOperationInfoBase core)
-			: base(core) { }
+        internal EpsgCoordinateOperationInverse(EpsgCoordinateOperationInfoBase core)
+            : base(core) { Contract.Requires(core != null);}
 
-		public new EpsgCoordinateOperationInfoBase GetInverse() {
-			return base.GetInverse() as EpsgCoordinateOperationInfoBase;
-		}
+        public new EpsgCoordinateOperationInfoBase GetInverse() {
+            Contract.Ensures(Contract.Result<EpsgCoordinateOperationInfoBase>() != null);
+            return (EpsgCoordinateOperationInfoBase)(base.GetInverse());
+        }
 
-	}
+    }
 }

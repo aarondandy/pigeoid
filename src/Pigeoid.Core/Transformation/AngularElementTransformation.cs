@@ -32,7 +32,7 @@ namespace Pigeoid.Transformation
         }
 
         public AngularElementTransformation GetInverse() {
-            if (!HasInverse) throw new InvalidOperationException("No inverse.");
+            if (!HasInverse) throw new NoInverseException();
             Contract.Ensures(Contract.Result<AngularElementTransformation>() != null);
             return new AngularElementTransformation(_core.GetInverse());
         }

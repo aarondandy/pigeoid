@@ -1,333 +1,378 @@
 ﻿using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
+using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
 using Vertesaur.Search;
 
 namespace Pigeoid.Epsg
 {
-	public class EpsgCrsCoordinateOperationPathGenerator :
-		ICoordinateOperationPathGenerator<ICrs>,
-		ICoordinateOperationPathGenerator<EpsgCrs>
-	{
+    public class EpsgCrsCoordinateOperationPathGenerator :
+        ICoordinateOperationPathGenerator<ICrs>,
+        ICoordinateOperationPathGenerator<EpsgCrs>
+    {
 
-		public class SharedOptions
-		{
+        public class SharedOptions
+        {
 
-			public abstract class AreaValidatorBase
-			{
+            public abstract class AreaValidatorBase
+            {
 
-				protected AreaValidatorBase(EpsgArea fromArea, EpsgArea toArea) {
-					FromArea = fromArea;
-					ToArea = toArea;
-				}
+                protected AreaValidatorBase(EpsgArea fromArea, EpsgArea toArea) {
+                    // TODO: is it possible for any of these to be null?
+                    FromArea = fromArea;
+                    ToArea = toArea;
+                }
 
-				public EpsgArea FromArea { get; protected set; }
-				public EpsgArea ToArea { get; protected set; }
+                public EpsgArea FromArea { get; protected set; }
+                public EpsgArea ToArea { get; protected set; }
 
-				protected virtual bool IsValid(EpsgArea area){
-					if (null == area || null == FromArea || null == ToArea)
-						return true;
-					return FromArea.Intersects(area) || ToArea.Intersects(area);
-				}
+                protected virtual bool IsValid(EpsgArea area) {
+                    if (null == area || null == FromArea || null == ToArea)
+                        return true;
+                    return FromArea.Intersects(area) || ToArea.Intersects(area);
+                }
 
-			}
+            }
 
-			public class CrsValidator : AreaValidatorBase
-			{
+            public class CrsValidator : AreaValidatorBase
+            {
 
-				public CrsValidator(EpsgArea fromArea, EpsgArea toArea) : base(fromArea, toArea) { }
+                public CrsValidator(EpsgArea fromArea, EpsgArea toArea) : base(fromArea, toArea) { }
 
-				public virtual bool IsValid([NotNull] EpsgCrs crs){
-					return IsValid(crs.Area);
-				}
+                public virtual bool IsValid(EpsgCrs crs) {
+                    Contract.Requires(crs != null);
+                    return IsValid(crs.Area);
+                }
 
-			}
+            }
 
-			public class OperationValidator : AreaValidatorBase
-			{
+            public class OperationValidator : AreaValidatorBase
+            {
 
-				public OperationValidator(EpsgArea fromArea, EpsgArea toArea) : base(fromArea, toArea) { }
+                public OperationValidator(EpsgArea fromArea, EpsgArea toArea) : base(fromArea, toArea) { }
 
-				public virtual bool IsValid([NotNull] EpsgCoordinateOperationInfoBase operation) {
-					return IsValid(operation.Area);
-				}
-			}
+                public virtual bool IsValid(EpsgCoordinateOperationInfoBase operation) {
+                    Contract.Requires(operation != null);
+                    return IsValid(operation.Area);
+                }
+            }
 
-			public virtual CrsValidator CreateCrsValidator(EpsgArea fromArea, EpsgArea toArea){
-				return new CrsValidator(fromArea, toArea);
-			}
+            public virtual CrsValidator CreateCrsValidator(EpsgArea fromArea, EpsgArea toArea) {
+                return new CrsValidator(fromArea, toArea);
+            }
 
-			public virtual OperationValidator CreateOperationValidator(EpsgArea fromArea, EpsgArea toArea){
-				return new OperationValidator(fromArea, toArea);
-			}
+            public virtual OperationValidator CreateOperationValidator(EpsgArea fromArea, EpsgArea toArea) {
+                return new OperationValidator(fromArea, toArea);
+            }
 
-		}
+        }
 
-		public class SharedOptionsAreaPredicate : SharedOptions
-		{
-			private class CrsPredicateValidator : CrsValidator
-			{
-				private readonly Predicate<EpsgCrs> _predicate;
+        public class SharedOptionsAreaPredicate : SharedOptions
+        {
+            private class CrsPredicateValidator : CrsValidator
+            {
+                private readonly Predicate<EpsgCrs> _predicate;
 
-				public CrsPredicateValidator([NotNull] Predicate<EpsgCrs> predicate, EpsgArea fromArea, EpsgArea toArea) : base(fromArea,toArea) {
-					_predicate = predicate;
-				}
+                public CrsPredicateValidator(Predicate<EpsgCrs> predicate, EpsgArea fromArea, EpsgArea toArea)
+                    : base(fromArea, toArea) {
+                    Contract.Requires(predicate != null);
+                    _predicate = predicate;
+                }
 
-				public override bool IsValid(EpsgCrs crs) {
-					return base.IsValid(crs) && _predicate(crs);
-				}
-			}
+                [ContractInvariantMethod]
+                private void CodeContractInvariants() {
+                    Contract.Invariant(_predicate != null);
+                }
 
-			private class OperationPredicateValidator : OperationValidator
-			{
-				private readonly Predicate<EpsgCoordinateOperationInfoBase> _predicate;
+                public override bool IsValid(EpsgCrs crs) {
+                    Contract.Requires(crs != null);
+                    return base.IsValid(crs) && _predicate(crs);
+                }
+            }
 
-				public OperationPredicateValidator([NotNull] Predicate<EpsgCoordinateOperationInfoBase> predicate, EpsgArea fromArea, EpsgArea toArea)
-					: base(fromArea, toArea) {
-					_predicate = predicate;
-				}
+            private class OperationPredicateValidator : OperationValidator
+            {
+                private readonly Predicate<EpsgCoordinateOperationInfoBase> _predicate;
 
-				public override bool IsValid(EpsgCoordinateOperationInfoBase operation) {
-					return base.IsValid(operation) && _predicate(operation);
-				}
-			}
+                public OperationPredicateValidator(Predicate<EpsgCoordinateOperationInfoBase> predicate, EpsgArea fromArea, EpsgArea toArea)
+                    : base(fromArea, toArea) {
+                    Contract.Requires(predicate != null);
+                    _predicate = predicate;
+                }
 
-			[NotNull] private readonly Predicate<EpsgCrs> _crsPredicate;
-			[NotNull] private readonly Predicate<EpsgCoordinateOperationInfoBase> _opPredicate;
+                [ContractInvariantMethod]
+                private void CodeContractInvariants() {
+                    Contract.Invariant(_predicate != null);
+                }
 
-			public SharedOptionsAreaPredicate([NotNull] Predicate<EpsgCrs> crsPredicate, [NotNull] Predicate<EpsgCoordinateOperationInfoBase> operationPredicate){
-				if(null == crsPredicate)
-					throw new ArgumentNullException("crsPredicate");
-				if(null == operationPredicate)
-					throw new ArgumentNullException("operationPredicate");
+                public override bool IsValid(EpsgCoordinateOperationInfoBase operation) {
+                    Contract.Requires(operation != null);
+                    return base.IsValid(operation) && _predicate(operation);
+                }
+            }
 
-				_crsPredicate = crsPredicate;
-				_opPredicate = operationPredicate;
-			}
+            private readonly Predicate<EpsgCrs> _crsPredicate;
+            private readonly Predicate<EpsgCoordinateOperationInfoBase> _opPredicate;
 
-			public override CrsValidator CreateCrsValidator(EpsgArea fromArea, EpsgArea toArea) {
-				return new CrsPredicateValidator(_crsPredicate, fromArea, toArea);
-			}
+            public SharedOptionsAreaPredicate(Predicate<EpsgCrs> crsPredicate, Predicate<EpsgCoordinateOperationInfoBase> operationPredicate) {
+                if (null == crsPredicate) throw new ArgumentNullException("crsPredicate");
+                if (null == operationPredicate) throw new ArgumentNullException("operationPredicate");
+                Contract.EndContractBlock();
 
-			public override OperationValidator CreateOperationValidator(EpsgArea fromArea, EpsgArea toArea) {
-				return new OperationPredicateValidator(_opPredicate, fromArea, toArea);
-			}
+                _crsPredicate = crsPredicate;
+                _opPredicate = operationPredicate;
+            }
 
-		}
+            [ContractInvariantMethod]
+            private void CodeContractInvariants() {
+                Contract.Invariant(_crsPredicate != null);
+                Contract.Invariant(_opPredicate != null);
+            }
 
-		private class EpsgTransformGraph : DynamicGraphBase<EpsgCrs, int, ICoordinateOperationInfo>
-		{
+            public override CrsValidator CreateCrsValidator(EpsgArea fromArea, EpsgArea toArea) {
+                return new CrsPredicateValidator(_crsPredicate, fromArea, toArea);
+            }
 
-			private readonly SharedOptions _options;
-			private readonly SharedOptions.CrsValidator _crsValidator;
-			private readonly SharedOptions.OperationValidator _opValidator;
+            public override OperationValidator CreateOperationValidator(EpsgArea fromArea, EpsgArea toArea) {
+                return new OperationPredicateValidator(_opPredicate, fromArea, toArea);
+            }
 
-			public EpsgTransformGraph([NotNull] EpsgArea fromArea, [NotNull] EpsgArea toArea, [NotNull] SharedOptions options) {
-				_options = options;
-				_crsValidator = _options.CreateCrsValidator(fromArea, toArea);
-				_opValidator = _options.CreateOperationValidator(fromArea, toArea);
-			}
+        }
 
-			public override IEnumerable<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>> GetNeighborInfo(EpsgCrs node, int currentCost) {
-				var costPlusOne = currentCost + 1;
-				if (costPlusOne > 4)
-					yield break;
-				
-				var nodeCode = node.Code;
+        private class EpsgTransformGraph : DynamicGraphBase<EpsgCrs, int, ICoordinateOperationInfo>
+        {
 
-				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedForwardReferenced(nodeCode)) {
-					if (!_opValidator.IsValid(op))
-						continue;
-					var crs = op.TargetCrs;
-					if (!_crsValidator.IsValid(crs))
-						continue;
-					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
-				}
+            private readonly SharedOptions _options;
+            private readonly SharedOptions.CrsValidator _crsValidator;
+            private readonly SharedOptions.OperationValidator _opValidator;
 
-				foreach(var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(nodeCode)) {
-					if (!_opValidator.IsValid(op))
-						continue;
-					if(!op.HasInverse)
-						continue;
-					var crs = op.SourceCrs;
-					if (!_crsValidator.IsValid(crs))
-						continue;
-					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
-				}
+            public EpsgTransformGraph(EpsgArea fromArea, EpsgArea toArea, SharedOptions options) {
+                Contract.Requires(fromArea != null);
+                Contract.Requires(toArea != null);
+                Contract.Requires(options != null);
+                _options = options;
+                _crsValidator = _options.CreateCrsValidator(fromArea, toArea);
+                _opValidator = _options.CreateOperationValidator(fromArea, toArea);
+            }
 
-				foreach(var op in EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced(nodeCode)) {
-					if (!_opValidator.IsValid(op))
-						continue;
-					var crs = op.TargetCrs;
-					if(!_crsValidator.IsValid(crs))
-						continue;
-					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
-				}
+            private void CodeContractInvariants() {
+                Contract.Invariant(_options != null);
+                Contract.Invariant(_opValidator != null);
+                Contract.Invariant(_crsValidator != null);
+            }
 
-				foreach(var op in EpsgCoordinateOperationInfoRepository.GetTransformReverseReferenced(nodeCode)) {
-					if (!_opValidator.IsValid(op))
-						continue;
-					if(!op.HasInverse)
-						continue;
-					var crs = op.SourceCrs;
-					if (!_crsValidator.IsValid(crs))
-						continue;
-					yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
-				}
+            protected override IEnumerable<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>> GetNeighborInfo(EpsgCrs node, int currentCost) {
+                Contract.Requires(node != null);
+                Contract.Ensures(Contract.Result<IEnumerable<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>>>() != null);
+                var costPlusOne = currentCost + 1;
+                if (costPlusOne > 4)
+                    yield break;
 
-			}
-		}
+                var nodeCode = node.Code;
 
-		private class CrsOperationRelation
-		{
+                foreach (var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedForwardReferenced(nodeCode)) {
+                    if (!_opValidator.IsValid(op))
+                        continue;
+                    var crs = op.TargetCrs;
+                    if (!_crsValidator.IsValid(crs))
+                        continue;
+                    yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
+                }
 
-			public static List<CrsOperationRelation> BuildSourceSearchList(EpsgCrs source) {
-				var cost = 0;
-				var current = source;
-				var path = new CoordinateOperationCrsPathInfo(source);
-				var result = new List<CrsOperationRelation> {
+                foreach (var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(nodeCode)) {
+                    if (!_opValidator.IsValid(op))
+                        continue;
+                    if (!op.HasInverse)
+                        continue;
+                    var crs = op.SourceCrs;
+                    if (!_crsValidator.IsValid(crs))
+                        continue;
+                    yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
+                }
+
+                foreach (var op in EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced(nodeCode)) {
+                    if (!_opValidator.IsValid(op))
+                        continue;
+                    var crs = op.TargetCrs;
+                    if (!_crsValidator.IsValid(crs))
+                        continue;
+                    yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
+                }
+
+                foreach (var op in EpsgCoordinateOperationInfoRepository.GetTransformReverseReferenced(nodeCode)) {
+                    if (!_opValidator.IsValid(op))
+                        continue;
+                    if (!op.HasInverse)
+                        continue;
+                    var crs = op.SourceCrs;
+                    if (!_crsValidator.IsValid(crs))
+                        continue;
+                    yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
+                }
+
+            }
+        }
+
+        private class CrsOperationRelation
+        {
+
+            public static List<CrsOperationRelation> BuildSourceSearchList(EpsgCrs source) {
+                Contract.Requires(source != null);
+                Contract.Ensures(Contract.Result<List<CrsOperationRelation>>() != null);
+                Contract.Ensures(Contract.ForAll(Contract.Result<List<CrsOperationRelation>>(), x => x != null));
+                var cost = 0;
+                var current = source;
+                var path = new CoordinateOperationCrsPathInfo(source);
+                var result = new List<CrsOperationRelation> { new CrsOperationRelation {Cost = cost, RelatedCrs = current, Path = path} };
+                while (current is EpsgCrsProjected) {
+                    var projected = current as EpsgCrsProjected;
+                    var projection = projected.Projection;
+                    if (null == projection || !projection.HasInverse)
+                        break;
+
+                    cost++;
+                    current = projected.BaseCrs;
+                    path = path.Append(current, projection.GetInverse());
+                    result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path });
+                }
+                return result;
+            }
+
+            public static List<CrsOperationRelation> BuildTargetSearchList(EpsgCrs target) {
+                Contract.Requires(target != null);
+                Contract.Ensures(Contract.Result<List<CrsOperationRelation>>() != null);
+                Contract.Ensures(Contract.ForAll(Contract.Result<List<CrsOperationRelation>>(), x => x != null));
+                var cost = 0;
+                var current = target;
+                var path = new CoordinateOperationCrsPathInfo(target);
+                var result = new List<CrsOperationRelation> {
 					new CrsOperationRelation {Cost = cost, RelatedCrs = current, Path = path}
 				};
-				while (current is EpsgCrsProjected) {
-					var projected = current as EpsgCrsProjected;
-					var projection = projected.Projection;
-					if (null == projection || !projection.HasInverse)
-						break;
+                while (current is EpsgCrsProjected) {
+                    var projected = current as EpsgCrsProjected;
+                    var projection = projected.Projection;
+                    if (null == projection)
+                        break;
 
-					cost++;
-					current = projected.BaseCrs;
-					path = path.Append(current, projection.GetInverse());
-					result.Add(new CrsOperationRelation {Cost = cost, RelatedCrs = current, Path = path});
-				}
-				return result;
-			}
+                    cost++;
+                    current = projected.BaseCrs;
+                    path = path.Prepend(current, projected.Projection);
+                    result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path });
+                }
+                return result;
+            }
 
-			public static List<CrsOperationRelation> BuildTargetSearchList(EpsgCrs target) {
-				var cost = 0;
-				var current = target;
-				var path = new CoordinateOperationCrsPathInfo(target);
-				var result = new List<CrsOperationRelation> {
-					new CrsOperationRelation {Cost = cost, RelatedCrs = current, Path = path}
-				};
-				while(current is EpsgCrsProjected) {
-					var projected = current as EpsgCrsProjected;
-					var projection = projected.Projection;
-					if (null == projection)
-						break;
+            public EpsgCrs RelatedCrs;
+            public CoordinateOperationCrsPathInfo Path;
+            public int Cost;
+        }
 
-					cost++;
-					current = projected.BaseCrs;
-					path = path.Prepend(current, projected.Projection);
-					result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path});
-				}
-				return result;
-			} 
+        private class CrsPathResult
+        {
+            public int Cost;
+            public CoordinateOperationCrsPathInfo Path;
+        }
 
-			public EpsgCrs RelatedCrs;
-			public CoordinateOperationCrsPathInfo Path;
-			public int Cost;
-		}
+        public EpsgCrsCoordinateOperationPathGenerator() : this(null) { }
 
-		private class CrsPathResult
-		{
-			public int Cost;
-			public CoordinateOperationCrsPathInfo Path;
-		}
+        public EpsgCrsCoordinateOperationPathGenerator(SharedOptions options) {
+            Options = options ?? new SharedOptions();
+        }
 
-		public EpsgCrsCoordinateOperationPathGenerator() : this(null) {}
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(Options != null);
+        }
 
-		public EpsgCrsCoordinateOperationPathGenerator(SharedOptions options) {
-			Options = options ?? new SharedOptions();
-		}
+        public SharedOptions Options { get; private set; }
 
-		public SharedOptions Options { get; private set; }
+        public ICoordinateOperationCrsPathInfo Generate(EpsgCrs from, EpsgCrs to) {
+            if (from == null || to == null)
+                return null;
+            // see if there is a direct path above the source
+            var sourceList = CrsOperationRelation.BuildSourceSearchList(from);
+            foreach (var source in sourceList) {
+                if (source.RelatedCrs == to) {
+                    return source.Path;
+                }
+            }
 
-		public ICoordinateOperationCrsPathInfo Generate(EpsgCrs from, EpsgCrs to) {
-			// see if there is a direct path above the source
-			var sourceList = CrsOperationRelation.BuildSourceSearchList(from);
-			foreach(var source in sourceList) {
-				if(source.RelatedCrs == to) {
-					return source.Path;
-				}
-			}
+            // see if there is a direct path above the target
+            var targetList = CrsOperationRelation.BuildTargetSearchList(to);
+            foreach (var target in targetList) {
+                if (target.RelatedCrs == from) {
+                    return target.Path;
+                }
+            }
 
-			// see if there is a direct path above the target
-			var targetList = CrsOperationRelation.BuildTargetSearchList(to);
-			foreach(var target in targetList) {
-				if(target.RelatedCrs == from) {
-					return target.Path;
-				}
-			}
-			
-			// try to find the best path from any source to any target
-			var graph = new EpsgTransformGraph(from.Area, to.Area, Options);
-			var results = new List<CrsPathResult>();
-			var lowestCost = Int32.MaxValue;
-			foreach(var source in sourceList) {
-				foreach(var target in targetList) {
-					var pathCost = source.Cost + target.Cost;
-					if(pathCost >= lowestCost)
-						continue;
+            // try to find the best path from any source to any target
+            var graph = new EpsgTransformGraph(from.Area, to.Area, Options);
+            var results = new List<CrsPathResult>();
+            var lowestCost = Int32.MaxValue;
+            foreach (var source in sourceList) {
+                foreach (var target in targetList) {
+                    var pathCost = source.Cost + target.Cost;
+                    if (pathCost >= lowestCost)
+                        continue;
 
-					if (source.RelatedCrs == target.RelatedCrs) {
-						results.Add(new CrsPathResult {
-							Cost = pathCost,
-							Path = source.Path.Append(target.Path)
-						});
-						if (pathCost < lowestCost)
-							lowestCost = pathCost;
+                    if (source.RelatedCrs == target.RelatedCrs) {
+                        results.Add(new CrsPathResult {
+                            Cost = pathCost,
+                            Path = source.Path.Append(target.Path)
+                        });
+                        if (pathCost < lowestCost)
+                            lowestCost = pathCost;
 
-						continue;
-					}
+                        continue;
+                    }
 
-					if ((pathCost+1) >= lowestCost)
-						continue;
+                    if ((pathCost + 1) >= lowestCost)
+                        continue;
 
-					var path = graph.FindPath(source.RelatedCrs, target.RelatedCrs);
-					if(null == path)
-						continue; // no path found
+                    var path = graph.FindPath(source.RelatedCrs, target.RelatedCrs);
+                    if (null == path)
+                        continue; // no path found
 
-					var pathOperations = source.Path;
-					for (int partIndex = 1; partIndex < path.Count; partIndex++) {
-						var part = path[partIndex];
-						pathCost += part.Cost;
-						pathOperations = pathOperations.Append(part.Node, part.Edge);
-					}
-					pathOperations = pathOperations.Append(target.Path);
+                    var pathOperations = source.Path;
+                    for (int partIndex = 1; partIndex < path.Count; partIndex++) {
+                        var part = path[partIndex];
+                        pathCost += part.Cost;
+                        pathOperations = pathOperations.Append(part.Node, part.Edge);
+                    }
+                    pathOperations = pathOperations.Append(target.Path);
 
-					results.Add(new CrsPathResult {
-						Cost = pathCost,
-						Path = pathOperations //source.Path.Append(pathOperations).Append(target.Path)
-					});
+                    results.Add(new CrsPathResult {
+                        Cost = pathCost,
+                        Path = pathOperations //source.Path.Append(pathOperations).Append(target.Path)
+                    });
 
-					if(pathCost < lowestCost)
-						lowestCost = pathCost;
-				}
-			}
+                    if (pathCost < lowestCost)
+                        lowestCost = pathCost;
+                }
+            }
 
-			// find the smallest result;
-			ICoordinateOperationCrsPathInfo bestResult = null;
-			lowestCost = Int32.MaxValue;
-			foreach(var result in results){
-				if(result.Cost < lowestCost){
-					lowestCost = result.Cost;
-					bestResult = result.Path;
-				}
-			}
-			return bestResult;
-		}
+            // find the smallest result;
+            ICoordinateOperationCrsPathInfo bestResult = null;
+            lowestCost = Int32.MaxValue;
+            foreach (var result in results) {
+                if (result.Cost < lowestCost) {
+                    lowestCost = result.Cost;
+                    bestResult = result.Path;
+                }
+            }
+            return bestResult;
+        }
 
-		public ICoordinateOperationCrsPathInfo Generate(ICrs from, ICrs to) {
-			if(from is EpsgCrs && to is EpsgCrs) {
-				return Generate(from as EpsgCrs, to as EpsgCrs);
-			}
-			// TODO: if one is not an EpsgCrs we should try making it one (but really it should already have been... so maybe not)
-			// TODO: if one is EpsgCrs and the other is not, we need to find the nearest EpsgCrs along the way and use standard methods to get us there
-			throw new NotImplementedException("Currently only 'EpsgCrs' to 'EpsgCrs' is supported."); // TODO: just return null if we don't know what to do with it?
-			return null; // TODO: or maybe just return null and move on?
-		}
+        public ICoordinateOperationCrsPathInfo Generate(ICrs from, ICrs to) {
+            if (from is EpsgCrs && to is EpsgCrs) {
+                return Generate(from as EpsgCrs, to as EpsgCrs);
+            }
+            // TODO: if one is not an EpsgCrs we should try making it one (but really it should already have been... so maybe not)
+            // TODO: if one is EpsgCrs and the other is not, we need to find the nearest EpsgCrs along the way and use standard methods to get us there
+            throw new NotImplementedException("Currently only 'EpsgCrs' to 'EpsgCrs' is supported."); // TODO: just return null if we don't know what to do with it?
+            return null; // TODO: or maybe just return null and move on?
+        }
 
-	}
+    }
 
 }

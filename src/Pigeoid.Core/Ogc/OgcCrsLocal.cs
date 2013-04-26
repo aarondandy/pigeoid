@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Pigeoid.Contracts;
 
 namespace Pigeoid.Ogc

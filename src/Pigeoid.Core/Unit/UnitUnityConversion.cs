@@ -1,54 +1,59 @@
 ﻿using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
+using System.Diagnostics.Contracts;
 using Pigeoid.Contracts;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Unit
 {
-	public class UnitUnityConversion : IUnitScalarConversion<double>
-	{
+    public class UnitUnityConversion : IUnitScalarConversion<double>
+    {
 
-		private readonly IUnit _from;
-		private readonly IUnit _to;
+        public UnitUnityConversion(IUnit from, IUnit to) {
+            if (null == from) throw new ArgumentNullException("from");
+            if (null == to) throw new ArgumentNullException("to");
+            Contract.EndContractBlock();
+            From = from;
+            To = to;
+        }
 
-		public UnitUnityConversion([NotNull] IUnit from, [NotNull] IUnit to) {
-			if(null == from)
-				throw new ArgumentNullException("from");
-			if(null == to)
-				throw new ArgumentNullException("to");
+        private void CodeContractInvariants() {
+            Contract.Invariant(From != null);
+            Contract.Invariant(To != null);
+        }
 
-			_from = from;
-			_to = to;
-		}
+        public double Factor { get { return 1.0; } }
 
-		public double Factor { get { return 1.0; } }
+        public IUnit From { get; private set; }
 
-		public IUnit From { [ContractAnnotation("=>notnull")] get { return _from; } }
+        public IUnit To { get; private set; }
 
-		public IUnit To { [ContractAnnotation("=>notnull")] get { return _to; } }
+        public void TransformValues(double[] values) {
+            // Do nothing
+        }
 
-		public void TransformValues(double[] values) {
-			// Do nothing
-		}
+        public double TransformValue(double value) { return value; }
 
-		public double TransformValue(double value) { return value; }
+        public IEnumerable<double> TransformValues(IEnumerable<double> values) {
+            Contract.Requires(values != null);
+            Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
+            return values;
+        }
 
-		[ContractAnnotation("null=>null; notnull=>notnull")] 
-		public IEnumerable<double> TransformValues(IEnumerable<double> values) { return values; }
+        bool ITransformation.HasInverse { get { return true; } }
 
-		public bool HasInverse { [ContractAnnotation("=>true")] get { return true; } }
+        public IUnitScalarConversion<double> GetInverse() {
+            Contract.Ensures(Contract.Result<IUnitScalarConversion<double>>() != null);
+            return new UnitUnityConversion(To, From);
+        }
 
-		[ContractAnnotation("=>notnull")]
-		public IUnitScalarConversion<double> GetInverse() { return new UnitUnityConversion(To, From); }
+        IUnitConversion<double> IUnitConversion<double>.GetInverse() { return GetInverse(); }
 
-		IUnitConversion<double> IUnitConversion<double>.GetInverse() { return GetInverse(); }
+        ITransformation<double> ITransformation<double>.GetInverse() { return GetInverse(); }
 
-		ITransformation<double> ITransformation<double>.GetInverse() { return GetInverse(); }
+        ITransformation<double, double> ITransformation<double, double>.GetInverse() { return GetInverse(); }
 
-		ITransformation<double, double> ITransformation<double, double>.GetInverse() { return GetInverse(); }
+        ITransformation ITransformation.GetInverse() { return GetInverse(); }
 
-		ITransformation ITransformation.GetInverse() { return GetInverse(); }
-
-	}
+    }
 }

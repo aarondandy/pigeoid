@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Pigeoid.Contracts;
+using Vertesaur;
 
 namespace Pigeoid
 {
@@ -43,9 +44,8 @@ namespace Pigeoid
         public bool HasInverse { get; protected set; }
 
         public ICoordinateOperationInfo GetInverse() {
-            if (!HasInverse)
-                throw new InvalidOperationException("Operation does not have an inverse.");
-
+            if (!HasInverse) throw new NoInverseException();
+            Contract.Ensures(Contract.Result<ICoordinateOperationInfo>() != null);
             return new CoordinateOperationInfoInverse(this);
         }
 

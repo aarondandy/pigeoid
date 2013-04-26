@@ -1,74 +1,99 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
-using JetBrains.Annotations;
 using Pigeoid.Contracts;
+using Vertesaur;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Unit
 {
-	public class ConcatenatedUnitConversion : IUnitConversion<double>
-	{
+    public class ConcatenatedUnitConversion : IUnitConversion<double>
+    {
 
-		private readonly IUnitConversion<double>[] _conversions;
+        private readonly IUnitConversion<double>[] _conversions;
 
-		public ConcatenatedUnitConversion([NotNull] IEnumerable<IUnitConversion<double>> conversions) {
-			if(null == conversions)
-				throw new ArgumentNullException("conversions");
-			_conversions = conversions.ToArray();
-			if(_conversions.Length == 0)
-				throw new ArgumentException("At least one conversion is required.", "conversions");
-		}
+        /// <exception cref="System.ArgumentException">At least one conversion is required.</exception>
+        public ConcatenatedUnitConversion(IEnumerable<IUnitConversion<double>> conversions) {
+            if (null == conversions) throw new ArgumentNullException("conversions");
+            Contract.EndContractBlock();
+            _conversions = conversions.ToArray();
+            if (_conversions.Length == 0)
+                throw new ArgumentException("At least one conversion is required.", "conversions");
+        }
 
-		public IUnit From {
-			get { return _conversions[0].From; }
-		}
+        private void CodeContractInvariants() {
+            Contract.Invariant(_conversions != null);
+            Contract.Invariant(_conversions.Length >= 1);
+        }
 
-		public IUnit To {
-			get { return _conversions[_conversions.Length-1].To; }
-		}
+        public IUnit From {
+            get {
+                Contract.Ensures(Contract.Result<IUnit>() != null);
+                return _conversions[0].From;
+            }
+        }
 
-		public ReadOnlyCollection<IUnitConversion<double>> Conversions { get { return Array.AsReadOnly(_conversions); } }
+        public IUnit To {
+            get {
+                Contract.Ensures(Contract.Result<IUnit>() != null);
+                return _conversions[_conversions.Length - 1].To;
+            }
+        }
 
-		public void TransformValues(double[] values) {
-			for (int i = 0; i < values.Length; i++)
-				values[i] = TransformValue(values[i]);
-		}
+        public ReadOnlyCollection<IUnitConversion<double>> Conversions {
+            get {
+                Contract.Ensures(Contract.Result<ReadOnlyCollection<IUnitConversion<double>>>() != null);
+                return Array.AsReadOnly(_conversions);
+            }
+        }
 
-		public double TransformValue(double value) {
-			for (int i = 0; i < _conversions.Length; i++)
-				value = _conversions[i].TransformValue(value);
+        public void TransformValues(double[] values) {
+            Contract.Requires(values != null);
+            for (int i = 0; i < values.Length; i++)
+                values[i] = TransformValue(values[i]);
+        }
 
-			return value;
-		}
+        public double TransformValue(double value) {
+            for (int i = 0; i < _conversions.Length; i++)
+                value = _conversions[i].TransformValue(value);
 
-		public IEnumerable<double> TransformValues(IEnumerable<double> values) {
-			return values.Select(TransformValue);
-		}
+            return value;
+        }
 
-		public ConcatenatedUnitConversion GetInverse() {
-			if(!HasInverse)
-				throw new InvalidOperationException("No inverse.");
-			return new ConcatenatedUnitConversion(_conversions.Select(x => x.GetInverse()).Reverse());
-		}
+        public IEnumerable<double> TransformValues(IEnumerable<double> values) {
+            Contract.Requires(values != null);
+            Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
+            return values.Select(TransformValue);
+        }
 
-		IUnitConversion<double> IUnitConversion<double>.GetInverse() {
-			return GetInverse();
-		}
+        public ConcatenatedUnitConversion GetInverse() {
+            if (!HasInverse) throw new NoInverseException();
+            Contract.Ensures(Contract.Result<ConcatenatedUnitConversion>() != null);
+            return new ConcatenatedUnitConversion(_conversions.Select(x => x.GetInverse()).Reverse());
+        }
 
-		ITransformation<double> ITransformation<double>.GetInverse() {
-			return GetInverse();
-		}
+        IUnitConversion<double> IUnitConversion<double>.GetInverse() {
+            return GetInverse();
+        }
 
-		ITransformation<double, double> ITransformation<double, double>.GetInverse() {
-			return GetInverse();
-		}
+        ITransformation<double> ITransformation<double>.GetInverse() {
+            return GetInverse();
+        }
 
-		ITransformation ITransformation.GetInverse() {
-			return GetInverse();
-		}
+        ITransformation<double, double> ITransformation<double, double>.GetInverse() {
+            return GetInverse();
+        }
 
-		public bool HasInverse { get { return _conversions.All(x => x.HasInverse); } }
-	}
+        ITransformation ITransformation.GetInverse() {
+            return GetInverse();
+        }
+
+        public bool HasInverse {
+            [Pure] get {
+                return _conversions.All(x => x.HasInverse);
+            }
+        }
+    }
 }
