@@ -37,6 +37,7 @@ namespace Pigeoid.Ogc
             Axes = Array.AsReadOnly(null == axes ? new IAxis[0] : axes.ToArray());
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(Datum != null);
             Contract.Invariant(Unit != null);

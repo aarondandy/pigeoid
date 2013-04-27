@@ -103,7 +103,6 @@ namespace Pigeoid.Transformation
         }
 
         public void TransformValues(GeographicHeightCoordinate[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++) {
                 TransformValue(ref values[i]);
             }
@@ -141,7 +140,6 @@ namespace Pigeoid.Transformation
         }
 
         public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
             return values.Select(TransformValue);
         }

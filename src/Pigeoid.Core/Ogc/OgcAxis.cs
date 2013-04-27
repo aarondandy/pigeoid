@@ -21,6 +21,7 @@ namespace Pigeoid.Ogc
             OgcOrientationType = ogcOrientationType;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(Name != null);
         }

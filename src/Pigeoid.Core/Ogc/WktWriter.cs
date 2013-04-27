@@ -32,6 +32,7 @@ namespace Pigeoid.Ogc
             Options = options ?? new WktOptions();
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(Options != null);
             Contract.Invariant(_writer != null);
@@ -101,6 +102,9 @@ namespace Pigeoid.Ogc
 
         private static string GenerateTabs(int n) {
             Contract.Ensures(Contract.Result<string>() != null);
+            if (n <= 0)
+                return String.Empty;
+
             var text = new StringBuilder(n);
             for (int i = n; i > 0; i--)
                 text.Append('\t');
@@ -178,7 +182,14 @@ namespace Pigeoid.Ogc
                     WriteOpenParenthesis();
                     Indent();
                     WriteIndentedNewLineIfPretty();
-                    Write(entity.GetInverse());
+                    if (entity.HasInverse) {
+                        Write(entity.GetInverse());
+                    }
+                    else {
+                        if(Options.ThrowOnError)
+                            throw new Exception("TODO:");
+                        WriteQuoted(String.Empty);
+                    }
                 }
                 else {
                     Write(WktKeyword.ParamMt);

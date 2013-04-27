@@ -13,11 +13,17 @@ namespace Pigeoid.Ogc
     /// </summary>
     public class OgcSpheroid : OgcNamedAuthorityBoundEntity, ISpheroidInfo
     {
+        private static OgcSpheroid _defaultWgs84;
 
-        public static OgcSpheroid DefaultWgs84 { get; private set; }
+        public static OgcSpheroid DefaultWgs84 {
+            get {
+                Contract.Ensures(Contract.Result<OgcSpheroid>() != null);
+                return _defaultWgs84;
+            }
+        }
 
         static OgcSpheroid() {
-            DefaultWgs84 = new OgcSpheroid(
+            _defaultWgs84 = new OgcSpheroid(
                 new SpheroidEquatorialInvF(6378137, 298.257223563),
                 "WGS 84",
                 OgcLinearUnit.DefaultMeter,

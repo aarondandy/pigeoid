@@ -1,8 +1,12 @@
-﻿namespace Pigeoid.Contracts
+﻿using System;
+using System.Diagnostics.Contracts;
+
+namespace Pigeoid.Contracts
 {
     /// <summary>
     /// A vertical coordinate reference system.
     /// </summary>
+    [ContractClass(typeof(ICrsVerticalCodeContracts))]
     public interface ICrsVertical : ICrs
     {
         /// <summary>
@@ -19,5 +23,35 @@
         /// The axis for this CRS.
         /// </summary>
         IAxis Axis { get; }
+    }
+
+    [ContractClassFor(typeof(ICrsVertical))]
+    internal abstract class ICrsVerticalCodeContracts : ICrsVertical
+    {
+
+        public IDatum Datum {
+            get {
+                Contract.Ensures(Contract.Result<IDatum>() != null);
+                throw new NotImplementedException();
+            }
+        }
+
+        public IUnit Unit {
+            get {
+                Contract.Ensures(Contract.Result<IUnit>() != null);
+                throw new NotImplementedException();
+            }
+        }
+
+        public IAxis Axis {
+            get {
+                Contract.Ensures(Contract.Result<IAxis>() != null);
+                throw new NotImplementedException();
+            }
+        }
+
+        public abstract string Name { get; }
+
+        public abstract IAuthorityTag Authority { get; }
     }
 }

@@ -33,6 +33,7 @@ namespace Pigeoid.Unit
                 .ToDictionary(x => x.Key, x => x.ToArray(), EqualityComparer);
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(_allConversions != null);
             Contract.Invariant(_allDistinctUnits != null);

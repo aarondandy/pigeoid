@@ -84,7 +84,6 @@ namespace Pigeoid.Transformation
         }
 
         public void TransformValues(Point3[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++) {
                 TransformValue(ref values[i]);
             }

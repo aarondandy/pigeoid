@@ -27,13 +27,11 @@ namespace Pigeoid.Transformation
         }
 
         public IEnumerable<Point3> TransformValues(IEnumerable<Point3> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<Point3>>() != null);
             return values.Select(D.Add);
         }
 
         public void TransformValues(Point3[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 TransformValue(ref values[i]);
         }

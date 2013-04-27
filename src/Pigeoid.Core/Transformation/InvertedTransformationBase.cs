@@ -47,7 +47,6 @@ namespace Pigeoid.Transformation
         public abstract TTarget TransformValue(TSource value);
 
         public IEnumerable<TTarget> TransformValues(IEnumerable<TSource> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<TTarget>>() != null);
             return values.Select(TransformValue);
         }
@@ -68,11 +67,10 @@ namespace Pigeoid.Transformation
         public override abstract TCoordinate TransformValue(TCoordinate value);
 
         public new ITransformation<TCoordinate> GetInverse() {
-            return base.GetInverse() as ITransformation<TCoordinate>;
+            return (ITransformation<TCoordinate>)(base.GetInverse());
         }
 
         public void TransformValues(TCoordinate[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++) {
                 TransformValue(ref values[i]);
             }

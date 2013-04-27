@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.Threading;
 using Pigeoid.Contracts;
 using Pigeoid.Unit;
@@ -13,10 +14,11 @@ namespace Pigeoid.Ogc
         private readonly Lazy<IUnitConversionMap<double>> _referenceConversionMap;
 
         protected OgcUnitBase(string name, double factor)
-            : this(name, factor, null) { }
+            : this(name, factor, null) { Contract.Requires(name != null);}
 
         protected OgcUnitBase(string name, double factor, IAuthorityTag authority)
             : base(name, authority) {
+            Contract.Requires(name != null);
             Factor = factor;
             _referenceConversionMap = new Lazy<IUnitConversionMap<double>>(CreateReferenceConversionMap, LazyThreadSafetyMode.ExecutionAndPublication);
         }

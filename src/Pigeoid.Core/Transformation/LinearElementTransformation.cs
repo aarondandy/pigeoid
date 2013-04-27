@@ -112,53 +112,43 @@ namespace Pigeoid.Transformation
         }
 
         public void TransformValues(Point2[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 values[i] = TransformValue(values[i]);
         }
         public void TransformValues(Point3[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 values[i] = TransformValue(values[i]);
         }
         public void TransformValues(Vector2[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 values[i] = TransformValue(values[i]);
         }
         public void TransformValues(Vector3[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 values[i] = TransformValue(values[i]);
         }
         public void TransformValues(GeographicHeightCoordinate[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 values[i] = TransformValue(values[i]);
         }
 
         public IEnumerable<Point2> TransformValues(IEnumerable<Point2> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<Point2>>() != null);
             return values.Select(TransformValue);
         }
         public IEnumerable<Point3> TransformValues(IEnumerable<Point3> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<Point3>>() != null);
             return values.Select(TransformValue);
         }
         public IEnumerable<Vector2> TransformValues(IEnumerable<Vector2> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<Vector2>>() != null);
             return values.Select(TransformValue);
         }
         public IEnumerable<Vector3> TransformValues(IEnumerable<Vector3> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<Vector3>>() != null);
             return values.Select(TransformValue);
         }
         public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
             return values.Select(TransformValue);
         }

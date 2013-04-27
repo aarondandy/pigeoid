@@ -1,9 +1,6 @@
 ﻿namespace Pigeoid.Contracts
 {
-    public interface ICoordinateOperationMethodInfo : IAuthorityBoundEntity
+    public interface ICoordinateOperationMethodInfo : INamedAuthorityBoundEntity
     {
-
-        string Name { get; }
-
     }
 }

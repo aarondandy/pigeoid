@@ -10,57 +10,61 @@ namespace Pigeoid
     public class CoordinateOperationCrsPathInfo : ICoordinateOperationCrsPathInfo
     {
 
-        private static readonly ReadOnlyCollection<ICoordinateOperationInfo> EmptyEdgeList = Array.AsReadOnly(new ICoordinateOperationInfo[0]);
-
         public static CoordinateOperationCrsPathInfo Join(CoordinateOperationCrsPathInfo primary, CoordinateOperationCrsPathInfo other) {
             if (primary == null) throw new ArgumentNullException("primary");
             if (other == null) throw new ArgumentNullException("other");
             Contract.Ensures(Contract.Result<CoordinateOperationCrsPathInfo>() != null);
             // TODO: make sure that the last node of the first list and the first node of the last list are a match
-            var nodes = new ICrs[primary._crsNodes.Count + other._crsNodes.Count - 1];
-            primary._crsNodes.CopyTo(nodes, 0);
-            other._crsNodes.CopyTo(nodes, primary._crsNodes.Count - 1);
-            var edges = new ICoordinateOperationInfo[primary._opEdges.Count + other._opEdges.Count];
-            primary._opEdges.CopyTo(edges, 0);
-            other._opEdges.CopyTo(edges, primary._opEdges.Count);
+            var nodes = new ICrs[primary.CrsNodesArray.Length + other.CrsNodesArray.Length - 1];
+            primary.CrsNodesArray.CopyTo(nodes, 0);
+            other.CrsNodesArray.CopyTo(nodes, primary.CrsNodesArray.Length - 1);
+            var edges = new ICoordinateOperationInfo[primary.OperationEdgesArray.Length + other.OperationEdgesArray.Length];
+            primary.OperationEdgesArray.CopyTo(edges, 0);
+            other.OperationEdgesArray.CopyTo(edges, primary.OperationEdgesArray.Length);
             return new CoordinateOperationCrsPathInfo(nodes, edges);
         }
 
         public CoordinateOperationCrsPathInfo(ICrs node) {
-            _crsNodes = Array.AsReadOnly(new[] { node });
-            _opEdges = EmptyEdgeList;
+            CrsNodesArray = new[] { node };
+            OperationEdgesArray = new ICoordinateOperationInfo[0];
         }
 
         public CoordinateOperationCrsPathInfo(IEnumerable<ICrs> nodes, IEnumerable<ICoordinateOperationInfo> edges)
-            : this(nodes.ToArray(), edges.ToArray()) { }
+            : this(nodes.ToArray(), edges.ToArray()) {
+            Contract.Requires(nodes != null);
+            Contract.Requires(edges != null);
+        }
 
         private CoordinateOperationCrsPathInfo(ICrs[] nodes, ICoordinateOperationInfo[] edges) {
-            _crsNodes = Array.AsReadOnly(nodes);
-            _opEdges = Array.AsReadOnly(edges);
-            if ((_opEdges.Count + 1) != _crsNodes.Count)
+            Contract.Requires(nodes != null);
+            Contract.Requires(edges != null);
+            CrsNodesArray = nodes;
+            OperationEdgesArray = edges;
+            if ((OperationEdgesArray.Length + 1) != CrsNodesArray.Length)
                 throw new ArgumentException("There must be exactly one more node than edge.");
         }
 
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
-            Contract.Invariant(_crsNodes != null);
-            Contract.Invariant(_opEdges != null);
+            Contract.Invariant(CrsNodesArray != null);
+            Contract.Invariant(CrsNodesArray.Length > 0);
+            Contract.Invariant(OperationEdgesArray != null);
         }
 
-        private readonly ReadOnlyCollection<ICrs> _crsNodes;
-        private readonly ReadOnlyCollection<ICoordinateOperationInfo> _opEdges;
+        private ICrs[] CrsNodesArray { get; set; }
+        private ICoordinateOperationInfo[] OperationEdgesArray { get; set; }
 
         public IEnumerable<ICrs> CoordinateReferenceSystems {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<ICrs>>() != null);
-                return _crsNodes;
+                return new ReadOnlyCollection<ICrs>(CrsNodesArray);
             }
         }
 
         public IEnumerable<ICoordinateOperationInfo> CoordinateOperations {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>() != null);
-                return _opEdges;
+                return new ReadOnlyCollection<ICoordinateOperationInfo>(OperationEdgesArray);
             }
         }
 
@@ -69,11 +73,11 @@ namespace Pigeoid
             if(node == null) throw new ArgumentNullException("node");
             if(edge == null) throw new ArgumentNullException("edge");
             Contract.Ensures(Contract.Result<CoordinateOperationCrsPathInfo>() != null);
-            var nodes = new ICrs[_crsNodes.Count + 1];
-            _crsNodes.CopyTo(nodes, 0);
+            var nodes = new ICrs[CrsNodesArray.Length + 1];
+            CrsNodesArray.CopyTo(nodes, 0);
             nodes[nodes.Length - 1] = node;
-            var edges = new ICoordinateOperationInfo[_opEdges.Count + 1];
-            _opEdges.CopyTo(edges, 0);
+            var edges = new ICoordinateOperationInfo[OperationEdgesArray.Length + 1];
+            OperationEdgesArray.CopyTo(edges, 0);
             edges[edges.Length - 1] = edge;
             return new CoordinateOperationCrsPathInfo(nodes, edges);
         }
@@ -83,11 +87,11 @@ namespace Pigeoid
             if (node == null) throw new ArgumentNullException("node");
             if (edge == null) throw new ArgumentNullException("edge");
             Contract.Ensures(Contract.Result<CoordinateOperationCrsPathInfo>() != null);
-            var nodes = new ICrs[_crsNodes.Count + 1];
-            _crsNodes.CopyTo(nodes, 1);
+            var nodes = new ICrs[CrsNodesArray.Length + 1];
+            CrsNodesArray.CopyTo(nodes, 1);
             nodes[0] = node;
-            var edges = new ICoordinateOperationInfo[_opEdges.Count + 1];
-            _opEdges.CopyTo(edges, 1);
+            var edges = new ICoordinateOperationInfo[OperationEdgesArray.Length + 1];
+            OperationEdgesArray.CopyTo(edges, 1);
             edges[0] = edge;
             return new CoordinateOperationCrsPathInfo(nodes, edges);
         }

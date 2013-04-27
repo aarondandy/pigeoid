@@ -11,6 +11,7 @@ namespace Pigeoid
     {
 
         public static IEnumerable<ICoordinateOperationInfo> LinearizeOperations(ICoordinateOperationInfo operation) {
+            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<ICoordinateOperationInfo>>(), x => x != null));
             if (null == operation)
                 return Enumerable.Empty<ICoordinateOperationInfo>();
             var concatOperations = operation as IConcatenatedCoordinateOperationInfo;
@@ -60,28 +61,36 @@ namespace Pigeoid
 
         }
 
-        private readonly ReadOnlyCollection<ICoordinateOperationInfo> _coordinateOperations;
-
+        /// <exception cref="System.ArgumentException">No coordinate operations given.</exception>
+        /// <exception cref="System.ArgumentException">Null coordinate operations are not allowed.</exception>
         public ConcatenatedCoordinateOperationInfo(IEnumerable<ICoordinateOperationInfo> coordinateOperations) {
             if (null == coordinateOperations) throw new ArgumentNullException("coordinateOperations");
             Contract.EndContractBlock();
 
-            _coordinateOperations = Array.AsReadOnly(coordinateOperations.ToArray());
-            if (_coordinateOperations.Count == 0)
+            RawCoordinateOperations = coordinateOperations.ToArray();
+            if (RawCoordinateOperations.Length < 1)
                 throw new ArgumentException("coordinateOperations must have at least one element", "coordinateOperations");
+            if(!Array.TrueForAll(RawCoordinateOperations, x => x != null))
+                throw new ArgumentException("Null coordinate operations are not allowed.","coordinateOperations");
         }
 
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
-            Contract.Invariant(_coordinateOperations != null);
+            Contract.Invariant(RawCoordinateOperations != null);
+            Contract.Invariant(1 <= RawCoordinateOperations.Length);
+            Contract.Invariant(Contract.ForAll(RawCoordinateOperations, x => x != null));
         }
+
+        private ICoordinateOperationInfo[] RawCoordinateOperations { get; set; }
 
         string ICoordinateOperationInfo.Name {
             get { return "Concatenated Operation"; }
         }
 
         public bool HasInverse {
-            get { return _coordinateOperations.All(x => x.HasInverse); }
+            get {
+                return Array.TrueForAll(RawCoordinateOperations, x => x.HasInverse);
+            }
         }
 
         public ICoordinateOperationInfo GetInverse() {
@@ -93,13 +102,12 @@ namespace Pigeoid
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>() != null);
                 Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<ICoordinateOperationInfo>>(), x => x != null));
-                return _coordinateOperations;
+                Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>().Count() > 0);
+                return new ReadOnlyCollection<ICoordinateOperationInfo>(RawCoordinateOperations);
             }
         }
 
-        public bool IsInverseOfDefinition {
-            [Pure] get { return false; }
-        }
+        bool ICoordinateOperationInfo.IsInverseOfDefinition { get { return false; } }
 
     }
 }

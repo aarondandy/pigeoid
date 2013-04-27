@@ -166,14 +166,12 @@ namespace Pigeoid.Transformation
         }
 
         public void TransformValues(Point3[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++) {
                 TransformValue(ref values[i]);
             }
         }
 
         public IEnumerable<Point3> TransformValues(IEnumerable<Point3> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<Point3>>() != null);
             return values.Select(TransformValue);
         }
@@ -240,10 +238,10 @@ namespace Pigeoid.Transformation
         }
 
         ICoordinateOperationInfo ICoordinateOperationInfo.GetInverse() {
-            return GetInverse() as ICoordinateOperationInfo;
+            return (ICoordinateOperationInfo)GetInverse();
         }
 
-        public bool IsInverseOfDefinition {
+        bool ICoordinateOperationInfo.IsInverseOfDefinition {
             get { return false; }
         }
 

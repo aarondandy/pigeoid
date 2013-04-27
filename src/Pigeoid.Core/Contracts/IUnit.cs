@@ -1,8 +1,11 @@
-﻿namespace Pigeoid.Contracts
+﻿using System.Diagnostics.Contracts;
+
+namespace Pigeoid.Contracts
 {
     /// <summary>
     /// A unit of measure.
     /// </summary>
+    [ContractClass(typeof(IUnitCodeContracts))]
     public interface IUnit
     {
         /// <summary>
@@ -15,6 +18,27 @@
         string Type { get; }
 
         IUnitConversionMap<double> ConversionMap { get; }
-
     }
+
+    [ContractClassFor(typeof(IUnit))]
+    internal abstract class IUnitCodeContracts : IUnit
+    {
+
+        public string Name {
+            get {
+                Contract.Ensures(Contract.Result<string>() != null);
+                throw new System.NotImplementedException();
+            }
+        }
+
+        public string Type {
+            get {
+                Contract.Ensures(Contract.Result<string>() != null);
+                throw new System.NotImplementedException();
+            }
+        }
+
+        public abstract IUnitConversionMap<double> ConversionMap { get; }
+    }
+
 }

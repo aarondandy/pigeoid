@@ -16,6 +16,7 @@ namespace Pigeoid.Ogc
             FirstAffectedOrdinate = firstAffectedOrdinate;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(Core != null);
         }

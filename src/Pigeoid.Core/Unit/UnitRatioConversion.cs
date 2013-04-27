@@ -43,6 +43,7 @@ namespace Pigeoid.Unit
             // ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(From != null);
             Contract.Invariant(To != null);
@@ -74,7 +75,6 @@ namespace Pigeoid.Unit
         public IUnit To { get; private set; }
 
         public void TransformValues(double[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 _transformInPlace(ref values[i]);
         }
@@ -84,7 +84,6 @@ namespace Pigeoid.Unit
         }
 
         public IEnumerable<double> TransformValues(IEnumerable<double> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
             return values.Select(_transform);
         }
@@ -104,13 +103,25 @@ namespace Pigeoid.Unit
             return new UnitRatioConversion(To, From, _denominator, _numerator);
         }
 
-        IUnitConversion<double> IUnitConversion<double>.GetInverse() { return GetInverse(); }
+        IUnitConversion<double> IUnitConversion<double>.GetInverse() {
+            Contract.Assume(HasInverse);
+            return GetInverse();
+        }
 
-        ITransformation<double> ITransformation<double>.GetInverse() { return GetInverse(); }
+        ITransformation<double> ITransformation<double>.GetInverse() {
+            Contract.Assume(HasInverse);
+            return GetInverse();
+        }
 
-        ITransformation<double, double> ITransformation<double, double>.GetInverse() { return GetInverse(); }
+        ITransformation<double, double> ITransformation<double, double>.GetInverse() {
+            Contract.Assume(HasInverse);
+            return GetInverse();
+        }
 
-        ITransformation ITransformation.GetInverse() { return GetInverse(); }
+        ITransformation ITransformation.GetInverse() {
+            Contract.Assume(HasInverse);
+            return GetInverse();
+        }
 
     }
 }

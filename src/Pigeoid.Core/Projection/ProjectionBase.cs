@@ -44,6 +44,7 @@ namespace Pigeoid.Projection
             EHalf = E / 2.0;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(Spheroid != null);
         }
@@ -68,7 +69,7 @@ namespace Pigeoid.Projection
     }
 
     [ContractClassFor(typeof(ProjectionBase))]
-    internal class ProjectionBaseCodeContracts : ProjectionBase
+    internal abstract class ProjectionBaseCodeContracts : ProjectionBase
     {
 
         internal ProjectionBaseCodeContracts() : base(default(Vector2), null) { }
@@ -78,7 +79,7 @@ namespace Pigeoid.Projection
         }
 
         public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
-            if (!HasInverse) throw new NoInverseException();
+            Contract.Requires(HasInverse);
             Contract.Ensures(Contract.Result<ITransformation<Point2, GeographicCoordinate>>() != null);
             Contract.EndContractBlock();
             return default(ITransformation<Point2, GeographicCoordinate>);

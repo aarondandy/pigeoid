@@ -19,6 +19,7 @@ namespace Pigeoid.Unit
             _singleUnit = unit;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(_singleUnit != null);
         }

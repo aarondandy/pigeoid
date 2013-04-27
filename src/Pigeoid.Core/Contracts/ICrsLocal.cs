@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace Pigeoid.Contracts
 {
     /// <summary>
     /// A local coordinate reference system.
     /// </summary>
+    [ContractClass(typeof(ICrsLocalCodeContracts))]
     public interface ICrsLocal : ICrs
     {
         /// <summary>
@@ -22,5 +25,35 @@ namespace Pigeoid.Contracts
         /// </summary>
         IList<IAxis> Axes { get; }
 
+    }
+
+    [ContractClassFor(typeof(ICrsLocal))]
+    internal abstract class ICrsLocalCodeContracts : ICrsLocal
+    {
+
+        public IDatum Datum {
+            get {
+                Contract.Ensures(Contract.Result<IDatum>() != null);
+                throw new NotImplementedException();
+            }
+        }
+
+        public IUnit Unit {
+            get {
+                Contract.Ensures(Contract.Result<IUnit>() != null);
+                throw new NotImplementedException();
+            }
+        }
+
+        public IList<IAxis> Axes {
+            get {
+                Contract.Ensures(Contract.Result<IList<IAxis>>() != null);
+                throw new NotImplementedException();
+            }
+        }
+
+        public abstract string Name { get; }
+
+        public abstract IAuthorityTag Authority { get; }
     }
 }

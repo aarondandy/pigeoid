@@ -17,6 +17,7 @@ namespace Pigeoid.Unit
             To = to;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(From != null);
             Contract.Invariant(To != null);
@@ -35,7 +36,6 @@ namespace Pigeoid.Unit
         public double TransformValue(double value) { return value; }
 
         public IEnumerable<double> TransformValues(IEnumerable<double> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
             return values;
         }

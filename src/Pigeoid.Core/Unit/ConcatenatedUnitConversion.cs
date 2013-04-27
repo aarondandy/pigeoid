@@ -23,6 +23,7 @@ namespace Pigeoid.Unit
                 throw new ArgumentException("At least one conversion is required.", "conversions");
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(_conversions != null);
             Contract.Invariant(_conversions.Length >= 1);
@@ -50,7 +51,6 @@ namespace Pigeoid.Unit
         }
 
         public void TransformValues(double[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 values[i] = TransformValue(values[i]);
         }
@@ -63,7 +63,6 @@ namespace Pigeoid.Unit
         }
 
         public IEnumerable<double> TransformValues(IEnumerable<double> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
             return values.Select(TransformValue);
         }

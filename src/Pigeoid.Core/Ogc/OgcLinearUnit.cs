@@ -9,23 +9,37 @@ namespace Pigeoid.Ogc
     /// </summary>
     public class OgcLinearUnit : OgcUnitBase
     {
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private static readonly OgcLinearUnit _defaultMeter;
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        private static readonly OgcLinearUnit _defaultKilometer;
 
         static OgcLinearUnit() {
-            DefaultMeter = new OgcLinearUnit("Meter", 1, new AuthorityTag("EPSG", "9001"));
-            DefaultKilometer = new OgcLinearUnit("Kilometer", 1000, new AuthorityTag("EPSG", "9036"));
+            _defaultMeter = new OgcLinearUnit("Meter", 1, new AuthorityTag("EPSG", "9001"));
+            _defaultKilometer = new OgcLinearUnit("Kilometer", 1000, new AuthorityTag("EPSG", "9036"));
         }
 
         /// <summary>
         /// The default OGC reference unit for length measures.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public static OgcLinearUnit DefaultMeter { get; private set; }
+        public static OgcLinearUnit DefaultMeter {
+            get {
+                Contract.Ensures(Contract.Result<OgcLinearUnit>() != null);
+                return _defaultMeter;
+            }
+        }
 
         /// <summary>
         /// The default kilometer unit.
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        public static OgcLinearUnit DefaultKilometer { get; private set; }
+        public static OgcLinearUnit DefaultKilometer {
+            get {
+                Contract.Ensures(Contract.Result<OgcLinearUnit>() != null);
+                return _defaultKilometer;
+            }
+        }
 
         /// <summary>
         /// Constructs a new unit.

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using Pigeoid.Contracts;
 using Pigeoid.Transformation;
@@ -226,14 +227,17 @@ namespace Pigeoid.CoordinateOperationCompilation
 
             var allOps = operationPath.CoordinateOperations.ToList();
             var allCrs = operationPath.CoordinateReferenceSystems.ToList();
-            if (allCrs.Count == 0)
-                throw new ArgumentException("operationPath contains no CRSs", "operationPath");
+            if (allCrs.Count <= 1)
+                return null; // operationPath must have at least 2 CRSs
 
             var firstCrs = allCrs[0];
             var lastCrs = allCrs[allCrs.Count - 1];
 
             var stepResults = new StepCompilationResult[allOps.Count];
             var currentUnit = ExtractUnit(firstCrs);
+
+            if(currentUnit == null)
+                throw new ArgumentException("Could not extract a unit from the first CRS in the operation path", "operationPath");
 
             for (int operationIndex = 0; operationIndex < stepResults.Length; operationIndex++) {
                 var stepResult = CompileStep(new StepCompilationParameters(
@@ -251,7 +255,11 @@ namespace Pigeoid.CoordinateOperationCompilation
             }
 
             // make sure that the output units are correct
-            ITransformation outputUnitConversion = CreateCoordinateUnitConversion(currentUnit, ExtractUnit(lastCrs));
+            var lastUnit = ExtractUnit(lastCrs);
+            if (lastUnit == null)
+                throw new ArgumentException("Could not extract a unit from the last CRS in the operation path", "operationPath");
+
+            var outputUnitConversion = CreateCoordinateUnitConversion(currentUnit, lastUnit);
 
             var resultTransformations = stepResults.Select(x => x.Transformation).ToList();
             if (null != outputUnitConversion)
@@ -276,6 +284,7 @@ namespace Pigeoid.CoordinateOperationCompilation
             var currentUnit = stepParams.InputUnit;
             var partResults = new StepCompilationResult[operations.Length];
             for (int operationIndex = 0; operationIndex < operations.Length; operationIndex++) {
+                Contract.Assume(operations[operationIndex] != null);
                 var partResult = CompilePart(new StepCompilationParameters(
                     operations[operationIndex],
                     currentUnit,

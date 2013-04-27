@@ -55,31 +55,26 @@ namespace Pigeoid.Transformation
         public abstract GeographicCoordinate TransformValue2D(GeographicHeightCoordinate value);
 
         public IEnumerable<GeographicCoordinate> TransformValues(IEnumerable<GeographicCoordinate> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<GeographicCoordinate>>() != null);
             return values.Select(TransformValue);
         }
 
         public void TransformValues(GeographicCoordinate[] values) {
-            Contract.Requires(values != null);
             for (var i = 0; i < values.Length; i++)
                 values[i] = TransformValue(values[i]);
         }
 
         public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
             return values.Select(TransformValue);
         }
 
         public void TransformValues(GeographicHeightCoordinate[] values) {
-            Contract.Requires(values != null);
             for (var i = 0; i < values.Length; i++)
                 values[i] = TransformValue(values[i]);
         }
 
         IEnumerable<GeographicHeightCoordinate> ITransformation<GeographicCoordinate, GeographicHeightCoordinate>.TransformValues(IEnumerable<GeographicCoordinate> values) {
-            Contract.Requires(values != null);
             return values.Select(TransformValue3D);
         }
 
@@ -88,7 +83,6 @@ namespace Pigeoid.Transformation
         }
 
         IEnumerable<GeographicCoordinate> ITransformation<GeographicHeightCoordinate, GeographicCoordinate>.TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
-            Contract.Requires(values != null);
             return values.Select(TransformValue2D);
         }
 
@@ -124,6 +118,7 @@ namespace Pigeoid.Transformation
 
         public virtual bool HasInverse {
             [Pure] get {
+                Contract.Ensures(Contract.Result<bool>() == (GeographicToGeocentric.HasInverse && GeocentricToGeographic.HasInverse));
                 return GeographicToGeocentric.HasInverse
                     && GeocentricToGeographic.HasInverse;
             }

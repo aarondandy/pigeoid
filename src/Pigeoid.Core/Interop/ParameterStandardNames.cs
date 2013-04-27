@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Pigeoid.Interop
 {
     public static class ParameterStandardNames
     {
-
-        [Obsolete]
-        private static readonly ReadOnlyCollection<string> GenericNamesCoreList;
 
         // TODO: I don't know if exposed fields for the names is the best idea.
 

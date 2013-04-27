@@ -28,6 +28,7 @@ namespace Pigeoid.Transformation
                 _invRot.Invert();
             }
 
+            [ContractInvariantMethod]
             private void CodeContractInvariants() {
                 Contract.Invariant(_invRot != null);
             }
@@ -101,13 +102,11 @@ namespace Pigeoid.Transformation
         }
 
         public IEnumerable<Point3> TransformValues(IEnumerable<Point3> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<Point3>>() != values);
             return values.Select(TransformValue);
         }
 
         public void TransformValues(Point3[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++) {
                 TransformValue(ref values[i]);
             }

@@ -285,7 +285,6 @@ namespace Pigeoid.Ogc
         }
 
         public ICrsCompound ReadCompoundCsFromParams() {
-            Contract.Ensures(Contract.Result<ICrsCompound>() != null);
             IAuthorityTag authority = null;
             ICrs headCrs = null;
             ICrs tailCrs = null;
@@ -310,6 +309,17 @@ namespace Pigeoid.Ogc
                 var crs = Options.GetCrs(authority) as ICrsCompound;
                 if (null != crs)
                     return crs;
+            }
+
+            if (headCrs == null) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Compoint CRS","No head CRS.");
+                return null;
+            }
+            if (tailCrs == null) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Compoint CRS", "No tail CRS.");
+                return null;
             }
 
             return new OgcCrsCompound(
@@ -351,8 +361,11 @@ namespace Pigeoid.Ogc
                     return crs;
             }
 
-            if (null == baseCrs)
+            if (null == baseCrs) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Project CRS", "No base CRS.");
                 return null;
+            }
 
             return new OgcCrsProjected(
                 name ?? String.Empty,
@@ -409,9 +422,15 @@ namespace Pigeoid.Ogc
                 );
             }
 
+            if (datum == null) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Geocentric CRS","No datum.");
+                datum = OgcDatumHorizontal.DefaultWgs84;
+            }
+
             return new OgcCrsGeocentric(
                 name,
-                datum ?? OgcDatumHorizontal.DefaultWgs84,
+                datum,
                 unit,
                 axes,
                 authority
@@ -419,7 +438,6 @@ namespace Pigeoid.Ogc
         }
 
         public ICrsVertical ReadVerticalCsFromParams() {
-            Contract.Ensures(Contract.Result<ICrsVertical>() != null);
             IAuthorityTag authority = null;
             var name = String.Empty;
             IDatum datum = null;
@@ -444,6 +462,22 @@ namespace Pigeoid.Ogc
                     return crs;
             }
 
+            if (null == datum) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Vertical CRS","No datum.");
+                datum = OgcDatumHorizontal.DefaultWgs84;
+            }
+            if (null == unit) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Vertical CRS","No unit.");
+                unit = OgcLinearUnit.DefaultMeter;
+            }
+            if (null == axis) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Vertical CRS","No axis.");
+                return null;
+            }
+
             return new OgcCrsVertical(
                 name,
                 datum,
@@ -466,8 +500,16 @@ namespace Pigeoid.Ogc
                     baseCrs = (ICrs)parameter;
             }
 
-            if (null == toBaseOperation || null == baseCrs)
+            if (baseCrs == null) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Fitted CS","No base CRS.");
                 return null;
+            }
+            if (toBaseOperation == null) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Fitted CS","No to-base operation.");
+                return null;
+            }
 
             return new OgcCrsFitted(
                 name,
@@ -500,6 +542,17 @@ namespace Pigeoid.Ogc
                 var crs = Options.GetCrs(authority) as ICrsLocal;
                 if (null != crs)
                     return crs;
+            }
+
+            if (datum == null) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Local CRS","No datum.");
+                datum = OgcDatumHorizontal.DefaultWgs84;
+            }
+            if (unit == null) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Local CRS","No unit.");
+                unit = OgcLinearUnit.DefaultMeter;
             }
 
             return new OgcCrsLocal(
@@ -551,9 +604,15 @@ namespace Pigeoid.Ogc
                 );
             }
 
+            if (datum == null) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Geographic CRS","No datum.");
+                datum = OgcDatumHorizontal.DefaultWgs84;
+            }
+
             return new OgcCrsGeographic(
                 name,
-                datum ?? OgcDatumHorizontal.DefaultWgs84,
+                datum,
                 unit,
                 axes,
                 authority
@@ -579,8 +638,11 @@ namespace Pigeoid.Ogc
                     coordinateOperationInfo = (ICoordinateOperationInfo)parameter;
             }
 
-            if (null == coordinateOperationInfo)
+            if (coordinateOperationInfo == null) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Passthrough Transform", "No coordinate operation.");
                 return null;
+            }
 
             return new OgcPassThroughCoordinateOperationInfo(
                 coordinateOperationInfo,
@@ -616,10 +678,21 @@ namespace Pigeoid.Ogc
                     return spheroid;
             }
 
+            if (!majorAxis.HasValue) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Spheroid", "No major axis.");
+                majorAxis = Double.NaN;
+            }
+            if (!inverseF.HasValue) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Spheroid","No inverse flattening.");
+                inverseF = Double.NaN;
+            }
+
             return new OgcSpheroid(
                 new SpheroidEquatorialInvF(
-                    majorAxis ?? Double.NaN,
-                    inverseF ?? Double.NaN
+                    majorAxis.GetValueOrDefault(),
+                    inverseF.GetValueOrDefault()
                 ),
                 name,
                 OgcLinearUnit.DefaultMeter,
@@ -681,9 +754,15 @@ namespace Pigeoid.Ogc
                     return datum;
             }
 
+            if (spheroid == null) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Horizontal Datum","No spheroid.");
+                spheroid = OgcSpheroid.DefaultWgs84;
+            }
+
             return new OgcDatumHorizontal(
                 name,
-                spheroid ?? OgcSpheroid.DefaultWgs84,
+                spheroid,
                 primeMeridian,
                 toWgs84,
                 authority
@@ -760,7 +839,7 @@ namespace Pigeoid.Ogc
             Contract.Ensures(Contract.Result<IUnit>() != null);
             IAuthorityTag authority = null;
             var name = String.Empty;
-            var factor = 1.0;
+            double? factor = null;
 
             foreach (var parameter in ReadParams()) {
                 if (parameter is IAuthorityTag)
@@ -777,14 +856,24 @@ namespace Pigeoid.Ogc
                     return unit;
             }
 
+            if (!factor.HasValue) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Unit","No base conversion factor.");
+                factor = 1.0;
+            }
+
             return isLength
-                ? (IUnit)new OgcLinearUnit(name, factor, authority)
-                : new OgcAngularUnit(name, factor, authority);
+                ? (IUnit)new OgcLinearUnit(name, factor.GetValueOrDefault(), authority)
+                : new OgcAngularUnit(name, factor.GetValueOrDefault(), authority);
         }
 
         public object ReadObject() {
             var keyword = ReadKeyword();
-            if (WktKeyword.Invalid == keyword) { return null; }
+            if (WktKeyword.Invalid == keyword) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Unknown keyword.");
+                return null;
+            }
 
             switch (keyword) {
             case WktKeyword.North:
@@ -798,6 +887,8 @@ namespace Pigeoid.Ogc
             }
 
             if (!ReadOpenBracket()) {
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Open bracket expected.");
                 return null;
             }
 
@@ -847,7 +938,9 @@ namespace Pigeoid.Ogc
             case WktKeyword.LocalCs:
                 return ReadLocalCsFromParams();
             default:
-                throw new NotSupportedException("Object type not supported: " + keyword);
+                if(Options.ThrowOnError)
+                    throw new WktParseExceptioncs("Object type not supported: " + keyword);
+                return null;
             }
         }
 

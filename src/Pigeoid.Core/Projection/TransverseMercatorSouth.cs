@@ -17,6 +17,7 @@ namespace Pigeoid.Projection
 
             public Inverted(TransverseMercatorSouth core) : base(core) {
                 Contract.Requires(core != null);
+                Contract.Requires(core.HasInverse);
                 _baseInv = core.BaseInverse;
             }
 
@@ -46,7 +47,11 @@ namespace Pigeoid.Projection
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private InvertedTransformationBase<TransverseMercator, Point2, GeographicCoordinate> BaseInverse {
-            get { return base.GetInverse() as InvertedTransformationBase<TransverseMercator, Point2, GeographicCoordinate>; }
+            get {
+                Contract.Requires(base.HasInverse);
+                Contract.Ensures(Contract.Result<InvertedTransformationBase<TransverseMercator, Point2, GeographicCoordinate>>() != null);
+                return (InvertedTransformationBase<TransverseMercator, Point2, GeographicCoordinate>)(base.GetInverse());
+            }
         }
 
         public override ITransformation<Point2, GeographicCoordinate> GetInverse() {

@@ -25,7 +25,6 @@ namespace Pigeoid.Transformation
         }
 
         public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<GeographicCoordinate> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
             return values.Select(TransformValue);
         }
@@ -35,14 +34,11 @@ namespace Pigeoid.Transformation
         }
 
         public IEnumerable<GeographicCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<GeographicCoordinate>>() != null);
             return values.Select(TransformValue);
         }
 
-        bool ITransformation.HasInverse {
-            get { return true; }
-        }
+        bool ITransformation.HasInverse { get { return true; } }
 
         ITransformation<GeographicHeightCoordinate, GeographicCoordinate> ITransformation<GeographicCoordinate, GeographicHeightCoordinate>.GetInverse() {
             return this;

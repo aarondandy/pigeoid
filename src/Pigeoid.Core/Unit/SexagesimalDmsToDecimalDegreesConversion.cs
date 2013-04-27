@@ -65,13 +65,11 @@ namespace Pigeoid.Unit
             }
 
             public void TransformValues(double[] values) {
-                Contract.Requires(values != null);
                 for (int i = 0; i < values.Length; i++)
                     values[i] = TransformValue(values[i]);
             }
 
             public IEnumerable<double> TransformValues(IEnumerable<double> values) {
-                Contract.Requires(values != null);
                 Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
                 return values.Select(TransformValue);
             }
@@ -154,13 +152,11 @@ namespace Pigeoid.Unit
         }
 
         public void TransformValues(double[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 values[i] = TransformValue(values[i]);
         }
 
         public IEnumerable<double> TransformValues(IEnumerable<double> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
             return values.Select(TransformValue);
         }

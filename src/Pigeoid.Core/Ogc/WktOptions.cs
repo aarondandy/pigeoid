@@ -24,6 +24,7 @@ namespace Pigeoid.Ogc
             AuthorityResolvers = new List<IAuthorityResolver>();
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(AuthorityResolvers != null);
         }

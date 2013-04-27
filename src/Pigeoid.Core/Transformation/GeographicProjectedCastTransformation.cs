@@ -35,7 +35,6 @@ namespace Pigeoid.Transformation
             return new Point2(value.Longitude, value.Latitude);
         }
         public IEnumerable<Point2> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<Point2>>() != null);
             return values.Select(TransformValue);
         }
@@ -43,7 +42,6 @@ namespace Pigeoid.Transformation
             return new Point2(value.Longitude, value.Latitude);
         }
         public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<Point2>>() != null);
             return values.Select(TransformValue);
         }
@@ -55,6 +53,8 @@ namespace Pigeoid.Transformation
             return TransformValue3D(value);
         }
         public IEnumerable<GeographicHeightCoordinate> TransformValues3D(IEnumerable<Point2> values) {
+            Contract.Requires(values != null);
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
             return values.Select(TransformValue3D);
         }
         IEnumerable<GeographicHeightCoordinate> ITransformation<Point2, GeographicHeightCoordinate>.TransformValues(IEnumerable<Point2> values) {

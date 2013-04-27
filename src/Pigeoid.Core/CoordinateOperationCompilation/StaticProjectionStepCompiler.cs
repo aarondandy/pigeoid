@@ -40,9 +40,9 @@ namespace Pigeoid.CoordinateOperationCompilation
                 Contract.Invariant(!String.IsNullOrEmpty(OperationName));
             }
 
-            public readonly StaticCoordinateOperationCompiler.StepCompilationParameters StepParams;
-            public readonly NamedParameterLookup ParameterLookup;
-            public readonly string OperationName;
+            public StaticCoordinateOperationCompiler.StepCompilationParameters StepParams { get; private set; }
+            public NamedParameterLookup ParameterLookup { get; private set; }
+            public string OperationName { get; private set; }
 
         }
 
@@ -476,6 +476,7 @@ namespace Pigeoid.CoordinateOperationCompilation
                             return value;
                         })
                         .ToArray();
+                    Contract.Assume(constants.Length == constantParams.Length);
                 }
             }
 

@@ -10,7 +10,7 @@ namespace Pigeoid.Transformation
         ITransformation<GeographicHeightCoordinate>
     {
 
-        public readonly GeographicHeightCoordinate _delta;
+        private readonly GeographicHeightCoordinate _delta;
 
         public GeographicHeightCoordinate Delta {
             get { return _delta; }
@@ -30,7 +30,6 @@ namespace Pigeoid.Transformation
             : this(d.Latitude, d.Longitude) { }
 
         public void TransformValues(GeographicCoordinate[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 TransformValue(ref values[i]);
         }
@@ -44,7 +43,6 @@ namespace Pigeoid.Transformation
         }
 
         public IEnumerable<GeographicCoordinate> TransformValues(IEnumerable<GeographicCoordinate> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<GeographicCoordinate>>() != null);
             return values.Select(TransformValue);
         }
@@ -58,13 +56,11 @@ namespace Pigeoid.Transformation
         }
 
         public void TransformValues(GeographicHeightCoordinate[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 TransformValue(ref values[i]);
         }
 
         public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
             return values.Select(TransformValue);
         }

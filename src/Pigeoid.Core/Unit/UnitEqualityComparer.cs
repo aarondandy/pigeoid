@@ -14,6 +14,7 @@ namespace Pigeoid.Unit
             NameNormalizedComparer = nameNormalizedComparer ?? UnitNameNormalizedComparer.Default;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(NameNormalizedComparer != null);
         }

@@ -32,7 +32,7 @@ namespace Pigeoid.Projection
     }
 
     [ContractClassFor(typeof(LambertConicBase))]
-    internal class LambertConicBaseCodeContracts : LambertConicBase
+    internal abstract class LambertConicBaseCodeContracts : LambertConicBase
     {
 
         internal LambertConicBaseCodeContracts() : base(
@@ -41,18 +41,18 @@ namespace Pigeoid.Projection
             default(ISpheroid<double>)) { }
 
         public override Point2 TransformValue(GeographicCoordinate source) {
-            throw new System.NotImplementedException();
-        }
-
-        public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
-            if(!HasInverse) throw new NoInverseException();
-            Contract.Ensures(Contract.Result<ITransformation<Point2, GeographicCoordinate>>() != null);
-            Contract.EndContractBlock();
             throw new NotImplementedException();
         }
 
+        public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
+            Contract.Requires(HasInverse);
+            Contract.Ensures(Contract.Result<ITransformation<Point2, GeographicCoordinate>>() != null);
+            Contract.EndContractBlock();
+            return null;
+        }
+
         public override bool HasInverse {
-            [Pure] get { throw new System.NotImplementedException(); }
+            [Pure] get { throw new NotImplementedException(); }
         }
     }
 

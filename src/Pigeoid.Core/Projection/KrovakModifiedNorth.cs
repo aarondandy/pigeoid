@@ -43,6 +43,7 @@ namespace Pigeoid.Projection
             Core = core;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(Core != null);
         }

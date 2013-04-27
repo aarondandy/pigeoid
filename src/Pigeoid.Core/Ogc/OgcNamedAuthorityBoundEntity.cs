@@ -7,7 +7,7 @@ namespace Pigeoid.Ogc
     /// <summary>
     /// An OGC entity with a name and an authority tag.
     /// </summary>
-    public abstract class OgcNamedAuthorityBoundEntity : IAuthorityBoundEntity
+    public abstract class OgcNamedAuthorityBoundEntity : INamedAuthorityBoundEntity
     {
 
         protected OgcNamedAuthorityBoundEntity(string name, IAuthorityTag authorityTag) {

@@ -30,10 +30,10 @@ namespace Pigeoid.Ogc
             IAuthorityTag authority = null
         )
             : base(name, authority) {
-
             if (null == baseCrs) throw new ArgumentNullException("baseCrs");
             if (null == projection) throw new ArgumentNullException("projection");
             if (null == linearUnit) throw new ArgumentNullException("linearUnit");
+            if(null == axes) throw new ArgumentNullException("axes");
             Contract.Requires(name != null);
 
             BaseCrs = baseCrs;

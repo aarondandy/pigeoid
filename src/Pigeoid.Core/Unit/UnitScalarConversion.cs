@@ -24,6 +24,7 @@ namespace Pigeoid.Unit
                 _inverseFactor = 1.0 / _factor;
             }
 
+            [ContractInvariantMethod]
             private void CodeContractInvariants() {
                 Contract.Invariant(_core != null);
             }
@@ -45,7 +46,6 @@ namespace Pigeoid.Unit
             }
 
             public void TransformValues(double[] values) {
-                Contract.Requires(values != null);
                 for (int i = 0; i < values.Length; i++)
                     values[i] /= _factor;
             }
@@ -55,7 +55,6 @@ namespace Pigeoid.Unit
             }
 
             public IEnumerable<double> TransformValues(IEnumerable<double> values) {
-                Contract.Requires(values != null);
                 Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
                 return values.Select(x => x / _factor);
             }
@@ -88,6 +87,7 @@ namespace Pigeoid.Unit
             _factor = factor;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(From != null);
             Contract.Invariant(To != null);
@@ -100,7 +100,6 @@ namespace Pigeoid.Unit
         public IUnit To { get; private set; }
 
         public void TransformValues(double[] values) {
-            Contract.Requires(values != null);
             for (int i = 0; i < values.Length; i++)
                 values[i] *= _factor;
         }
@@ -110,7 +109,6 @@ namespace Pigeoid.Unit
         }
 
         public IEnumerable<double> TransformValues(IEnumerable<double> values) {
-            Contract.Requires(values != null);
             Contract.Ensures(Contract.Result<IEnumerable<double>>() != null);
             return values.Select(x => x * _factor);
         }

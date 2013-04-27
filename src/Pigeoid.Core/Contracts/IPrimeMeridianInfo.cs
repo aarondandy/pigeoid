@@ -1,9 +1,12 @@
-﻿namespace Pigeoid.Contracts
+﻿using System.Diagnostics.Contracts;
+
+namespace Pigeoid.Contracts
 {
     /// <summary>
     /// A prime meridian.
     /// </summary>
-    public interface IPrimeMeridianInfo : IAuthorityBoundEntity
+    [ContractClass(typeof(IPrimeMeridianInfoCodeContracts))]
+    public interface IPrimeMeridianInfo : INamedAuthorityBoundEntity
     {
         /// <summary>
         /// The longitude of the prime meridian.
@@ -13,9 +16,24 @@
         /// The unit of measure for the longitude.
         /// </summary>
         IUnit Unit { get; }
+    }
 
-        string Name { get; }
+    [ContractClassFor(typeof(IPrimeMeridianInfo))]
+    internal abstract class IPrimeMeridianInfoCodeContracts : IPrimeMeridianInfo
+    {
 
+        public abstract double Longitude { get; }
+
+        public IUnit Unit {
+            get {
+                Contract.Ensures(Contract.Result<IUnit>() != null);
+                throw new System.NotImplementedException();
+            }
+        }
+
+        public abstract string Name { get; }
+
+        public abstract IAuthorityTag Authority { get; }
     }
 
 }

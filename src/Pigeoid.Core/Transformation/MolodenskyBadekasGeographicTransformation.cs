@@ -13,10 +13,23 @@ namespace Pigeoid.Transformation
             private readonly MolodenskyBadekasGeographicTransformation _core;
             private readonly ITransformation<Point3> _mbInverse;
 
-            public Inverse(MolodenskyBadekasGeographicTransformation core)
-                : base(core.GeocentricToGeographic.GetInverse(), core.GeographicToGeocentric.GetInverse()) {
+            public static Inverse BuildInverse(MolodenskyBadekasGeographicTransformation core) {
+                Contract.Requires(core != null);
+                Contract.Requires(core.GeocentricToGeographic.HasInverse);
+                Contract.Requires(core.GeographicToGeocentric.HasInverse);
+                Contract.Ensures(Contract.Result<Inverse>() != null);
+                var geographicGeocentric = core.GeocentricToGeographic.GetInverse();
+                Contract.Assume(core.GeographicToGeocentric.HasInverse);
+                var geocentricGeographic = core.GeographicToGeocentric.GetInverse();
+                return new Inverse(geographicGeocentric, geocentricGeographic, core);
+            }
+
+            private Inverse(GeographicGeocentricTransformation geographicGeocentric, GeocentricGeographicTransformation geocentricGeographic, MolodenskyBadekasGeographicTransformation core)
+                : base(geographicGeocentric, geocentricGeographic) {
                 _core = core;
                 Contract.Requires(core != null);
+                Contract.Requires(geographicGeocentric != null);
+                Contract.Requires(geocentricGeographic != null);
                 _mbInverse = _core.MolodenskyBadekas.GetInverse();
             }
 
@@ -83,7 +96,7 @@ namespace Pigeoid.Transformation
         public override ITransformation GetInverse() {
             if (!HasInverse) throw new NoInverseException();
             Contract.Ensures(Contract.Result<ITransformation>() != null);
-            return new Inverse(this);
+            return Inverse.BuildInverse(this);
         }
 
         public override bool HasInverse {

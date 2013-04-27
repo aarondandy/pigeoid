@@ -2,12 +2,8 @@
 
 namespace Pigeoid.Contracts
 {
-    public interface ISpheroidInfo : ISpheroid<double>, IAuthorityBoundEntity
+    public interface ISpheroidInfo : ISpheroid<double>, INamedAuthorityBoundEntity
     {
-
-        string Name { get; }
-
         IUnit AxisUnit { get; }
-
     }
 }

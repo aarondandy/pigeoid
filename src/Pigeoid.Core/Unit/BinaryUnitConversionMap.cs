@@ -19,6 +19,7 @@ namespace Pigeoid.Unit
             _forwardOperation = forwardOperation;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(_forwardOperation != null);
         }

@@ -13,12 +13,6 @@ namespace Pigeoid
     public class NamedParameter<TValue> : INamedParameter
     {
 
-        /// <summary>
-        /// The optional unit of measure for the parameter value.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private readonly IUnit _unit;
-
         public NamedParameter(string name, TValue value)
             : this(name, value, null) { }
 
@@ -46,6 +40,9 @@ namespace Pigeoid
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         object INamedParameter.Value { get { return Value; } }
 
+        /// <summary>
+        /// The optional unit of measure for the parameter value.
+        /// </summary>
         public IUnit Unit { get; private set; }
 
         private string GetValueUnitString() {
