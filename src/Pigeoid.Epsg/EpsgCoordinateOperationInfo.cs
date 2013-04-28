@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using Pigeoid.Contracts;
+using Pigeoid.CoordinateOperation;
 
 namespace Pigeoid.Epsg
 {

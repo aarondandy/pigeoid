@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using Pigeoid.Contracts;
 
 namespace Pigeoid.Unit
 {

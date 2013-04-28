@@ -1,11 +1,9 @@
-﻿using Pigeoid.Contracts;
-
-namespace Pigeoid.Core.Test.Mock
+﻿namespace Pigeoid.Core.Test.Mock
 {
-	public class MockAxis : IAxis
-	{
-		public string Name { get; set; }
+    public class MockAxis : IAxis
+    {
+        public string Name { get; set; }
 
-		public string Orientation { get; set; }
-	}
+        public string Orientation { get; set; }
+    }
 }

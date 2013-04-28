@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Threading;
-using Pigeoid.Contracts;
+using Pigeoid.CoordinateOperation;
 using Pigeoid.Epsg.Resources;
 
 namespace Pigeoid.Epsg

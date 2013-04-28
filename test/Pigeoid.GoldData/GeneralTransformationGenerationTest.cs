@@ -1,30 +1,31 @@
 ﻿using NUnit.Framework;
+using Pigeoid.CoordinateOperation;
 
 namespace Pigeoid.GoldData
 {
 
-	[TestFixture]
-	public class GeneralTransformationGenerationTest
-	{
+    [TestFixture]
+    public class GeneralTransformationGenerationTest
+    {
 
-		[Test]
-		[TestCase("Wgs84.Lat_Lon.csv", "Wgs84.LCC_14.csv", 0.000001)]
-		public void Test(string sourceResourceName, string targetResourceName, double allowedDelta) {
+        [Test]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.LCC_14.csv", 0.000001)]
+        public void Test(string sourceResourceName, string targetResourceName, double allowedDelta) {
 
-			var sourceData = GoldData.GetReadyReader(sourceResourceName);
-			var targetData = GoldData.GetReadyReader(targetResourceName);
-			var sourceCrs = GoldData.GetCrs(sourceData);
-			var targetCrs = GoldData.GetCrs(targetData);
+            var sourceData = GoldData.GetReadyReader(sourceResourceName);
+            var targetData = GoldData.GetReadyReader(targetResourceName);
+            var sourceCrs = GoldData.GetCrs(sourceData);
+            var targetCrs = GoldData.GetCrs(targetData);
 
-			Assert.IsNotNull(sourceCrs);
-			Assert.IsNotNull(targetCrs);
+            Assert.IsNotNull(sourceCrs);
+            Assert.IsNotNull(targetCrs);
 
-			var operationGenerator = new GeneralCrsCoordinateOperationPathGenerator();
-			var operation = operationGenerator.Generate(sourceCrs, targetCrs);
-			Assert.IsNotNull(operation);
-			Assert.Inconclusive();
-		}
+            var operationGenerator = new GeneralCrsCoordinateOperationPathGenerator();
+            var operation = operationGenerator.Generate(sourceCrs, targetCrs);
+            Assert.IsNotNull(operation);
+            Assert.Inconclusive();
+        }
 
-	}
+    }
 
 }

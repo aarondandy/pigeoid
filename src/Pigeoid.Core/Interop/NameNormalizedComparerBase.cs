@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using System.Text;
-using Pigeoid.Contracts;
 
 namespace Pigeoid.Interop
 {

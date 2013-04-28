@@ -4,8 +4,9 @@ using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
-using Pigeoid.Contracts;
+using Pigeoid.CoordinateOperation;
 using Pigeoid.Epsg.Resources;
+using Pigeoid.Unit;
 
 namespace Pigeoid.Epsg
 {

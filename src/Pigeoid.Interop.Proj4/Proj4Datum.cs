@@ -1,24 +1,21 @@
-﻿// TODO: source header
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Pigeoid.Contracts;
-using Pigeoid.Transformation;
+using Pigeoid.CoordinateOperation.Transformation;
 using Vertesaur;
 
 namespace Pigeoid.Interop.Proj4
 {
-	/// <summary>
-	/// A datum used for Proj4 interop.
-	/// </summary>
-	public class Proj4Datum : IDatumGeodetic
-	{
+    /// <summary>
+    /// A datum used for Proj4 interop.
+    /// </summary>
+    public class Proj4Datum : IDatumGeodetic
+    {
 
-		private static readonly ReadOnlyCollection<Proj4Datum> DefaultDatums;
+        private static readonly ReadOnlyCollection<Proj4Datum> DefaultDatums;
 
-		static Proj4Datum() {
-			DefaultDatums = Array.AsReadOnly(new[]{
+        static Proj4Datum() {
+            DefaultDatums = Array.AsReadOnly(new[]{
 				new Proj4Datum("WGS84", Proj4Spheroid.GetSpheroid("WGS84"), Helmert7Transformation.IdentityTransformation),
 				new Proj4Datum(
 					"GGRS87", Proj4Spheroid.GetSpheroid("GRS80"),
@@ -64,89 +61,89 @@ namespace Pigeoid.Interop.Proj4
 					supported: false
 				)
 			});
-		}
+        }
 
-		/// <summary>
-		/// All Proj4 datums.
-		/// </summary>
-		public static IList<Proj4Datum> Datums {
-			get { return DefaultDatums; }
-		}
+        /// <summary>
+        /// All Proj4 datums.
+        /// </summary>
+        public static IList<Proj4Datum> Datums {
+            get { return DefaultDatums; }
+        }
 
-		private readonly string _name;
-		private readonly Proj4Spheroid _spheroid;
-		private readonly Helmert7Transformation _toWgs84;
-		private readonly bool _supported;
-		private readonly bool _matchExplicitly;
+        private readonly string _name;
+        private readonly Proj4Spheroid _spheroid;
+        private readonly Helmert7Transformation _toWgs84;
+        private readonly bool _supported;
+        private readonly bool _matchExplicitly;
 
-		/// <summary>
-		/// Constructs a new Proj4 datum object.
-		/// </summary>
-		/// <param name="name">The Proj4 datum name.</param>
-		/// <param name="spheroid">The ellipse for this datum.</param>
-		/// <param name="toWgs84">A transformation to WGS84.</param>
-		/// <param name="supported">Indicates if this datum is supported by Proj4.</param>
-		/// <param name="matchExplicitly">Indicated is this datum must be matched explicitly by name only.</param>
-		private Proj4Datum(
-			string name,
-			Proj4Spheroid spheroid,
-			Helmert7Transformation toWgs84,
-			bool supported = true,
-			bool matchExplicitly = false
-		) {
-			_name = name;
-			_spheroid = spheroid;
-			_toWgs84 = toWgs84;
-			_supported = supported;
-			_matchExplicitly = matchExplicitly;
-		}
+        /// <summary>
+        /// Constructs a new Proj4 datum object.
+        /// </summary>
+        /// <param name="name">The Proj4 datum name.</param>
+        /// <param name="spheroid">The ellipse for this datum.</param>
+        /// <param name="toWgs84">A transformation to WGS84.</param>
+        /// <param name="supported">Indicates if this datum is supported by Proj4.</param>
+        /// <param name="matchExplicitly">Indicated is this datum must be matched explicitly by name only.</param>
+        private Proj4Datum(
+            string name,
+            Proj4Spheroid spheroid,
+            Helmert7Transformation toWgs84,
+            bool supported = true,
+            bool matchExplicitly = false
+        ) {
+            _name = name;
+            _spheroid = spheroid;
+            _toWgs84 = toWgs84;
+            _supported = supported;
+            _matchExplicitly = matchExplicitly;
+        }
 
-		/// <summary>
-		/// Indicates if this datum is supported by Proj4.
-		/// </summary>
-		public bool Supported { get { return _supported; } }
+        /// <summary>
+        /// Indicates if this datum is supported by Proj4.
+        /// </summary>
+        public bool Supported { get { return _supported; } }
 
-		/// <summary>
-		/// Indicated is this datum must be matched explicitly by name only.
-		/// </summary>
-		/// <remarks>
-		/// When false a Proj4 datum may also be matched based on spheroid parameters.
-		/// </remarks>
-		public bool MatchExplicitly { get { return _matchExplicitly; } }
+        /// <summary>
+        /// Indicated is this datum must be matched explicitly by name only.
+        /// </summary>
+        /// <remarks>
+        /// When false a Proj4 datum may also be matched based on spheroid parameters.
+        /// </remarks>
+        public bool MatchExplicitly { get { return _matchExplicitly; } }
 
-		IPrimeMeridianInfo IDatumGeodetic.PrimeMeridian {
-			get { throw new NotImplementedException(); }
-		}
+        IPrimeMeridianInfo IDatumGeodetic.PrimeMeridian {
+            get { throw new NotImplementedException(); }
+        }
 
-		/// <summary>
-		/// The spheroid for this datum.
-		/// </summary>
-		public Proj4Spheroid Spheroid {
-			get { return _spheroid; }
-		}
+        /// <summary>
+        /// The spheroid for this datum.
+        /// </summary>
+        public Proj4Spheroid Spheroid {
+            get { return _spheroid; }
+        }
 
-		ISpheroidInfo IDatumGeodetic.Spheroid {
-			get { return _spheroid; }
-		}
+        ISpheroidInfo IDatumGeodetic.Spheroid {
+            get { return _spheroid; }
+        }
 
-		public string Name {
-			get { return _name; }
-		}
+        public string Name {
+            get { return _name; }
+        }
 
-		public string Type {
-			get { return "Geodetic"; }
-		}
+        public string Type {
+            get { return "Geodetic"; }
+        }
 
-		public bool IsTransformableToWgs84 {
-			get { return null != _toWgs84; }
-		}
+        public bool IsTransformableToWgs84 {
+            get { return null != _toWgs84; }
+        }
 
-		public Helmert7Transformation BasicWgs84Transformation {
-			get { return _toWgs84; }
-		}
+        public Helmert7Transformation BasicWgs84Transformation {
+            get { return _toWgs84; }
+        }
 
-		public IAuthorityTag Authority {
-			get { return new AuthorityTag("PROJ4", Name); }
-		}
-	}
+        public IAuthorityTag Authority {
+            get { return new AuthorityTag("PROJ4", Name); }
+        }
+    }
 }

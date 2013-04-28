@@ -96,91 +96,91 @@
     <Compile Include="..\PigeoidAssemblyInfo.cs">
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
-    <Compile Include="AuthorityTag.cs" />
-    <Compile Include="ConcatenatedCoordinateOperationInfo.cs" />
-    <Compile Include="Contracts\IAuthorityBoundEntity.cs" />
-    <Compile Include="Contracts\IAuthorityResolver.cs" />
-    <Compile Include="Contracts\IAuthorityTag.cs">
+    <Compile Include="Core\AuthorityTag.cs" />
+    <Compile Include="CoordinateOperation\ConcatenatedCoordinateOperationInfo.cs" />
+    <Compile Include="Core\IAuthorityBoundEntity.cs" />
+    <Compile Include="Core\IAuthorityResolver.cs" />
+    <Compile Include="Core\IAuthorityTag.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\IAxis.cs">
+    <Compile Include="Core\IAxis.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\IConcatenatedCoordinateOperationInfo.cs" />
-    <Compile Include="Contracts\IConcatenatedOperation.cs" />
-    <Compile Include="Contracts\ICoordinateOperationCrsPathInfo.cs" />
-    <Compile Include="Contracts\ICoordinateOperationPathGenerator.cs" />
-    <Compile Include="Contracts\ICoordinateOperationInfo.cs" />
-    <Compile Include="Contracts\ICoordinateOperationMethodInfo.cs" />
-    <Compile Include="Contracts\ICoordinateOperationCompiler.cs" />
-    <Compile Include="Contracts\ICrs.cs">
+    <Compile Include="CoordinateOperation\IConcatenatedCoordinateOperationInfo.cs" />
+    <Compile Include="CoordinateOperation\IConcatenatedOperation.cs" />
+    <Compile Include="CoordinateOperation\ICoordinateOperationCrsPathInfo.cs" />
+    <Compile Include="CoordinateOperation\ICoordinateOperationPathGenerator.cs" />
+    <Compile Include="CoordinateOperation\ICoordinateOperationInfo.cs" />
+    <Compile Include="CoordinateOperation\ICoordinateOperationMethodInfo.cs" />
+    <Compile Include="CoordinateOperation\ICoordinateOperationCompiler.cs" />
+    <Compile Include="Core\ICrs.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\ICrsCompound.cs">
+    <Compile Include="Core\ICrsCompound.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\ICrsFitted.cs">
+    <Compile Include="Core\ICrsFitted.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\ICrsGeocentric.cs">
+    <Compile Include="Core\ICrsGeocentric.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\ICrsGeodetic.cs">
+    <Compile Include="Core\ICrsGeodetic.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\ICrsGeographic.cs">
+    <Compile Include="Core\ICrsGeographic.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\ICrsLocal.cs">
+    <Compile Include="Core\ICrsLocal.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\ICrsProjected.cs">
+    <Compile Include="Core\ICrsProjected.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\ICrsVertical.cs">
+    <Compile Include="Core\ICrsVertical.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\IDatum.cs">
+    <Compile Include="Core\IDatum.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\IDatumGeodetic.cs">
+    <Compile Include="Core\IDatumGeodetic.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\IGeographicCoordinate.cs" />
-    <Compile Include="Contracts\IGeographicHeightCoordinate.cs" />
-    <Compile Include="Contracts\INamedParameter.cs" />
-    <Compile Include="Contracts\INameNormalizedComparer.cs" />
-    <Compile Include="Contracts\IParameterizedCoordinateOperationInfo.cs" />
-    <Compile Include="Contracts\IPassthroughCoordinateOperationInfo.cs" />
-    <Compile Include="Contracts\IPrimeMeridianInfo.cs">
+    <Compile Include="Core\IGeographicCoordinate.cs" />
+    <Compile Include="Core\IGeographicHeightCoordinate.cs" />
+    <Compile Include="Core\INamedParameter.cs" />
+    <Compile Include="Interop\INameNormalizedComparer.cs" />
+    <Compile Include="CoordinateOperation\IParameterizedCoordinateOperationInfo.cs" />
+    <Compile Include="CoordinateOperation\IPassthroughCoordinateOperationInfo.cs" />
+    <Compile Include="Core\IPrimeMeridianInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\ISpheroidInfo.cs" />
-    <Compile Include="Contracts\IUnit.cs">
+    <Compile Include="Core\ISpheroidInfo.cs" />
+    <Compile Include="Unit\IUnit.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Contracts\IUnitConversion.cs" />
-    <Compile Include="Contracts\IUnitConversionMap.cs" />
-    <Compile Include="Contracts\IUnitConversionGenerator.cs" />
-    <Compile Include="CoordinateOperationCompilation\NamedParameterLookup.cs" />
-    <Compile Include="CoordinateOperationCompilation\NamedParameterSelector.cs" />
-    <Compile Include="CoordinateOperationCompilation\StaticCoordinateOperationCompiler.cs" />
-    <Compile Include="CoordinateOperationCompilation\StaticProjectionStepCompiler.cs" />
-    <Compile Include="CoordinateOperationCompilation\StaticTransformationStepCompiler.cs" />
-    <Compile Include="CoordinateOperationCrsPathInfo.cs" />
-    <Compile Include="CoordinateOperationInfo.cs" />
-    <Compile Include="CoordinateOperationInfoInverse.cs" />
-    <Compile Include="GeneralCrsCoordinateOperationPathGenerator.cs" />
-    <Compile Include="GeographicCoordinate.cs" />
-    <Compile Include="GeographicHeightCoordinate.cs" />
+    <Compile Include="Unit\IUnitConversion.cs" />
+    <Compile Include="Unit\IUnitConversionMap.cs" />
+    <Compile Include="Unit\IUnitConversionGenerator.cs" />
+    <Compile Include="CoordinateOperation\NamedParameterLookup.cs" />
+    <Compile Include="CoordinateOperation\NamedParameterSelector.cs" />
+    <Compile Include="CoordinateOperation\StaticCoordinateOperationCompiler.cs" />
+    <Compile Include="CoordinateOperation\StaticProjectionStepCompiler.cs" />
+    <Compile Include="CoordinateOperation\StaticTransformationStepCompiler.cs" />
+    <Compile Include="CoordinateOperation\CoordinateOperationCrsPathInfo.cs" />
+    <Compile Include="CoordinateOperation\CoordinateOperationInfo.cs" />
+    <Compile Include="CoordinateOperation\CoordinateOperationInfoInverse.cs" />
+    <Compile Include="CoordinateOperation\GeneralCrsCoordinateOperationPathGenerator.cs" />
+    <Compile Include="Core\GeographicCoordinate.cs" />
+    <Compile Include="Core\GeographicHeightCoordinate.cs" />
     <Compile Include="Interop\CoordinateOperationNameNormalizedComparer.cs" />
     <Compile Include="Interop\CoordinateOperationStandardNames.cs" />
     <Compile Include="Interop\NameNormalizedComparerBase.cs" />
     <Compile Include="Interop\ParameterNameNormalizedComparer.cs" />
     <Compile Include="Interop\ParameterStandardNames.cs" />
     <Compile Include="Interop\UnitNameNormalizedComparer.cs" />
-    <Compile Include="LongitudeDegreeRange.cs" />
-    <Compile Include="NamedParameter.cs" />
+    <Compile Include="Core\LongitudeDegreeRange.cs" />
+    <Compile Include="Core\NamedParameter.cs" />
     <Compile Include="Ogc\OgcCoordinateOperationMethodInfo.cs" />
     <Compile Include="Ogc\OgcCrsCompound.cs" />
     <Compile Include="Ogc\OgcCrsFitted.cs" />
@@ -207,64 +207,64 @@
     <Compile Include="Ogc\WktReader.cs" />
     <Compile Include="Ogc\WktSerializer.cs" />
     <Compile Include="Ogc\WktWriter.cs" />
-    <Compile Include="Projection\Bonne.cs" />
-    <Compile Include="Projection\CassiniSoldner.cs" />
-    <Compile Include="Projection\EquidistantCylindrical.cs" />
-    <Compile Include="Projection\EquidistantCylindricalSpherical.cs" />
-    <Compile Include="Projection\Guam.cs" />
-    <Compile Include="Projection\HotineObliqueMercator.cs" />
-    <Compile Include="Projection\HyperbolicCassiniSoldner.cs" />
-    <Compile Include="Projection\Krovak.cs" />
-    <Compile Include="Projection\KrovakModified.cs" />
-    <Compile Include="Projection\KrovakModifiedNorth.cs" />
-    <Compile Include="Projection\KrovakNorth.cs" />
-    <Compile Include="Projection\LabordeObliqueMercator.cs" />
-    <Compile Include="Projection\LambertAzimuthalEqualArea.cs" />
-    <Compile Include="Projection\LambertAzimuthalEqualAreaSpherical.cs" />
-    <Compile Include="Projection\LambertConicBase.cs" />
-    <Compile Include="Projection\LambertConicConformal.cs" />
-    <Compile Include="Projection\LambertConicConformal1Sp.cs" />
-    <Compile Include="Projection\LambertConicConformal1SpWest.cs" />
-    <Compile Include="Projection\LambertConicConformal2Sp.cs" />
-    <Compile Include="Projection\LambertConicConformalBelgium.cs" />
-    <Compile Include="Projection\LambertConicNearConformal.cs" />
-    <Compile Include="Projection\LambertCylindricalEqualAreaSpherical.cs" />
-    <Compile Include="Projection\Mercator.cs" />
-    <Compile Include="Projection\MercatorSpherical.cs" />
-    <Compile Include="Projection\ModifiedAzimuthalEquidistant.cs" />
-    <Compile Include="Projection\NeysProjection.cs" />
-    <Compile Include="Projection\ObliqueStereographic.cs" />
-    <Compile Include="Projection\PolarStereographic.cs" />
-    <Compile Include="Projection\PopularVizualisationPseudoMercator.cs" />
-    <Compile Include="Projection\ProjectionBase.cs" />
-    <Compile Include="Projection\TransverseMercator.cs" />
-    <Compile Include="Projection\TransverseMercatorSouth.cs" />
-    <Compile Include="Projection\TunisiaMiningGrid.cs" />
+    <Compile Include="CoordinateOperation\Projection\Bonne.cs" />
+    <Compile Include="CoordinateOperation\Projection\CassiniSoldner.cs" />
+    <Compile Include="CoordinateOperation\Projection\EquidistantCylindrical.cs" />
+    <Compile Include="CoordinateOperation\Projection\EquidistantCylindricalSpherical.cs" />
+    <Compile Include="CoordinateOperation\Projection\Guam.cs" />
+    <Compile Include="CoordinateOperation\Projection\HotineObliqueMercator.cs" />
+    <Compile Include="CoordinateOperation\Projection\HyperbolicCassiniSoldner.cs" />
+    <Compile Include="CoordinateOperation\Projection\Krovak.cs" />
+    <Compile Include="CoordinateOperation\Projection\KrovakModified.cs" />
+    <Compile Include="CoordinateOperation\Projection\KrovakModifiedNorth.cs" />
+    <Compile Include="CoordinateOperation\Projection\KrovakNorth.cs" />
+    <Compile Include="CoordinateOperation\Projection\LabordeObliqueMercator.cs" />
+    <Compile Include="CoordinateOperation\Projection\LambertAzimuthalEqualArea.cs" />
+    <Compile Include="CoordinateOperation\Projection\LambertAzimuthalEqualAreaSpherical.cs" />
+    <Compile Include="CoordinateOperation\Projection\LambertConicBase.cs" />
+    <Compile Include="CoordinateOperation\Projection\LambertConicConformal.cs" />
+    <Compile Include="CoordinateOperation\Projection\LambertConicConformal1Sp.cs" />
+    <Compile Include="CoordinateOperation\Projection\LambertConicConformal1SpWest.cs" />
+    <Compile Include="CoordinateOperation\Projection\LambertConicConformal2Sp.cs" />
+    <Compile Include="CoordinateOperation\Projection\LambertConicConformalBelgium.cs" />
+    <Compile Include="CoordinateOperation\Projection\LambertConicNearConformal.cs" />
+    <Compile Include="CoordinateOperation\Projection\LambertCylindricalEqualAreaSpherical.cs" />
+    <Compile Include="CoordinateOperation\Projection\Mercator.cs" />
+    <Compile Include="CoordinateOperation\Projection\MercatorSpherical.cs" />
+    <Compile Include="CoordinateOperation\Projection\ModifiedAzimuthalEquidistant.cs" />
+    <Compile Include="CoordinateOperation\Projection\NeysProjection.cs" />
+    <Compile Include="CoordinateOperation\Projection\ObliqueStereographic.cs" />
+    <Compile Include="CoordinateOperation\Projection\PolarStereographic.cs" />
+    <Compile Include="CoordinateOperation\Projection\PopularVizualisationPseudoMercator.cs" />
+    <Compile Include="CoordinateOperation\Projection\ProjectionBase.cs" />
+    <Compile Include="CoordinateOperation\Projection\TransverseMercator.cs" />
+    <Compile Include="CoordinateOperation\Projection\TransverseMercatorSouth.cs" />
+    <Compile Include="CoordinateOperation\Projection\TunisiaMiningGrid.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SpheroidLinearUnitConversionWrapper.cs" />
-    <Compile Include="Transformation\AbridgedMolodenskyTransformation.cs" />
-    <Compile Include="Transformation\AffineParametricTransformation.cs" />
-    <Compile Include="Transformation\AngularElementTransformation.cs" />
-    <Compile Include="Transformation\CartesianOffset2.cs" />
-    <Compile Include="Transformation\GeocentricTopocentricTransformation.cs" />
-    <Compile Include="Transformation\GeocentricTransformationGeographicWrapper.cs" />
-    <Compile Include="Transformation\GeocentricTranslation.cs" />
-    <Compile Include="Transformation\GeographicDimensionChange.cs" />
-    <Compile Include="Transformation\GeographicGeocentricTransformation.cs" />
-    <Compile Include="Transformation\GeographicGeocentricTransformationBase.cs" />
-    <Compile Include="Transformation\GeographicOffset.cs" />
-    <Compile Include="Transformation\GeographicGeocentricTranslation.cs" />
-    <Compile Include="Transformation\GeographicProjectedCastTransformation.cs" />
-    <Compile Include="Transformation\Helmert7Transformation.cs" />
-    <Compile Include="Transformation\InvertedTransformationBase.cs" />
-    <Compile Include="Transformation\LinearElementTransformation.cs" />
-    <Compile Include="Transformation\MadridEd50Polynomial.cs" />
-    <Compile Include="Transformation\MolodenskyBadekasGeographicTransformation.cs" />
-    <Compile Include="Transformation\MolodenskyBadekasTransformation.cs" />
-    <Compile Include="Transformation\SimilarityTransformation.cs" />
-    <Compile Include="Transformation\VerticalOffset.cs" />
-    <Compile Include="Transformation\VerticalPerspective.cs" />
-    <Compile Include="Transformation\VerticalPerspectiveOrthographic.cs" />
+    <Compile Include="Core\SpheroidLinearUnitConversionWrapper.cs" />
+    <Compile Include="CoordinateOperation\Transformation\AbridgedMolodenskyTransformation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\AffineParametricTransformation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\AngularElementTransformation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\CartesianOffset2.cs" />
+    <Compile Include="CoordinateOperation\Transformation\GeocentricTopocentricTransformation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\GeocentricTransformationGeographicWrapper.cs" />
+    <Compile Include="CoordinateOperation\Transformation\GeocentricTranslation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\GeographicDimensionChange.cs" />
+    <Compile Include="CoordinateOperation\Transformation\GeographicGeocentricTransformation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\GeographicGeocentricTransformationBase.cs" />
+    <Compile Include="CoordinateOperation\Transformation\GeographicOffset.cs" />
+    <Compile Include="CoordinateOperation\Transformation\GeographicGeocentricTranslation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\GeographicProjectedCastTransformation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\Helmert7Transformation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\InvertedTransformationBase.cs" />
+    <Compile Include="CoordinateOperation\Transformation\LinearElementTransformation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\MadridEd50Polynomial.cs" />
+    <Compile Include="CoordinateOperation\Transformation\MolodenskyBadekasGeographicTransformation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\MolodenskyBadekasTransformation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\SimilarityTransformation.cs" />
+    <Compile Include="CoordinateOperation\Transformation\VerticalOffset.cs" />
+    <Compile Include="CoordinateOperation\Transformation\VerticalPerspective.cs" />
+    <Compile Include="CoordinateOperation\Transformation\VerticalPerspectiveOrthographic.cs" />
     <Compile Include="Unit\BasicScaleUnitConversionMap.cs" />
     <Compile Include="Unit\ConcatenatedUnitConversion.cs" />
     <Compile Include="Unit\ScaleUnitPartsPerMillion.cs" />
@@ -285,6 +285,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Contracts\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

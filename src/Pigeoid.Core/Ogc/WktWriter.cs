@@ -6,8 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Pigeoid.Contracts;
-using Pigeoid.Transformation;
+using Pigeoid.CoordinateOperation;
+using Pigeoid.CoordinateOperation.Transformation;
 using Pigeoid.Unit;
 
 namespace Pigeoid.Ogc

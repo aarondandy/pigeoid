@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Diagnostics.Contracts;
-using Pigeoid.Contracts;
-
 namespace Pigeoid.Ogc
 {
     /// <summary>

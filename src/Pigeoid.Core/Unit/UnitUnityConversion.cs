@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using Pigeoid.Contracts;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Unit

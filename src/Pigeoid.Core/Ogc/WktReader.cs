@@ -5,8 +5,9 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Pigeoid.Contracts;
-using Pigeoid.Transformation;
+using Pigeoid.CoordinateOperation;
+using Pigeoid.CoordinateOperation.Transformation;
+using Pigeoid.Unit;
 using Vertesaur;
 
 namespace Pigeoid.Ogc

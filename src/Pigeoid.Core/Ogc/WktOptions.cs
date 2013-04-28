@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
-using Pigeoid.Contracts;
+using Pigeoid.CoordinateOperation;
+using Pigeoid.Unit;
 
 namespace Pigeoid.Ogc
 {

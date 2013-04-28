@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Pigeoid.Contracts;
 using Vertesaur.Contracts;
 
 namespace Pigeoid.Unit

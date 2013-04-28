@@ -4,9 +4,8 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Pigeoid.Contracts;
+using Pigeoid.CoordinateOperation.Transformation;
 using Pigeoid.Epsg.Resources;
-using Pigeoid.Transformation;
 
 namespace Pigeoid.Epsg
 {

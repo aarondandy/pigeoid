@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.Contracts;
-using Pigeoid.Contracts;
+using Pigeoid.Unit;
 
 namespace Pigeoid.Ogc
 {

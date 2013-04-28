@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using System.Threading;
-using Pigeoid.Contracts;
 using Pigeoid.Unit;
 
 namespace Pigeoid.Ogc

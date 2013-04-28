@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
-using Pigeoid.Contracts;
 using Pigeoid.Epsg.Resources;
 
 namespace Pigeoid.Epsg

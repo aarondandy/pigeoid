@@ -2,8 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Pigeoid.Contracts;
-
 namespace Pigeoid.Unit
 {
     public class UnitConversionMapCollection<TValue> : Collection<IUnitConversionMap<TValue>>, IUnitConversionMap<TValue>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
-using Pigeoid.Contracts;
-using Pigeoid.Transformation;
+using Pigeoid.CoordinateOperation.Transformation;
 
 namespace Pigeoid.Ogc
 {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using Pigeoid.Contracts;
 
 namespace Pigeoid.Epsg
 {

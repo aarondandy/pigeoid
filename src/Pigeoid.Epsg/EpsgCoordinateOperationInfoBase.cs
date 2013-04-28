@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
-using Pigeoid.Contracts;
+using Pigeoid.CoordinateOperation;
 using Vertesaur;
 
 namespace Pigeoid.Epsg

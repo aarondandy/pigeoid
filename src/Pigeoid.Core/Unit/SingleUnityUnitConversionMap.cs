@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using Pigeoid.Contracts;
-
 namespace Pigeoid.Unit
 {
     [Obsolete("I don't see a use for this. Yagni?")]

@@ -1,13 +1,11 @@
-﻿using Pigeoid.Contracts;
-
-namespace Pigeoid.Core.Test.Mock
+﻿namespace Pigeoid.Core.Test.Mock
 {
-	public class MockDatum : IDatum
-	{
-		public string Name { get; set; }
+    public class MockDatum : IDatum
+    {
+        public string Name { get; set; }
 
-		public string Type { get; set; }
+        public string Type { get; set; }
 
-		public IAuthorityTag Authority { get; set; }
-	}
+        public IAuthorityTag Authority { get; set; }
+    }
 }
