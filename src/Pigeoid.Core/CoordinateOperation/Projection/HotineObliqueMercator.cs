@@ -140,7 +140,7 @@ namespace Pigeoid.CoordinateOperation.Projection
 
                 // variant B
                 double uScalar;
-                if (HighAzimuth) {
+                if (HasHighAzimuth) {
                     if (lonDelta == 0) {
                         uScalar = 0;
                     }
@@ -190,8 +190,8 @@ namespace Pigeoid.CoordinateOperation.Projection
         protected double Vc;
         protected double GammaOrigin;
         protected double LongitudeOrigin;
-        protected bool NegativeCenterLatitude;
-        protected bool HighAzimuth;
+        protected bool CenterLatitudeIsNegative;
+        protected bool HasHighAzimuth;
 
         private readonly double _e4;
         private readonly double _e6;
@@ -211,7 +211,7 @@ namespace Pigeoid.CoordinateOperation.Projection
             var eSinLatCenter = E * sinLatCenter;
 
             // ReSharper disable CompareOfFloatsByEqualityOperator
-            HighAzimuth = AzimuthOfInitialLine >= HalfPi || AzimuthOfInitialLine <= -HalfPi || 0 == cosAzimuth;
+            HasHighAzimuth = AzimuthOfInitialLine >= HalfPi || AzimuthOfInitialLine <= -HalfPi || 0 == cosAzimuth;
             // ReSharper restore CompareOfFloatsByEqualityOperator
 
             B = Math.Sqrt(
@@ -232,11 +232,11 @@ namespace Pigeoid.CoordinateOperation.Projection
 
             D = (B * Math.Sqrt(1 - ESq)) / (cosLatCenter * Math.Sqrt(1 - (ESq * sinLatCenter * sinLatCenter)));
 
-            NegativeCenterLatitude = geographicCenter.Latitude < 0;
+            CenterLatitudeIsNegative = geographicCenter.Latitude < 0;
             F = D >= 1
                 ? D + Math.Sqrt((D * D) - 1)
                 : D;
-            if (NegativeCenterLatitude)
+            if (CenterLatitudeIsNegative)
                 F = -F;
 
             H = F * Math.Pow(TOrigin, B);
@@ -248,12 +248,12 @@ namespace Pigeoid.CoordinateOperation.Projection
             LongitudeOrigin = geographicCenter.Longitude - (Math.Asin(G * Math.Tan(GammaOrigin)) / B);
 
             Vc = 0;
-            if (HighAzimuth) {
+            if (HasHighAzimuth) {
                 Uc = A * (GeographicCenter.Longitude - LongitudeOrigin);
             }
             else {
                 Uc = (A / B) * Math.Atan(Math.Sqrt((D * D) - 1.0) / cosAzimuth);
-                if (GeographicCenter.Latitude < 0)
+                if (CenterLatitudeIsNegative)
                     Uc = -Uc;
             }
 

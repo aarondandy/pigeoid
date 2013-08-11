@@ -6,10 +6,18 @@ using Vertesaur.Contracts;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
+
+    /// <remarks>
+    /// While the projection is defined with an origin relative to Paris
+    /// the projection inputs and inverse outputs are relative to Greenwich.
+    /// </remarks>
     public class LabordeObliqueMercator : ProjectionBase
     {
 
-        private const double ParisLongitudeOffset = 2.5969212963 * Math.PI / 200.0;
+        /// <summary>
+        /// The east offset of Paris from Greenwich using in this projection in radians.
+        /// </summary>
+        public readonly double ParisLongitudeOffset = 2.5969212963 * Math.PI / 200.0;
 
         private class Inverse : InvertedTransformationBase<LabordeObliqueMercator, Point2, GeographicCoordinate>
         {
@@ -54,7 +62,11 @@ namespace Pigeoid.CoordinateOperation.Projection
                     p = Math.Atan(wPrime / d);
                 }
 
-                var lon = Core.GreenwichProjectionCenter.Longitude + (l / Core.Beta) - ParisLongitudeOffset;
+                var lon = (l / Core.Beta) + (
+                    Core.GeogCoordinatesAreRelativeToGreenwich
+                        ? Core.GreenwichCenterLongitude
+                        : Core.ParisCenterLongitude);
+
                 var qPrime = (Math.Log(Math.Tan(QuarterPi + (p / 2.0))) - Core.C) / Core.Beta;
                 var lat = (Math.Atan(Math.Pow(Math.E, qPrime)) * 2.0) - HalfPi;
                 for (int i = 0; i < 8; i++) {
@@ -68,25 +80,71 @@ namespace Pigeoid.CoordinateOperation.Projection
             }
         }
 
-        protected GeographicCoordinate GreenwichProjectionCenter;
+        protected double GreenwichCenterLongitude;
+        protected double ParisCenterLongitude;
         protected double Beta;
         protected double SLatitude;
         protected double R;
         protected double C;
         protected double Azimuth;
+        protected bool IsGeogCenterDefinedOnParis;
+        protected bool GeogCoordinatesAreRelativeToGreenwich;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="projectionCenter">The projection center relative to Paris</param>
+        /// <param name="azimuthOfInitialLine"></param>
+        /// <param name="scaleFactor"></param>
+        /// <param name="spheroid"></param>
+        /// <param name="falseProjectedOffset"></param>
+        /// <remarks>
+        /// When using this constructor all geographic coordinates will be processed as geographic
+        /// even though the projection is defined relative to paris.
+        /// </remarks>
         public LabordeObliqueMercator(
             GeographicCoordinate projectionCenter,
             double azimuthOfInitialLine,
             double scaleFactor,
             ISpheroid<double> spheroid,
             Vector2 falseProjectedOffset
+        ) : this(
+            projectionCenter,
+            azimuthOfInitialLine,
+            scaleFactor,
+            spheroid,
+            falseProjectedOffset,
+            isGeogCenterDefinedOnParis: true,
+            geogCoordinatesAreRelativeToGreenwich: true
+        ) { }
+
+        public LabordeObliqueMercator(
+            GeographicCoordinate projectionCenter,
+            double azimuthOfInitialLine,
+            double scaleFactor,
+            ISpheroid<double> spheroid,
+            Vector2 falseProjectedOffset,
+            bool isGeogCenterDefinedOnParis,
+            bool geogCoordinatesAreRelativeToGreenwich
         ) : base(falseProjectedOffset, spheroid) {
             Contract.Requires(spheroid != null);
+
+            IsGeogCenterDefinedOnParis = isGeogCenterDefinedOnParis;
+            GeogCoordinatesAreRelativeToGreenwich = geogCoordinatesAreRelativeToGreenwich;
+
             Azimuth = azimuthOfInitialLine;
-            GreenwichProjectionCenter = new GeographicCoordinate(projectionCenter.Latitude, projectionCenter.Longitude + ParisLongitudeOffset);
-            var cosLatCenter = Math.Cos(GreenwichProjectionCenter.Latitude);
-            var sinLatCenter = Math.Sin(GreenwichProjectionCenter.Latitude);
+
+            if (IsGeogCenterDefinedOnParis) {
+                ParisCenterLongitude = projectionCenter.Longitude;
+                GreenwichCenterLongitude = projectionCenter.Longitude + ParisLongitudeOffset;
+            }
+            else {
+                GreenwichCenterLongitude = projectionCenter.Longitude;
+                ParisCenterLongitude = projectionCenter.Longitude - ParisLongitudeOffset;
+            }
+
+            var cosLatCenter = Math.Cos(projectionCenter.Latitude);
+            var sinLatCenter = Math.Sin(projectionCenter.Latitude);
             var oneMinusESq = 1 - ESq;
             var eSinLatCenter = E * sinLatCenter;
             Beta = Math.Sqrt(
@@ -104,7 +162,7 @@ namespace Pigeoid.CoordinateOperation.Projection
                 - (
                     Beta
                     * Math.Log(
-                        Math.Tan(QuarterPi + (GreenwichProjectionCenter.Latitude / 2.0))
+                        Math.Tan(QuarterPi + (projectionCenter.Latitude / 2.0))
                         * Math.Pow(
                             (1 - eSinLatCenter) / (1 + eSinLatCenter),
                             EHalf
@@ -115,13 +173,18 @@ namespace Pigeoid.CoordinateOperation.Projection
         }
 
         public override Point2 TransformValue(GeographicCoordinate source) {
-            var greenwichLon = source.Longitude + ParisLongitudeOffset;
+            double greenwichLon;
 
+
+            var lonDiff = source.Longitude - (
+                GeogCoordinatesAreRelativeToGreenwich
+                    ? GreenwichCenterLongitude
+                    : ParisCenterLongitude);
 
             var sinLat = Math.Sin(source.Latitude);
             var eSinLat = E * sinLat;
             var halfLat = source.Latitude / 2.0;
-            var betaLonDiff = Beta * (greenwichLon - GreenwichProjectionCenter.Longitude);
+            var betaLonDiff = Beta * lonDiff;
             var q = C + (
                 Beta
                 * Math.Log(
