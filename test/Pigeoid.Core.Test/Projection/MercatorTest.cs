@@ -41,7 +41,7 @@ namespace Pigeoid.Core.Test.Projection
         }
 
         [Test]
-        public void EpsgExample_1_3_3_1_Test() {
+        public void EpsgExample_1_3_3_A_Test() {
             var projection = new Mercator(
                 1.91986218,
                 0.997,
@@ -58,7 +58,7 @@ namespace Pigeoid.Core.Test.Projection
         }
 
         [Test]
-        public void EpsgExample_1_3_3_1_InverseTest() {
+        public void EpsgExample_1_3_3_A_InverseTest() {
             var projection = new Mercator(
                 1.91986218,
                 0.997,
@@ -75,7 +75,7 @@ namespace Pigeoid.Core.Test.Projection
         }
 
         [Test]
-        public void EpsgExample_1_3_3_2_Test() {
+        public void EpsgExample_1_3_3_B_Test() {
             var projection = new Mercator(
                 new GeographicCoordinate(0.73303829, 0.89011792),
                 new Vector2(0, 0),
@@ -91,7 +91,7 @@ namespace Pigeoid.Core.Test.Projection
         }
 
         [Test]
-        public void EpsgExample_1_3_3_2_InverseTest() {
+        public void EpsgExample_1_3_3_B_InverseTest() {
             var projection = new Mercator(
                 new GeographicCoordinate(0.73303829, 0.89011792),
                 new Vector2(0, 0),
@@ -103,6 +103,38 @@ namespace Pigeoid.Core.Test.Projection
             var result = projection.GetInverse().TransformValue(input);
 
             Assert.AreEqual(expected.Latitude, result.Latitude, 0.000000006);
+            Assert.AreEqual(expected.Longitude, result.Longitude, 0.000000005);
+        }
+
+        [Test]
+        public void EpsgExample_1_3_3_C_Test() {
+            var projection = Mercator.ConstructVariantC(
+                new GeographicCoordinate(0.73303829, 0.89011792),
+                new Vector2(0,0),
+                new SpheroidEquatorialInvF(6378245, 298.3));
+
+            var input = new GeographicCoordinate(0.9250245, 0.9250245);
+            var expected = new Point2(165704.29, 1351950.22);
+
+            var result = projection.TransformValue(input);
+
+            Assert.AreEqual(expected.X, result.X, 0.04);
+            Assert.AreEqual(expected.Y, result.Y, 0.06);
+        }
+
+        [Test]
+        public void EpsgExample_1_3_3_C_InverseTest() {
+            var projection = Mercator.ConstructVariantC(
+                new GeographicCoordinate(0.73303829, 0.89011792),
+                new Vector2(0, 0),
+                new SpheroidEquatorialInvF(6378245, 298.3));
+
+            var expected = new GeographicCoordinate(0.9250245, 0.9250245);
+            var input = new Point2(165704.29, 1351950.22);
+
+            var result = projection.GetInverse().TransformValue(input);
+
+            Assert.AreEqual(expected.Latitude, result.Latitude, 0.000000008);
             Assert.AreEqual(expected.Longitude, result.Longitude, 0.000000005);
         }
 

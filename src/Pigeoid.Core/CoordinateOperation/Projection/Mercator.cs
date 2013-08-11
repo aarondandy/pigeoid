@@ -14,14 +14,6 @@ namespace Pigeoid.CoordinateOperation.Projection
         IEquatable<Mercator>
     {
 
-        protected readonly double CentralMeridian;
-        protected readonly double ScaleFactor;
-        protected readonly double Ak;
-        protected readonly double LatLineCoefficient1;
-        protected readonly double LatLineCoefficient2;
-        protected readonly double LatLineCoefficient3;
-        protected readonly double LatLineCoefficient4;
-
         private class Inverted : InvertedTransformationBase<Mercator, Point2, GeographicCoordinate>
         {
 
@@ -52,6 +44,45 @@ namespace Pigeoid.CoordinateOperation.Projection
 
         }
 
+        public static Mercator ConstructVariantC(
+            GeographicCoordinate falseOrigin,
+            Vector2 offsetAtFalseOrigin,
+            ISpheroid<double> spheroid
+        ) {
+            var sinLat = Math.Sin(falseOrigin.Latitude);
+            var eSinLat = spheroid.E * sinLat;
+            var eHalf = spheroid.E / 2.0;
+            var scaleFactor = CalculateScaleFactor(falseOrigin.Latitude, spheroid.ESquared);
+            var m = spheroid.A
+                * scaleFactor
+                * Math.Log(
+                    Math.Tan((falseOrigin.Latitude / 2.0) + QuarterPi)
+                    * Math.Pow((1.0 - eSinLat) / (1.0 + eSinLat), eHalf)
+                );
+            var falseProjectedOffset = new Vector2(
+                offsetAtFalseOrigin.X,
+                offsetAtFalseOrigin.Y - m);
+            return new Mercator(
+                falseOrigin.Longitude,
+                scaleFactor,
+                falseProjectedOffset,
+                spheroid);
+        }
+
+        private static double CalculateScaleFactor(double latitude, double eSquared) {
+            var sinLat = Math.Sin(latitude);
+            return Math.Cos(latitude)
+                / Math.Sqrt(1.0 - (sinLat * sinLat * eSquared));
+        }
+
+        protected readonly double CentralMeridian;
+        protected readonly double ScaleFactor;
+        protected readonly double Ak;
+        protected readonly double LatLineCoefficient1;
+        protected readonly double LatLineCoefficient2;
+        protected readonly double LatLineCoefficient3;
+        protected readonly double LatLineCoefficient4;
+
         /// <summary>
         /// Constructs a Mercator projection from 2 standard parallels.
         /// </summary>
@@ -64,8 +95,7 @@ namespace Pigeoid.CoordinateOperation.Projection
             ISpheroid<double> spheroid
         ) : this(
             geographicOrigin.Longitude,
-            Math.Cos(geographicOrigin.Latitude)
-                / Math.Sqrt(1.0 - (Math.Sin(geographicOrigin.Latitude) * Math.Sin(geographicOrigin.Latitude) * spheroid.ESquared)),
+            CalculateScaleFactor(geographicOrigin.Latitude, spheroid.ESquared),
             falseProjectedOffset,
             spheroid
         ) {

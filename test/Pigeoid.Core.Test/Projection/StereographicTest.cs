@@ -27,6 +27,23 @@ namespace Pigeoid.Core.Test.Projection
         }
 
         [Test]
+        public void EpsgExample_1_3_7_1_Inverse() {
+            var projection = new ObliqueStereographic(
+                new GeographicCoordinate(0.910296727, 0.094032038),
+                0.9999079,
+                new Vector2(155000.00, 463000.00),
+                new SpheroidEquatorialInvF(6377397.155, 299.15281)
+            );
+            var expected = new GeographicCoordinate(0.925024504, 0.104719755);
+            var input = new Point2(196105.283, 557057.739);
+
+            var result = projection.GetInverse().TransformValue(input);
+
+            Assert.AreEqual(expected.Latitude, result.Latitude, 0.000000001);
+            Assert.AreEqual(expected.Longitude, result.Longitude, 0.0000000007);
+        }
+
+        [Test]
         public void EpsgExample_1_3_7_2_A() {
             var projection = new PolarStereographic(
                 new GeographicCoordinate(1.570796327, 0),
