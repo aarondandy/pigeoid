@@ -64,6 +64,7 @@
     <Compile Include="Mock\MockAxis.cs" />
     <Compile Include="Mock\MockDatum.cs" />
     <Compile Include="Ogc\OgcUnitTest.cs" />
+    <Compile Include="Projection\AmericanPolyconicTest.cs" />
     <Compile Include="Projection\EquidistantCylindricalTest.cs" />
     <Compile Include="Projection\LambertAzimuthalEqualAreaTest.cs" />
     <Compile Include="Projection\LambertConicConformal1SpTest.cs" />

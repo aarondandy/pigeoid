@@ -1271,7 +1271,7 @@ namespace Pigeoid.Epsg.Transform.Test
             AreEqual(expected4298, inverse.TransformValue(expected29873), 0.0005);
         }
 
-        [Test, Ignore(NotSupported)]
+        [Test]
         public void m9816_tunisiaMiningGrid() {
             // method: 9816
             // op: 19937
