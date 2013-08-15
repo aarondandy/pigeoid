@@ -1233,9 +1233,9 @@ namespace Pigeoid.Epsg.Transform.Test
             Assert.IsNotNull(inverse);
 
             var expected29701 = new Point2(188333.848, 1098841.091);
-            var expected4810 = new GeographicCoordinate(-17.9886666667, 46.800381173); // grads
+            var expected4810 = new GeographicCoordinate(-17.9886666667, 46.800381173 + 2.5969212963); // grads
 
-            AreEqual(expected4810, transformation.TransformValue(expected29701), 0.01);
+            AreEqual(expected4810, transformation.TransformValue(expected29701), 0.001);
             AreEqual(expected29701, inverse.TransformValue(expected4810), 50);
         }
 

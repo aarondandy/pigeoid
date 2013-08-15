@@ -96,8 +96,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\build\data\EPSG_v8_1.mdb">
-      <Link>EPSG_v8_1.mdb</Link>
+    <Content Include="..\..\build\data\EPSG_v8_2.mdb">
+      <Link>EPSG_v8_2.mdb</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

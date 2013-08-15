@@ -117,8 +117,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\data\EPSG_v8_1.mdb">
-      <Link>EPSG_v8_1.mdb</Link>
+    <Content Include="..\data\EPSG_v8_2.mdb">
+      <Link>EPSG_v8_2.mdb</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
