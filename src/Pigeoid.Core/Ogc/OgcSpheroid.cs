@@ -2,7 +2,6 @@
 using System.Diagnostics.Contracts;
 using Pigeoid.Unit;
 using Vertesaur;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Ogc
 {

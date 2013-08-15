@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Pigeoid.CoordinateOperation.Transformation;
-using Vertesaur.Contracts;
+using Vertesaur;
 using Vertesaur.Transformation;
 using Pigeoid.Unit;
 

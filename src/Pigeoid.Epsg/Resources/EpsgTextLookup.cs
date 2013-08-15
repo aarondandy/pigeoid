@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.IO;
 using System.Text;
 
@@ -18,6 +19,7 @@ namespace Pigeoid.Epsg.Resources
 		}
 
 		public static string GetString(ushort stringOffset, BinaryReader reader) {
+            Contract.Requires(reader != null);
 			if (stringOffset == UInt16.MaxValue)
 				return String.Empty;
 			reader.BaseStream.Seek(stringOffset, SeekOrigin.Begin);
@@ -26,6 +28,7 @@ namespace Pigeoid.Epsg.Resources
 		}
 
 		private static string BuildWordString(List<int> wordIndices) {
+            Contract.Requires(wordIndices != null);
 			using(var datReader = EpsgDataResource.CreateBinaryReader("words.dat"))
 			using(var txtReader = EpsgDataResource.CreateBinaryReader("words.txt")){
 				if (wordIndices.Count == 1) {
@@ -41,6 +44,8 @@ namespace Pigeoid.Epsg.Resources
 		}
 
 		private static string BuildWordString(int wordIndex, BinaryReader datReader, BinaryReader txtReader) {
+            Contract.Requires(datReader != null);
+            Contract.Requires(txtReader != null);
 			datReader.BaseStream.Seek(wordIndex * (sizeof(ushort) + sizeof(byte)), SeekOrigin.Begin);
 			var address = datReader.ReadUInt16();
 			var stringBytes = new byte[datReader.ReadByte()];
@@ -51,11 +56,13 @@ namespace Pigeoid.Epsg.Resources
 		}
 
 		private static List<int> Read7BitArray(BinaryReader reader) {
+            Contract.Requires(reader != null);
 			var dataCount = reader.ReadByte();
 			return Read7BitArray(dataCount, reader);
 		}
 
 		private static List<int> Read7BitArray(int length, BinaryReader reader) {
+            Contract.Requires(reader != null);
 			var result = new List<int>();
 			int bytesRead = 0;
 			while(bytesRead < length) {

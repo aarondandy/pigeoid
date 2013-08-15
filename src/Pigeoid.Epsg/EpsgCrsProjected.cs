@@ -41,6 +41,7 @@ namespace Pigeoid.Epsg
                             codeList = new List<int>();
                             reverseIndex.Add(baseCrs, codeList);
                         }
+                        Contract.Assume(codeList != null);
                         codeList.Add(key);
                     }
                 }
@@ -86,7 +87,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override int GetKeyForItem(EpsgCrsProjected value) {
-                Contract.Requires(value != null);
                 return value.Code;
             }
         }

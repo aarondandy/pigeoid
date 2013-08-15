@@ -60,7 +60,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override int GetKeyForItem(EpsgCrsDatumBased value) {
-                Contract.Requires(value != null);
                 return value.Code;
             }
 

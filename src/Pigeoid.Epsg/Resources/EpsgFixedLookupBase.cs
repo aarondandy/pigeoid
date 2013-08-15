@@ -26,11 +26,11 @@ namespace Pigeoid.Epsg.Resources
 			return item;
 		}
 
-		public override IEnumerable<TKey> Keys {
+		internal override IEnumerable<TKey> Keys {
 			get { return LookUpCore.Keys; }
 		}
 
-		public override IEnumerable<TValue> Values {
+        internal override IEnumerable<TValue> Values {
 			get { return LookUpCore.Values; }
 		}
 

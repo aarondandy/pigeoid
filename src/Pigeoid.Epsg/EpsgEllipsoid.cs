@@ -4,7 +4,6 @@ using System.Diagnostics.Contracts;
 using Pigeoid.Epsg.Resources;
 using Pigeoid.Unit;
 using Vertesaur;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Epsg
 {

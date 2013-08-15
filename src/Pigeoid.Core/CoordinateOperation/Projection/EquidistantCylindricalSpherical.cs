@@ -2,7 +2,7 @@
 using System.Diagnostics.Contracts;
 using Pigeoid.CoordinateOperation.Transformation;
 using Vertesaur;
-using Vertesaur.Contracts;
+using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {

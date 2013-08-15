@@ -17,6 +17,7 @@ namespace Pigeoid.Epsg
             VerticalDatum = datum;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(VerticalDatum != null);
         }

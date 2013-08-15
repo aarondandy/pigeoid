@@ -2,7 +2,7 @@
 using System.Diagnostics.Contracts;
 using Pigeoid.CoordinateOperation.Transformation;
 using Vertesaur;
-using Vertesaur.Contracts;
+using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
@@ -49,6 +49,7 @@ namespace Pigeoid.CoordinateOperation.Projection
             Vector2 offsetAtFalseOrigin,
             ISpheroid<double> spheroid
         ) {
+            Contract.Requires(spheroid != null);
             var sinLat = Math.Sin(falseOrigin.Latitude);
             var eSinLat = spheroid.E * sinLat;
             var eHalf = spheroid.E / 2.0;

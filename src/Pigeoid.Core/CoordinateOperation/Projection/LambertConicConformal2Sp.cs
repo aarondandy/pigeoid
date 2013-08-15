@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using Vertesaur;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {

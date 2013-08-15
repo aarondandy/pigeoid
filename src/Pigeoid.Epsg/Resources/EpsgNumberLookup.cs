@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Contracts;
 using System.IO;
 
 namespace Pigeoid.Epsg.Resources
@@ -7,6 +8,7 @@ namespace Pigeoid.Epsg.Resources
 	{
 
 		public static double ReadNumber(ushort index, BinaryReader reader) {
+            Contract.Requires(reader != null);
 			reader.BaseStream.Seek(index * sizeof(double), SeekOrigin.Begin);
 			return reader.ReadDouble();
 		}
@@ -20,6 +22,13 @@ namespace Pigeoid.Epsg.Resources
 			_intReader = EpsgDataResource.CreateBinaryReader("numbersi.dat");
 			_shortReader = EpsgDataResource.CreateBinaryReader("numberss.dat");
 		}
+
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(_doubleReader != null);
+            Contract.Invariant(_intReader != null);
+            Contract.Invariant(_shortReader != null);
+        }
 
 		public double Get(ushort code) {
 			var index = (ushort) (code & 0x3fff);

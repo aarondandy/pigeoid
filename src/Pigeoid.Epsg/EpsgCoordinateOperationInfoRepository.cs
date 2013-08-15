@@ -48,7 +48,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override ushort GetKeyForItem(EpsgCoordinateOperationInfo value) {
-                Contract.Requires(value != null);
                 return (ushort)value.Code;
             }
 
@@ -85,12 +84,14 @@ namespace Pigeoid.Epsg
                             lookUpTargets = new List<ushort>();
                             forwardLookUp.Add(sourceCrsCode, lookUpTargets);
                         }
+                        Contract.Assume(lookUpTargets != null);
                         lookUpTargets.Add(key);
 
                         if (!reverseLookUp.TryGetValue(targetCrsCode, out lookUpTargets)) {
                             lookUpTargets = new List<ushort>();
                             reverseLookUp.Add(targetCrsCode, lookUpTargets);
                         }
+                        Contract.Assume(lookUpTargets != null);
                         lookUpTargets.Add(key);
                     }
                 }
@@ -160,7 +161,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override ushort GetKeyForItem(EpsgCoordinateTransformInfo value) {
-                Contract.Requires(value != null);
                 return (ushort)value.Code;
             }
 
@@ -197,12 +197,14 @@ namespace Pigeoid.Epsg
                             lookUpTargets = new List<ushort>();
                             forwardLookUp.Add(sourceCrsCode, lookUpTargets);
                         }
+                        Contract.Assume(lookUpTargets != null);
                         lookUpTargets.Add(key);
 
                         if (!reverseLookUp.TryGetValue(targetCrsCode, out lookUpTargets)) {
                             lookUpTargets = new List<ushort>();
                             reverseLookUp.Add(targetCrsCode, lookUpTargets);
                         }
+                        Contract.Assume(lookUpTargets != null);
                         lookUpTargets.Add(key);
                     }
                 }
@@ -277,7 +279,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override ushort GetKeyForItem(EpsgConcatenatedCoordinateOperationInfo value) {
-                Contract.Requires(value != null);
                 return (ushort)value.Code;
             }
 

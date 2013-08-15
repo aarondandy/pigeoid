@@ -4,7 +4,6 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using Pigeoid.Epsg.Resources;
 using Vertesaur;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Epsg
 {
@@ -69,7 +68,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override ushort GetKeyForItem(EpsgArea value) {
-                Contract.Requires(value != null);
                 return (ushort)(value.Code);
             }
 
@@ -128,19 +126,16 @@ namespace Pigeoid.Epsg
         }
 
         public bool Intersects(EpsgArea other) {
-            Contract.Requires(other != null);
             return LongitudeRange.Intersects(other.LongitudeRange)
                 && LatitudeRange.Intersects(other.LatitudeRange);
         }
 
         public bool Contains(EpsgArea other) {
-            Contract.Requires(other != null);
             return LongitudeRange.Contains(other.LongitudeRange)
                 && LatitudeRange.Contains(other.LatitudeRange);
         }
 
         public bool Within(EpsgArea other) {
-            Contract.Requires(other != null);
             return LongitudeRange.Within(other.LongitudeRange)
                 && LatitudeRange.Within(other.LatitudeRange);
         }

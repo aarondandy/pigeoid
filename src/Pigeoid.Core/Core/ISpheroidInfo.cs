@@ -1,5 +1,5 @@
 ﻿using Pigeoid.Unit;
-using Vertesaur.Contracts;
+using Vertesaur;
 
 namespace Pigeoid
 {

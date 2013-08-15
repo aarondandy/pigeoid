@@ -3,10 +3,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace Pigeoid.Epsg.Resources
 {
+    [ContractClass(typeof(EpsgDynamicLookUpBaseContract<,>))]
 	internal abstract class EpsgDynamicLookUpBase<TKey, TValue> :
 		EpsgLookUpBase<TKey, TValue>
 		where TValue : class
@@ -22,8 +24,7 @@ namespace Pigeoid.Epsg.Resources
 		/// Concrete classes must initialize the <c>AllOrderedKeys</c> field from their constructor.
 		/// </summary>
 		protected EpsgDynamicLookUpBase(TKey[] orderedKeys) {
-			if(null == orderedKeys)
-				throw new ArgumentNullException();
+            Contract.Requires(orderedKeys != null);
 
 			// TODO: ONLY if in debug, make sure the keys are ordered?
 
@@ -33,8 +34,16 @@ namespace Pigeoid.Epsg.Resources
 			_orderedKeys = orderedKeys;
 		}
 
-		public override IEnumerable<TValue> Values {
+        [ContractInvariantMethod]
+        private void CodeContractInvariants() {
+            Contract.Invariant(_lookUp != null);
+            Contract.Invariant(_orderedKeys != null);
+            Contract.Invariant(_fullReadMutex != null);
+        }
+
+		internal override IEnumerable<TValue> Values {
 			get {
+                Contract.Ensures(Contract.Result<IEnumerable<TValue>>() != null);
 				if(!_fullReadPerformed)
 					SingleFullRead();
 				// TODO: should this collection be cached?
@@ -42,8 +51,11 @@ namespace Pigeoid.Epsg.Resources
 			}
 		}
 
-		public override IEnumerable<TKey> Keys {
-			get { return Array.AsReadOnly(_orderedKeys); }
+		internal override IEnumerable<TKey> Keys {
+			get {
+                Contract.Ensures(Contract.Result<IEnumerable<TKey>>() != null);
+			    return _orderedKeys;
+			}
 		}
 
 		public override TValue Get(TKey key) {
@@ -57,6 +69,7 @@ namespace Pigeoid.Epsg.Resources
 				return default(TValue);
 			// if we do have a key for it, try a get add
 			// we do a GetOrAdd instead of TryAdd just in case somebody beat us to it
+            Contract.Assume(key != null);
 			return _lookUp.GetOrAdd(key, k => Create(k,i));
 		}
 
@@ -75,6 +88,7 @@ namespace Pigeoid.Epsg.Resources
 					// call directly on the look-up to avoid another key look-up
 					var key = _orderedKeys[i];
 					var localIndex = i;
+                    Contract.Assume(key != null);
 					_lookUp.GetOrAdd(key, k => Create(k, localIndex));
 				}
 				_fullReadPerformed = true;
@@ -82,4 +96,19 @@ namespace Pigeoid.Epsg.Resources
 		}
 
 	}
+
+    [ContractClassFor(typeof(EpsgDynamicLookUpBase<,>))]
+    internal abstract class EpsgDynamicLookUpBaseContract<TKey, TValue> :
+        EpsgDynamicLookUpBase<TKey, TValue>
+        where TValue : class
+    {
+        public EpsgDynamicLookUpBaseContract() : base(null) { }
+
+        protected override TKey GetKeyForItem(TValue value) {
+            Contract.Requires(value != null);
+            return default(TKey);
+        }
+
+    }
+
 }

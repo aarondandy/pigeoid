@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
-using Vertesaur.Contracts;
+using Vertesaur;
 using Vertesaur.Periodic;
 
 namespace Pigeoid

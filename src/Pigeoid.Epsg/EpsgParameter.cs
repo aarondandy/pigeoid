@@ -45,7 +45,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override ushort GetKeyForItem(EpsgParameterInfo value) {
-                Contract.Requires(value != null);
                 return value._code;
             }
         }
@@ -68,7 +67,7 @@ namespace Pigeoid.Epsg
         private readonly ushort _code;
 
         internal EpsgParameterInfo(ushort code, string name) {
-            Contract.Requires(!String.IsNullOrEmpty(Name));
+            Contract.Requires(!String.IsNullOrEmpty(name));
             _code = code;
             Name = name;
         }

@@ -3,7 +3,6 @@ using Pigeoid.CoordinateOperation;
 using Pigeoid.CoordinateOperation.Projection;
 using Pigeoid.Unit;
 using Vertesaur;
-using Vertesaur.Contracts;
 using Vertesaur.Transformation;
 
 namespace Pigeoid.Epsg.Transform.Test

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using Vertesaur;
-using Vertesaur.Contracts;
+using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Transformation
 {
@@ -16,6 +16,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
                 Contract.Requires(coreWrapper != null);
                 Contract.Requires(coreWrapper.GeocentricToGeographic.HasInverse);
                 Contract.Requires(coreWrapper.GeographicToGeocentric.HasInverse);
+                Contract.Ensures(Contract.Result<Inverse>() != null);
                 var geographicToGeocentric = coreWrapper.GeocentricToGeographic.GetInverse();
                 Contract.Assume(coreWrapper.GeographicToGeocentric.HasInverse);
                 var geocentricToGeographic = coreWrapper.GeographicToGeocentric.GetInverse();

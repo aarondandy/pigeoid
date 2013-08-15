@@ -29,6 +29,7 @@ namespace Pigeoid.Epsg
             _code = code;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(_code >= 0);
         }

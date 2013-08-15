@@ -85,7 +85,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override ushort GetKeyForItem(EpsgAxisSet value) {
-                Contract.Requires(value != null);
                 return value.CsKey;
             }
 
@@ -112,6 +111,7 @@ namespace Pigeoid.Epsg
             Unit = unit;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(!String.IsNullOrEmpty(Name));
             Contract.Invariant(!String.IsNullOrEmpty(Abbreviation));

@@ -7,9 +7,9 @@ namespace Pigeoid.Epsg.Resources
 
 		public abstract TValue Get(TKey key);
 
-		public abstract IEnumerable<TKey> Keys { get; }
+		internal abstract IEnumerable<TKey> Keys { get; }
 
-		public abstract IEnumerable<TValue> Values { get; }
+        internal abstract IEnumerable<TValue> Values { get; }
 
 	}
 }

@@ -48,7 +48,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override ushort GetKeyForItem(EpsgCrsCompound value) {
-                Contract.Requires(value != null);
                 return (ushort)value.Code;
             }
 

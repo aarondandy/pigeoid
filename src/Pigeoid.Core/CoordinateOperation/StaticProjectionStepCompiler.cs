@@ -8,7 +8,6 @@ using Pigeoid.Interop;
 using Pigeoid.Ogc;
 using Pigeoid.Unit;
 using Vertesaur;
-using Vertesaur.Contracts;
 using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation

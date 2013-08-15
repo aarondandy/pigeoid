@@ -5,7 +5,6 @@ using System.Linq;
 using Pigeoid.Ogc;
 using Pigeoid.Unit;
 using Vertesaur;
-using Vertesaur.Contracts;
 
 namespace Pigeoid.Interop.Proj4
 {

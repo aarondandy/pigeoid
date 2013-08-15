@@ -70,7 +70,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override ushort GetKeyForItem(EpsgCoordinateSystem value) {
-                Contract.Requires(value != null);
                 return (ushort)value.Code;
             }
         }

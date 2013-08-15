@@ -48,7 +48,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override ushort GetKeyForItem(EpsgCoordinateOperationMethodInfo value) {
-                Contract.Requires(value != null);
                 return value._code;
             }
 
@@ -76,6 +75,7 @@ namespace Pigeoid.Epsg
                         + ((sizeof(ushort) * 2) * _parent._paramUsage.Length); // values
                 }
 
+                [ContractInvariantMethod]
                 private void CodeContractInvariants() {
                     Contract.Invariant(_parent != null);
                 }
@@ -105,7 +105,6 @@ namespace Pigeoid.Epsg
                 }
 
                 protected override ushort GetKeyForItem(OpParamValueInfo value) {
-                    Contract.Requires(value != null);
                     return (ushort)value.OpCode;
                 }
             }
@@ -183,6 +182,7 @@ namespace Pigeoid.Epsg
                 }
             }
 
+            [ContractInvariantMethod]
             private void CodeContractInvariants() {
                 Contract.Invariant(_paramUsage != null);
                 Contract.Invariant(_valueLookUp != null);
@@ -269,6 +269,7 @@ namespace Pigeoid.Epsg
                 CreateParamInfoLookUp, LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(!String.IsNullOrEmpty(Name));
             Contract.Invariant(_paramData != null);

@@ -2,7 +2,7 @@
 using System.Diagnostics.Contracts;
 using Pigeoid.CoordinateOperation.Transformation;
 using Vertesaur;
-using Vertesaur.Contracts;
+using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
@@ -66,6 +66,7 @@ namespace Pigeoid.CoordinateOperation.Projection
             Vector2 falseProjectedOffset,
             ISpheroid<double> spheroid
         ) : base(falseProjectedOffset, spheroid) {
+            Contract.Requires(spheroid != null);
             E4 = ESq * ESq;
             E6 = E4 * ESq;
             GeographicOrigin = geographicOrigin;

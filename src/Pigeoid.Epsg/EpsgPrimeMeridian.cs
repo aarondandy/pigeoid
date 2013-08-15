@@ -49,6 +49,7 @@ namespace Pigeoid.Epsg
             Name = name;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(!String.IsNullOrEmpty(Name));
             Contract.Invariant(Unit != null);

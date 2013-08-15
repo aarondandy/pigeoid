@@ -85,7 +85,6 @@ namespace Pigeoid.Epsg
                 }
 
                 public override bool IsValid(EpsgCrs crs) {
-                    Contract.Requires(crs != null);
                     return base.IsValid(crs) && _predicate(crs);
                 }
             }
@@ -106,7 +105,6 @@ namespace Pigeoid.Epsg
                 }
 
                 public override bool IsValid(EpsgCoordinateOperationInfoBase operation) {
-                    Contract.Requires(operation != null);
                     return base.IsValid(operation) && _predicate(operation);
                 }
             }
@@ -155,6 +153,7 @@ namespace Pigeoid.Epsg
                 _opValidator = _options.CreateOperationValidator(fromArea, toArea);
             }
 
+            [ContractInvariantMethod]
             private void CodeContractInvariants() {
                 Contract.Invariant(_options != null);
                 Contract.Invariant(_opValidator != null);
@@ -162,7 +161,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override IEnumerable<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>> GetNeighborInfo(EpsgCrs node, int currentCost) {
-                Contract.Requires(node != null);
                 Contract.Ensures(Contract.Result<IEnumerable<DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>>>() != null);
                 var costPlusOne = currentCost + 1;
                 if (costPlusOne > 4)

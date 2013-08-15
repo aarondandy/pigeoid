@@ -70,7 +70,6 @@ namespace Pigeoid.Epsg
             }
 
             protected override ushort GetKeyForItem(EpsgDatumGeodetic value) {
-                Contract.Requires(value != null);
                 return (ushort)value.Code;
             }
         }
@@ -162,6 +161,7 @@ namespace Pigeoid.Epsg
             Area = area;
         }
 
+        [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(!String.IsNullOrEmpty(Name));
             Contract.Invariant(Area != null);
@@ -186,13 +186,17 @@ namespace Pigeoid.Epsg
 
     public class EpsgDatumEngineering : EpsgDatum
     {
-        internal EpsgDatumEngineering(ushort code, string name, EpsgArea area) : base(code, name, area) { }
+        internal EpsgDatumEngineering(ushort code, string name, EpsgArea area) : base(code, name, area) {
+            Contract.Requires(area != null);
+        }
         public override string Type { get { return "Engineering"; } }
     }
 
     public class EpsgDatumVertical : EpsgDatum
     {
-        internal EpsgDatumVertical(ushort code, string name, EpsgArea area) : base(code, name, area) { }
+        internal EpsgDatumVertical(ushort code, string name, EpsgArea area) : base(code, name, area) {
+            Contract.Requires(area != null);
+        }
         public override string Type { get { return "Vertical"; } }
     }
 
@@ -203,6 +207,7 @@ namespace Pigeoid.Epsg
             : base(code, name, area) {
             Contract.Requires(spheroid != null);
             Contract.Requires(primeMeridian != null);
+            Contract.Requires(area != null);
             Spheroid = spheroid;
             PrimeMeridian = primeMeridian;
         }

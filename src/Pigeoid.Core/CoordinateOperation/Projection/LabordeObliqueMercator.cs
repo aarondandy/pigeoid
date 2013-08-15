@@ -2,7 +2,7 @@
 using System.Diagnostics.Contracts;
 using Pigeoid.CoordinateOperation.Transformation;
 using Vertesaur;
-using Vertesaur.Contracts;
+using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
@@ -116,7 +116,9 @@ namespace Pigeoid.CoordinateOperation.Projection
             falseProjectedOffset,
             isGeogCenterDefinedOnParis: true,
             geogCoordinatesAreRelativeToGreenwich: true
-        ) { }
+        ) {
+            Contract.Requires(spheroid != null);
+        }
 
         public LabordeObliqueMercator(
             GeographicCoordinate projectionCenter,
@@ -173,9 +175,6 @@ namespace Pigeoid.CoordinateOperation.Projection
         }
 
         public override Point2 TransformValue(GeographicCoordinate source) {
-            double greenwichLon;
-
-
             var lonDiff = source.Longitude - (
                 GeogCoordinatesAreRelativeToGreenwich
                     ? GreenwichCenterLongitude

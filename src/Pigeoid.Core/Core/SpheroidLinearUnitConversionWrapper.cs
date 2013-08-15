@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
 using Pigeoid.Unit;
-using Vertesaur.Contracts;
+using Vertesaur;
 
 namespace Pigeoid
 {
