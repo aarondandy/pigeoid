@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System;
+using NUnit.Framework;
 using Pigeoid.CoordinateOperation.Projection;
 using Vertesaur;
 
@@ -32,6 +33,27 @@ namespace Pigeoid.Core.Test.Projection
             var geographicActual = inverse.TransformValue(projectedExpected);
             Assert.AreEqual(geographicExpected.Latitude, geographicActual.Latitude, 0.000001);
             Assert.AreEqual(geographicExpected.Longitude, geographicActual.Longitude, 0.00000003);
+        }
+
+        [Test]
+        public void map_proj_working_manual_lambert_az_eq_area_spherical_example() {
+            var projection = new LambertAzimuthalEqualAreaSpherical(
+                new GeographicCoordinate(0, 0),
+                new Vector2(0, 0),
+                new Sphere(1));
+            Assert.That(projection.HasInverse);
+            var inverse = projection.GetInverse();
+
+            var projectedExpected = new Point2(0.61040, 0.54826);
+            var geographicExpected = new GeographicCoordinate(30 * Math.PI / 180.0, 40 * Math.PI / 180.0);
+
+            var projectedActual = projection.TransformValue(geographicExpected);
+            Assert.AreEqual(projectedExpected.X, projectedActual.X, 0.00001);
+            Assert.AreEqual(projectedExpected.Y, projectedActual.Y, 0.000003);
+
+            var geographicActual = inverse.TransformValue(projectedExpected);
+            Assert.AreEqual(geographicExpected.Latitude, geographicActual.Latitude, 0.00001);
+            Assert.AreEqual(geographicExpected.Longitude, geographicActual.Longitude, 0.000004);
         }
 
     }
