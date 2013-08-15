@@ -26,8 +26,8 @@ namespace Pigeoid.Core.Test.Projection
             var geographicExpected = new GeographicCoordinate(0.872664626, 0.087266463);
 
             var projectedActual = projection.TransformValue(geographicExpected);
-            Assert.AreEqual(projectedExpected.X, projectedActual.X, 60);
-            Assert.AreEqual(projectedExpected.Y, projectedActual.Y, 1000);
+            Assert.AreEqual(projectedExpected.X, projectedActual.X, 0.004);
+            Assert.AreEqual(projectedExpected.Y, projectedActual.Y, 0.004);
 
             var geographicActual = inverse.TransformValue(projectedExpected);
             Assert.AreEqual(geographicExpected.Latitude, geographicActual.Latitude, 0.000001);
