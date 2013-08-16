@@ -131,6 +131,7 @@
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
     <Compile Include="CoordinateOperation\Projection\AmericanPolyconic.cs" />
+    <Compile Include="CoordinateOperation\Projection\LambertCylindricalEqualArea.cs" />
     <Compile Include="Core\AuthorityTag.cs" />
     <Compile Include="CoordinateOperation\ConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="Core\IAuthorityBoundEntity.cs" />
