@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
+using Pigeoid.Core;
 using Vertesaur;
 using Vertesaur.Periodic;
 
 namespace Pigeoid
 {
     public struct LongitudeDegreeRange :
+        IPeriodicRange<double>,
         IEquatable<LongitudeDegreeRange>,
         IEquatable<double>,
         IHasDistance<double, double>,
@@ -61,6 +63,10 @@ namespace Pigeoid
             Start = start;
             End = end;
         }
+
+        double IPeriodicRange<double>.Start { get { return Start; } }
+
+        double IPeriodicRange<double>.End { get { return End; } }
 
         public double Mid {
             [Pure] get { return DefaultPeriodicOperations.CalculateMidpoint(Start, End); }
@@ -129,6 +135,17 @@ namespace Pigeoid
         [Pure] public override string ToString() {
             Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
             return String.Concat(Start, ':', End);
+        }
+
+        [Pure] public bool TryIntersection(LongitudeDegreeRange other, out LongitudeDegreeRange result) {
+            if (Intersects(other)) {
+                result = new LongitudeDegreeRange(
+                    Math.Max(Start, other.Start),
+                    Math.Min(End, other.End));
+                return true;
+            }
+            result = default(LongitudeDegreeRange);
+            return false;
         }
 
     }

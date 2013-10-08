@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
+using Pigeoid.Core;
 using Pigeoid.Epsg.Resources;
 using Vertesaur;
 
 namespace Pigeoid.Epsg
 {
     public class EpsgArea :
+        IGeographicMbr,
         IRelatableIntersects<EpsgArea>,
         IRelatableContains<EpsgArea>,
         IRelatableWithin<EpsgArea>
@@ -116,6 +118,8 @@ namespace Pigeoid.Epsg
 
         public LongitudeDegreeRange LongitudeRange { get; private set; }
 
+        IPeriodicRange<double> IGeographicMbr.LongitudeRange { get{ return LongitudeRange; } }
+
         public Range LatitudeRange { get; private set; }
 
         public IAuthorityTag Authority {
@@ -138,6 +142,33 @@ namespace Pigeoid.Epsg
         public bool Within(EpsgArea other) {
             return LongitudeRange.Within(other.LongitudeRange)
                 && LatitudeRange.Within(other.LatitudeRange);
+        }
+
+        [Obsolete("A more generic replacement should be used.")]
+        private class IntersectionResult : IGeographicMbr
+        {
+
+            public IPeriodicRange<double> LongitudeRange { get; set; }
+
+            public Range LatitudeRange { get; set; }
+        }
+
+        public IGeographicMbr Intersection(EpsgArea other) {
+            if (!LatitudeRange.Intersects(other.LatitudeRange))
+                return null;
+
+            LongitudeDegreeRange longitude;
+            if (!LongitudeRange.TryIntersection(other.LongitudeRange, out longitude))
+                return null;
+
+            var latitude = new Range(
+                Math.Max(LatitudeRange.Low, other.LatitudeRange.Low),
+                Math.Min(LatitudeRange.High, other.LatitudeRange.High));
+
+            return new IntersectionResult {
+                LatitudeRange = latitude,
+                LongitudeRange = longitude
+            };
         }
 
     }

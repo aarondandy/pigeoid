@@ -185,7 +185,9 @@
     </Compile>
     <Compile Include="Core\IGeographicCoordinate.cs" />
     <Compile Include="Core\IGeographicHeightCoordinate.cs" />
+    <Compile Include="Core\IGeographicMbr.cs" />
     <Compile Include="Core\INamedParameter.cs" />
+    <Compile Include="Core\IPeriodicRange.cs" />
     <Compile Include="Interop\INameNormalizedComparer.cs" />
     <Compile Include="CoordinateOperation\IParameterizedCoordinateOperationInfo.cs" />
     <Compile Include="CoordinateOperation\IPassthroughCoordinateOperationInfo.cs" />
