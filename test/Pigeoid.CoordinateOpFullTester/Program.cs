@@ -37,6 +37,7 @@ namespace Pigeoid.CoordinateOpFullTester
 
             foreach (var testCase in CreateTestCases()) {
                 var intersectingArea = testCase.IntersectingArea;
+                var testPoints = testCase.CreateTestPoints(intersectingArea).ToArray();
                 Console.WriteLine("{0}", testCase);
             }
 
