@@ -17,5 +17,15 @@ namespace Pigeoid.CoordinateOperation
         /// </summary>
         IEnumerable<ICoordinateOperationInfo> CoordinateOperations { get; }
 
+        /// <summary>
+        /// The first CRS of the path.
+        /// </summary>
+        ICrs From { get; }
+
+        /// <summary>
+        /// The last CRS of the path.
+        /// </summary>
+        ICrs To { get; }
+
     }
 }

@@ -98,6 +98,10 @@ namespace Pigeoid
             return DefaultPeriodicOperations.Intersects(Start, End, r.Start, r.End);
         }
 
+        [Pure] public bool Intersects(IPeriodicRange<double> r) {
+            return DefaultPeriodicOperations.Intersects(Start, End, r.Start, r.End);
+        }
+
         [Pure] public bool Contains(double value) {
             return DefaultPeriodicOperations.Contains(Start, End, value);
         }
@@ -146,6 +150,15 @@ namespace Pigeoid
             }
             result = default(LongitudeDegreeRange);
             return false;
+        }
+
+        [Pure]
+        public IPeriodicRange<double> Intersection(IPeriodicRange<double> other) {
+            LongitudeDegreeRange result;
+            if (other != null && TryIntersection(new LongitudeDegreeRange(other.Start, other.End), out result)) {
+                return result;
+            }
+            return null;
         }
 
     }

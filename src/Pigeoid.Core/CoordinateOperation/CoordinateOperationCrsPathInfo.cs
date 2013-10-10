@@ -101,5 +101,13 @@ namespace Pigeoid.CoordinateOperation
             Contract.Ensures(Contract.Result<CoordinateOperationCrsPathInfo>() != null);
             return Join(this, other);
         }
+
+        public ICrs From {
+            get { return CrsNodesArray[0]; }
+        }
+
+        public ICrs To {
+            get { return CrsNodesArray[CrsNodesArray.Length-1]; }
+        }
     }
 }

@@ -78,8 +78,9 @@ namespace Pigeoid.Epsg
         internal static readonly EpsgAreaLookUp LookUp = new EpsgAreaLookUp();
 
         public static EpsgArea Get(int code) {
-            Contract.Ensures(Contract.Result<EpsgArea>() != null);
-            return LookUp.Get(checked((ushort)code));
+            if (code < 0 || code >= UInt16.MaxValue)
+                return null;
+            return LookUp.Get(unchecked((ushort)code));
         }
 
         public static IEnumerable<EpsgArea> Values {
@@ -129,6 +130,11 @@ namespace Pigeoid.Epsg
             }
         }
 
+        public bool Intersects(IGeographicMbr other) {
+            return LongitudeRange.Intersects(other.LongitudeRange)
+                && LatitudeRange.Intersects(other.LatitudeRange);
+        }
+
         public bool Intersects(EpsgArea other) {
             return LongitudeRange.Intersects(other.LongitudeRange)
                 && LatitudeRange.Intersects(other.LatitudeRange);
@@ -151,14 +157,37 @@ namespace Pigeoid.Epsg
             public IPeriodicRange<double> LongitudeRange { get; set; }
 
             public Range LatitudeRange { get; set; }
+
+            public bool Intersects(IGeographicMbr other) {
+                return LongitudeRange.Intersects(other.LongitudeRange)
+                && LatitudeRange.Intersects(other.LatitudeRange);
+            }
+
+            public IGeographicMbr Intersection(IGeographicMbr other) {
+                if (!LatitudeRange.Intersects(other.LatitudeRange))
+                    return null;
+
+                var longitude = LongitudeRange.Intersection(other.LongitudeRange);
+                if (longitude == null)
+                    return null;
+
+                var latitude = new Range(
+                    Math.Max(LatitudeRange.Low, other.LatitudeRange.Low),
+                    Math.Min(LatitudeRange.High, other.LatitudeRange.High));
+
+                return new IntersectionResult {
+                    LatitudeRange = latitude,
+                    LongitudeRange = longitude
+                };
+            }
         }
 
-        public IGeographicMbr Intersection(EpsgArea other) {
+        public IGeographicMbr Intersection(IGeographicMbr other) {
             if (!LatitudeRange.Intersects(other.LatitudeRange))
                 return null;
 
-            LongitudeDegreeRange longitude;
-            if (!LongitudeRange.TryIntersection(other.LongitudeRange, out longitude))
+            var longitude = LongitudeRange.Intersection(other.LongitudeRange);
+            if(longitude == null)
                 return null;
 
             var latitude = new Range(

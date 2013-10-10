@@ -46,7 +46,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CoordinateOpTestCase.cs" />
+    <Compile Include="CoordOpTestCase.cs" />
+    <Compile Include="CoordOpTester.cs" />
+    <Compile Include="CoordOpTransformPath.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

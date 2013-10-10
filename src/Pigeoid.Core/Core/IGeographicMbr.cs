@@ -9,5 +9,8 @@ namespace Pigeoid.Core
 
         Range LatitudeRange { get; }
 
+        bool Intersects(IGeographicMbr other);
+
+        IGeographicMbr Intersection(IGeographicMbr other);
     }
 }

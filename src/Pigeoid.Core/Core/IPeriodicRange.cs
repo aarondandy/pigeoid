@@ -6,5 +6,9 @@
 
         T End { get; }
 
+        bool Intersects(IPeriodicRange<double> other);
+
+        IPeriodicRange<double> Intersection(IPeriodicRange<double> other);
+
     }
 }
