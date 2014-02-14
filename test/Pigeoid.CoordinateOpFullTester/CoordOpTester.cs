@@ -12,35 +12,6 @@ namespace Pigeoid.CoordinateOpFullTester
     public class CoordOpTester
     {
 
-        public static double[] GetValues(double start, double end, int count) {
-            var result = new double[count];
-            var lastIndex = count - 1;
-            var distance = end - start;
-            for (int i = 1; i < lastIndex; i++) {
-                var ratio = i / (double)(lastIndex);
-                result[i] = ratio * distance;
-            }
-            result[0] = start;
-            result[lastIndex] = end;
-            return result;
-        }
-
-        public static double[] GetValues(LongitudeDegreeRange range, int count) {
-            return GetValues(range.Start, range.End, count);
-        }
-
-        public static double[] GetValues(Range range, int count) {
-            return GetValues(range.Low, range.High, count);
-        }
-
-        public static IEnumerable<GeographicCoordinate> CreateTestPoints(IGeographicMbr mbr, int lonValueCount = 10, int latValueCount = 10) {
-            var lonValues = GetValues(mbr.LongitudeRange.Start, mbr.LongitudeRange.End, lonValueCount);
-            var latValues = GetValues(mbr.LatitudeRange.Low, mbr.LatitudeRange.High, latValueCount);
-            for (int r = 0; r < latValues.Length; r++)
-                for (int c = 0; c < lonValues.Length; c++)
-                    yield return new GeographicCoordinate(latValues[r], lonValues[c]);
-        }
-
         public static EpsgCrs Crs4326 { get { return EpsgCrs.Get(4326); } }
 
         public CoordOpTester() {
@@ -60,16 +31,6 @@ namespace Pigeoid.CoordinateOpFullTester
             var epsgCrs = crs as EpsgCrs;
             if (epsgCrs != null)
                 return epsgCrs.Area;
-            return null;
-        }
-
-        private Type GetCoordinateType(ICrs crs) {
-            if (crs is ICrsGeocentric)
-                return typeof (Point3);
-            if (crs is ICrsGeographic)
-                return typeof (GeographicCoordinate);
-            if (crs is ICrsProjected)
-                return typeof (Point2);
             return null;
         }
 
@@ -115,11 +76,6 @@ namespace Pigeoid.CoordinateOpFullTester
                     var path = CreateOperationPath(fromCrs, toCrs);
                     if(path == null)
                         continue;
-                    
-                    var testPoints4326 = CreateTestPoints(areaIntersection);
-                    var fromCrsCoordType = GetCoordinateType(fromCrs);
-
-                    throw new NotImplementedException("Need a simpler way to apply an ITransformation");
 
                     yield return new CoordOpTestCase {
                         From = fromCrs,
@@ -134,6 +90,5 @@ namespace Pigeoid.CoordinateOpFullTester
         public ICoordinateOperationCrsPathInfo CreateOperationPath(ICrs from, ICrs to) {
             return _epsgPathGenerator.Generate(from, to);
         }
-
     }
 }

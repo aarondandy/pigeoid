@@ -19,7 +19,7 @@ namespace Pigeoid
         IRelatableWithin<LongitudeDegreeRange>
     {
 
-        private static readonly PeriodicOperations DefaultPeriodicOperations;
+        public static PeriodicOperations DefaultPeriodicOperations { get; private set; }
 
         static LongitudeDegreeRange() {
             DefaultPeriodicOperations = new PeriodicOperations(-180, 360);

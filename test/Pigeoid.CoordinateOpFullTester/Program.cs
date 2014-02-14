@@ -12,6 +12,7 @@ namespace Pigeoid.CoordinateOpFullTester
             var tester = new CoordOpTester();
 
             foreach (var testCase in tester.CreateTestCases()) {
+                testCase.Execute();
                 //var intersectingArea = testCase.Area;
                 //var testPoints = CoordOpTester.CreateTestPoints(intersectingArea).ToArray();
                 Console.WriteLine("{0}", testCase);
