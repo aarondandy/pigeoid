@@ -14,6 +14,58 @@ namespace Pigeoid.CoordinateOpFullTester
 
         public static EpsgCrs Crs4326 { get { return EpsgCrs.Get(4326); } }
 
+        public static double[] GetValues(double start, double end, int count) {
+            var result = new double[count];
+            var lastIndex = count - 1;
+            var distance = end - start;
+            for (int i = 1; i < lastIndex; i++) {
+                var ratio = i / (double)(lastIndex);
+                result[i] = start + (ratio * distance);
+            }
+            result[0] = start;
+            result[lastIndex] = end;
+            return result;
+        }
+
+        public static double[] GetValues(LongitudeDegreeRange range, int count) {
+            var distance = range.GetMagnitude();
+            var result = GetValues(range.Start, range.Start + distance, count);
+            for (int i = 0; i < result.Length; i++)
+                result[i] = LongitudeDegreeRange.DefaultPeriodicOperations.Fix(result[i]);
+
+            return result;
+
+        }
+
+        public static double[] GetValues(IPeriodicRange<double> range, int count) {
+            if (range is LongitudeDegreeRange)
+                return GetValues((LongitudeDegreeRange)range, count);
+            throw new NotImplementedException();
+        }
+
+        public static double[] GetValues(Range range, int count) {
+            return GetValues(range.Low, range.High, count);
+        }
+
+        public static IEnumerable<GeographicCoordinate> CreateTestPoints(IGeographicMbr mbr, int lonValueCount = 10, int latValueCount = 10) {
+            var lonValues = GetValues(mbr.LongitudeRange, lonValueCount);
+            var latValues = GetValues(mbr.LatitudeRange, latValueCount);
+            for (int r = 0; r < latValues.Length; r++)
+                for (int c = 0; c < lonValues.Length; c++)
+                    yield return new GeographicCoordinate(latValues[r], lonValues[c]);
+        }
+
+        [Obsolete]
+        private Type GetCoordinateType(ICrs crs) {
+            if (crs is ICrsGeocentric)
+                return typeof(Point3);
+            if (crs is ICrsGeographic)
+                return typeof(GeographicCoordinate);
+            if (crs is ICrsProjected)
+                return typeof(Point2);
+            return null;
+        }
+
         public CoordOpTester() {
             _epsgPathGenerator = new EpsgCrsCoordinateOperationPathGenerator(
                 new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(x => !x.Deprecated, x => !x.Deprecated));
@@ -39,11 +91,13 @@ namespace Pigeoid.CoordinateOpFullTester
             if(crs4326 == null)
                 throw new InvalidOperationException("No implementation of EPSG:4326 has been found.");
 
-            var from4326 = GetAllCrs()
+            var testableCrsList = GetAllCrs()
+                .Where(x => x is ICrsGeocentric || x is ICrsGeographic || x is ICrsProjected)
+                .ToList();
+
+            var from4326 = testableCrsList
                 .Select(crs => CreateOperationPath(crs4326, crs))
                 .Where(x => x != null);
-
-            var allOtherCrs = GetAllCrs().ToList();
 
             foreach (var from4326Path in from4326) {
                 var fromCrs = from4326Path.To;
@@ -64,11 +118,14 @@ namespace Pigeoid.CoordinateOpFullTester
                 if(from4326Transformation == null)
                     continue;
 
-                foreach (var toCrs in allOtherCrs) {
+                foreach (var toCrs in testableCrsList) {
+                    if (toCrs == fromCrs)
+                        continue;
+
                     var toArea = ExtractMbr(toCrs);
                     if(toArea == null)
                         continue;
-
+                    
                     var areaIntersection = fromArea.Intersection(toArea);
                     if(areaIntersection == null)
                         continue;
@@ -77,11 +134,18 @@ namespace Pigeoid.CoordinateOpFullTester
                     if(path == null)
                         continue;
 
+                    var inputCoordsWgs84 = CreateTestPoints(areaIntersection).ToList();
+                    var transformedInputCoords = inputCoordsWgs84
+                        .Select(x => from4326Transformation.TransformValue(x))
+                        .ToList();
+
                     yield return new CoordOpTestCase {
                         From = fromCrs,
                         To = toCrs,
                         Area = areaIntersection,
-                        Path = path
+                        Path = path,
+                        InputWgs84Coordinates = inputCoordsWgs84,
+                        InputCoordinates = transformedInputCoords
                     };
                 }
             }

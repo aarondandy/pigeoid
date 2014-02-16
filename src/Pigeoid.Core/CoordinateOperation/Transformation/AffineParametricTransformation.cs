@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Pigeoid.Utility;
 using Vertesaur;
 using Vertesaur.Transformation;
 
@@ -69,6 +70,24 @@ namespace Pigeoid.CoordinateOperation.Transformation
             bool ITransformation.HasInverse {
                 [Pure] get { return true; }
             }
+
+            public Type[] GetInputTypes() {
+                return new[] {typeof(Point2)};
+            }
+
+            public Type[] GetOutputTypes(Type inputType) {
+                return inputType == typeof (Point2)
+                    ? new[] {typeof (Point2)}
+                    : ArrayUtil<Type>.Empty;
+            }
+
+            public object TransformValue(object value) {
+                return TransformValue((Point2) value);
+            }
+
+            public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+                return values.Select(TransformValue);
+            }
         }
 
         private readonly double _a0;
@@ -129,5 +148,24 @@ namespace Pigeoid.CoordinateOperation.Transformation
             [Pure] get { return 0 != _d && !Double.IsNaN(_d); }
             // ReSharper restore CompareOfFloatsByEqualityOperator
         }
+
+        public Type[] GetInputTypes() {
+            return new[] { typeof(Point2) };
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            return inputType == typeof(Point2)
+                ? new[] { typeof(Point2) }
+                : ArrayUtil<Type>.Empty;
+        }
+
+        public object TransformValue(object value) {
+            return TransformValue((Point2)value);
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            return values.Select(TransformValue);
+        }
+
     }
 }

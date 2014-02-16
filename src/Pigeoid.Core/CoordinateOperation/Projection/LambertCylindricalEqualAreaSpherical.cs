@@ -6,7 +6,7 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
-    public class LambertCylindricalEqualAreaSpherical : ProjectionBase
+    public class LambertCylindricalEqualAreaSpherical : SpheroidProjectionBase
     {
 
         private class Inverse : InvertedTransformationBase<LambertCylindricalEqualAreaSpherical, Point2, GeographicCoordinate>

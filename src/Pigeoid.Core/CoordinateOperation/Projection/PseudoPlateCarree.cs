@@ -1,63 +1,37 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
+﻿using System.Diagnostics.Contracts;
+using Pigeoid.CoordinateOperation.Transformation;
 using Vertesaur;
 using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
-    public class PseudoPlateCarree : ITransformation<GeographicCoordinate, Point2>
+    public class PseudoPlateCarree : ProjectionBase
     {
 
-        private class Inverted : ITransformation<Point2,GeographicCoordinate>
+        private class Inverse : InvertedTransformationBase<PseudoPlateCarree, Point2, GeographicCoordinate>
         {
 
-            public static readonly Inverted DefaultReverse = new Inverted();
-
-            private Inverted() { }
-
-            public ITransformation<GeographicCoordinate, Point2> GetInverse() {
-                return Default;
+            public Inverse(PseudoPlateCarree core) : base(core) {
+                Contract.Requires(core != null);
             }
 
-            public GeographicCoordinate TransformValue(Point2 value) {
+            public override GeographicCoordinate TransformValue(Point2 value) {
                 return new GeographicCoordinate(value.X, value.Y);
             }
 
-            public IEnumerable<GeographicCoordinate> TransformValues(IEnumerable<Point2> values) {
-                return values.Select(TransformValue);
-            }
-
-            ITransformation ITransformation.GetInverse() {
-                return GetInverse();
-            }
-
-            bool ITransformation.HasInverse {
-                [Pure] get { return true; }
-            }
         }
 
-        public static readonly PseudoPlateCarree Default = new PseudoPlateCarree();
+        public PseudoPlateCarree() { }
 
-        private PseudoPlateCarree() { }
-
-        public ITransformation<Point2, GeographicCoordinate> GetInverse() {
-            return Inverted.DefaultReverse;
+        public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
+            return new Inverse(this);
         }
 
-        public Point2 TransformValue(GeographicCoordinate value) {
+        public override Point2 TransformValue(GeographicCoordinate value) {
             return new Point2(value.Latitude, value.Longitude);
         }
 
-        public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values) {
-            return values.Select(TransformValue);
-        }
-
-        ITransformation ITransformation.GetInverse() {
-            return GetInverse();
-        }
-
-        bool ITransformation.HasInverse {
+        public override bool HasInverse {
             [Pure] get { return true; }
         }
     }

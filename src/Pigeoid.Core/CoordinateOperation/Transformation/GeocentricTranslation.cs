@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Pigeoid.Utility;
 using Vertesaur;
 using Vertesaur.Transformation;
 
@@ -55,6 +57,25 @@ namespace Pigeoid.CoordinateOperation.Transformation
         public ITransformation<Point3> GetInverse() {
             Contract.Ensures(Contract.Result<ITransformation<Point3>>() != null);
             return new GeocentricTranslation(D.GetNegative());
+        }
+
+        public Type[] GetInputTypes() {
+            return new[] { typeof(Point3) };
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            return inputType == typeof(Point3)
+                ? new[] { typeof(Point3) }
+                : ArrayUtil<Type>.Empty;
+        }
+
+        public object TransformValue(object value) {
+            return TransformValue((Point3)value);
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<object>>() != null);
+            return values.Select(TransformValue);
         }
     }
 }

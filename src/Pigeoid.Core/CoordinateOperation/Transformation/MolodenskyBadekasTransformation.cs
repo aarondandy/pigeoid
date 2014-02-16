@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pigeoid.Utility;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -116,5 +117,24 @@ namespace Pigeoid.CoordinateOperation.Transformation
             value = TransformValue(value);
         }
 
+
+        public Type[] GetInputTypes() {
+            return new[] {typeof (Point3)};
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            return inputType == typeof(Point3)
+                ? new[] { typeof(Point3) }
+                : ArrayUtil<Type>.Empty;
+        }
+
+        public object TransformValue(object value) {
+            return TransformValue((Point3) value);
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+            return values.Select(TransformValue);
+        }
     }
 }

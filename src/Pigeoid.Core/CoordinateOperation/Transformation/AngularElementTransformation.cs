@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Pigeoid.Utility;
 using Vertesaur;
 using Vertesaur.Transformation;
 
@@ -27,6 +28,41 @@ namespace Pigeoid.CoordinateOperation.Transformation
             Contract.Invariant(_core != null);
         }
 
+        public Type[] GetInputTypes() {
+            return new [] {
+                typeof(GeographicHeightCoordinate),
+                typeof(GeographicCoordinate),
+                typeof(Vector3),
+                typeof(Vector2)
+            };
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            return inputType == typeof (GeographicHeightCoordinate)
+                || inputType == typeof (GeographicCoordinate)
+                || inputType == typeof (Vector3)
+                || inputType == typeof (Vector2)
+                ? new[] {inputType}
+                : ArrayUtil<Type>.Empty;
+        }
+
+        public object TransformValue(object value) {
+            if (value is GeographicHeightCoordinate)
+                return TransformValue((GeographicHeightCoordinate) value);
+            if (value is GeographicCoordinate)
+                return TransformValue((GeographicCoordinate) value);
+            if (value is Vector3)
+                return TransformValue((Vector3) value);
+            if (value is Vector2)
+                return TransformValue((Vector2) value);
+            throw new InvalidOperationException();
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<object>>() != null);
+            return values.Select(TransformValue);
+        }
+
         public bool HasInverse {
             [Pure] get { return _core.HasInverse; }
         }
@@ -36,6 +72,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
             Contract.Ensures(Contract.Result<AngularElementTransformation>() != null);
             return new AngularElementTransformation(_core.GetInverse());
         }
+
 
         ITransformation<Vector2> ITransformation<Vector2>.GetInverse() {
             return GetInverse();

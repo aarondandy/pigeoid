@@ -368,7 +368,6 @@ namespace Pigeoid.Epsg
             // TODO: if one is not an EpsgCrs we should try making it one (but really it should already have been... so maybe not)
             // TODO: if one is EpsgCrs and the other is not, we need to find the nearest EpsgCrs along the way and use standard methods to get us there
             throw new NotImplementedException("Currently only 'EpsgCrs' to 'EpsgCrs' is supported."); // TODO: just return null if we don't know what to do with it?
-            return null; // TODO: or maybe just return null and move on?
         }
 
     }

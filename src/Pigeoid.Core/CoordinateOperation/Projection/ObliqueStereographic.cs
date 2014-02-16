@@ -6,7 +6,7 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
-    public class ObliqueStereographic : ProjectionBase
+    public class ObliqueStereographic : SpheroidProjectionBase
     {
 
         private class Inverted : InvertedTransformationBase<ObliqueStereographic, Point2, GeographicCoordinate>

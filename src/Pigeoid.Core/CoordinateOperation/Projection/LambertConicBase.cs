@@ -6,7 +6,7 @@ using Vertesaur.Transformation;
 namespace Pigeoid.CoordinateOperation.Projection
 {
     [ContractClass(typeof(LambertConicBaseCodeContracts))]
-    public abstract class LambertConicBase : ProjectionBase
+    public abstract class LambertConicBase : SpheroidProjectionBase
     {
 
         /// <summary>

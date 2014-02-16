@@ -11,7 +11,7 @@ namespace Pigeoid.CoordinateOperation.Projection
     /// While the projection is defined with an origin relative to Paris
     /// the projection inputs and inverse outputs are relative to Greenwich.
     /// </remarks>
-    public class LabordeObliqueMercator : ProjectionBase
+    public class LabordeObliqueMercator : SpheroidProjectionBase
     {
 
         /// <summary>

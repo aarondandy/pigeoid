@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
+﻿using System.Diagnostics.Contracts;
 using Pigeoid.CoordinateOperation.Transformation;
 using Vertesaur;
 using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
-    public class TunisiaMiningGrid : ITransformation<GeographicCoordinate, Point2>
+    public class TunisiaMiningGrid : ProjectionBase
     {
 
         private class Inverse : InvertedTransformationBase<TunisiaMiningGrid, Point2, GeographicCoordinate>
@@ -30,29 +27,19 @@ namespace Pigeoid.CoordinateOperation.Projection
             return new Point2(easting, northing);
         }
 
-        public Point2 TransformValue(GeographicCoordinate source) {
+        public override Point2 TransformValue(GeographicCoordinate source) {
             var x = 270.0 + ((source.Longitude - 7.83445) / 0.012185);
             var y = 360.0 + ((source.Latitude - 36.5964) / (source.Latitude > 36.5964 ? 0.010015 : 0.01002));
             return new Point2(x, y);
         }
 
-        public bool HasInverse {
+        public override bool HasInverse {
             [Pure] get { return true; }
         }
 
-        public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values) {
-            if(values == null) throw new ArgumentNullException("values");
-            Contract.Ensures(Contract.Result<IEnumerable<Point2>>() != null);
-            return values.Select(TransformValue);
-        }
-
-        public ITransformation<Point2, GeographicCoordinate> GetInverse() {
+        public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
             Contract.Ensures(Contract.Result<ITransformation<Point2, GeographicCoordinate>>() != null);
             return new Inverse(this);
-        }
-
-        ITransformation ITransformation.GetInverse() {
-            return GetInverse();
         }
 
     }

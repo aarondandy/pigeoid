@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using Pigeoid.CoordinateOperation.Transformation;
 using Vertesaur;
 using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
-    public class KrovakModified : ITransformation<GeographicCoordinate, Point2>
+    public class KrovakModified : ProjectionBase
     {
 
         internal class Inverse : InvertedTransformationBase<KrovakModified, Point2, GeographicCoordinate>
@@ -114,7 +112,7 @@ namespace Pigeoid.CoordinateOperation.Projection
             C10 = constants[9];
         }
 
-        public Point2 TransformValue(GeographicCoordinate source) {
+        public override Point2 TransformValue(GeographicCoordinate source) {
             var p = Core.TransformValue(source);
             var r = p.Difference(EvaluationPoint);
             var r2 = new Vector2(r.X * r.X, r.Y * r.Y);
@@ -150,23 +148,14 @@ namespace Pigeoid.CoordinateOperation.Projection
                 .Add(FalseProjectedOffset);
         }
 
-        public ITransformation<Point2, GeographicCoordinate> GetInverse() {
+        public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
             Contract.Ensures(Contract.Result<ITransformation<Point2, GeographicCoordinate>>() != null);
             return new Inverse(this);
         }
 
-        public bool HasInverse {
+        public override bool HasInverse {
             [Pure] get { return Core.HasInverse; }
         }
-
-        public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values) {
-            if(values == null) throw new ArgumentNullException("values");
-            Contract.Ensures(Contract.Result<IEnumerable<Point2>>() != null);
-            return values.Select(TransformValue);
-        }
-
-        ITransformation ITransformation.GetInverse() {
-            return GetInverse();
-        }
+        
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using Pigeoid.Ogc;
 using Vertesaur;
 using Vertesaur.Transformation;
+using Pigeoid.Utility;
 
 namespace Pigeoid.CoordinateOperation.Transformation
 {
@@ -211,12 +212,10 @@ namespace Pigeoid.CoordinateOperation.Transformation
             return Delta.GetHashCode() ^ RotationRadians.GetHashCode();
         }
 
-        [Obsolete]
         public string Name {
             get { return "Helmert 7 Parameter Transformation"; }
         }
 
-        [Obsolete]
         public IEnumerable<INamedParameter> Parameters {
             get {
                 return new INamedParameter[] {
@@ -231,7 +230,6 @@ namespace Pigeoid.CoordinateOperation.Transformation
             }
         }
 
-        [Obsolete]
         public ICoordinateOperationMethodInfo Method {
             get { return new OgcCoordinateOperationMethodInfo(Name); }
         }
@@ -259,5 +257,25 @@ namespace Pigeoid.CoordinateOperation.Transformation
             return result;
             // ReSharper restore CompareOfFloatsByEqualityOperator
         }
+
+        public object TransformValue(object value) {
+            return TransformValue((Point3) value);
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<object>>() != null);
+            return values.Select(TransformValue);
+        }
+
+        public Type[] GetInputTypes() {
+            return new []{typeof(Point3)};
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            return inputType == typeof(Point3)
+                ? new[] { typeof(Point3) }
+                : ArrayUtil<Type>.Empty;
+        }
+
     }
 }

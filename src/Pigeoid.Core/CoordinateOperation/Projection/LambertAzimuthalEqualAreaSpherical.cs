@@ -7,7 +7,7 @@ using Vertesaur.Transformation;
 namespace Pigeoid.CoordinateOperation.Projection
 {
     public class LambertAzimuthalEqualAreaSpherical :
-        ProjectionBase,
+        SpheroidProjectionBase,
         IEquatable<LambertAzimuthalEqualAreaSpherical>
     {
 

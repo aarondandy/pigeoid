@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Pigeoid.Utility;
 using Vertesaur;
 using Vertesaur.Transformation;
 
@@ -83,6 +84,29 @@ namespace Pigeoid.CoordinateOperation.Transformation
             get { return false; }
         }
 
+        public Type[] GetInputTypes() {
+            return new[] { typeof(GeographicHeightCoordinate), typeof(GeographicCoordinate) };
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            return inputType == typeof(GeographicHeightCoordinate)
+                || inputType == typeof(GeographicCoordinate)
+                ? new[] { typeof(Point2) }
+                : ArrayUtil<Type>.Empty;
+        }
+
+        public object TransformValue(object value) {
+            if (value is GeographicHeightCoordinate)
+                return TransformValue((GeographicHeightCoordinate)value);
+            if (value is GeographicCoordinate)
+                return TransformValue((GeographicCoordinate)value);
+            throw new InvalidOperationException();
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+            return values.Select(TransformValue);
+        }
 
     }
 }

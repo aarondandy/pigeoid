@@ -9,7 +9,7 @@ namespace Pigeoid.CoordinateOperation.Projection
     /// <summary>
     /// A transverse Mercator projection.
     /// </summary>
-    public class TransverseMercator : ProjectionBase
+    public class TransverseMercator : SpheroidProjectionBase
     {
 
         private class Inverted : InvertedTransformationBase<TransverseMercator, Point2, GeographicCoordinate>

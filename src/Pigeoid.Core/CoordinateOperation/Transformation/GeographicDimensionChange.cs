@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Pigeoid.Utility;
 using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Transformation
@@ -30,7 +32,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
         }
 
         public GeographicCoordinate TransformValue(GeographicHeightCoordinate value) {
-            return new GeographicCoordinate(value.Latitude, value.Longitude);
+            return (GeographicCoordinate)value;
         }
 
         public IEnumerable<GeographicCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
@@ -52,6 +54,29 @@ namespace Pigeoid.CoordinateOperation.Transformation
             return this;
         }
 
+        public Type[] GetInputTypes() {
+            return new[] { typeof(GeographicHeightCoordinate), typeof(GeographicCoordinate) };
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            if (inputType == typeof (GeographicHeightCoordinate))
+                return new[] {typeof(GeographicCoordinate)};
+            if (inputType == typeof (GeographicCoordinate))
+                return new[] {typeof(GeographicHeightCoordinate)};
+            return ArrayUtil<Type>.Empty;
+        }
+
+        public object TransformValue(object value) {
+            if (value is GeographicHeightCoordinate)
+                return TransformValue((GeographicHeightCoordinate)value);
+            if (value is GeographicCoordinate)
+                return TransformValue((GeographicCoordinate)value);
+            throw new InvalidOperationException();
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            throw new NotImplementedException();
+        }
     }
 
 }

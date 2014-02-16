@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Pigeoid.Utility;
 using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Transformation
@@ -29,6 +30,24 @@ namespace Pigeoid.CoordinateOperation.Transformation
                 Contract.Ensures(Contract.Result<TCore>() != null);
                 return _core;
             }
+        }
+
+        public object TransformValue(object value) {
+            return TransformValue((TSource)value);
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            return values.Select(TransformValue);
+        }
+
+        public Type[] GetInputTypes() {
+            return new []{ typeof(TSource) };
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            return inputType == typeof(TSource)
+                ? new[] { typeof(TTarget) }
+                : ArrayUtil<Type>.Empty;
         }
 
         public ITransformation<TTarget, TSource> GetInverse() {

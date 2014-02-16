@@ -121,9 +121,9 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vertesaur.Core, Version=0.9.0.36805, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Vertesaur.Core, Version=0.10.1.42218, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Vertesaur.Core.0.9.0\lib\net40-client\Vertesaur.Core.dll</HintPath>
+      <HintPath>..\..\packages\Vertesaur.Core.0.10.1\lib\net40-client\Vertesaur.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -320,9 +320,9 @@
     <Compile Include="Unit\UnitRatioConversion.cs" />
     <Compile Include="Unit\UnitScalarConversion.cs" />
     <Compile Include="Unit\UnitUnityConversion.cs" />
+    <Compile Include="Utility\ArrayUtil.cs" />
     <Compile Include="Utility\ConversionUtil.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

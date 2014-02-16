@@ -9,7 +9,7 @@ namespace Pigeoid.CoordinateOperation.Projection
     /// <summary>
     /// A Cassini Soldner projection.
     /// </summary>
-    public class CassiniSoldner : ProjectionBase, IEquatable<CassiniSoldner>
+    public class CassiniSoldner : SpheroidProjectionBase, IEquatable<CassiniSoldner>
     {
         protected readonly GeographicCoordinate NaturalOrigin;
         protected readonly double MLineCoefficient1;

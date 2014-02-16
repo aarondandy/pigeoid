@@ -8,7 +8,7 @@ using Vertesaur.Transformation;
 namespace Pigeoid.CoordinateOperation.Projection
 {
 
-    public class PolarStereographic : ProjectionBase
+    public class PolarStereographic : SpheroidProjectionBase
     {
 
         private class Inverse : InvertedTransformationBase<PolarStereographic, Point2, GeographicCoordinate>

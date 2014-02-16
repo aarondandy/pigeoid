@@ -6,7 +6,7 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
-    public class AmericanPolyconic : ProjectionBase
+    public class AmericanPolyconic : SpheroidProjectionBase
     {
 
         private class Inverted : InvertedTransformationBase<AmericanPolyconic, Point2, GeographicCoordinate>

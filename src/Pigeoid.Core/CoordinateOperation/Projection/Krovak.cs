@@ -6,7 +6,7 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
-    public class Krovak : ProjectionBase
+    public class Krovak : SpheroidProjectionBase
     {
 
         internal static double KrovakLongitudeRadiansOffset = -(17.0 + (2.0 / 3.0)) * Math.PI / 180.0;

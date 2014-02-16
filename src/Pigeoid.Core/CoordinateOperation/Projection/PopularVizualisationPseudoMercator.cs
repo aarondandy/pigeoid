@@ -6,7 +6,7 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
-    public class PopularVisualizationPseudoMercator : ProjectionBase
+    public class PopularVisualizationPseudoMercator : SpheroidProjectionBase
     {
 
         private class Inverse : InvertedTransformationBase<PopularVisualizationPseudoMercator, Point2, GeographicCoordinate>

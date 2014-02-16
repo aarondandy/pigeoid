@@ -11,6 +11,10 @@ namespace Pigeoid
         IComparable<GeographicCoordinate>
     {
 
+        public static explicit operator GeographicCoordinate(GeographicHeightCoordinate coordinate) {
+            return new GeographicCoordinate(coordinate.Latitude, coordinate.Longitude);
+        }
+
         /// <summary>
         /// Implements the operator ==.
         /// </summary>

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Pigeoid.Utility;
 using Vertesaur;
 using Vertesaur.Transformation;
 
@@ -10,7 +11,9 @@ namespace Pigeoid.CoordinateOperation.Transformation
     /// <summary>
     /// An abridged Molodensky transformation.
     /// </summary>
-    public class AbridgedMolodenskyTransformation : ITransformation<GeographicHeightCoordinate>
+    public class AbridgedMolodenskyTransformation :
+        ITransformation<GeographicHeightCoordinate>,
+        ITransformation<GeographicCoordinate>
     {
 
         private static readonly double SinOne = Math.Sin(1);
@@ -102,23 +105,75 @@ namespace Pigeoid.CoordinateOperation.Transformation
             );
         }
 
-        public void TransformValues(GeographicHeightCoordinate[] values) {
-            for (int i = 0; i < values.Length; i++) {
-                TransformValue(ref values[i]);
-            }
-        }
-
         private void TransformValue(ref GeographicHeightCoordinate value) {
             value = TransformValue(value);
         }
 
+        public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+            return values.Select(TransformValue);
+        }
+
+        public void TransformValues(GeographicHeightCoordinate[] values) {
+            for (int i = 0; i < values.Length; i++)
+                TransformValue(ref values[i]);
+        }
+
+        public GeographicCoordinate TransformValue(GeographicCoordinate coordinate) {
+            return (GeographicCoordinate)(TransformValue((GeographicHeightCoordinate)coordinate));
+        }
+
+        private void TransformValue(ref GeographicCoordinate value) {
+            value = TransformValue(value);
+        }
+
+        public IEnumerable<GeographicCoordinate> TransformValues(IEnumerable<GeographicCoordinate> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+            return values.Select(TransformValue);
+        }
+
+        public void TransformValues(GeographicCoordinate[] values) {
+            for (int i = 0; i < values.Length; i++)
+                TransformValue(ref values[i]);
+        }
+
+        public object TransformValue(object value) {
+            if (value is GeographicHeightCoordinate)
+                return TransformValue((GeographicHeightCoordinate) value);
+            if (value is GeographicCoordinate)
+                return TransformValue((GeographicCoordinate) value);
+            throw new InvalidOperationException();
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<object>>() != null);
+            return values.Select(TransformValue);
+        }
+
+
         public AbridgedMolodenskyTransformation GetInverse() {
+            if(!HasInverse) throw new NoInverseException();
             Contract.Ensures(Contract.Result<AbridgedMolodenskyTransformation>() != null);
             return new AbridgedMolodenskyTransformation(D.GetNegative(), TargetSpheroid, SourceSpheroid);
         }
 
+        ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate>.GetInverse() {
+            return GetInverse();
+        }
+
+        ITransformation<GeographicCoordinate, GeographicCoordinate> ITransformation<GeographicCoordinate, GeographicCoordinate>.GetInverse() {
+            return GetInverse();
+        }
+
         ITransformation<GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate>.GetInverse() {
-            Contract.Ensures(Contract.Result<ITransformation<GeographicHeightCoordinate>>() != null);
+            return GetInverse();
+        }
+
+        ITransformation<GeographicCoordinate> ITransformation<GeographicCoordinate>.GetInverse() {
+            return GetInverse();
+        }
+
+        ITransformation ITransformation.GetInverse() {
             return GetInverse();
         }
 
@@ -131,17 +186,14 @@ namespace Pigeoid.CoordinateOperation.Transformation
             // ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
-        ITransformation ITransformation.GetInverse() {
-            return GetInverse();
+        public Type[] GetInputTypes() {
+            return new[] {typeof (GeographicHeightCoordinate), typeof (GeographicCoordinate)};
         }
 
-        ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicHeightCoordinate>.GetInverse() {
-            return GetInverse();
-        }
-
-        public IEnumerable<GeographicHeightCoordinate> TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
-            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
-            return values.Select(TransformValue);
+        public Type[] GetOutputTypes(Type inputType) {
+            if (inputType == typeof (GeographicHeightCoordinate) || inputType == typeof(GeographicCoordinate))
+                return new[] { inputType };
+            return ArrayUtil<Type>.Empty;
         }
 
     }

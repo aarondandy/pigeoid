@@ -6,7 +6,7 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
-    public abstract class HotineObliqueMercator : ProjectionBase
+    public abstract class HotineObliqueMercator : SpheroidProjectionBase
     {
 
         public class VariantA : HotineObliqueMercator

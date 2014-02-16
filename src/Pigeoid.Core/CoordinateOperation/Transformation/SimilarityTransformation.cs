@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pigeoid.Utility;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -59,6 +60,26 @@ namespace Pigeoid.CoordinateOperation.Transformation
             public bool HasInverse {
                 [Pure] get { return true; }
             }
+
+            public Type[] GetInputTypes() {
+                return new[] {typeof (Point2)};
+            }
+
+            public Type[] GetOutputTypes(Type inputType) {
+                return inputType == typeof(Point2)
+                    ? new[] { inputType }
+                    : ArrayUtil<Type>.Empty;
+            }
+
+            public object TransformValue(object value) {
+                return TransformValue((Point2) value);
+            }
+
+            public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+                Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+                return values.Select(TransformValue);
+            }
+
         }
 
         private readonly Point2 _origin;
@@ -116,5 +137,23 @@ namespace Pigeoid.CoordinateOperation.Transformation
             // ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
+        public Type[] GetInputTypes() {
+            return new[] { typeof(Point2) };
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            return inputType == typeof(Point2)
+                ? new[] { inputType }
+                : ArrayUtil<Type>.Empty;
+        }
+
+        public object TransformValue(object value) {
+            return TransformValue((Point2)value);
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+            return values.Select(TransformValue);
+        }
     }
 }

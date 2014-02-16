@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
+using Pigeoid.Utility;
 using Vertesaur.Transformation;
 
 namespace Pigeoid.Unit
@@ -51,6 +53,15 @@ namespace Pigeoid.Unit
         ITransformation ITransformation.GetInverse() { return GetInverse(); }
 
         public abstract bool HasInverse { get; }
+
+        public abstract Type[] GetInputTypes();
+
+        public abstract Type[] GetOutputTypes(Type inputType);
+
+        public abstract object TransformValue(object value);
+
+        public abstract IEnumerable<object> TransformValues(IEnumerable<object> values);
+        
     }
 
     [ContractClass(typeof(IUnitScalarConversionCodeContracts<>))]
@@ -91,6 +102,14 @@ namespace Pigeoid.Unit
         ITransformation ITransformation.GetInverse() { return GetInverse(); }
 
         public abstract bool HasInverse { get; }
+
+        public abstract Type[] GetInputTypes();
+
+        public abstract Type[] GetOutputTypes(Type inputType);
+
+        public abstract object TransformValue(object value);
+
+        public abstract IEnumerable<object> TransformValues(IEnumerable<object> values);
     }
 
 }

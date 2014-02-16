@@ -105,7 +105,7 @@ namespace Pigeoid.CoordinateOperation
             return false;
         }
 
-        private ProjectionBase CreatePolarStereographic(ProjectionCompilationParams opData) {
+        private SpheroidProjectionBase CreatePolarStereographic(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
             var parallelLatParam = new KeywordNamedParameterSelector("LAT", "PARALLEL");
@@ -146,7 +146,7 @@ namespace Pigeoid.CoordinateOperation
             return PolarStereographic.CreateFromStandardParallel(latParallel, origin.Longitude, offset, fromSpheroid);
         }
 
-        private static ProjectionBase CreateTransverseMercator(ProjectionCompilationParams opData) {
+        private static SpheroidProjectionBase CreateTransverseMercator(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
@@ -174,7 +174,7 @@ namespace Pigeoid.CoordinateOperation
             return null;
         }
 
-        private static ProjectionBase CreateTransverseMercatorSouth(ProjectionCompilationParams opData) {
+        private static SpheroidProjectionBase CreateTransverseMercatorSouth(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
@@ -227,7 +227,7 @@ namespace Pigeoid.CoordinateOperation
             return null;
         }
 
-        private ProjectionBase CreateLambertAzimuthalEqualArea(ProjectionCompilationParams opData) {
+        private SpheroidProjectionBase CreateLambertAzimuthalEqualArea(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "NATURALORIGIN");
             var originLonParam = new KeywordNamedParameterSelector("LON", "NATURALORIGIN");
@@ -250,11 +250,11 @@ namespace Pigeoid.CoordinateOperation
             var spherical = _coordinateOperationNameComparer.Normalize(opData.OperationName).EndsWith("SPHERICAL");
 
             return spherical
-                ? (ProjectionBase)new LambertAzimuthalEqualAreaSpherical(origin, offset, spheroid)
+                ? (SpheroidProjectionBase)new LambertAzimuthalEqualAreaSpherical(origin, offset, spheroid)
                 : new LambertAzimuthalEqualArea(origin, offset, spheroid);
         }
 
-        private ProjectionBase CreateEquidistantCylindrical(ProjectionCompilationParams opData) {
+        private SpheroidProjectionBase CreateEquidistantCylindrical(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "PARALLEL");
             var originLonParam = new KeywordNamedParameterSelector("LON", "NATURALORIGIN");
@@ -280,7 +280,7 @@ namespace Pigeoid.CoordinateOperation
             // ReSharper restore CompareOfFloatsByEqualityOperator
 
             return spherical
-                ? (ProjectionBase)new EquidistantCylindricalSpherical(origin, offset, spheroid)
+                ? (SpheroidProjectionBase)new EquidistantCylindricalSpherical(origin, offset, spheroid)
                 : new EquidistantCylindrical(origin, offset, spheroid);
         }
 
@@ -380,7 +380,7 @@ namespace Pigeoid.CoordinateOperation
             return null;
         }
 
-        private ProjectionBase CreateLambertConicNearConformal(ProjectionCompilationParams opData) {
+        private SpheroidProjectionBase CreateLambertConicNearConformal(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
@@ -493,7 +493,7 @@ namespace Pigeoid.CoordinateOperation
             return new Krovak(origin, latitudeOfPseudoStandardParallel, azimuthOfInitialLine, scaleFactor, offset, spheroid);
         }
 
-        private ProjectionBase CreateObliqueStereographic(ProjectionCompilationParams opData) {
+        private SpheroidProjectionBase CreateObliqueStereographic(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
@@ -521,7 +521,7 @@ namespace Pigeoid.CoordinateOperation
             return null;
         }
 
-        private static ProjectionBase CreateGuam(ProjectionCompilationParams opData) {
+        private static SpheroidProjectionBase CreateGuam(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
@@ -544,7 +544,7 @@ namespace Pigeoid.CoordinateOperation
             return new Guam(origin, offset, spheroid);
         }
 
-        private static ProjectionBase CreateHyperbolicCassiniSoldner(ProjectionCompilationParams opData) {
+        private static SpheroidProjectionBase CreateHyperbolicCassiniSoldner(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
@@ -567,7 +567,7 @@ namespace Pigeoid.CoordinateOperation
             return new HyperbolicCassiniSoldner(origin, offset, spheroid);
         }
 
-        private static ProjectionBase CreateModifiedAzimuthalEquidistant(ProjectionCompilationParams opData) {
+        private static SpheroidProjectionBase CreateModifiedAzimuthalEquidistant(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
@@ -590,7 +590,7 @@ namespace Pigeoid.CoordinateOperation
             return new ModifiedAzimuthalEquidistant(origin, offset, spheroid);
         }
 
-        private static ProjectionBase CreateLambertCylindricalEqualAreaSpherical(ProjectionCompilationParams opData) {
+        private static SpheroidProjectionBase CreateLambertCylindricalEqualAreaSpherical(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
@@ -613,7 +613,7 @@ namespace Pigeoid.CoordinateOperation
             return new LambertCylindricalEqualAreaSpherical(origin, offset, spheroid);
         }
 
-        private ProjectionBase CreateLabordeObliqueMercator(ProjectionCompilationParams opData) {
+        private SpheroidProjectionBase CreateLabordeObliqueMercator(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "CENTER");
             var originLonParam = new KeywordNamedParameterSelector("LON", "CENTER");
@@ -646,7 +646,7 @@ namespace Pigeoid.CoordinateOperation
             return new LabordeObliqueMercator(origin, azimuth, scaleFactor, spheroid, offset);
         }
 
-        private ProjectionBase CreateHotineObliqueMercator(ProjectionCompilationParams opData) {
+        private SpheroidProjectionBase CreateHotineObliqueMercator(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "CENTER");
             var originLonParam = new KeywordNamedParameterSelector("LON", "CENTER");

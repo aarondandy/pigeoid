@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Pigeoid.Ogc;
+using Pigeoid.Utility;
 using Vertesaur;
 using Vertesaur.Transformation;
 
@@ -138,7 +139,6 @@ namespace Pigeoid.CoordinateOperation.Transformation
 
         public bool IsInverseOfDefinition { get; private set; }
 
-        [Obsolete]
         public IEnumerable<INamedParameter> Parameters {
             get {
                 return new[] {
@@ -148,7 +148,6 @@ namespace Pigeoid.CoordinateOperation.Transformation
             }
         }
 
-        [Obsolete]
         public ICoordinateOperationMethodInfo Method {
             get { return new OgcCoordinateOperationMethodInfo(Name); }
         }
@@ -157,6 +156,25 @@ namespace Pigeoid.CoordinateOperation.Transformation
             return Name + ' ' + Spheroid;
         }
 
+
+        public Type[] GetInputTypes() {
+            return new[] {typeof(Point3)};
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            return inputType == typeof(Point3)
+                ? new[] { typeof(GeographicHeightCoordinate), typeof(GeographicCoordinate) }
+                : ArrayUtil<Type>.Empty;
+        }
+
+        public object TransformValue(object value) {
+            return TransformValue((Point3) value);
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<object>>() != null);
+            return values.Select(TransformValue);
+        }
     }
 
     public class GeographicGeocentricTransformation :
@@ -288,6 +306,30 @@ namespace Pigeoid.CoordinateOperation.Transformation
 
         public override string ToString() {
             return Name + ' ' + Spheroid;
+        }
+
+        public Type[] GetInputTypes() {
+            return new[] {typeof(GeographicHeightCoordinate), typeof(GeographicCoordinate)};
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            return inputType == typeof(GeographicHeightCoordinate)
+                || inputType == typeof(GeographicCoordinate)
+                ? new[] { typeof(Point3) }
+                : ArrayUtil<Type>.Empty;
+        }
+
+        public object TransformValue(object value) {
+            if (value is GeographicHeightCoordinate)
+                return TransformValue((GeographicHeightCoordinate) value);
+            if (value is GeographicCoordinate)
+                return TransformValue((GeographicCoordinate) value);
+            throw new InvalidOperationException();
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<object>>() != null);
+            return values.Select(TransformValue);
         }
     }
 }

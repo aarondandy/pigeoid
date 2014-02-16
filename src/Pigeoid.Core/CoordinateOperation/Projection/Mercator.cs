@@ -10,7 +10,7 @@ namespace Pigeoid.CoordinateOperation.Projection
     /// A Mercator projection, 1SP or 2SP.
     /// </summary>
     public class Mercator :
-        ProjectionBase,
+        SpheroidProjectionBase,
         IEquatable<Mercator>
     {
 

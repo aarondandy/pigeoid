@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pigeoid.Utility;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -73,6 +74,25 @@ namespace Pigeoid.Unit
 
             ITransformation ITransformation.GetInverse() { return GetInverse(); }
 
+            public Type[] GetInputTypes() {
+                return new[] { typeof(double) };
+            }
+
+            public Type[] GetOutputTypes(Type inputType) {
+                return inputType == typeof(double)
+                    ? new[] { inputType }
+                    : ArrayUtil<Type>.Empty;
+            }
+
+            public object TransformValue(object value) {
+                return TransformValue((double)value);
+            }
+
+            public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+                Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+                return values.Select(TransformValue);
+            }
+
         }
 
         private readonly double _factor;
@@ -133,6 +153,25 @@ namespace Pigeoid.Unit
         ITransformation<double, double> ITransformation<double, double>.GetInverse() { return GetInverse(); }
 
         ITransformation ITransformation.GetInverse() { return GetInverse(); }
+
+        public Type[] GetInputTypes() {
+            return new[] { typeof(double) };
+        }
+
+        public Type[] GetOutputTypes(Type inputType) {
+            return inputType == typeof(double)
+                ? new[] { inputType }
+                : ArrayUtil<Type>.Empty;
+        }
+
+        public object TransformValue(object value) {
+            return TransformValue((double)value);
+        }
+
+        public IEnumerable<object> TransformValues(IEnumerable<object> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+            return values.Select(TransformValue);
+        }
 
     }
 }

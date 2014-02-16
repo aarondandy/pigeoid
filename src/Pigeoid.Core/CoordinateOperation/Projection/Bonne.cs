@@ -6,7 +6,7 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
-    public class Bonne : ProjectionBase
+    public class Bonne : SpheroidProjectionBase
     {
 
         private class Inverse : InvertedTransformationBase<Bonne, Point2, GeographicCoordinate>

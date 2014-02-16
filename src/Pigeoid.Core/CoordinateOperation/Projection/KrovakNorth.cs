@@ -7,7 +7,7 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Projection
 {
-    public class KrovakNorth : ITransformation<GeographicCoordinate, Point2>
+    public class KrovakNorth : ProjectionBase
     {
 
         protected readonly Krovak Core;
@@ -53,34 +53,17 @@ namespace Pigeoid.CoordinateOperation.Projection
             }
         }
 
-        public ITransformation<Point2, GeographicCoordinate> GetInverse() {
+        public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
             Contract.Ensures(Contract.Result<ITransformation<Point2, GeographicCoordinate>>() != null);
             return new Inverse(Core);
         }
 
-        public Point2 TransformValue(GeographicCoordinate source) {
+        public override Point2 TransformValue(GeographicCoordinate source) {
             var p = Core.TransformValue(source);
             return new Point2(-p.Y, -p.X);
         }
 
-        public string Name {
-            get {
-                Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
-                return "Krovak North";
-            }
-        }
-
-        public IEnumerable<Point2> TransformValues(IEnumerable<GeographicCoordinate> values) {
-            if(values == null) throw new ArgumentNullException("values");
-            Contract.Ensures(Contract.Result<IEnumerable<Point2>>() != null);
-            return values.Select(TransformValue);
-        }
-
-        ITransformation ITransformation.GetInverse() {
-            return GetInverse();
-        }
-
-        public bool HasInverse {
+        public override bool HasInverse {
             [Pure] get { return Core.HasInverse; }
         }
     }
