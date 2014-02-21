@@ -9,6 +9,7 @@ namespace Pigeoid.Interop.Proj4
     /// <summary>
     /// A datum used for Proj4 interop.
     /// </summary>
+    [Obsolete]
     public class Proj4Datum : IDatumGeodetic
     {
 

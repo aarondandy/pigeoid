@@ -8,6 +8,8 @@ using Vertesaur;
 
 namespace Pigeoid.Interop.Proj4
 {
+
+    [Obsolete]
     public class Proj4Spheroid :
         ISpheroidInfo,
         IEquatable<ISpheroid<double>>
