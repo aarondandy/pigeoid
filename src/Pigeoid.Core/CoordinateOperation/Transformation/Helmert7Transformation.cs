@@ -156,7 +156,6 @@ namespace Pigeoid.CoordinateOperation.Transformation
             );
         }
 
-
         public Point3 TransformValue(Point3 coordinate) {
             return new Point3(
                 ((coordinate.X - (coordinate.Z * RotationRadians.Y) + (coordinate.Y * RotationRadians.Z)) * ScaleFactor) + Delta.X,

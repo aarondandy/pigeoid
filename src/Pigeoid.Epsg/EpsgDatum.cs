@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using Pigeoid.CoordinateOperation.Transformation;
 using Pigeoid.Epsg.Resources;
+using Pigeoid.CoordinateOperation;
 
 namespace Pigeoid.Epsg
 {
@@ -203,6 +204,8 @@ namespace Pigeoid.Epsg
     public class EpsgDatumGeodetic : EpsgDatum, IDatumGeodetic
     {
 
+        private readonly Lazy<Helmert7Transformation> _basicWgs84Transformation;
+
         internal EpsgDatumGeodetic(ushort code, string name, EpsgEllipsoid spheroid, EpsgPrimeMeridian primeMeridian, EpsgArea area)
             : base(code, name, area) {
             Contract.Requires(spheroid != null);
@@ -210,12 +213,14 @@ namespace Pigeoid.Epsg
             Contract.Requires(area != null);
             Spheroid = spheroid;
             PrimeMeridian = primeMeridian;
+            _basicWgs84Transformation = new Lazy<Helmert7Transformation>(FindBasicWgs84Transformation, LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(Spheroid != null);
             Contract.Invariant(PrimeMeridian != null);
+            Contract.Invariant(_basicWgs84Transformation != null);
         }
 
         public EpsgEllipsoid Spheroid { get; private set; }
@@ -228,12 +233,33 @@ namespace Pigeoid.Epsg
 
         public override string Type { get { return "Geodetic"; } }
 
+        private Helmert7Transformation FindBasicWgs84Transformation() {
+            // TODO: this is horrible and needs to be redone or precomputed
+            var targetCrs = EpsgCrsGeographic.Get(4326);
+            var pathGen = new EpsgCrsCoordinateOperationPathGenerator();
+            foreach (var sourceCrs in EpsgCrsGeographic.Values.OfType<EpsgCrsGeographic>().Where(x => x.Datum == this)) {
+                var path = pathGen.Generate(sourceCrs, targetCrs);
+                if(path == null)
+                    continue;
+
+                var staticCompiler = new StaticCoordinateOperationCompiler();
+                var staticTransformation = staticCompiler.Compile(path);
+
+                if (staticTransformation is Helmert7Transformation)
+                    return staticTransformation as Helmert7Transformation;
+
+                ;
+
+            }
+            return null;
+        }
+
         public Helmert7Transformation BasicWgs84Transformation {
-            get { throw new NotImplementedException(); } // TODO: this
+            get { return _basicWgs84Transformation.Value; }
         }
 
         public bool IsTransformableToWgs84 {
-            get { throw new NotImplementedException(); } // TODO: this
+            get { return BasicWgs84Transformation != null; }
         }
     }
 }

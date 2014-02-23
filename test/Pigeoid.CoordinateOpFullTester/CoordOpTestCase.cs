@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Pigeoid.CoordinateOperation;
 using Pigeoid.Core;
+using Pigeoid.Interop.Proj4;
 using Vertesaur;
 using Vertesaur.Periodic;
 using Vertesaur.Transformation;
@@ -14,6 +15,7 @@ namespace Pigeoid.CoordinateOpFullTester
 
         public ICrs From { get; set; }
         public ICrs To { get; set; }
+
         public IGeographicMbr Area { get; set; }
         public ICoordinateOperationCrsPathInfo Path { get; set; }
         public List<GeographicCoordinate> InputWgs84Coordinates { get; set; }
@@ -26,6 +28,15 @@ namespace Pigeoid.CoordinateOpFullTester
                 if (staticTransformation == null) {
                     Console.WriteLine("TODO: Log static compile failure");
                     return;
+                }
+
+
+                try {
+                    var proj4Transform = Proj4Transform.Create(From, To);
+                    ;
+                }
+                catch (Exception ex) {
+                    ;
                 }
 
                 var outputPoints = staticTransformation.TransformValues(InputCoordinates).ToList();

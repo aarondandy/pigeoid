@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Text;
 using Pigeoid.CoordinateOperation.Transformation;
-using Pigeoid.Ogc;
 using DotSpatial.Projections;
 using Vertesaur;
 
@@ -13,24 +9,58 @@ namespace Pigeoid.Interop.Proj4
     public class Proj4DatumWrapper : IDatumGeodetic
     {
 
-        public Proj4DatumWrapper(Datum datum) {
-            if(datum ==null) throw new ArgumentNullException("datum");
-            if(datum.Spheroid == null) throw new ArgumentException("Datum has no spheroid.","datum");
+        public static Datum Create(IDatumGeodetic datum) {
+            if(datum == null) throw new ArgumentNullException("datum");
+            Contract.Ensures(Contract.Result<Datum>() != null);
+
+            var result = new Datum {
+                Name = datum.Name
+            };
+
+            if (datum.IsTransformableToWgs84) {
+                var helmert = datum.BasicWgs84Transformation;
+                result.ToWGS84 = new[] {
+                    helmert.Delta.X, helmert.Delta.Y, helmert.Delta.Z,
+                    helmert.RotationArcSeconds.X, helmert.RotationArcSeconds.Y, helmert.RotationArcSeconds.Z,
+                    helmert.ScaleDeltaPartsPerMillion
+                };
+            }
+
+            result.Spheroid = Proj4SpheroidWrapper.Create(datum.Spheroid);
+
+            return result;
+        }
+
+        public static Proj4DatumWrapper CreateWrapper(GeographicInfo geographicInfo) {
+            if(geographicInfo == null) throw new ArgumentNullException("geographicInfo");
+            Contract.Ensures(Contract.Result<Proj4DatumWrapper>() != null);
+            return new Proj4DatumWrapper(
+                geographicInfo.Datum,
+                new Proj4MeridianWrapper(geographicInfo.Meridian));
+        }
+
+        public Proj4DatumWrapper(Datum datum, Proj4MeridianWrapper meridian) {
+            if (datum == null) throw new ArgumentNullException("datum");
+            if (meridian == null) throw new ArgumentNullException("meridian");
+            if (datum.Spheroid == null) throw new ArgumentException("Datum has no spheroid.", "datum");
+            Contract.EndContractBlock();
             Core = datum;
+            PrimeMeridian = meridian;
         }
 
         [ContractInvariantMethod]
         private void ObjectInvariants() {
             Contract.Invariant(Core != null);
+            Contract.Invariant(PrimeMeridian != null);
         }
 
         protected Datum Core { get; private set; }
 
         public ISpheroidInfo Spheroid { get { return new Proj4SpheroidWrapper(Core.Spheroid); } }
 
-        public IPrimeMeridianInfo PrimeMeridian {
-            get { throw new NotImplementedException(); }
-        }
+        public Proj4MeridianWrapper PrimeMeridian { get; private set; }
+
+        IPrimeMeridianInfo IDatumGeodetic.PrimeMeridian { get { return PrimeMeridian; } }
 
         public Helmert7Transformation BasicWgs84Transformation {
             get {

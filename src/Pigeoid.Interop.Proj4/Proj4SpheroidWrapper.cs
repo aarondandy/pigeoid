@@ -3,11 +3,24 @@ using System.Diagnostics.Contracts;
 using DotSpatial.Projections;
 using Pigeoid.Ogc;
 using Pigeoid.Unit;
+using Vertesaur;
 
 namespace Pigeoid.Interop.Proj4
 {
     public class Proj4SpheroidWrapper : OgcNamedAuthorityBoundEntity, ISpheroidInfo
     {
+
+        public static Spheroid Create(ISpheroidInfo spheroidInfo) {
+            if(spheroidInfo == null) throw new ArgumentNullException("spheroidInfo");
+            Contract.Ensures(Contract.Result<Spheroid>() != null);
+
+            var result = spheroidInfo is SpheroidEquatorialPolar
+                ? new Spheroid(spheroidInfo.A)
+                : new Spheroid(spheroidInfo.A, spheroidInfo.InvF);
+
+            result.Name = spheroidInfo.Name;
+            return result;
+        }
 
         public Proj4SpheroidWrapper(Spheroid spheroid)
             : base(spheroid.Name, new AuthorityTag("PROJ4", spheroid.Code)) {

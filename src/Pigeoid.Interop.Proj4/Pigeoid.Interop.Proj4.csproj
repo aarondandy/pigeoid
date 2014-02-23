@@ -64,11 +64,13 @@
     <Compile Include="..\PigeoidAssemblyInfo.cs">
       <Link>Properties\PigeoidAssemblyInfo.cs</Link>
     </Compile>
+    <Compile Include="Proj4Crs.cs" />
     <Compile Include="Proj4Datum.cs" />
     <Compile Include="Proj4DatumWrapper.cs" />
     <Compile Include="Proj4MeridianWrapper.cs" />
     <Compile Include="Proj4Spheroid.cs" />
     <Compile Include="Proj4SpheroidWrapper.cs" />
+    <Compile Include="Proj4Transform.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
