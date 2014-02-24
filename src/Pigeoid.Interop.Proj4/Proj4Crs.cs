@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using DotSpatial.Projections;
+using DotSpatial.Projections.Transforms;
 using Pigeoid.CoordinateOperation;
 using Pigeoid.Ogc;
 using Pigeoid.Unit;
@@ -27,6 +28,77 @@ namespace Pigeoid.Interop.Proj4
     public class Proj4CrsProjected : Proj4Crs, ICrsProjected
     {
 
+        private static readonly TransformManager TransformManager = new TransformManager();
+
+        private static readonly Dictionary<string, string> ToProj4NameLookup = new Dictionary<string, string>(CoordinateOperationNameNormalizedComparer.Default) {        
+            {CoordinateOperationStandardNames.AlbersEqualAreaConic,"aea"},
+            {CoordinateOperationStandardNames.AzimuthalEquidistant, "aeqd"},
+            {CoordinateOperationStandardNames.BipolarObliqueConformalConic, "bipc"},
+            {CoordinateOperationStandardNames.CassiniSoldner, "cass"},
+            {CoordinateOperationStandardNames.CylindricalEqualArea, "cea"},
+            {CoordinateOperationStandardNames.CrasterParabolic, "crast"},
+            {CoordinateOperationStandardNames.Eckert1, "eck1"},
+            {CoordinateOperationStandardNames.Eckert2, "eck2"},
+            {CoordinateOperationStandardNames.Eckert3, "eck3"},
+            {CoordinateOperationStandardNames.Eckert4, "eck4"},
+            {CoordinateOperationStandardNames.Eckert5, "eck5"},
+            {CoordinateOperationStandardNames.Eckert6, "eck6"},
+            {CoordinateOperationStandardNames.EquidistantCylindrical, "eqc"},
+            {CoordinateOperationStandardNames.EquidistantConic, "eqdc"},
+            {CoordinateOperationStandardNames.Foucaut, "fouc"},
+            {CoordinateOperationStandardNames.GallStereographic, "gall"},
+            {CoordinateOperationStandardNames.GeneralSinusoidal, "gn_sinu"},
+            {CoordinateOperationStandardNames.Geos, "geos"},
+            {CoordinateOperationStandardNames.Gnomonic, "gnom"},
+            {CoordinateOperationStandardNames.GoodeHomolosine, "goode"},
+            {CoordinateOperationStandardNames.HammerAitoff, "hammer"},
+            {CoordinateOperationStandardNames.HotineObliqueMercator, "omerc"},
+            {CoordinateOperationStandardNames.Kavraisky5,"kav5"},
+            {CoordinateOperationStandardNames.LambertAzimuthalEqualArea, "laea"},
+            {CoordinateOperationStandardNames.LambertConicConformal2Sp, "lcc"},
+            {CoordinateOperationStandardNames.LambertEqualAreaConic, "leac"},
+            {CoordinateOperationStandardNames.Loximuthal, "loxim"},
+            {CoordinateOperationStandardNames.McBrydeThomasFlatPolarSine, "mbt_s"},
+            {CoordinateOperationStandardNames.Mercator2Sp, "merc"},
+            {CoordinateOperationStandardNames.Mercator1Sp, "merc"},
+            {CoordinateOperationStandardNames.MercatorAuxiliarySphere, "merc"},
+            {CoordinateOperationStandardNames.MillerCylindrical, "mill"},
+            {CoordinateOperationStandardNames.Mollweide, "moll"},
+            {CoordinateOperationStandardNames.NewZealandMapGrid, "nzmg"},
+            {CoordinateOperationStandardNames.ObliqueStereographic, "sterea"},
+            {CoordinateOperationStandardNames.ObliqueCylindricalEqualArea, "ocea"},
+            {CoordinateOperationStandardNames.ObliqueMercator, "omerc"},
+            {CoordinateOperationStandardNames.Orthographic, "ortho"},
+            {CoordinateOperationStandardNames.Polyconic, "poly"},
+            {CoordinateOperationStandardNames.PutinsP1, "putp1"},
+            {CoordinateOperationStandardNames.QuarticAuthalic, "qua_aut"},
+            {CoordinateOperationStandardNames.Robinson, "robin"},
+            {CoordinateOperationStandardNames.Sinusoidal, "sinu"},
+            {CoordinateOperationStandardNames.Stereographic, "stere"},
+            {CoordinateOperationStandardNames.SwissObliqueCylindrical, "somerc"},
+            {CoordinateOperationStandardNames.TransverseMercator, "tmerc"},
+            {CoordinateOperationStandardNames.TwoPointEquidistant, "tpeqd"},
+            {CoordinateOperationStandardNames.PolarStereographic, "ups"},
+            {CoordinateOperationStandardNames.VanDerGrinten, "vandg"},
+            {CoordinateOperationStandardNames.Wagner4, "wag4"},
+            {CoordinateOperationStandardNames.Wagner5, "wag5"},
+            {CoordinateOperationStandardNames.Wagner6, "wag6"},
+            {CoordinateOperationStandardNames.Winkel1, "wink1"},
+            {CoordinateOperationStandardNames.Winkel2, "wink2"},
+            {CoordinateOperationStandardNames.WinkelTripel, "wintri"},
+
+        };
+
+
+        private static string ToProj4MethodName(string name) {
+            string result;
+            return ToProj4NameLookup.TryGetValue(name, out result)
+                ? result
+                : name.ToLowerInvariant();
+
+            return name.ToLowerInvariant();
+        }
+
         public static ProjectionInfo CreateProjection(ICrsProjected crsProjected) {
             if (crsProjected == null) throw new ArgumentNullException("crsProjected");
             Contract.Ensures(Contract.Result<ProjectionInfo>() != null);
@@ -46,9 +118,19 @@ namespace Pigeoid.Interop.Proj4
             if(crsProjected.BaseCrs is ICrsGeographic)
                 result.GeographicInfo = Proj4CrsGeographic.CreateGeographic((ICrsGeographic)(crsProjected.BaseCrs));
 
-            throw new NotImplementedException();
 
-            return result;
+            var projectionInfo = crsProjected.Projection as IParameterizedCoordinateOperationInfo;
+
+            if (projectionInfo == null)
+                return result;
+
+            var projectionMethod = projectionInfo.Method;
+
+            var proj4Name = ToProj4MethodName(projectionMethod.Name);
+            var transform = TransformManager.GetProj4(proj4Name);
+
+             
+            throw new NotImplementedException("Need a new way to create proj4 CRSs from ours");
         }
 
         private static AuthorityTag CreateAuthorityTag(ProjectionInfo projectionInfo) {
@@ -60,7 +142,7 @@ namespace Pigeoid.Interop.Proj4
         }
 
         public Proj4CrsProjected(ProjectionInfo projectionInfo)
-            : base(projectionInfo.Name, CreateAuthorityTag(projectionInfo)) {
+            : base(projectionInfo.Name ?? projectionInfo.Transform.Name ?? "Unknown", CreateAuthorityTag(projectionInfo)) {
             Contract.Requires(projectionInfo != null);
             Core = projectionInfo;
             Geographic = new Proj4CrsGeographic(projectionInfo.GeographicInfo);
@@ -82,7 +164,57 @@ namespace Pigeoid.Interop.Proj4
 
         public ICoordinateOperationInfo Projection {
             get {
-                throw new NotImplementedException();
+
+                // TODO: units!
+
+                var parameters = new List<INamedParameter>();
+                if (Core.FalseEasting.HasValue)
+                    parameters.Add(new NamedParameter<double>("x_0", Core.FalseEasting.Value));
+                if (Core.FalseNorthing.HasValue)
+                    parameters.Add(new NamedParameter<double>("y_0", Core.FalseNorthing.Value));
+                if (!Double.IsNaN(Core.ScaleFactor) && Core.ScaleFactor != 0 && Core.ScaleFactor != 1)
+                    parameters.Add(new NamedParameter<double>("k_0", Core.ScaleFactor));
+                if (Core.LatitudeOfOrigin.HasValue)
+                    parameters.Add(new NamedParameter<double>("lat_0", Core.LatitudeOfOrigin.Value));
+                if (Core.CentralMeridian.HasValue)
+                    parameters.Add(new NamedParameter<double>("lon_0", Core.CentralMeridian.Value));
+                if (Core.StandardParallel1.HasValue)
+                    parameters.Add(new NamedParameter<double>("lat_1", Core.StandardParallel1.Value));
+                if (Core.StandardParallel2.HasValue)
+                    parameters.Add(new NamedParameter<double>("lat_2", Core.StandardParallel2.Value));
+                if (Core.Over)
+                    parameters.Add(new NamedParameter<int>("over", 1));
+                if (Core.Geoc)
+                    parameters.Add(new NamedParameter<int>("geoc", 1));
+                if (Core.alpha.HasValue)
+                    parameters.Add(new NamedParameter<double>("alpha", Core.alpha.Value));
+                if (Core.LongitudeOfCenter.HasValue)
+                    parameters.Add(new NamedParameter<double>("lonc", Core.LongitudeOfCenter.Value));
+                if (Core.Zone.HasValue)
+                    parameters.Add(new NamedParameter<int>("zone", Core.Zone.Value));
+                if (Core.IsLatLon) {
+                    parameters.Add(new NamedParameter<string>("proj", "longlat"));
+                }
+                else {
+                    if (Core.Transform != null)
+                        parameters.Add(new NamedParameter<string>("proj", Core.Transform.Name ?? Core.Transform.Proj4Name));
+                    // TODO: make sure to get the units added to the parameters!
+                }
+
+                if (Core.IsSouth)
+                    parameters.Add(new NamedParameter<bool>("south", true));
+                if (Core.NoDefs)
+                    parameters.Add(new NamedParameter<bool>("no_defs", true));
+
+                var method = Core.Transform == null
+                    ? new OgcCoordinateOperationMethodInfo("Unknown")
+                    : new OgcCoordinateOperationMethodInfo(Core.Transform.Name ?? Core.Transform.Proj4Name);
+
+                return new CoordinateOperationInfo(
+                    Core.Name ?? "Unknown",
+                    parameters,
+                    method
+                );
             }
         }
 
@@ -122,7 +254,7 @@ namespace Pigeoid.Interop.Proj4
         }
 
         public Proj4CrsGeographic(GeographicInfo geographicInfo)
-            : base(geographicInfo.Name, new AuthorityTag("PROJ4", String.Empty))
+            : base(geographicInfo.Name ?? geographicInfo.Datum.Name ?? "Unknown", new AuthorityTag("PROJ4", String.Empty))
         {
             Contract.Requires(geographicInfo != null);
             Core = geographicInfo;
