@@ -8,6 +8,8 @@ namespace Pigeoid.Epsg
     public abstract class EpsgCrs : ICrs
     {
 
+        internal const int Wgs84GeographicCode = 4326;
+
         public static EpsgCrs Get(int code) {
             return EpsgCrsDatumBased.GetDatumBased(code)
                 ?? EpsgCrsProjected.GetProjected(code)

@@ -7,6 +7,8 @@ using System.Threading;
 using Pigeoid.CoordinateOperation.Transformation;
 using Pigeoid.Epsg.Resources;
 using Pigeoid.CoordinateOperation;
+using Vertesaur;
+using Vertesaur.Transformation;
 
 namespace Pigeoid.Epsg
 {
@@ -14,6 +16,7 @@ namespace Pigeoid.Epsg
     public static class EpsgDatumRepository
     {
 
+        internal const int Wgs84DatumCode = 6326;
         private const int CodeSize = sizeof(ushort);
         private const string TxtFileName = "datums.txt";
 
@@ -234,23 +237,53 @@ namespace Pigeoid.Epsg
         public override string Type { get { return "Geodetic"; } }
 
         private Helmert7Transformation FindBasicWgs84Transformation() {
-            // TODO: this is horrible and needs to be redone or precomputed
-            var targetCrs = EpsgCrsGeographic.Get(4326);
-            var pathGen = new EpsgCrsCoordinateOperationPathGenerator();
-            foreach (var sourceCrs in EpsgCrsGeographic.Values.OfType<EpsgCrsGeographic>().Where(x => x.Datum == this)) {
-                var path = pathGen.Generate(sourceCrs, targetCrs);
-                if(path == null)
-                    continue;
+            if (Code == EpsgDatumRepository.Wgs84DatumCode)
+                return new Helmert7Transformation(Vector3.Zero);
 
-                var staticCompiler = new StaticCoordinateOperationCompiler();
-                var staticTransformation = staticCompiler.Compile(path);
+            var transformsFromThisDatum = EpsgCrsDatumBased.DatumBasedValues.Where(x => x.Datum.Code == Code).Select(x => x.Code)
+                .Concat(EpsgCrsProjected.ProjectedValues.Where(x => x.Datum.Code == Code).Select(x => x.Code))
+                .SelectMany(EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced)
+                .Where(x => x.TargetCrsCode == EpsgCrs.Wgs84GeographicCode)
+                .Where(x => x.Method.Code == 9607 || x.Method.Code == 9606 || x.Method.Code == 9603);
 
-                if (staticTransformation is Helmert7Transformation)
-                    return staticTransformation as Helmert7Transformation;
+            var bestTransform = transformsFromThisDatum
+                .OrderBy(x => x.Deprecated)
+                .ThenByDescending(x => x.Method.Code) // translation is a lower EPSG code
+                .ThenBy(x => x.Accuracy)
+                .FirstOrDefault();
 
-                ;
+            if (bestTransform == null)
+                return null;
 
+            var compiler = new StaticCoordinateOperationCompiler();
+            var compileRequest = new CoordinateOperationCrsPathInfo(
+                new[] {bestTransform.SourceCrs, bestTransform.TargetCrs},
+                new[] {bestTransform});
+            var compileResult = compiler.Compile(compileRequest);
+
+            var transformationSteps = compileResult is ConcatenatedTransformation
+                ? ((ConcatenatedTransformation)compileResult).Transformations
+                : (IEnumerable<ITransformation>)new[] { compileResult };
+
+            transformationSteps = transformationSteps.Select(step => {
+                if (step is GeocentricTransformationGeographicWrapper) {
+                    return ((GeocentricTransformationGeographicWrapper)step).GeocentricCore;
+                }
+                return step;
+            });
+
+            foreach (var step in transformationSteps) {
+                if (step is Helmert7Transformation) {
+                    return step as Helmert7Transformation;
+                }
+                if (step is GeocentricTranslation) {
+                    return new Helmert7Transformation(((GeocentricTranslation)step).Delta);
+                }
+                if (step is GeographicGeocentricTranslation) {
+                    return new Helmert7Transformation(((GeographicGeocentricTranslation)step).Delta);
+                }
             }
+
             return null;
         }
 
@@ -258,6 +291,7 @@ namespace Pigeoid.Epsg
             get { return _basicWgs84Transformation.Value; }
         }
 
+        [Obsolete("Name should indicate it will use Helmert7Transformation (basic?)")]
         public bool IsTransformableToWgs84 {
             get { return BasicWgs84Transformation != null; }
         }

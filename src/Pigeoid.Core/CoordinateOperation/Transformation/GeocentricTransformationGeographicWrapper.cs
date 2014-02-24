@@ -5,14 +5,13 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation.Transformation
 {
-    public class GeocentricTransformationGeographicWrapper<T> :
-        GeographicGeocentricTransformationBase
-        where T : ITransformation<Point3>
+
+    public class GeocentricTransformationGeographicWrapper : GeographicGeocentricTransformationBase
     {
 
         private class Inverse : GeographicGeocentricTransformationBase
         {
-            public static Inverse BuildInverse(GeocentricTransformationGeographicWrapper<T> coreWrapper) {
+            public static Inverse BuildInverse(GeocentricTransformationGeographicWrapper coreWrapper) {
                 Contract.Requires(coreWrapper != null);
                 Contract.Requires(coreWrapper.GeocentricToGeographic.HasInverse);
                 Contract.Requires(coreWrapper.GeographicToGeocentric.HasInverse);
@@ -23,10 +22,10 @@ namespace Pigeoid.CoordinateOperation.Transformation
                 return new Inverse(geographicToGeocentric, geocentricToGeographic, coreWrapper);
             }
 
-            private readonly GeocentricTransformationGeographicWrapper<T> _coreWrapper;
+            private readonly GeocentricTransformationGeographicWrapper _coreWrapper;
             private readonly ITransformation<Point3> _inverseOperation;
 
-            private Inverse(GeographicGeocentricTransformation geographicGeocentric, GeocentricGeographicTransformation geocentricGeographic, GeocentricTransformationGeographicWrapper<T> coreWrapper)
+            private Inverse(GeographicGeocentricTransformation geographicGeocentric, GeocentricGeographicTransformation geocentricGeographic, GeocentricTransformationGeographicWrapper coreWrapper)
                 : base(geographicGeocentric, geocentricGeographic) {
                 Contract.Requires(coreWrapper != null);
                 Contract.Requires(geographicGeocentric != null);
@@ -67,9 +66,9 @@ namespace Pigeoid.CoordinateOperation.Transformation
 
         }
 
-        private readonly T _core;
+        private readonly ITransformation<Point3> _core;
 
-        public GeocentricTransformationGeographicWrapper(GeographicGeocentricTransformation geographicGeocentric, GeocentricGeographicTransformation geocentricGeographic, T core)
+        public GeocentricTransformationGeographicWrapper(GeographicGeocentricTransformation geographicGeocentric, GeocentricGeographicTransformation geocentricGeographic, ITransformation<Point3> core)
             : base(geographicGeocentric, geocentricGeographic) {
             if (null == core) throw new ArgumentNullException("core");
             Contract.Requires(geographicGeocentric != null);
@@ -77,7 +76,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
             _core = core;
         }
 
-        public GeocentricTransformationGeographicWrapper(ISpheroid<double> fromSpheroid, ISpheroid<double> toSpheroid, T core)
+        public GeocentricTransformationGeographicWrapper(ISpheroid<double> fromSpheroid, ISpheroid<double> toSpheroid, ITransformation<Point3> core)
             : base(fromSpheroid, toSpheroid) {
             if (null == core) throw new ArgumentNullException("core");
             Contract.Requires(fromSpheroid != null);
@@ -90,9 +89,9 @@ namespace Pigeoid.CoordinateOperation.Transformation
             Contract.Invariant(_core != null);
         }
 
-        public T GeocentricCore {
+        public ITransformation<Point3> GeocentricCore {
             get {
-                Contract.Ensures(Contract.Result<T>() != null);
+                Contract.Ensures(Contract.Result<ITransformation<Point3>>() != null);
                 return _core;
             }
         }

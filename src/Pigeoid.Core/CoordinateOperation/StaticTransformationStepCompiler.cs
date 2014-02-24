@@ -12,7 +12,7 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.CoordinateOperation
 {
-    class StaticTransformationStepCompiler : StaticCoordinateOperationCompiler.IStepOperationCompiler
+    internal class StaticTransformationStepCompiler : StaticCoordinateOperationCompiler.IStepOperationCompiler
     {
 
         private class TransformationCompilationParams
@@ -184,7 +184,7 @@ namespace Pigeoid.CoordinateOperation
 
             var spheroidTo = ExtractSpheroid(opData.StepParams.RelatedOutputCrs) ?? spheroidFrom;
 
-            ITransformation transformation = new GeocentricTransformationGeographicWrapper<Helmert7Transformation>(spheroidFrom, spheroidTo, helmert);
+            ITransformation transformation = new GeocentricTransformationGeographicWrapper(spheroidFrom, spheroidTo, helmert);
             var unitConversion = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
             if (null != unitConversion)
                 transformation = new ConcatenatedTransformation(new[] { unitConversion, transformation });
@@ -553,7 +553,7 @@ namespace Pigeoid.CoordinateOperation
             if (null == spheroidTo)
                 return null;
 
-            ITransformation transformation = new GeocentricTransformationGeographicWrapper<MolodenskyBadekasTransformation>(spheroidFrom, spheroidTo, molodensky);
+            ITransformation transformation = new GeocentricTransformationGeographicWrapper(spheroidFrom, spheroidTo, molodensky);
             var conv = StaticCoordinateOperationCompiler.CreateCoordinateUnitConversion(opData.StepParams.InputUnit, OgcAngularUnit.DefaultRadians);
             if (null != conv)
                 transformation = new ConcatenatedTransformation(new[] { conv, transformation });

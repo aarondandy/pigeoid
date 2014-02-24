@@ -14,23 +14,23 @@ namespace Pigeoid.CoordinateOperation.Transformation
     public class GeocentricTranslation : ITransformation<Point3>
     {
 
-        public readonly Vector3 D;
+        public readonly Vector3 Delta;
 
         /// <summary>
         /// Constructs a new geocentric translation operation.
         /// </summary>
-        /// <param name="d"></param>
-        public GeocentricTranslation(Vector3 d) {
-            D = d;
+        /// <param name="delta"></param>
+        public GeocentricTranslation(Vector3 delta) {
+            Delta = delta;
         }
 
-        public Point3 TransformValue(Point3 p) {
-            return p.Add(D);
+        public Point3 TransformValue(Point3 point) {
+            return point.Add(Delta);
         }
 
         public IEnumerable<Point3> TransformValues(IEnumerable<Point3> values) {
             Contract.Ensures(Contract.Result<IEnumerable<Point3>>() != null);
-            return values.Select(D.Add);
+            return values.Select(Delta.Add);
         }
 
         public void TransformValues(Point3[] values) {
@@ -38,8 +38,8 @@ namespace Pigeoid.CoordinateOperation.Transformation
                 TransformValue(ref values[i]);
         }
 
-        private void TransformValue(ref Point3 p) {
-            p = p.Add(D);
+        private void TransformValue(ref Point3 point) {
+            point = point.Add(Delta);
         }
 
         public bool HasInverse {
@@ -56,7 +56,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
 
         public ITransformation<Point3> GetInverse() {
             Contract.Ensures(Contract.Result<ITransformation<Point3>>() != null);
-            return new GeocentricTranslation(D.GetNegative());
+            return new GeocentricTranslation(Delta.GetNegative());
         }
 
         public Type[] GetInputTypes() {

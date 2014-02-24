@@ -19,11 +19,28 @@ namespace Pigeoid.Interop.Proj4
 
             if (datum.IsTransformableToWgs84) {
                 var helmert = datum.BasicWgs84Transformation;
-                result.ToWGS84 = new[] {
-                    helmert.Delta.X, helmert.Delta.Y, helmert.Delta.Z,
-                    helmert.RotationArcSeconds.X, helmert.RotationArcSeconds.Y, helmert.RotationArcSeconds.Z,
-                    helmert.ScaleDeltaPartsPerMillion
-                };
+                if (helmert.ScaleDeltaPartsPerMillion == 0 && Vector3.Zero.Equals(helmert.RotationArcSeconds)) {
+                    if (Vector3.Zero.Equals(helmert.Delta)) {
+                        result.DatumType = DatumType.WGS84;
+                    }
+                    else{
+                        result.ToWGS84 = new[] {
+                            helmert.Delta.X, helmert.Delta.Y, helmert.Delta.Z
+                        };
+                        result.DatumType = DatumType.Param3;
+                    }
+                }
+                else {
+                    result.ToWGS84 = new[] {
+                        helmert.Delta.X, helmert.Delta.Y, helmert.Delta.Z,
+                        helmert.RotationArcSeconds.X, helmert.RotationArcSeconds.Y, helmert.RotationArcSeconds.Z,
+                        helmert.ScaleDeltaPartsPerMillion
+                    };
+                    result.DatumType = DatumType.Param7;
+                }
+            }
+            else {
+                result.DatumType = DatumType.Unknown;
             }
 
             result.Spheroid = Proj4SpheroidWrapper.Create(datum.Spheroid);
