@@ -86,7 +86,6 @@ namespace Pigeoid.Interop.Proj4
             {CoordinateOperationStandardNames.Winkel1, "wink1"},
             {CoordinateOperationStandardNames.Winkel2, "wink2"},
             {CoordinateOperationStandardNames.WinkelTripel, "wintri"},
-
         };
 
 
@@ -95,8 +94,6 @@ namespace Pigeoid.Interop.Proj4
             return ToProj4NameLookup.TryGetValue(name, out result)
                 ? result
                 : name.ToLowerInvariant();
-
-            return name.ToLowerInvariant();
         }
 
         public static ProjectionInfo CreateProjection(ICrsProjected crsProjected) {

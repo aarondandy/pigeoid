@@ -47,23 +47,30 @@ namespace Pigeoid.CoordinateOperation
         private static readonly StaticProjectionStepCompiler DefaultValue = new StaticProjectionStepCompiler();
         public static StaticProjectionStepCompiler Default { get { return DefaultValue; } }
 
-        private static bool ConvertIfVaild(IUnit from, IUnit to, ref double value) {
+        private static bool TryConvert(IUnit from, IUnit to, ref double value) {
             if (null == from || null == to)
                 return false;
-            var conv = SimpleUnitConversionGenerator.FindConversion(from, to);
-            if (null == conv)
+            var conversion = SimpleUnitConversionGenerator.FindConversion(from, to);
+            if (null == conversion)
                 return false;
 
-            value = conv.TransformValue(value);
+            value = conversion.TransformValue(value);
             return true;
         }
 
-        private static bool TryGetDouble(INamedParameter parameter, IUnit unit, out double value) {
+        private static bool TryGetDouble(INamedParameter parameter, out double value, double defaultValue = 0) {
             if (null != parameter && NamedParameter.TryGetDouble(parameter, out value)) {
-                ConvertIfVaild(parameter.Unit, unit, ref value);
                 return true;
             }
-            value = Double.NaN;
+            value = defaultValue;
+            return false;
+        }
+
+        private static bool TryGetDouble(INamedParameter parameter, IUnit unit, out double value, double defaultValue = 0) {
+            if (null != parameter && NamedParameter.TryGetDouble(parameter, out value)) {
+                return TryConvert(parameter.Unit, unit, ref value);
+            }
+            value = defaultValue;
             return false;
         }
 
@@ -73,12 +80,18 @@ namespace Pigeoid.CoordinateOperation
                 result = new GeographicCoordinate(lat, lon);
                 return true;
             }
-            result = GeographicCoordinate.Invalid;
+            result = GeographicCoordinate.Zero;
             return false;
         }
 
         private static bool TryCreateVector2(INamedParameter xParam, INamedParameter yParam, out Vector2 result) {
-            return TryCreateVector2(xParam, yParam, null, out result);
+            double x, y;
+            if (TryGetDouble(xParam, out x) | TryGetDouble(yParam, out y)) {
+                result = new Vector2(x, y);
+                return true;
+            }
+            result = Vector2.Zero;
+            return false;
         }
 
         private static bool TryCreateVector2(INamedParameter xParam, INamedParameter yParam, IUnit linearUnit, out Vector2 result) {
@@ -87,12 +100,18 @@ namespace Pigeoid.CoordinateOperation
                 result = new Vector2(x, y);
                 return true;
             }
-            result = Vector2.Invalid;
+            result = Vector2.Zero;
             return false;
         }
 
         private static bool TryCreatePoint2(INamedParameter xParam, INamedParameter yParam, out Point2 result) {
-            return TryCreatePoint2(xParam, yParam, null, out result);
+            double x, y;
+            if (TryGetDouble(xParam, out x) | TryGetDouble(yParam, out y)) {
+                result = new Point2(x, y);
+                return true;
+            }
+            result = Point2.Zero;
+            return false;
         }
 
         private static bool TryCreatePoint2(INamedParameter xParam, INamedParameter yParam, IUnit linearUnit, out Point2 result) {
@@ -101,7 +120,7 @@ namespace Pigeoid.CoordinateOperation
                 result = new Point2(x, y);
                 return true;
             }
-            result = Point2.Invalid;
+            result = Point2.Zero;
             return false;
         }
 
@@ -218,13 +237,9 @@ namespace Pigeoid.CoordinateOperation
             GeographicCoordinate origin;
             Vector2 offset;
 
-            if (
-                TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin)
-                && TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset)
-            ) {
-                return new PopularVisualizationPseudoMercator(origin, offset, spheroid);
-            }
-            return null;
+            TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin);
+            TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, out offset);
+            return new PopularVisualizationPseudoMercator(origin, offset, spheroid);
         }
 
         private SpheroidProjectionBase CreateLambertAzimuthalEqualArea(ProjectionCompilationParams opData) {

@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using DotSpatial.Projections;
-using DotSpatial.Projections.ProjectedCategories;
+﻿using DotSpatial.Projections.ProjectedCategories;
 using NUnit.Framework;
-using Pigeoid.Epsg;
-using Pigeoid.Ogc;
 
 namespace Pigeoid.Interop.Proj4.Test
 {
