@@ -110,7 +110,7 @@ namespace Pigeoid.Unit
             }
 
             public IEnumerable<object> TransformValues(IEnumerable<object> values) {
-                Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+                Contract.Ensures(Contract.Result<IEnumerable<object>>() != null);
                 return values.Select(TransformValue);
             }
 
@@ -217,7 +217,7 @@ namespace Pigeoid.Unit
         }
 
         public IEnumerable<object> TransformValues(IEnumerable<object> values) {
-            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+            Contract.Ensures(Contract.Result<IEnumerable<object>>() != null);
             return values.Select(TransformValue);
         }
 

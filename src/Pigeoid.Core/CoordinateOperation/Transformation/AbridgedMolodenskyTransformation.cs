@@ -128,7 +128,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
         }
 
         public IEnumerable<GeographicCoordinate> TransformValues(IEnumerable<GeographicCoordinate> values) {
-            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicCoordinate>>() != null);
             return values.Select(TransformValue);
         }
 

@@ -120,7 +120,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
 
         public virtual bool HasInverse {
             [Pure] get {
-                Contract.Ensures(Contract.Result<bool>() == (GeographicToGeocentric.HasInverse && GeocentricToGeographic.HasInverse));
+                Contract.Ensures(!Contract.Result<bool>() || (GeographicToGeocentric.HasInverse && GeocentricToGeographic.HasInverse));
                 return GeographicToGeocentric.HasInverse
                     && GeocentricToGeographic.HasInverse;
             }

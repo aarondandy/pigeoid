@@ -31,12 +31,20 @@ namespace Pigeoid.CoordinateOperation
         public ParameterNameNormalizedComparer ParameterNameNormalizedComparer { get; private set; }
 
         [Obsolete]
+        private static IEnumerable<INamedParameter> ToNamedParameters( IParameterizedCoordinateOperationInfo operationInfo) {
+            Contract.Ensures(Contract.Result<IEnumerable<INamedParameter>>() != null);
+            return operationInfo != null && operationInfo.Parameters != null
+                ? operationInfo.Parameters
+                : Enumerable.Empty<INamedParameter>();
+        }
+
+        [Obsolete]
         public NamedParameterLookup(ICoordinateOperationInfo operationInfo)
             : this(operationInfo as IParameterizedCoordinateOperationInfo) { }
 
         [Obsolete]
         public NamedParameterLookup(IParameterizedCoordinateOperationInfo operationInfo)
-            : this(null == operationInfo ? Enumerable.Empty<INamedParameter>() : operationInfo.Parameters) { }
+            : this(ToNamedParameters(operationInfo)) { }
 
         public NamedParameterLookup(IEnumerable<INamedParameter> parameters) : this(parameters.ToArray()) {
             Contract.Requires(parameters != null);

@@ -29,8 +29,6 @@ namespace Pigeoid.Epsg
         public IEnumerable<INamedParameter> Parameters {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<INamedParameter>>() != null);
-                /*var opMethodInfo = Method; // make a local copy to prevent another call to 'Get'
-                return null != opMethodInfo ? opMethodInfo.GetOperationParameters(Code) : null;*/
                 return Method.GetOperationParameters(Code);
             }
         }

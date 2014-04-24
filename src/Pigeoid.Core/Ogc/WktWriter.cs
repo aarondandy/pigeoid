@@ -452,6 +452,9 @@ namespace Pigeoid.Ogc
             }
 
             foreach (var axis in entity.Axes) {
+                if (axis == null)
+                    continue;
+
                 StartNextLineParameter();
                 Write(axis);
             }

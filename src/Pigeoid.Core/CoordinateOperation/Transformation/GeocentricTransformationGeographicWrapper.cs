@@ -28,6 +28,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
             private Inverse(GeographicGeocentricTransformation geographicGeocentric, GeocentricGeographicTransformation geocentricGeographic, GeocentricTransformationGeographicWrapper coreWrapper)
                 : base(geographicGeocentric, geocentricGeographic) {
                 Contract.Requires(coreWrapper != null);
+                Contract.Requires(coreWrapper.GeocentricCore.HasInverse);
                 Contract.Requires(geographicGeocentric != null);
                 Contract.Requires(geocentricGeographic != null);
                 _coreWrapper = coreWrapper;
