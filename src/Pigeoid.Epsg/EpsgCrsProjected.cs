@@ -77,9 +77,12 @@ namespace Pigeoid.Epsg
                 using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
                     reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
                     var baseCrs = EpsgCrs.Get(reader.ReadUInt16());
+                    Contract.Assume(baseCrs != null);
                     var projectionCode = reader.ReadUInt16();
                     var cs = EpsgCoordinateSystem.Get(reader.ReadUInt16());
+                    Contract.Assume(cs!= null);
                     var area = EpsgArea.Get(reader.ReadUInt16());
+                    Contract.Assume(area != null);
                     var name = TextLookUp.GetString(reader.ReadUInt16());
                     var deprecated = reader.ReadByte() == 0xff;
                     return new EpsgCrsProjected(code, name, area, deprecated, baseCrs, cs, projectionCode);

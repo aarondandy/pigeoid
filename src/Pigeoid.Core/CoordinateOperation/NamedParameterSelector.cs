@@ -32,6 +32,7 @@ namespace Pigeoid.CoordinateOperation
 
         public static bool AllAreSelected(params NamedParameterSelector[] selectors) {
             Contract.Requires(selectors != null);
+            Contract.Requires(Contract.ForAll(selectors, x => x != null));
             if (selectors.Length == 0)
                 return false;
             for (var i = 0; i < selectors.Length; i++) {

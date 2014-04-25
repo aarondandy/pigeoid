@@ -134,6 +134,14 @@ namespace Pigeoid.Epsg
                     var name = EpsgTextLookUp.GetString(readerDat.ReadUInt16(), readerTxt);
                     var factorB = numberLookUp.Get(readerDat.ReadUInt16());
                     var factorC = numberLookUp.Get(readerDat.ReadUInt16());
+// ReSharper disable CompareOfFloatsByEqualityOperator
+                    if (factorC == 0) {
+                        if(factorB == 0)
+                            factorC = Double.NaN;
+                        else
+                            throw new InvalidDataException("Bad unit conversion factor values.");
+                    }
+// ReSharper restore CompareOfFloatsByEqualityOperator
                     lookUpDictionary.Add(code, new EpsgUnit(code, name, typeName, factorB, factorC));
                 }
             }
@@ -157,7 +165,9 @@ namespace Pigeoid.Epsg
         private EpsgUnit(ushort code, string name, string type, double factorB, double factorC) {
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(!String.IsNullOrEmpty(type));
+// ReSharper disable CompareOfFloatsByEqualityOperator
             Contract.Requires(factorC != 0);
+// ReSharper restore CompareOfFloatsByEqualityOperator
             _code = code;
             Name = name;
             Type = type;
@@ -169,7 +179,9 @@ namespace Pigeoid.Epsg
         private void CodeContractInvariants() {
             Contract.Invariant(!String.IsNullOrEmpty(Name));
             Contract.Invariant(!String.IsNullOrEmpty(Type));
+// ReSharper disable CompareOfFloatsByEqualityOperator
             Contract.Invariant(FactorC != 0);
+// ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
         public int Code { get { return _code; } }
@@ -192,24 +204,30 @@ namespace Pigeoid.Epsg
         private IUnitConversion<double> BuildConversionToBase() {
             var to = GetBaseUnit();
             // ReSharper disable CompareOfFloatsByEqualityOperator
+            if (Double.IsNaN(FactorC))
+                return null;
             if (1.0 == FactorB && 1.0 == FactorC)
                 return new UnitUnityConversion(this, to);
             if (1.0 != FactorB && 1.0 == FactorC)
                 return new UnitScalarConversion(this, to, FactorB);
-            if (0 == FactorB && 0 == FactorC)
-                return null;
             return new UnitRatioConversion(this, to, FactorB, FactorC);
             // ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
         private IUnit GetBaseUnit() {
             Contract.Ensures(Contract.Result<IUnit>() != null);
+            IUnit unit;
             if (StringComparer.OrdinalIgnoreCase.Equals("Angle", Type))
-                return LookUp.Get(9101);
-            if (StringComparer.OrdinalIgnoreCase.Equals("Length", Type))
-                return LookUp.Get(9001);
-            if (StringComparer.OrdinalIgnoreCase.Equals("Scale", Type))
-                return LookUp.Get(9201);
+                unit = LookUp.Get(9101);
+            else if (StringComparer.OrdinalIgnoreCase.Equals("Length", Type))
+                unit = LookUp.Get(9001);
+            else if (StringComparer.OrdinalIgnoreCase.Equals("Scale", Type))
+                unit = LookUp.Get(9201);
+            else
+                unit = null;
+
+            if (unit != null)
+                return unit;
             throw new NotSupportedException();
         }
 

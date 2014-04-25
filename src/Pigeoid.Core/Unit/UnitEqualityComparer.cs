@@ -21,6 +21,11 @@ namespace Pigeoid.Unit
         public INameNormalizedComparer NameNormalizedComparer { get; private set; }
 
         public bool Equals(IUnit x, IUnit y) {
+            if (ReferenceEquals(x, y))
+                return true;
+            if (x == null || y == null)
+                return false;
+
             return AreSameType(x, y)
                 && NameNormalizedComparer.Equals(x.Name, y.Name);
         }

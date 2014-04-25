@@ -49,7 +49,6 @@ namespace Pigeoid.Ogc
             Contract.Invariant(Unit != null);
             Contract.Invariant(Projection != null);
             Contract.Invariant(Axes != null);
-            Contract.Invariant(Datum != null);
         }
 
         /// <inheritdoc/>
@@ -65,7 +64,7 @@ namespace Pigeoid.Ogc
         public IList<IAxis> Axes { get; private set; }
 
         /// <inheritdoc/>
-        public IDatumGeodetic Datum { get; private set; }
+        public IDatumGeodetic Datum { get { return BaseCrs.Datum; } }
 
     }
 }

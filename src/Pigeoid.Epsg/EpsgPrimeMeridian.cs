@@ -19,6 +19,7 @@ namespace Pigeoid.Epsg
                 for (int i = readerDat.ReadUInt16(); i > 0; i--) {
                     var code = readerDat.ReadUInt16();
                     var uom = EpsgUnit.Get(readerDat.ReadUInt16());
+                    Contract.Assume(uom != null);
                     var longitude = numberLookUp.Get(readerDat.ReadUInt16());
                     var name = EpsgTextLookUp.GetString(readerDat.ReadByte(), readerTxt);
                     lookUpDictionary.Add(code, new EpsgPrimeMeridian(code, name, longitude, uom));

@@ -41,14 +41,18 @@ namespace Pigeoid.Epsg
         public EpsgCrs SourceCrs {
             get {
                 Contract.Ensures(Contract.Result<EpsgCrs>() != null);
-                return EpsgCrs.Get(_sourceCrsCode);
+                var source = EpsgCrs.Get(_sourceCrsCode);
+                Contract.Assume(source != null); // _sourceCrsCode comes from a trusted source
+                return source;
             }
         }
 
         public EpsgCrs TargetCrs {
             get {
                 Contract.Ensures(Contract.Result<EpsgCrs>() != null);
-                return EpsgCrs.Get(_targetCrsCode);
+                var target = EpsgCrs.Get(_targetCrsCode);
+                Contract.Assume(target != null); // _targetCrsCode comes from a trusted source
+                return target;
             }
         }
 

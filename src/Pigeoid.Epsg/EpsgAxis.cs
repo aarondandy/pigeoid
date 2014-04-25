@@ -73,6 +73,7 @@ namespace Pigeoid.Epsg
                     };
                     for (int i = 0; i < axisSet.Axes.Length; i++) {
                         var uom = EpsgUnit.Get(reader.ReadUInt16());
+                        Contract.Assume(uom != null);
                         using (var textReader = EpsgDataResource.CreateBinaryReader("axis.txt")) {
                             var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
                             var orientation = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);

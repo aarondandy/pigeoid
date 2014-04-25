@@ -66,27 +66,30 @@ namespace Pigeoid
     public static class NamedParameter
     {
         public static bool TryGetDouble(INamedParameter parameter, out double value) {
-            if (null != parameter) {
-                var doubleParameter = parameter as NamedParameter<double>;
-                if (null != doubleParameter) {
-                    value = doubleParameter.Value;
-                    return true;
-                }
-                if (parameter is NamedParameter<string>) {
-                    return ConversionUtil.TryParseDoubleMultiCulture(((NamedParameter<string>)parameter).Value, out value);
-                }
-                var rawValue = parameter.Value;
-                if (rawValue is double) {
-                    value = (double)rawValue;
-                    return true;
-                }
-                if (rawValue is string) {
-                    return ConversionUtil.TryParseDoubleMultiCulture((string)rawValue, out value);
-                }
-                return ConversionUtil.TryConvertDoubleMultiCulture(rawValue, out value);
+            Contract.Ensures(parameter == null ? !Contract.Result<bool>() : true);
+
+            if (null == parameter) {
+                value = default(double);
+                return false;
             }
-            value = default(double);
-            return false;
+
+            var doubleParameter = parameter as NamedParameter<double>;
+            if (null != doubleParameter) {
+                value = doubleParameter.Value;
+                return true;
+            }
+            if (parameter is NamedParameter<string>) {
+                return ConversionUtil.TryParseDoubleMultiCulture(((NamedParameter<string>)parameter).Value, out value);
+            }
+            var rawValue = parameter.Value;
+            if (rawValue is double) {
+                value = (double)rawValue;
+                return true;
+            }
+            if (rawValue is string) {
+                return ConversionUtil.TryParseDoubleMultiCulture((string)rawValue, out value);
+            }
+            return ConversionUtil.TryConvertDoubleMultiCulture(rawValue, out value);
         }
 
     }

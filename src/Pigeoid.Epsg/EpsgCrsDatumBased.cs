@@ -38,8 +38,11 @@ namespace Pigeoid.Epsg
                 using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
                     reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
                     var datum = EpsgDatum.Get(reader.ReadUInt16());
+                    Contract.Assume(datum != null);
                     var cs = EpsgCoordinateSystem.Get(reader.ReadUInt16());
+                    Contract.Assume(cs != null);
                     var area = EpsgArea.Get(reader.ReadUInt16());
+                    Contract.Assume(area != null);
                     var name = TextLookUp.GetString(reader.ReadUInt16());
                     var deprecated = reader.ReadByte() == 0xff;
                     var kind = reader.ReadByte();

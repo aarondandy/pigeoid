@@ -52,6 +52,7 @@ namespace Pigeoid.CoordinateOperation
 
         public bool Assign(params NamedParameterSelector[] selectors) {
             if(selectors == null) throw new ArgumentNullException("selectors");
+            Contract.Requires(Contract.ForAll(selectors, x => x != null));
             Contract.EndContractBlock();
             var paramsToSearch = _data.ToList();
             foreach (var selector in selectors) {

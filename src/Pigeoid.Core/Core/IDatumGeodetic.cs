@@ -36,12 +36,7 @@ namespace Pigeoid
             }
         }
 
-        public IPrimeMeridianInfo PrimeMeridian {
-            get {
-                Contract.Ensures(Contract.Result<IPrimeMeridianInfo>() != null);
-                throw new NotImplementedException();
-            }
-        }
+        public abstract IPrimeMeridianInfo PrimeMeridian { get; }
 
         public Helmert7Transformation BasicWgs84Transformation {
             get {

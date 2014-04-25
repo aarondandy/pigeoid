@@ -59,10 +59,12 @@ namespace Pigeoid.Epsg
                     var southBound = DecodeDegreeValueFromShort(reader.ReadInt16());
                     var northBound = DecodeDegreeValueFromShort(reader.ReadInt16());
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    var iso2 = EpsgTextLookUp.LookUpIsoString(key, "iso2.dat", 2);
+                    var iso3 = EpsgTextLookUp.LookUpIsoString(key, "iso3.dat", 3);
                     return new EpsgArea(
                         key, name,
-                        EpsgTextLookUp.LookUpIsoString(key, "iso2.dat", 2),
-                        EpsgTextLookUp.LookUpIsoString(key, "iso3.dat", 3),
+                        iso2,
+                        iso3,
                         new LongitudeDegreeRange(westBound, eastBound),
                         new Range(southBound, northBound)
                     );
@@ -91,9 +93,8 @@ namespace Pigeoid.Epsg
         }
 
         internal EpsgArea(ushort code, string name, string iso2, string iso3, LongitudeDegreeRange longitudeRange, Range latRange) {
+            Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
-            Contract.Requires(!String.IsNullOrEmpty(iso2));
-            Contract.Requires(!String.IsNullOrEmpty(iso3));
             Code = code;
             Name = name;
             Iso2 = iso2;
@@ -104,9 +105,8 @@ namespace Pigeoid.Epsg
 
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
+            Contract.Invariant(Code >= 0);
             Contract.Invariant(!String.IsNullOrEmpty(Name));
-            Contract.Invariant(!String.IsNullOrEmpty(Iso2));
-            Contract.Invariant(!String.IsNullOrEmpty(Iso3));
         }
 
         public int Code { get; private set; }

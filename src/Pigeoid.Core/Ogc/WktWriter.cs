@@ -201,7 +201,8 @@ namespace Pigeoid.Ogc
                         Indent();
                         foreach (var parameter in parameterizedOperation.Parameters) {
                             StartNextLineParameter();
-                            Write(parameter);
+                            if(parameter != null)
+                                Write(parameter);
                         }
                     }
                     else {
@@ -220,8 +221,12 @@ namespace Pigeoid.Ogc
             Write(WktKeyword.PassThroughMt);
             WriteOpenParenthesis();
             WriteValue(entity.FirstAffectedOrdinate);
+
             WriteComma();
-            Write(entity.Steps.First());
+            var firstStep = entity.Steps.FirstOrDefault(s => s != null);
+            if(firstStep != null)
+                Write(firstStep);
+
             WriteCloseParenthesis();
         }
 
@@ -405,14 +410,19 @@ namespace Pigeoid.Ogc
 
             StartNextLineParameter();
             Write(entity.Datum);
+
             StartNextLineParameter();
-            Write(entity.Datum.PrimeMeridian);
+            var primeMeridian = entity.Datum.PrimeMeridian;
+            if (primeMeridian != null)
+                Write(entity.Datum.PrimeMeridian);
+            
             StartNextLineParameter();
             Write(entity.Unit);
 
             foreach (var axis in entity.Axes) {
                 StartNextLineParameter();
-                Write(axis);
+                if(axis != null)
+                    Write(axis);
             }
 
             if (null != entity.Authority) {
@@ -442,7 +452,8 @@ namespace Pigeoid.Ogc
 
                 foreach (var parameter in parameterizedOperation.Parameters) {
                     StartNextLineParameter();
-                    Write(parameter);
+                    if (parameter != null)
+                        Write(parameter);
                 }
             }
 
@@ -523,7 +534,8 @@ namespace Pigeoid.Ogc
 
             foreach (var axis in entity.Axes) {
                 StartNextLineParameter();
-                Write(axis);
+                if(axis != null)
+                    Write(axis);
             }
 
             if (null != entity.Authority) {

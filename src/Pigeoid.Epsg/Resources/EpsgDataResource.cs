@@ -13,7 +13,11 @@ namespace Pigeoid.Epsg.Resources
 		private static readonly Assembly ResourceAssembly = typeof(EpsgDataResource).Assembly;
 
 		public static Stream CreateStream(string resourceName) {
-			return ResourceAssembly.GetManifestResourceStream(ResourceBaseName + resourceName);
+            Contract.Ensures(Contract.Result<Stream>() != null);
+            var stream = ResourceAssembly.GetManifestResourceStream(ResourceBaseName + resourceName);
+            if(stream == null)
+                throw new FileNotFoundException("Resource file not found: " + resourceName);
+		    return stream;
 		}
 
 		public static BinaryReader CreateBinaryReader(string resourceName) {

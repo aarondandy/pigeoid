@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace Pigeoid.Epsg.Resources
 {
@@ -20,6 +21,7 @@ namespace Pigeoid.Epsg.Resources
 			LookUpCore = lookUpCore;
 		}
 
+        [Pure]
 		public override TValue Get(TKey key) {
 			TValue item;
 			LookUpCore.TryGetValue(key, out item);

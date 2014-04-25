@@ -23,6 +23,7 @@ namespace Pigeoid.Epsg
                     var valueB = numberLookUp.Get(readerDat.ReadUInt16());
                     var name = EpsgTextLookUp.GetString(readerDat.ReadUInt16(), readerTxt);
                     var uom = EpsgUnit.Get(readerDat.ReadByte() + 9000);
+                    Contract.Assume(uom != null);
                     // ReSharper disable CompareOfFloatsByEqualityOperator
                     lookUpDictionary.Add(code, new EpsgEllipsoid(
                         code, name, uom,

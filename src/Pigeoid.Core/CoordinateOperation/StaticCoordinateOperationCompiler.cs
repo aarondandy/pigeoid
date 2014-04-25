@@ -197,6 +197,7 @@ namespace Pigeoid.CoordinateOperation
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(_stepCompilers != null);
+            Contract.Invariant(Contract.ForAll(_stepCompilers, x => x != null));
         }
 
         public static ITransformation CreateCoordinateUnitConversion(IUnit from, IUnit to) {

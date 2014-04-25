@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using Pigeoid.CoordinateOperation;
 
 namespace Pigeoid.Epsg
@@ -20,7 +21,9 @@ namespace Pigeoid.Epsg
         public EpsgCoordinateOperationMethodInfo Method {
             get {
                 Contract.Ensures(Contract.Result<EpsgCoordinateOperationMethodInfo>() != null);
-                return EpsgCoordinateOperationMethodInfo.Get(_opMethodCode);
+                var method = EpsgCoordinateOperationMethodInfo.Get(_opMethodCode);
+                Contract.Assume(method != null); // because _opMethodCode comes from a trusted source
+                return method;
             }
         }
 
@@ -29,7 +32,8 @@ namespace Pigeoid.Epsg
         public IEnumerable<INamedParameter> Parameters {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<INamedParameter>>() != null);
-                return Method.GetOperationParameters(Code);
+                return Method.GetOperationParameters(Code)
+                    ?? Enumerable.Empty<INamedParameter>();
             }
         }
 

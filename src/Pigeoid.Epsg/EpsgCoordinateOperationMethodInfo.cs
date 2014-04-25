@@ -91,12 +91,14 @@ namespace Pigeoid.Epsg
                             + sizeof(ushort) // current opCode
                             , SeekOrigin.Begin);
                         var paramValues = new List<INamedParameter>(_parent._paramUsage.Length);
+                        Contract.Assume(Contract.ForAll(_parent._paramUsage, pu => pu != null)); // invariant not found from EpsgCoordinateOperationMethodParamInfoLookUp._paramUsage
                         for (int i = 0; i < _parent._paramUsage.Length; i++) {
                             var valueCode = reader.ReadUInt16();
                             var uomCode = reader.ReadUInt16();
                             if (valueCode != 0xffff) {
-                                string paramName = _parent._paramUsage[i].Parameter.Name;
+                                var paramName = _parent._paramUsage[i].Parameter.Name;
                                 var uom = EpsgUnit.Get(uomCode);
+                                Contract.Assume(uom != null);
                                 paramValues.Add(CreateParameter(valueCode, paramName, uom, readerTxt, numberLookUp));
                             }
                         }
@@ -128,6 +130,7 @@ namespace Pigeoid.Epsg
             private static EpsgFixedLookUpBase<ushort, OpParamValueInfo> CreateFullLookUp(BinaryReader reader, int opCount, ParamUsage[] paramUsage) {
                 Contract.Requires(reader != null);
                 Contract.Requires(paramUsage != null);
+                Contract.Requires(Contract.ForAll(paramUsage, pu => pu != null));
                 Contract.Ensures(Contract.Result<EpsgFixedLookUpBase<ushort, OpParamValueInfo>>() != null);
                 var lookUpDictionary = new SortedDictionary<ushort, OpParamValueInfo>();
                 var paramValues = new List<INamedParameter>();
@@ -140,8 +143,9 @@ namespace Pigeoid.Epsg
                             var valueCode = reader.ReadUInt16();
                             var uomCode = reader.ReadUInt16();
                             if (valueCode != 0xffff) {
-                                string paramName = paramUsage[paramIndex].Parameter.Name;
+                                var paramName = paramUsage[paramIndex].Parameter.Name;
                                 var uom = EpsgUnit.Get(uomCode);
+                                Contract.Assume(uom != null);
                                 paramValues.Add(CreateParameter(valueCode, paramName, uom, readerTxt, numberLookUp));
                             }
                         }
@@ -163,9 +167,11 @@ namespace Pigeoid.Epsg
                     _paramUsage = new ParamUsage[reader.ReadByte()];
                     for (int i = 0; i < _paramUsage.Length; i++) {
                         var paramInfo = EpsgParameterInfo.Get(reader.ReadUInt16());
+                        Contract.Assume(paramInfo != null);
                         var signRev = 0x01 == reader.ReadByte();
                         _paramUsage[i] = new ParamUsage(paramInfo, signRev);
                     }
+                    Contract.Assume(Contract.ForAll(_paramUsage, pu => pu != null));
                     var opCount = reader.ReadUInt16();
                     if (opCount <= FixedLookUpThreshold) {
                         _valueLookUp = CreateFullLookUp(reader, opCount, _paramUsage);
@@ -185,6 +191,7 @@ namespace Pigeoid.Epsg
             [ContractInvariantMethod]
             private void CodeContractInvariants() {
                 Contract.Invariant(_paramUsage != null);
+                Contract.Invariant(Contract.ForAll(_paramUsage, pu => pu != null));
                 Contract.Invariant(_valueLookUp != null);
                 Contract.Invariant(!String.IsNullOrEmpty(_paramDatFileName));
             }

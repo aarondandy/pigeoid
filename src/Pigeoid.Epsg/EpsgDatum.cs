@@ -67,8 +67,11 @@ namespace Pigeoid.Epsg
                     reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
                     var name = TextLookUp.GetString(reader.ReadUInt16());
                     var area = EpsgArea.Get(reader.ReadUInt16());
+                    Contract.Assume(area != null);
                     var spheroid = EpsgEllipsoid.Get(reader.ReadUInt16());
+                    Contract.Assume(spheroid != null);
                     var meridian = EpsgPrimeMeridian.Get(reader.ReadUInt16());
+                    Contract.Assume(meridian != null);
                     return new EpsgDatumGeodetic(key, name, spheroid, meridian, area);
                 }
             }

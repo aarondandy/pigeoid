@@ -39,8 +39,11 @@ namespace Pigeoid.Epsg
                 using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
                     reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
                     var horizontal = EpsgCrs.Get(reader.ReadUInt16());
+                    Contract.Assume(horizontal != null);
                     var vertical = (EpsgCrsVertical)EpsgCrsDatumBased.GetDatumBased(reader.ReadUInt16());
+                    Contract.Assume(vertical != null);
                     var area = EpsgArea.Get(reader.ReadUInt16());
+                    Contract.Assume(area != null);
                     var name = TextLookUp.GetString(reader.ReadUInt16());
                     var deprecated = reader.ReadByte() == 0xff;
                     return new EpsgCrsCompound(code, name, area, deprecated, horizontal, vertical);

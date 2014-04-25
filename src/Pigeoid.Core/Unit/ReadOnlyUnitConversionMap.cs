@@ -37,7 +37,9 @@ namespace Pigeoid.Unit
             Contract.Invariant(_allConversions != null);
             Contract.Invariant(_allDistinctUnits != null);
             Contract.Invariant(_fromMap != null);
+            Contract.Invariant(Contract.ForAll(_fromMap.Values, v => v != null));
             Contract.Invariant(_toMap != null);
+            Contract.Invariant(Contract.ForAll(_toMap.Values, v => v != null));
         }
 
         public override IEnumerable<IUnit> AllUnits {
@@ -51,10 +53,14 @@ namespace Pigeoid.Unit
             Contract.Ensures(Contract.Result<IEnumerable<IUnitConversion<double>>>() != null);
             IUnitConversion<double>[] rawOperations;
             var results = new List<IUnitConversion<double>>();
-            if (_toMap.TryGetValue(to, out rawOperations))
+            if (_toMap.TryGetValue(to, out rawOperations)) {
+                Contract.Assume(rawOperations != null);
                 results.AddRange(rawOperations);
-            if (_fromMap.TryGetValue(to, out rawOperations))
+            }
+            if (_fromMap.TryGetValue(to, out rawOperations)) {
+                Contract.Assume(rawOperations != null);
                 results.AddRange(rawOperations.Where(x => x.HasInverse).Select(x => x.GetInverse()));
+            }
             return results;
         }
 
@@ -62,10 +68,14 @@ namespace Pigeoid.Unit
             Contract.Ensures(Contract.Result<IEnumerable<IUnitConversion<double>>>() != null);
             IUnitConversion<double>[] rawOperations;
             var results = new List<IUnitConversion<double>>();
-            if (_fromMap.TryGetValue(from, out rawOperations))
+            if (_fromMap.TryGetValue(from, out rawOperations)) {
+                Contract.Assume(rawOperations != null);
                 results.AddRange(rawOperations);
-            if (_toMap.TryGetValue(from, out rawOperations))
+            }
+            if (_toMap.TryGetValue(from, out rawOperations)) {
+                Contract.Assume(rawOperations != null);
                 results.AddRange(rawOperations.Where(x => x.HasInverse).Select(x => x.GetInverse()));
+            }
             return results;
         }
 

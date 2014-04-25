@@ -23,7 +23,8 @@ namespace Pigeoid.Unit
             // ReSharper disable CompareOfFloatsByEqualityOperator
             if (null == from) throw new ArgumentNullException("from");
             if (null == to) throw new ArgumentNullException("to");
-            if (0 == denominator || Double.IsNaN(denominator)) throw new ArgumentException("denominator must be non-zero", "denominator");
+            if (0 == denominator) throw new ArgumentException("denominator must be non-zero", "denominator");
+            if (Double.IsNaN(denominator)) throw new ArgumentException("denominator must be a number", "denominator");
             Contract.EndContractBlock();
 
             From = from;
@@ -91,6 +92,8 @@ namespace Pigeoid.Unit
         // ReSharper disable CompareOfFloatsByEqualityOperator
         public bool HasInverse {
             [Pure] get {
+                Contract.Ensures(_numerator != 0 || !Contract.Result<bool>());
+                Contract.Ensures(!Double.IsNaN(_numerator) || !Contract.Result<bool>());
                 return 0 != _numerator
                     && !Double.IsNaN(_numerator);
             }

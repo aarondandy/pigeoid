@@ -65,12 +65,15 @@ namespace Pigeoid.Interop
             // remove plural suffix
             for (int i = 0; i < PluralSuffixWholeWords.Length; i++) {
                 var baseWord = PluralSuffixWholeWords[i];
+                Contract.Assume(baseWord != null);
                 if (text.Length == baseWord.Length - 1 && text[text.Length - 1] == 'S' && text.StartsWith(baseWord, StringComparison.OrdinalIgnoreCase))
                     return baseWord;
             }
 
             for (int i = 0; i < PluralSuffixInTextWords.Length; i++) {
-                text = RemovePluralS(text, PluralSuffixInTextWords[i]);
+                var baseWord = PluralSuffixInTextWords[i];
+                Contract.Assume(baseWord != null);
+                text = RemovePluralS(text, baseWord);
             }
 
             return text;
