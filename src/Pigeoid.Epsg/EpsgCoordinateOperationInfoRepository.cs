@@ -43,6 +43,7 @@ namespace Pigeoid.Epsg
                     var areaCode = reader.ReadUInt16();
                     var deprecated = reader.ReadByte() != 0;
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     return new EpsgCoordinateOperationInfo(code, opMethodCode, areaCode, deprecated, name);
                 }
             }
@@ -245,6 +246,7 @@ namespace Pigeoid.Epsg
                     var areaCode = reader.ReadUInt16();
                     var deprecated = reader.ReadByte() != 0;
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     var stepCodes = new ushort[reader.ReadByte()];
                     var stepFileOffset = reader.ReadUInt16();
                     using (var readerPath = EpsgDataResource.CreateBinaryReader(PathFileName)) {

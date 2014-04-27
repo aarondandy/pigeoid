@@ -54,22 +54,27 @@ namespace Pigeoid.Epsg
                 : base(keys) {
                 Contract.Requires(keys != null);
                 Contract.Requires(reverseIndex != null);
+                Contract.Requires(Contract.ForAll(reverseIndex.Values, x => x != null));
                 _reverseIndex = reverseIndex;
             }
 
             [ContractInvariantMethod]
             private void CodeContractInvariants() {
                 Contract.Invariant(_reverseIndex != null);
+                Contract.Invariant(Contract.ForAll(_reverseIndex.Values, x => x != null));
             }
 
             public ReadOnlyCollection<int> GetProjectionCodesBasedOn(int baseCrsCode) {
                 Contract.Ensures(Contract.Result<ReadOnlyCollection<int>>() != null);
                 int[] rawList;
-                return baseCrsCode >= 0
+                if (baseCrsCode >= 0
                     && baseCrsCode <= ushort.MaxValue
-                    && _reverseIndex.TryGetValue((ushort)baseCrsCode, out rawList)
-                    ? Array.AsReadOnly(rawList)
-                    : EmptyIntList;
+                    && _reverseIndex.TryGetValue((ushort) baseCrsCode, out rawList)
+                ) {
+                    Contract.Assume(rawList != null);
+                    return Array.AsReadOnly(rawList);
+                }
+                return EmptyIntList;
             }
 
             protected override EpsgCrsProjected Create(int code, int index) {
@@ -78,6 +83,7 @@ namespace Pigeoid.Epsg
                     reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
                     var baseCrs = EpsgCrs.Get(reader.ReadUInt16());
                     Contract.Assume(baseCrs != null);
+                    Contract.Assume(baseCrs is EpsgCrsProjected || baseCrs is EpsgCrsGeodetic);
                     var projectionCode = reader.ReadUInt16();
                     var cs = EpsgCoordinateSystem.Get(reader.ReadUInt16());
                     Contract.Assume(cs!= null);
@@ -123,34 +129,45 @@ namespace Pigeoid.Epsg
             return result;
         }
 
-        private static EpsgCrsGeodetic FindGeodeticBase(EpsgCrs crs) {
+        private static EpsgCrsGeodetic FindGeodeticBase(EpsgCrsProjected queryCrs) {
+            Contract.Requires(queryCrs != null);
+            var crs = queryCrs.BaseCrs;
             do {
-                if (crs is EpsgCrsGeodetic)
-                    return crs as EpsgCrsGeodetic;
+                var geodeticCrs = crs as EpsgCrsGeodetic;
+                if (geodeticCrs != null)
+                    return geodeticCrs;
 
-                if (crs is EpsgCrsProjected)
-                    crs = (crs as EpsgCrsProjected).BaseCrs;
+                var projectedCrs = crs as EpsgCrsProjected;
+                if (projectedCrs != null)
+                    crs = projectedCrs.BaseCrs;
 
-            } while (null != crs);
-            return null;
+            } while (true);
+            throw new NotSupportedException();
         }
 
         private readonly int _projectionCode;
 
         internal EpsgCrsProjected(int code, string name, EpsgArea area, bool deprecated, EpsgCrs baseCrs, EpsgCoordinateSystem cs, int projectionCode)
             : base(code, name, area, deprecated) {
+            Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
             Contract.Requires(baseCrs != null);
+            Contract.Requires(
+                baseCrs is EpsgCrsGeodetic
+                || baseCrs is EpsgCrsProjected);
             Contract.Requires(cs != null);
             BaseCrs = baseCrs;
             CoordinateSystem = cs;
             _projectionCode = projectionCode;
         }
 
-        [ContractInvariantMethod]
+        [ContractInvariantMethod] 
         private void CodeContractInvariants() {
             Contract.Invariant(BaseCrs != null);
+            Contract.Invariant(
+                BaseCrs is EpsgCrsGeodetic
+                || BaseCrs is EpsgCrsProjected);
             Contract.Invariant(CoordinateSystem != null);
         }
 
@@ -158,7 +175,21 @@ namespace Pigeoid.Epsg
 
         public EpsgCrs BaseCrs { get; private set; }
 
-        public EpsgCrsGeodetic BaseGeodeticCrs { get { return FindGeodeticBase(BaseCrs); } }
+        public EpsgCrsGeodetic BaseGeodeticCrs {
+            get {
+                Contract.Ensures(Contract.Result<EpsgCrsGeodetic>() != null);
+
+                var geodeticCrs = BaseCrs as EpsgCrsGeodetic;
+                if (geodeticCrs != null)
+                    return geodeticCrs;
+
+                var projectedCrs = BaseCrs as EpsgCrsProjected;
+                if (projectedCrs != null)
+                    return FindGeodeticBase(projectedCrs);
+
+                throw new NotSupportedException();
+            }
+        }
 
         ICrsGeodetic ICrsProjected.BaseCrs { get { return BaseGeodeticCrs; } }
 
@@ -182,7 +213,11 @@ namespace Pigeoid.Epsg
         public EpsgUnit Unit {
             get {
                 Contract.Ensures(Contract.Result<EpsgUnit>() != null);
-                return CoordinateSystem.Axes.First().Unit;
+                var axes = CoordinateSystem.Axes;
+                if(axes.Count == 0)
+                    throw new NotImplementedException();
+                Contract.Assume(axes[0] != null);
+                return axes[0].Unit;
             }
         }
 

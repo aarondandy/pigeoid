@@ -21,6 +21,11 @@ namespace Pigeoid.Epsg.Resources
 			LookUpCore = lookUpCore;
 		}
 
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(LookUpCore != null);
+        }
+
         [Pure]
 		public override TValue Get(TKey key) {
 			TValue item;

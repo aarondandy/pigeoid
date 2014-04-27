@@ -40,6 +40,7 @@ namespace Pigeoid.Epsg
                 using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
                     reader.BaseStream.Seek((index * RecordSize) + FileHeaderSize + CodeSize, SeekOrigin.Begin);
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     return new EpsgParameterInfo(key, name);
                 }
             }

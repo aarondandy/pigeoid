@@ -22,6 +22,7 @@ namespace Pigeoid.Epsg
                     Contract.Assume(uom != null);
                     var longitude = numberLookUp.Get(readerDat.ReadUInt16());
                     var name = EpsgTextLookUp.GetString(readerDat.ReadByte(), readerTxt);
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     lookUpDictionary.Add(code, new EpsgPrimeMeridian(code, name, longitude, uom));
                 }
             }

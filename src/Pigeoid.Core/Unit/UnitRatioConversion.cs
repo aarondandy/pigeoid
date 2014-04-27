@@ -23,7 +23,7 @@ namespace Pigeoid.Unit
             // ReSharper disable CompareOfFloatsByEqualityOperator
             if (null == from) throw new ArgumentNullException("from");
             if (null == to) throw new ArgumentNullException("to");
-            if (0 == denominator) throw new ArgumentException("denominator must be non-zero", "denominator");
+            if (denominator == 0) throw new ArgumentException("denominator must be non-zero", "denominator");
             if (Double.IsNaN(denominator)) throw new ArgumentException("denominator must be a number", "denominator");
             Contract.EndContractBlock();
 
@@ -48,7 +48,8 @@ namespace Pigeoid.Unit
         private void CodeContractInvariants() {
             Contract.Invariant(From != null);
             Contract.Invariant(To != null);
-            Contract.Invariant(_denominator != 0 && !Double.IsNaN(_denominator));
+            Contract.Invariant(_denominator != 0);
+            Contract.Invariant(!Double.IsNaN(_denominator));
             Contract.Invariant(_transformInPlace != null);
             Contract.Invariant(_transform != null);
         }

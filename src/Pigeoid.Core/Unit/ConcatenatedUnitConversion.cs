@@ -17,7 +17,8 @@ namespace Pigeoid.Unit
         /// <exception cref="System.ArgumentException">At least one conversion is required.</exception>
         public ConcatenatedUnitConversion(IEnumerable<IUnitConversion<double>> conversions) {
             if (null == conversions) throw new ArgumentNullException("conversions");
-            Contract.EndContractBlock();
+            Contract.Requires(conversions.Count() >= 1);
+            Contract.Requires(Contract.ForAll(conversions, x => x != null));
             _conversions = conversions.ToArray();
             if (_conversions.Length == 0)
                 throw new ArgumentException("At least one conversion is required.", "conversions");
@@ -27,6 +28,7 @@ namespace Pigeoid.Unit
         private void CodeContractInvariants() {
             Contract.Invariant(_conversions != null);
             Contract.Invariant(_conversions.Length >= 1);
+            Contract.Invariant(Contract.ForAll(_conversions, x => x != null));
         }
 
         public IUnit From {

@@ -31,7 +31,9 @@ namespace Pigeoid.Epsg
         private readonly bool _deprecated;
 
         internal EpsgCrs(int code, string name, EpsgArea area, bool deprecated) {
+            Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
+            Contract.Requires(area != null);
             _code = code;
             Name = name;
             _area = area;
@@ -40,10 +42,17 @@ namespace Pigeoid.Epsg
 
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
+            Contract.Invariant(_code >= 0);
             Contract.Invariant(!String.IsNullOrEmpty(Name));
+            Contract.Invariant(_area != null);
         }
 
-        public int Code { get { return _code; } }
+        public int Code {
+            get {
+                Contract.Ensures(Contract.Result<int>() >= 0);
+                return _code;
+            }
+        }
 
         public string Name { get; private set; }
 
@@ -54,7 +63,12 @@ namespace Pigeoid.Epsg
             }
         }
 
-        public EpsgArea Area { get { return _area; } }
+        public EpsgArea Area {
+            get {
+                Contract.Ensures(Contract.Result<EpsgArea>() != null);
+                return _area;
+            }
+        }
 
         public bool Deprecated { get { return _deprecated; } }
 

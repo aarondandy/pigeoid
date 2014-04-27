@@ -52,6 +52,11 @@ namespace Pigeoid.CoordinateOperation.Transformation
                 _invRot.Invert();
             }
 
+            [ContractInvariantMethod]
+            private void ObjectInvariants() {
+                Contract.Invariant(_invRot != null);
+            }
+
             public override Point3 TransformValue(Point3 coordinate) {
                 coordinate = new Point3(
                     (coordinate.X - Core.Delta.X) / Core.ScaleFactor,

@@ -88,18 +88,16 @@ namespace Pigeoid.CoordinateOperation
 
         private readonly string[] _keywords;
 
-        public KeywordNamedParameterSelector(IEnumerable<string> keywords)
-            : this(keywords.ToArray()) { Contract.Requires(keywords != null);}
-
         public KeywordNamedParameterSelector(params string[] keywords) {
             if(keywords == null) throw new ArgumentNullException("keywords");
-            Contract.EndContractBlock();
+            Contract.Requires(Contract.ForAll(keywords, x => x != null));
             _keywords = keywords;
         }
 
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(_keywords != null);
+            Contract.Invariant(Contract.ForAll(_keywords, x => x != null));
         }
 
         public ReadOnlyCollection<string> Keywords {

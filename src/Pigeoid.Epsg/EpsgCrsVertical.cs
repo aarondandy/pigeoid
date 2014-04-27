@@ -10,6 +10,7 @@ namespace Pigeoid.Epsg
 
         internal EpsgCrsVertical(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumVertical datum)
             : base(code, name, area, deprecated, cs) {
+            Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
             Contract.Requires(cs != null);

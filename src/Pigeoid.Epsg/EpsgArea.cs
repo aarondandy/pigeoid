@@ -59,6 +59,7 @@ namespace Pigeoid.Epsg
                     var southBound = DecodeDegreeValueFromShort(reader.ReadInt16());
                     var northBound = DecodeDegreeValueFromShort(reader.ReadInt16());
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     var iso2 = EpsgTextLookUp.LookUpIsoString(key, "iso2.dat", 2);
                     var iso3 = EpsgTextLookUp.LookUpIsoString(key, "iso3.dat", 3);
                     return new EpsgArea(

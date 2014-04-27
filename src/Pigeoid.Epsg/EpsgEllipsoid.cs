@@ -22,6 +22,7 @@ namespace Pigeoid.Epsg
                     var semiMajorAxis = numberLookUp.Get(readerDat.ReadUInt16());
                     var valueB = numberLookUp.Get(readerDat.ReadUInt16());
                     var name = EpsgTextLookUp.GetString(readerDat.ReadUInt16(), readerTxt);
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     var uom = EpsgUnit.Get(readerDat.ReadByte() + 9000);
                     Contract.Assume(uom != null);
                     // ReSharper disable CompareOfFloatsByEqualityOperator

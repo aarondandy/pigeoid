@@ -19,9 +19,15 @@ namespace Pigeoid.Epsg
         )
             : base(code, areaCode, deprecated, name) {
             Contract.Requires(!string.IsNullOrEmpty(name));
+            Contract.Requires(stepCodes != null);
             _sourceCrsCode = sourceCrsCode;
             _targetCrsCode = targetCrsCode;
             _stepCodes = stepCodes;
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(_stepCodes != null);
         }
 
         public int SourceCrsCode {

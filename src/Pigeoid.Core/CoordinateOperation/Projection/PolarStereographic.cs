@@ -39,6 +39,11 @@ namespace Pigeoid.CoordinateOperation.Projection
                     _transform = TransformValueSouth;
             }
 
+            [ContractInvariantMethod]
+            private void ObjectInvariants() {
+                Contract.Invariant(_transform != null);
+            }
+
             private GeographicCoordinate TransformValueNorth(Point2 value) {
                 var dx = value.X - Core.FalseProjectedOffset.X;
                 var dy = value.Y - Core.FalseProjectedOffset.Y;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
@@ -13,8 +14,21 @@ namespace Pigeoid.Epsg
 
         private class EpsgAxisSet
         {
-            public ushort CsKey;
-            public EpsgAxis[] Axes;
+            public EpsgAxisSet(ushort key, EpsgAxis[] axes) {
+                Contract.Requires(axes != null);
+                Contract.Requires(Contract.ForAll(axes, x => x != null));
+                CsKey = key;
+                Axes = axes;
+            }
+
+            public readonly ushort CsKey;
+            public readonly EpsgAxis[] Axes;
+
+            [ContractInvariantMethod]
+            private void ObjectInvariants() {
+                Contract.Invariant(Axes != null);
+                Contract.Invariant(Contract.ForAll(Axes, x => x != null));
+            }
 
         }
 
@@ -32,6 +46,8 @@ namespace Pigeoid.Epsg
 
             private static KeyData GetKeyData() {
                 Contract.Ensures(Contract.Result<KeyData>() != null);
+                Contract.Ensures(Contract.Result<KeyData>().KeyLookUp != null);
+                Contract.Ensures(Contract.Result<KeyData>().KeyAddress != null);
                 var keyData = new KeyData();
                 using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
                     keyData.KeyLookUp = new ushort[reader.ReadUInt16()];
@@ -55,6 +71,7 @@ namespace Pigeoid.Epsg
             private EpsgAxisSetLookUp(KeyData keyData)
                 : base(keyData.KeyLookUp) {
                 Contract.Requires(keyData != null);
+                Contract.Requires(keyData.KeyLookUp != null);
                 _keyData = keyData;
             }
 
@@ -67,21 +84,19 @@ namespace Pigeoid.Epsg
                 Contract.Ensures(Contract.Result<EpsgAxisSet>() != null);
                 using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
                     reader.BaseStream.Seek(_keyData.KeyAddress[key] + CodeSize, SeekOrigin.Begin);
-                    var axisSet = new EpsgAxisSet {
-                        CsKey = key,
-                        Axes = new EpsgAxis[reader.ReadByte()]
-                    };
-                    for (int i = 0; i < axisSet.Axes.Length; i++) {
+                    var axes = new EpsgAxis[reader.ReadByte()];
+                    for (int i = 0; i < axes.Length; i++) {
                         var uom = EpsgUnit.Get(reader.ReadUInt16());
                         Contract.Assume(uom != null);
                         using (var textReader = EpsgDataResource.CreateBinaryReader("axis.txt")) {
                             var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
+                            Contract.Assume(!String.IsNullOrEmpty(name));
                             var orientation = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
                             var abbreviation = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
-                            axisSet.Axes[i] = new EpsgAxis(name, abbreviation, orientation, uom);
+                            axes[i] = new EpsgAxis(name, abbreviation, orientation, uom);
                         }
                     }
-                    return axisSet;
+                    return new EpsgAxisSet(key, axes);
                 }
             }
 
@@ -93,11 +108,12 @@ namespace Pigeoid.Epsg
 
         private static readonly EpsgAxisSetLookUp SetLookUp = new EpsgAxisSetLookUp();
 
-        internal static IEnumerable<EpsgAxis> Get(ushort csCode) {
-            Contract.Ensures(Contract.Result<IEnumerable<EpsgAxis>>() != null);
+        internal static ReadOnlyCollection<EpsgAxis> Get(ushort csCode) {
+            Contract.Ensures(Contract.Result<ReadOnlyCollection<EpsgAxis>>() != null);
+            Contract.Ensures(Contract.ForAll(Contract.Result<ReadOnlyCollection<EpsgAxis>>(), x => x != null));
             var set = SetLookUp.Get(csCode);
             return set == null
-                ? Enumerable.Empty<EpsgAxis>()
+                ? new ReadOnlyCollection<EpsgAxis>(new EpsgAxis[0])
                 : Array.AsReadOnly(set.Axes);
         }
 

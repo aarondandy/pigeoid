@@ -76,7 +76,9 @@ namespace Pigeoid.Epsg
             EpsgCrs horizontal, EpsgCrsVertical vertical
         )
             : base(code, name, area, deprecated) {
+            Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
+            Contract.Requires(area != null);
             Contract.Requires(horizontal != null);
             Contract.Requires(vertical != null);
             Horizontal = horizontal;

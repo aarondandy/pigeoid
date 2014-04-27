@@ -21,10 +21,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
         protected readonly double MinorAxis;
         protected readonly double ESq;
 
-        /// <summary>
-        /// The spheroid.
-        /// </summary>
-        public readonly ISpheroid<double> Spheroid;
+        public ISpheroid<double> Spheroid { get; private set; }
         private readonly double _eSqMajAxis;
         private readonly double _eSecSqMinAxis;
 

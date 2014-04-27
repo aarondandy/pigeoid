@@ -37,7 +37,9 @@ namespace Pigeoid.Epsg
         public string Code {
             get {
                 Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
-                return _code.ToString(CultureInfo.InvariantCulture);
+                var codeText = _code.ToString(CultureInfo.InvariantCulture);
+                Contract.Assume(!String.IsNullOrEmpty(codeText));
+                return codeText;
             }
         }
 
@@ -70,7 +72,9 @@ namespace Pigeoid.Epsg
 
         public override string ToString() {
             Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
-            return Name + ':' + _code;
+            var result = Name + ':' + _code;
+            Contract.Assume(!String.IsNullOrEmpty(result));
+            return result;
         }
 
     }

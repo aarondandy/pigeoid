@@ -66,6 +66,7 @@ namespace Pigeoid.Epsg
                 using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
                     reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     var area = EpsgArea.Get(reader.ReadUInt16());
                     Contract.Assume(area != null);
                     var spheroid = EpsgEllipsoid.Get(reader.ReadUInt16());
@@ -191,9 +192,28 @@ namespace Pigeoid.Epsg
 
     }
 
+    internal abstract class EpsgDatumContracts : EpsgDatum
+    {
+
+        protected EpsgDatumContracts(string name, EpsgArea area)
+            : base(0, name, area)
+        {
+            Contract.Requires(!String.IsNullOrEmpty(name));
+            Contract.Requires(area != null);
+        }
+
+        public override string Type {
+            get {
+                Contract.Ensures(Contract.Result<string>() != null);
+                throw new NotImplementedException();
+            }
+        }
+    }
+
     public class EpsgDatumEngineering : EpsgDatum
     {
         internal EpsgDatumEngineering(ushort code, string name, EpsgArea area) : base(code, name, area) {
+            Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
         }
         public override string Type { get { return "Engineering"; } }
@@ -202,6 +222,7 @@ namespace Pigeoid.Epsg
     public class EpsgDatumVertical : EpsgDatum
     {
         internal EpsgDatumVertical(ushort code, string name, EpsgArea area) : base(code, name, area) {
+            Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
         }
         public override string Type { get { return "Vertical"; } }
@@ -217,6 +238,7 @@ namespace Pigeoid.Epsg
             Contract.Requires(spheroid != null);
             Contract.Requires(primeMeridian != null);
             Contract.Requires(area != null);
+            Contract.Requires(!String.IsNullOrEmpty(name));
             Spheroid = spheroid;
             PrimeMeridian = primeMeridian;
             _basicWgs84Transformation = new Lazy<Helmert7Transformation>(FindBasicWgs84Transformation, LazyThreadSafetyMode.ExecutionAndPublication);

@@ -37,6 +37,7 @@ namespace Pigeoid
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(AxisUnit != null);
+            Contract.Invariant(_shapeData != null);
         }
 
         public string Name {

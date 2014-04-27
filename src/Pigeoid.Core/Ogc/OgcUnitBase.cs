@@ -22,6 +22,11 @@ namespace Pigeoid.Ogc
             _referenceConversionMap = new Lazy<IUnitConversionMap<double>>(CreateReferenceConversionMap, LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(_referenceConversionMap != null);
+        }
+
         public abstract string Type { get; }
 
         public abstract IUnit ReferenceUnit { get; }

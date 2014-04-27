@@ -44,6 +44,7 @@ namespace Pigeoid.Epsg
                     var area = EpsgArea.Get(reader.ReadUInt16());
                     Contract.Assume(area != null);
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    Contract.Assume(!string.IsNullOrEmpty(name));
                     var deprecated = reader.ReadByte() == 0xff;
                     var kind = reader.ReadByte();
                     switch (kind) {
@@ -83,6 +84,7 @@ namespace Pigeoid.Epsg
 
         internal EpsgCrsDatumBased(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs)
             : base(code, name, area, deprecated) {
+            Contract.Requires(code >= 0);
             Contract.Requires(!string.IsNullOrEmpty(name));
             Contract.Requires(area != null);
             Contract.Requires(cs != null);

@@ -132,6 +132,7 @@ namespace Pigeoid.Epsg
                 while (readerDat.BaseStream.Position < readerDat.BaseStream.Length) {
                     var code = readerDat.ReadUInt16();
                     var name = EpsgTextLookUp.GetString(readerDat.ReadUInt16(), readerTxt);
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     var factorB = numberLookUp.Get(readerDat.ReadUInt16());
                     var factorC = numberLookUp.Get(readerDat.ReadUInt16());
 // ReSharper disable CompareOfFloatsByEqualityOperator

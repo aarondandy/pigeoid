@@ -43,6 +43,7 @@ namespace Pigeoid.Epsg
                     reader.BaseStream.Seek((index * RecordSize) + FileHeaderSize + CodeSize, SeekOrigin.Begin);
                     var reverse = reader.ReadByte() == 'B';
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     return new EpsgCoordinateOperationMethodInfo(key, name, reverse);
                 }
             }
@@ -66,6 +67,7 @@ namespace Pigeoid.Epsg
                 internal OpParamValueDynamicLookUp(EpsgCoordinateOperationMethodParamInfoLookUp parent, ushort[] opCodes)
                     : base(opCodes) {
                     Contract.Requires(parent != null);
+                    Contract.Requires(parent._paramUsage != null);
                     Contract.Requires(opCodes != null);
                     _parent = parent;
                     _valueDataOffset = sizeof(byte) // usage count
@@ -78,6 +80,7 @@ namespace Pigeoid.Epsg
                 [ContractInvariantMethod]
                 private void CodeContractInvariants() {
                     Contract.Invariant(_parent != null);
+                    Contract.Invariant(_parent._paramUsage != null);
                 }
 
                 protected override OpParamValueInfo Create(ushort key, int index) {
@@ -287,7 +290,12 @@ namespace Pigeoid.Epsg
             return new EpsgCoordinateOperationMethodParamInfoLookUp(_code);
         }
 
-        public int Code { get { return _code; } }
+        public int Code {
+            get {
+                Contract.Ensures(Contract.Result<int>() >= 0);
+                return _code;
+            }
+        }
         public string Name { get; private set; }
         public bool CanReverse { get; private set; }
 

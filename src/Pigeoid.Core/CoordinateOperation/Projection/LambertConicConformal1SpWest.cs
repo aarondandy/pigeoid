@@ -21,6 +21,11 @@ namespace Pigeoid.CoordinateOperation.Projection
                 _baseInv = core.BaseInverse;
             }
 
+            [ContractInvariantMethod]
+            private void ObjectInvariants() {
+                Contract.Invariant(_baseInv != null);
+            }
+
             public override GeographicCoordinate TransformValue(Point2 source) {
                 return _baseInv.TransformValue(new Point2(-source.X, source.Y));
             }
@@ -49,6 +54,7 @@ namespace Pigeoid.CoordinateOperation.Projection
         private InvertedTransformationBase<LambertConicConformal, Point2, GeographicCoordinate> BaseInverse {
             get {
                 Contract.Requires(HasInverse);
+                Contract.Ensures(Contract.Result<InvertedTransformationBase<LambertConicConformal, Point2, GeographicCoordinate>>() != null);
                 return (InvertedTransformationBase<LambertConicConformal, Point2, GeographicCoordinate>)(base.GetInverse());
             }
         }

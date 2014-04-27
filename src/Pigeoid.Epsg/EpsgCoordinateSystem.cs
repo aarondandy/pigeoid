@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.IO;
 using Pigeoid.Epsg.Resources;
+using System.Collections.ObjectModel;
 
 namespace Pigeoid.Epsg
 {
@@ -60,6 +61,7 @@ namespace Pigeoid.Epsg
                     reader.BaseStream.Seek((index * RecordSize) + HeaderSize + CodeSize, SeekOrigin.Begin);
                     var typeData = reader.ReadByte();
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     return new EpsgCoordinateSystem(
                         key, name,
                         dimension: typeData & 3,
@@ -118,9 +120,10 @@ namespace Pigeoid.Epsg
 
         public CsType Type { get { return _csType; } }
 
-        public IEnumerable<EpsgAxis> Axes {
+        public ReadOnlyCollection<EpsgAxis> Axes {
             get {
-                Contract.Ensures(Contract.Result<IEnumerable<EpsgAxis>>() != null);
+                Contract.Ensures(Contract.Result<ReadOnlyCollection<EpsgAxis>>() != null);
+                Contract.Ensures(Contract.ForAll(Contract.Result<ReadOnlyCollection<EpsgAxis>>(), x => x != null));
                 return EpsgAxis.Get(_code);
             }
         }

@@ -11,6 +11,7 @@ namespace Pigeoid.Epsg
 
         internal EpsgCrsGeodetic(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum)
             : base(code, name, area, deprecated, cs) {
+            Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
             Contract.Requires(cs != null);
@@ -37,7 +38,11 @@ namespace Pigeoid.Epsg
         public EpsgUnit Unit {
             get {
                 Contract.Ensures(Contract.Result<EpsgUnit>() != null);
-                return CoordinateSystem.Axes.First().Unit;
+                var axes = CoordinateSystem.Axes;
+                if (axes.Count == 0)
+                    throw new NotImplementedException();
+                Contract.Assume(axes[0] != null);
+                return axes[0].Unit;
             }
         }
 
@@ -57,6 +62,7 @@ namespace Pigeoid.Epsg
     {
         internal EpsgCrsGeocentric(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum)
             : base(code, name, area, deprecated, cs, geodeticDatum) {
+            Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
             Contract.Requires(cs != null);
@@ -68,6 +74,7 @@ namespace Pigeoid.Epsg
     {
         internal EpsgCrsGeographic(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum)
             : base(code, name, area, deprecated, cs, geodeticDatum) {
+            Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
             Contract.Requires(cs != null);

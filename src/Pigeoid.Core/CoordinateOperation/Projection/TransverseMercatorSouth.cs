@@ -21,6 +21,11 @@ namespace Pigeoid.CoordinateOperation.Projection
                 _baseInv = core.BaseInverse;
             }
 
+            [ContractInvariantMethod]
+            private void ObjectInvariants() {
+                Contract.Invariant(_baseInv != null);
+            }
+
             public override GeographicCoordinate TransformValue(Point2 source) {
                 return _baseInv.TransformValue(new Point2(-source.Y, -source.X));
             }

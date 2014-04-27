@@ -56,6 +56,12 @@ namespace Pigeoid.CoordinateOperation.Transformation
             SetTopocentricOrigin(topocentricOrigin);
         }
 
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(GeographicTransform != null);
+        }
+
+
         /// <summary>
         /// Sets the topocentric origin for this transformation.
         /// </summary>
