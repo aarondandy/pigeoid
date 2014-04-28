@@ -45,6 +45,7 @@ namespace Pigeoid.Epsg
                     var area = EpsgArea.Get(reader.ReadUInt16());
                     Contract.Assume(area != null);
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     var deprecated = reader.ReadByte() == 0xff;
                     return new EpsgCrsCompound(code, name, area, deprecated, horizontal, vertical);
                 }

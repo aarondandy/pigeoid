@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Pigeoid.CoordinateOperation;
@@ -18,7 +19,7 @@ namespace Pigeoid.Epsg
             ushort[] stepCodes
         )
             : base(code, areaCode, deprecated, name) {
-            Contract.Requires(!string.IsNullOrEmpty(name));
+            Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(stepCodes != null);
             _sourceCrsCode = sourceCrsCode;
             _targetCrsCode = targetCrsCode;

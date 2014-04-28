@@ -93,6 +93,12 @@ namespace Pigeoid.Unit
         public SimpleUnitConversionGenerator(IUnit a, IUnit b)
             : this(new[] { a, b }) { }
 
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(_conversionGraph != null);
+            Contract.Invariant(_conversionMap != null);
+        }
+
         public IUnitConversion<double> GenerateConversion(IUnit from, IUnit to) {
             if (null == from || null == to)
                 return null;

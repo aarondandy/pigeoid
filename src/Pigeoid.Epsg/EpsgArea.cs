@@ -168,6 +168,9 @@ namespace Pigeoid.Epsg
                 if (!LatitudeRange.Intersects(other.LatitudeRange))
                     return null;
 
+                if (LongitudeRange == null)
+                    return null;
+
                 var longitude = LongitudeRange.Intersection(other.LongitudeRange);
                 if (longitude == null)
                     return null;

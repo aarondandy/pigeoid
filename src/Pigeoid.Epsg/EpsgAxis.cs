@@ -3,13 +3,12 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.IO;
-using System.Linq;
 using Pigeoid.Epsg.Resources;
+using Pigeoid.Epsg.Utility;
 
 namespace Pigeoid.Epsg
 {
-    public class EpsgAxis :
-        IAxis
+    public class EpsgAxis : IAxis
     {
 
         private class EpsgAxisSet
@@ -21,8 +20,8 @@ namespace Pigeoid.Epsg
                 Axes = axes;
             }
 
-            public readonly ushort CsKey;
-            public readonly EpsgAxis[] Axes;
+            public ushort CsKey { get; private set; }
+            public EpsgAxis[] Axes { get; private set; }
 
             [ContractInvariantMethod]
             private void ObjectInvariants() {
@@ -96,6 +95,7 @@ namespace Pigeoid.Epsg
                             axes[i] = new EpsgAxis(name, abbreviation, orientation, uom);
                         }
                     }
+                    Contract.Assume(Contract.ForAll(axes, x => x != null));
                     return new EpsgAxisSet(key, axes);
                 }
             }
@@ -112,9 +112,8 @@ namespace Pigeoid.Epsg
             Contract.Ensures(Contract.Result<ReadOnlyCollection<EpsgAxis>>() != null);
             Contract.Ensures(Contract.ForAll(Contract.Result<ReadOnlyCollection<EpsgAxis>>(), x => x != null));
             var set = SetLookUp.Get(csCode);
-            return set == null
-                ? new ReadOnlyCollection<EpsgAxis>(new EpsgAxis[0])
-                : Array.AsReadOnly(set.Axes);
+            var axes = set == null ? new EpsgAxis[0] : set.Axes;
+            return axes.AsReadOnly();
         }
 
         private EpsgAxis(string name, string abbreviation, string orientation, EpsgUnit unit) {

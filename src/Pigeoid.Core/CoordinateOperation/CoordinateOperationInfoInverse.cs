@@ -34,14 +34,24 @@ namespace Pigeoid.CoordinateOperation
             }
         }
 
-        bool ICoordinateOperationInfo.HasInverse { [Pure] get { return true; } }
+        bool ICoordinateOperationInfo.HasInverse {
+            [Pure] get {
+                Contract.Ensures(Contract.Result<bool>() == true);
+                return true;
+            }
+        }
 
         public ICoordinateOperationInfo GetInverse() {
             Contract.Ensures(Contract.Result<ICoordinateOperationInfo>() != null);
             return Core;
         }
 
-        bool ICoordinateOperationInfo.IsInverseOfDefinition { [Pure] get { return true; } }
+        bool ICoordinateOperationInfo.IsInverseOfDefinition {
+            [Pure] get {
+                Contract.Ensures(Contract.Result<bool>() == true);
+                return true;
+            }
+        }
 
         public ICoordinateOperationMethodInfo Method {
             get {

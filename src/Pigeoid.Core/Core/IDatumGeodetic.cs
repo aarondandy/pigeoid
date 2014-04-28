@@ -40,17 +40,12 @@ namespace Pigeoid
 
         public Helmert7Transformation BasicWgs84Transformation {
             get {
-                Contract.Ensures(!(Contract.Result<Helmert7Transformation>() == null && IsTransformableToWgs84));
+                Contract.Ensures(!IsTransformableToWgs84 || Contract.Result<Helmert7Transformation>() != null);
                 throw new NotImplementedException();
             }
         }
 
-        public bool IsTransformableToWgs84 {
-            get {
-                Contract.Ensures(!(Contract.Result<bool>() == true && BasicWgs84Transformation == null));
-                throw new NotImplementedException();
-            }
-        }
+        public abstract bool IsTransformableToWgs84 { get; }
 
         public abstract string Name { get; }
 

@@ -46,10 +46,9 @@ namespace Pigeoid.Interop
         public static readonly UnitNameNormalizedComparer Default = new UnitNameNormalizedComparer();
 
         public override string Normalize(string text) {
-            if (null == text)
-                return String.Empty;
-
             text = base.Normalize(text);
+            if (String.IsNullOrEmpty(text))
+                return String.Empty;
 
             // to avoid confusion, just treat coefficient as unity, just another number
             if (text.Equals("COEFFICIENT"))
@@ -65,7 +64,7 @@ namespace Pigeoid.Interop
             // remove plural suffix
             for (int i = 0; i < PluralSuffixWholeWords.Length; i++) {
                 var baseWord = PluralSuffixWholeWords[i];
-                Contract.Assume(baseWord != null);
+                Contract.Assume(!String.IsNullOrEmpty(baseWord));
                 if (text.Length == baseWord.Length - 1 && text[text.Length - 1] == 'S' && text.StartsWith(baseWord, StringComparison.OrdinalIgnoreCase))
                     return baseWord;
             }

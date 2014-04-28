@@ -12,25 +12,18 @@ namespace Pigeoid.CoordinateOperation.Transformation
         where TCore : ITransformation<TTarget, TSource>
     {
 
-        private readonly TCore _core;
-
         protected InvertedTransformationBase(TCore core) {
             if(core == null) throw new ArgumentNullException("core");
             Contract.EndContractBlock();
-            _core = core;
+            Core = core;
         }
 
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
-            Contract.Invariant(_core != null);
+            Contract.Invariant(Core != null);
         }
 
-        public TCore Core {
-            get {
-                Contract.Ensures(Contract.Result<TCore>() != null);
-                return _core;
-            }
-        }
+        public TCore Core { get; private set; }
 
         public object TransformValue(object value) {
             return TransformValue((TSource)value);
@@ -52,7 +45,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
 
         public ITransformation<TTarget, TSource> GetInverse() {
             Contract.Ensures(Contract.Result<ITransformation<TTarget, TSource>>() != null);
-            return _core;
+            return Core;
         }
 
         public bool HasInverse {

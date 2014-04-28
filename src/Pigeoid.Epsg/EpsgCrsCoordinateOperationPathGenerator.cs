@@ -18,7 +18,6 @@ namespace Pigeoid.Epsg
             {
 
                 protected AreaValidatorBase(EpsgArea fromArea, EpsgArea toArea) {
-                    // TODO: is it possible for any of these to be null?
                     FromArea = fromArea;
                     ToArea = toArea;
                 }
@@ -27,11 +26,12 @@ namespace Pigeoid.Epsg
                 public EpsgArea ToArea { get; protected set; }
 
                 protected virtual bool IsValid(EpsgArea area) {
-                    if (null == area || null == FromArea || null == ToArea)
-                        return true;
-                    return FromArea.Intersects(area) || ToArea.Intersects(area);
+                    return area == null
+                        || FromArea == null
+                        || FromArea.Intersects(area)
+                        || ToArea == null
+                        || ToArea.Intersects(area);
                 }
-
             }
 
             public class CrsValidator : AreaValidatorBase
@@ -40,7 +40,8 @@ namespace Pigeoid.Epsg
                 public CrsValidator(EpsgArea fromArea, EpsgArea toArea) : base(fromArea, toArea) { }
 
                 public virtual bool IsValid(EpsgCrs crs) {
-                    Contract.Requires(crs != null);
+                    if(crs == null) throw new ArgumentNullException("crs");
+                    Contract.EndContractBlock();
                     return IsValid(crs.Area);
                 }
 
@@ -52,16 +53,19 @@ namespace Pigeoid.Epsg
                 public OperationValidator(EpsgArea fromArea, EpsgArea toArea) : base(fromArea, toArea) { }
 
                 public virtual bool IsValid(EpsgCoordinateOperationInfoBase operation) {
-                    Contract.Requires(operation != null);
+                    if(operation == null) throw new ArgumentNullException("operation");
+                    Contract.EndContractBlock();
                     return IsValid(operation.Area);
                 }
             }
 
             public virtual CrsValidator CreateCrsValidator(EpsgArea fromArea, EpsgArea toArea) {
+                Contract.Ensures(Contract.Result<CrsValidator>() != null);
                 return new CrsValidator(fromArea, toArea);
             }
 
             public virtual OperationValidator CreateOperationValidator(EpsgArea fromArea, EpsgArea toArea) {
+                Contract.Ensures(Contract.Result<OperationValidator>() != null);
                 return new OperationValidator(fromArea, toArea);
             }
 
@@ -85,6 +89,8 @@ namespace Pigeoid.Epsg
                 }
 
                 public override bool IsValid(EpsgCrs crs) {
+                    if (crs == null) throw new ArgumentNullException("crs");
+                    Contract.EndContractBlock();
                     return base.IsValid(crs) && _predicate(crs);
                 }
             }
@@ -105,6 +111,8 @@ namespace Pigeoid.Epsg
                 }
 
                 public override bool IsValid(EpsgCoordinateOperationInfoBase operation) {
+                    if (operation == null) throw new ArgumentNullException("operation");
+                    Contract.EndContractBlock();
                     return base.IsValid(operation) && _predicate(operation);
                 }
             }
@@ -233,6 +241,7 @@ namespace Pigeoid.Epsg
                     path = path.Append(current, projection.GetInverse());
                     result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path });
                 }
+                Contract.Assume(Contract.ForAll(result, x => x != null));
                 return result;
             }
 

@@ -313,12 +313,18 @@ namespace Pigeoid.Epsg
         }
 
         public Helmert7Transformation BasicWgs84Transformation {
-            get { return _basicWgs84Transformation.Value; }
+            get {
+                var result = _basicWgs84Transformation.Value;
+                Contract.Assume(IsTransformableToWgs84 ? result != null : result == null);
+                return result;
+            }
         }
 
         [Obsolete("Name should indicate it will use Helmert7Transformation (basic?)")]
         public bool IsTransformableToWgs84 {
-            get { return BasicWgs84Transformation != null; }
+            get {
+                return _basicWgs84Transformation.Value != null;
+            }
         }
     }
 }

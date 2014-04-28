@@ -16,7 +16,7 @@ namespace Pigeoid.Interop
     {
 
         public string Normalize(string text) {
-            Contract.Ensures(text == null || Contract.Result<string>() != null);
+            Contract.Ensures(Contract.Result<string>() != null);
             throw new NotImplementedException();
         }
 

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Pigeoid.Utility;
 
 namespace Pigeoid.CoordinateOperation
 {
@@ -76,7 +76,7 @@ namespace Pigeoid.CoordinateOperation
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(RawCoordinateOperations != null);
-            Contract.Invariant(1 <= RawCoordinateOperations.Length);
+            Contract.Invariant(RawCoordinateOperations.Length >= 1);
             Contract.Invariant(Contract.ForAll(RawCoordinateOperations, x => x != null));
         }
 
@@ -87,7 +87,7 @@ namespace Pigeoid.CoordinateOperation
         }
 
         public bool HasInverse {
-            get {
+            [Pure] get {
                 return Array.TrueForAll(RawCoordinateOperations, x => x.HasInverse);
             }
         }
@@ -101,8 +101,8 @@ namespace Pigeoid.CoordinateOperation
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>() != null);
                 Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<ICoordinateOperationInfo>>(), x => x != null));
-                Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>().Count() > 0);
-                return new ReadOnlyCollection<ICoordinateOperationInfo>(RawCoordinateOperations);
+                Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>().Any());
+                return RawCoordinateOperations.AsReadOnly();
             }
         }
 

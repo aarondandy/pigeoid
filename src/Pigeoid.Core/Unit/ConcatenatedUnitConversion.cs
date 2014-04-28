@@ -15,13 +15,24 @@ namespace Pigeoid.Unit
         private readonly IUnitConversion<double>[] _conversions;
 
         /// <exception cref="System.ArgumentException">At least one conversion is required.</exception>
-        public ConcatenatedUnitConversion(IEnumerable<IUnitConversion<double>> conversions) {
-            if (null == conversions) throw new ArgumentNullException("conversions");
-            Contract.Requires(conversions.Count() >= 1);
+        public ConcatenatedUnitConversion(IEnumerable<IUnitConversion<double>> conversions)
+            : this(conversions.ToArray())
+        {
+            Contract.Requires(conversions != null);
+            Contract.Requires(conversions.Any());
             Contract.Requires(Contract.ForAll(conversions, x => x != null));
-            _conversions = conversions.ToArray();
-            if (_conversions.Length == 0)
-                throw new ArgumentException("At least one conversion is required.", "conversions");
+        }
+
+        protected ConcatenatedUnitConversion(IUnitConversion<double>[] conversions) {
+            if (null == conversions) throw new ArgumentNullException("conversions");
+            if (conversions.Length < 1) throw new ArgumentException("At least one conversion is required.", "conversions");
+            Contract.Requires(Contract.ForAll(conversions, x => x != null));
+
+            if (conversions.Any(x => x == null))
+                throw new ArgumentException("No null conversions are allowed", "conversions");
+
+            Contract.Assume(Contract.ForAll(conversions, x => x != null));
+            _conversions = conversions;
         }
 
         [ContractInvariantMethod]

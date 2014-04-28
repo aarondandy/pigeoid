@@ -1,7 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace Pigeoid.CoordinateOperation
 {
+
+    [ContractClass(typeof(CoordinateOperationCrsPathInfoContracts))]
     public interface ICoordinateOperationCrsPathInfo
     {
         /// <summary>
@@ -28,4 +32,39 @@ namespace Pigeoid.CoordinateOperation
         ICrs To { get; }
 
     }
+
+    [ContractClassFor(typeof(ICoordinateOperationCrsPathInfo))]
+    internal abstract class CoordinateOperationCrsPathInfoContracts : ICoordinateOperationCrsPathInfo
+    {
+        public IEnumerable<ICrs> CoordinateReferenceSystems {
+            get {
+                Contract.Ensures(Contract.Result<IEnumerable<ICrs>>() != null);
+                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<ICrs>>(), x => x != null));
+                throw new NotImplementedException();
+            }
+        }
+
+        public IEnumerable<ICoordinateOperationInfo> CoordinateOperations {
+            get {
+                Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>() != null);
+                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<ICoordinateOperationInfo>>(), x => x != null));
+                throw new NotImplementedException();
+            }
+        }
+
+        public ICrs From {
+            get {
+                Contract.Ensures(Contract.Result<ICrs>() != null);
+                throw new NotImplementedException();
+            }
+        }
+
+        public ICrs To {
+            get {
+                Contract.Ensures(Contract.Result<ICrs>() != null);
+                throw new NotImplementedException();
+            }
+        }
+    }
+
 }

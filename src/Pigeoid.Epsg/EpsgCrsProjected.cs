@@ -45,7 +45,9 @@ namespace Pigeoid.Epsg
                         codeList.Add(key);
                     }
                 }
-                return new EpsgCrsProjectedLookUp(keys.ToArray(), reverseIndex.ToDictionary(x => x.Key, x => x.Value.ToArray()));
+                var reverseArrayIndex = reverseIndex.ToDictionary(x => x.Key, x => x.Value.ToArray());
+                Contract.Assume(Contract.ForAll(reverseArrayIndex.Values, x => x != null));
+                return new EpsgCrsProjectedLookUp(keys.ToArray(), reverseArrayIndex);
             }
 
             private readonly Dictionary<ushort, int[]> _reverseIndex;
@@ -90,6 +92,7 @@ namespace Pigeoid.Epsg
                     var area = EpsgArea.Get(reader.ReadUInt16());
                     Contract.Assume(area != null);
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     var deprecated = reader.ReadByte() == 0xff;
                     return new EpsgCrsProjected(code, name, area, deprecated, baseCrs, cs, projectionCode);
                 }

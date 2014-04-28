@@ -102,11 +102,10 @@ namespace Pigeoid
         /// <inheritdoc/>
         [Pure] public override string ToString() {
             Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
-            return String.Concat(
-                "lat:",
-                Latitude.ToString(CultureInfo.InvariantCulture),
-                " lon:",
-                Longitude.ToString(CultureInfo.InvariantCulture));
+            var result = "lat:" + Latitude.ToString(CultureInfo.InvariantCulture)
+                + " lon:" + Longitude.ToString(CultureInfo.InvariantCulture);
+            Contract.Assume(!String.IsNullOrEmpty(result));
+            return result;
         }
 
     }

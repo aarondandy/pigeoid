@@ -8,6 +8,7 @@ namespace Pigeoid.Ogc
     /// <summary>
     /// The base OGC unit of measure class. All units are relative to a single base unit by some factor.
     /// </summary>
+    [ContractClass(typeof(OgcUnitBaseContracts))]
     public abstract class OgcUnitBase : OgcNamedAuthorityBoundEntity, IUnit
     {
         private readonly Lazy<IUnitConversionMap<double>> _referenceConversionMap;
@@ -58,5 +59,20 @@ namespace Pigeoid.Ogc
             get { return _referenceConversionMap.Value; }
         }
 
+    }
+
+    [ContractClassFor(typeof(OgcUnitBase))]
+    internal abstract class OgcUnitBaseContracts : OgcUnitBase
+    {
+        protected OgcUnitBaseContracts(string name, double factor) : base(name, factor) { }
+
+        public abstract override string Type { get; }
+
+        public override IUnit ReferenceUnit {
+            get {
+                Contract.Ensures(Contract.Result<IUnit>() != null);
+                throw new NotImplementedException();
+            }
+        }
     }
 }

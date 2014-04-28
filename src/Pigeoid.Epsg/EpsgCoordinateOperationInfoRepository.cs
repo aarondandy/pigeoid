@@ -137,6 +137,7 @@ namespace Pigeoid.Epsg
                     var areaCode = reader.ReadUInt16();
                     var deprecated = reader.ReadByte() != 0;
                     var name = TextLookUp.GetString(reader.ReadUInt16());
+                    Contract.Assume(!String.IsNullOrEmpty(name));
                     return new EpsgCoordinateTransformInfo(
                         code, sourceCrsCode, targetCrsCode, opMethodCode,
                         accuracy, areaCode, deprecated, name);

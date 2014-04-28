@@ -15,7 +15,6 @@ namespace Pigeoid.CoordinateOperation.Projection
 
             public Inverse(KrovakModified core) : base(core) {
                 Contract.Requires(core != null);
-                Contract.Assume(core.Core != null); // should be inferred from the invariant on core
                 _invertedCore = core.Core.GetInverse();
             }
 
@@ -60,7 +59,6 @@ namespace Pigeoid.CoordinateOperation.Projection
             }
         }
 
-        protected readonly Krovak Core;
         protected readonly Point2 EvaluationPoint;
         protected readonly Vector2 FalseProjectedOffset;
         protected readonly double C1;
@@ -118,6 +116,13 @@ namespace Pigeoid.CoordinateOperation.Projection
             C10 = constants[9];
         }
 
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(Core != null);
+        }
+
+        protected Krovak Core { get; private set; }
+
         public override Point2 TransformValue(GeographicCoordinate source) {
             var p = Core.TransformValue(source);
             var r = p.Difference(EvaluationPoint);
@@ -152,11 +157,6 @@ namespace Pigeoid.CoordinateOperation.Projection
             return p
                 .Difference(delta)
                 .Add(FalseProjectedOffset);
-        }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariants() {
-            Contract.Invariant(Core != null);
         }
 
         public override ITransformation<Point2, GeographicCoordinate> GetInverse() {

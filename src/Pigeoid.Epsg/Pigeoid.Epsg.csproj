@@ -159,6 +159,7 @@
     <Compile Include="Resources\EpsgLookupBase.cs" />
     <Compile Include="Resources\EpsgNumberLookup.cs" />
     <Compile Include="Resources\EpsgTextLookup.cs" />
+    <Compile Include="Utility\ArrayEx.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pigeoid.Core\Pigeoid.Core.csproj">

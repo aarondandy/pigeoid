@@ -31,7 +31,7 @@ namespace Pigeoid
 
         public string Name {
             get {
-                Contract.Ensures(Contract.Result<string>() != null);
+                Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
                 throw new NotImplementedException();
             }
         }

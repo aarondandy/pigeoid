@@ -22,7 +22,7 @@ namespace Pigeoid.Interop
 
         public static string NormalizeBasic(string text) {
             Contract.Ensures(Contract.Result<string>() != null);
-            if (null == text)
+            if (String.IsNullOrEmpty(text))
                 return String.Empty;
 
             var builder = new StringBuilder();
