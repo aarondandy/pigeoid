@@ -23,8 +23,30 @@ namespace Pigeoid.Utility
         public static ReadOnlyCollection<T> AsReadOnly<T>(this T[] items) {
             Contract.Requires(items != null);
             Contract.Ensures(Contract.Result<ReadOnlyCollection<T>>().Count == items.Length);
-            Contract.Ensures(Contract.ForAll(items.GetLowerBound(0), items.GetLowerBound(0) + items.Length, i => Contract.Result<ReadOnlyCollection<T>>()[i].Equals(items[i])));
+            Contract.Ensures(Contract.ForAll(0, items.Length, i => Contract.Result<ReadOnlyCollection<T>>()[i].Equals(items[i])));
+#if DEBUG
+            var result = new ReadOnlyCollection<T>(items);
+            Contract.Assume(result.Count == items.Length);
+            Contract.Assume(Contract.ForAll(0, items.Length, i => result[i].Equals(items[i])));
+            return result;
+#else
             return new ReadOnlyCollection<T>(items);
+#endif
+        }
+
+        [Pure]
+        public static T[] CreateSingleElementArray<T>(T item) {
+            Contract.Ensures(Contract.Result<T[]>() != null);
+            Contract.Ensures(Contract.Result<T[]>().Length == 1);
+            Contract.Ensures(Contract.Result<T[]>()[0].Equals(item));
+#if DEBUG
+            var result = new[] {item};
+            Contract.Assume(result.Length == 1);
+            Contract.Assume(result[0].Equals(item));
+            return result;
+#else
+            return new[] {item};
+#endif
         }
 
     }

@@ -17,8 +17,8 @@ namespace Pigeoid.CoordinateOperation.Projection
 
             public Inverted(AlbersEqualArea core) : base(core) {
                 Contract.Requires(core != null);
-                E4 = Core.ESq*Core.ESq;
-                E6 = E4*Core.ESq;
+                E4 = core.ESq*core.ESq;
+                E6 = E4*core.ESq;
             }
 
             public override GeographicCoordinate TransformValue(Point2 value) {

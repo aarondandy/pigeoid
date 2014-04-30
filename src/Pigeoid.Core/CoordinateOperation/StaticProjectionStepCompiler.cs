@@ -863,7 +863,7 @@ namespace Pigeoid.CoordinateOperation
                 operationName = stepParameters.CoordinateOperationInfo.Name;
 
             Func<ProjectionCompilationParams, ITransformation<GeographicCoordinate, Point2>> projectionCompiler;
-            if (null == operationName || !_transformationCreatorLookup.TryGetValue(operationName, out projectionCompiler) || null == projectionCompiler)
+            if (String.IsNullOrEmpty(operationName) || !_transformationCreatorLookup.TryGetValue(operationName, out projectionCompiler) || null == projectionCompiler)
                 return null;
 
             var parameterLookup = new NamedParameterLookup(parameters ?? Enumerable.Empty<INamedParameter>());

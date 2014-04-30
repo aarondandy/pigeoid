@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using Pigeoid.Ogc;
 using Pigeoid.Unit;
@@ -81,18 +82,23 @@ namespace Pigeoid.Interop.Proj4
         }
 
         private readonly string _code;
-        private readonly string _name;
         private readonly ISpheroid<double> _spheroid;
 
         private Proj4Spheroid(string code, string name, ISpheroid<double> spheroid) {
+            Contract.Requires(!String.IsNullOrEmpty(name));
+            Contract.Requires(spheroid != null);
             _code = code;
-            _name = name;
+            Name = name;
             _spheroid = spheroid;
         }
 
-        public string Name {
-            get { return _name; }
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(!String.IsNullOrEmpty(Name));
+            Contract.Invariant(_spheroid != null);
         }
+
+        public string Name { get; private set; }
 
         public IUnit AxisUnit { get { return OgcLinearUnit.DefaultMeter; } }
 

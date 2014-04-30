@@ -51,42 +51,45 @@ namespace Pigeoid.Ogc
 
         public virtual string ToStringRepresentation(OgcOrientationType orientationType) {
             Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
+            Contract.Assume(!String.IsNullOrEmpty(orientationType.ToString().ToUpperInvariant()));
             return orientationType.ToString().ToUpperInvariant();
         }
 
         public virtual string ToStringRepresentation(WktKeyword keyword) {
             Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
             switch (keyword) {
-            case WktKeyword.ParamMt:
-                return "PARAM_MT";
-            case WktKeyword.InverseMt:
-                return "INVERSE_MT";
-            case WktKeyword.PrimeMeridian:
-                return "PRIMEM";
-            case WktKeyword.VerticalDatum:
-                return "VERT_DATUM";
-            case WktKeyword.LocalDatum:
-                return "LOCAL_DATUM";
-            case WktKeyword.ConcatMt:
-                return "CONCAT_MT";
-            case WktKeyword.GeographicCs:
-                return "GEOGCS";
-            case WktKeyword.ProjectedCs:
-                return "PROJCS";
-            case WktKeyword.GeocentricCs:
-                return "GEOCCS";
-            case WktKeyword.VerticalCs:
-                return "VERT_CS";
-            case WktKeyword.LocalCs:
-                return "LOCAL_CS";
-            case WktKeyword.FittedCs:
-                return "FITTED_CS";
-            case WktKeyword.CompoundCs:
-                return "COMPD_CS";
-            case WktKeyword.PassThroughMt:
-                return "PASSTHROUGH_MT";
-            default:
-                return keyword.ToString().ToUpperInvariant();
+                case WktKeyword.ParamMt:
+                    return "PARAM_MT";
+                case WktKeyword.InverseMt:
+                    return "INVERSE_MT";
+                case WktKeyword.PrimeMeridian:
+                    return "PRIMEM";
+                case WktKeyword.VerticalDatum:
+                    return "VERT_DATUM";
+                case WktKeyword.LocalDatum:
+                    return "LOCAL_DATUM";
+                case WktKeyword.ConcatMt:
+                    return "CONCAT_MT";
+                case WktKeyword.GeographicCs:
+                    return "GEOGCS";
+                case WktKeyword.ProjectedCs:
+                    return "PROJCS";
+                case WktKeyword.GeocentricCs:
+                    return "GEOCCS";
+                case WktKeyword.VerticalCs:
+                    return "VERT_CS";
+                case WktKeyword.LocalCs:
+                    return "LOCAL_CS";
+                case WktKeyword.FittedCs:
+                    return "FITTED_CS";
+                case WktKeyword.CompoundCs:
+                    return "COMPD_CS";
+                case WktKeyword.PassThroughMt:
+                    return "PASSTHROUGH_MT";
+                default: {
+                    Contract.Assume(!String.IsNullOrEmpty(keyword.ToString().ToUpperInvariant()));
+                    return keyword.ToString().ToUpperInvariant();
+                }
             }
         }
 

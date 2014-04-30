@@ -34,7 +34,10 @@ namespace Pigeoid.Epsg.Resources
 		}
 
 		internal override IEnumerable<TKey> Keys {
-			get { return LookUpCore.Keys; }
+			get {
+                Contract.Assume(LookUpCore.Keys != null);
+			    return LookUpCore.Keys;
+			}
 		}
 
         internal override IEnumerable<TValue> Values {

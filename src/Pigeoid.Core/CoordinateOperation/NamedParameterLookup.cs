@@ -25,6 +25,7 @@ namespace Pigeoid.CoordinateOperation
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(_data != null);
+            Contract.Invariant(Contract.ForAll(_data, x => x != null));
             Contract.Invariant(ParameterNameNormalizedComparer != null);
         }
 
@@ -53,9 +54,10 @@ namespace Pigeoid.CoordinateOperation
         public bool Assign(params NamedParameterSelector[] selectors) {
             if(selectors == null) throw new ArgumentNullException("selectors");
             Contract.Requires(Contract.ForAll(selectors, x => x != null));
-            Contract.EndContractBlock();
+
             var paramsToSearch = _data.ToList();
             foreach (var selector in selectors) {
+                Contract.Assume(selector != null);
                 if (paramsToSearch.Count == 0)
                     break;
 

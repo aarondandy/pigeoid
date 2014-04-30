@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using Pigeoid.CoordinateOperation.Transformation;
 using Vertesaur;
 
@@ -71,7 +72,6 @@ namespace Pigeoid.Interop.Proj4
             get { return DefaultDatums; }
         }
 
-        private readonly string _name;
         private readonly Proj4Spheroid _spheroid;
         private readonly Helmert7Transformation _toWgs84;
         private readonly bool _supported;
@@ -92,11 +92,17 @@ namespace Pigeoid.Interop.Proj4
             bool supported = true,
             bool matchExplicitly = false
         ) {
-            _name = name;
+            Contract.Requires(!String.IsNullOrEmpty(name));
+            Name = name;
             _spheroid = spheroid;
             _toWgs84 = toWgs84;
             _supported = supported;
             _matchExplicitly = matchExplicitly;
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(!String.IsNullOrEmpty(Name));
         }
 
         /// <summary>
@@ -127,20 +133,23 @@ namespace Pigeoid.Interop.Proj4
             get { return _spheroid; }
         }
 
-        public string Name {
-            get { return _name; }
-        }
+        public string Name { get; private set; }
 
         public string Type {
             get { return "Geodetic"; }
         }
 
         public bool IsTransformableToWgs84 {
-            get { return null != _toWgs84; }
+            get {
+                return null != _toWgs84;
+            }
         }
 
         public Helmert7Transformation BasicWgs84Transformation {
-            get { return _toWgs84; }
+            get {
+                Contract.Assume(IsTransformableToWgs84 == (_toWgs84 != null));
+                return _toWgs84;
+            }
         }
 
         public IAuthorityTag Authority {

@@ -47,6 +47,7 @@ namespace Pigeoid.CoordinateOperation
         private void CodeContractInvariants() {
             Contract.Invariant(CrsNodesArray != null);
             Contract.Invariant(CrsNodesArray.Length > 0);
+            Contract.Invariant(Contract.ForAll(CrsNodesArray, x => x != null));
             Contract.Invariant(OperationEdgesArray != null);
         }
 

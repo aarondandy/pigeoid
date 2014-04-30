@@ -83,7 +83,10 @@ namespace Pigeoid.Unit
         public ConcatenatedUnitConversion GetInverse() {
             if (!HasInverse) throw new NoInverseException();
             Contract.Ensures(Contract.Result<ConcatenatedUnitConversion>() != null);
-            return new ConcatenatedUnitConversion(_conversions.Select(x => x.GetInverse()).Reverse());
+            var inverse = Array.ConvertAll(_conversions, x => x.GetInverse());
+            Array.Reverse(inverse);
+            Contract.Assume(Contract.ForAll(inverse, x => x != null));
+            return new ConcatenatedUnitConversion(inverse);
         }
 
         IUnitConversion<double> IUnitConversion<double>.GetInverse() {

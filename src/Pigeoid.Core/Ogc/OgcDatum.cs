@@ -30,7 +30,11 @@ namespace Pigeoid.Ogc
                     case OgcDatumType.LocalOther: return "Local";
                     case OgcDatumType.VerticalOther: return "Vertical";
                     case OgcDatumType.HorizontalOther: return "Horizontal";
-                    default: return OgcType.ToString();
+                    default: {
+                        var result = OgcType.ToString();
+                        Contract.Assume(!String.IsNullOrEmpty(result));
+                        return result;
+                    }
                 }
             }
         }

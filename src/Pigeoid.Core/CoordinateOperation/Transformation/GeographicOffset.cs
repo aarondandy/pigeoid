@@ -116,7 +116,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
         }
 
         public IEnumerable<object> TransformValues(IEnumerable<object> values) {
-            Contract.Ensures(Contract.Result<IEnumerable<object>>() != values);
+            Contract.Ensures(Contract.Result<IEnumerable<object>>() != null);
             return values.Select(TransformValue);
         }
     }

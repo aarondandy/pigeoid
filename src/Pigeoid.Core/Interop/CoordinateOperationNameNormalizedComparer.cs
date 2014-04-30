@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Text.RegularExpressions;
 
 namespace Pigeoid.Interop
@@ -130,6 +131,7 @@ namespace Pigeoid.Interop
 
             var variantMatch = VariantEndingRegex.Match(text);
             if (variantMatch.Success) {
+                Contract.Assume(variantMatch.Index < text.Length);
                 var variantLetter = variantMatch.Groups[1].Value;
                 var nonVariant = text.Substring(0, variantMatch.Index);
 

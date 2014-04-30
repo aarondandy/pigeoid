@@ -93,7 +93,7 @@ namespace Pigeoid.Ogc
             var result = "MajorAxis: " + A + " InverseF: " + B;
             if (!String.IsNullOrEmpty(Name))
                 result += " (" + Name + ')';
-
+            Contract.Assume(!String.IsNullOrEmpty(result));
             return result;
         }
     }

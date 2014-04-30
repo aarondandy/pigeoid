@@ -138,7 +138,9 @@ namespace Pigeoid
 
         [Pure] public override string ToString() {
             Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
-            return String.Concat(Start, ':', End);
+            var result = String.Concat(Start, ':', End);
+            Contract.Assume(!String.IsNullOrEmpty(result));
+            return result;
         }
 
         [Pure] public bool TryIntersection(LongitudeDegreeRange other, out LongitudeDegreeRange result) {

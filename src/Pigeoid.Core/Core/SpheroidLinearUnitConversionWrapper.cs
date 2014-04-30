@@ -43,9 +43,11 @@ namespace Pigeoid
         public string Name {
             get {
                 Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
-                if (String.IsNullOrWhiteSpace(_name))
-                    return "converted to " + AxisUnit;
-                return _name + " converted to " + AxisUnit;
+                var result =  String.IsNullOrWhiteSpace(_name)
+                    ? "converted to " + AxisUnit
+                    : _name + " converted to " + AxisUnit;
+                Contract.Assume(!String.IsNullOrEmpty(result));
+                return result;
             }
         }
 

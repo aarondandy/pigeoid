@@ -15,16 +15,15 @@ namespace Pigeoid.CoordinateOperation.Projection
         private class Inverted : InvertedTransformationBase<TransverseMercator, Point2, GeographicCoordinate>
         {
 
-            //private readonly double _majorAxisScaleFactor;
-            protected readonly double InverseCoefficient1;
-            protected readonly double InverseCoefficient2;
-            protected readonly double InverseCoefficient3;
-            protected readonly double InverseCoefficient4;
-            protected readonly double PrimaryScaleFactor;
+            private readonly double InverseCoefficient1;
+            private readonly double InverseCoefficient2;
+            private readonly double InverseCoefficient3;
+            private readonly double InverseCoefficient4;
+            private readonly double PrimaryScaleFactor;
 
             public Inverted(TransverseMercator core) : base(core) {
                 Contract.Requires(core != null);
-                var n = Core.Spheroid.F / (2.0 - Core.Spheroid.F);
+                var n = core.Spheroid.F / (2.0 - core.Spheroid.F);
                 var n2 = n * n;
                 var n3 = n2 * n;
                 var n4 = n3 * n;
@@ -32,7 +31,7 @@ namespace Pigeoid.CoordinateOperation.Projection
                 InverseCoefficient2 = (n2 / 48.0) + (n3 / 15.0) - (n4 * 437.0 / 1440.0);
                 InverseCoefficient3 = (n3 * 17.0 / 480.0) - (n4 * 37.0 / 840.0);
                 InverseCoefficient4 = (n4 * 4397 / 161280.0);
-                PrimaryScaleFactor = Core.ValueB * Core.ScaleFactor;
+                PrimaryScaleFactor = core.ValueB * core.ScaleFactor;
             }
 
             public override GeographicCoordinate TransformValue(Point2 coordinate) {
@@ -109,7 +108,7 @@ namespace Pigeoid.CoordinateOperation.Projection
             // ReSharper disable CompareOfFloatsByEqualityOperator
             NaturalOrigin = naturalOrigin;
             ScaleFactor = scaleFactor;
-            var n = Spheroid.F / (2.0 - Spheroid.F);
+            var n = spheroid.F / (2.0 - spheroid.F);
             var n2 = n * n;
             var n3 = n2 * n;
             var n4 = n3 * n;

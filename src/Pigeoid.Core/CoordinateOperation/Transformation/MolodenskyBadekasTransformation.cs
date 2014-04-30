@@ -103,7 +103,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
         }
 
         public IEnumerable<Point3> TransformValues(IEnumerable<Point3> values) {
-            Contract.Ensures(Contract.Result<IEnumerable<Point3>>() != values);
+            Contract.Ensures(Contract.Result<IEnumerable<Point3>>() != null);
             return values.Select(TransformValue);
         }
 

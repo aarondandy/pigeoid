@@ -229,6 +229,8 @@ namespace Pigeoid.CoordinateOperation
             if (allCrs.Count <= 1)
                 return null; // operationPath must have at least 2 CRSs
 
+            Contract.Assume(allOps.Count + 1 == allCrs.Count);
+
             var firstCrs = allCrs[0];
             var lastCrs = allCrs[allCrs.Count - 1];
 
@@ -239,6 +241,7 @@ namespace Pigeoid.CoordinateOperation
                 throw new ArgumentException("Could not extract a unit from the first CRS in the operation path", "operationPath");
 
             for (int operationIndex = 0; operationIndex < stepResults.Length; operationIndex++) {
+                Contract.Assume(allOps[operationIndex] != null);
                 var stepResult = CompileStep(new StepCompilationParameters(
                     allOps[operationIndex],
                     currentUnit,

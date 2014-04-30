@@ -652,17 +652,15 @@ namespace Pigeoid.CoordinateOperation
                 parameters = parameterizedOperation.Parameters;
             }
 
-            if (null == operationName)
+            if (String.IsNullOrEmpty(operationName))
                 operationName = stepParameters.CoordinateOperationInfo.Name;
-
-            if (null == operationName)
+            if (String.IsNullOrEmpty(operationName))
                 return null;
 
             var parameterLookup = new NamedParameterLookup(parameters ?? Enumerable.Empty<INamedParameter>());
             var compilationParams = new TransformationCompilationParams(stepParameters, parameterLookup, operationName);
 
             var normalizedName = _coordinateOperationNameComparer.Normalize(compilationParams.OperationName);
-
             if (normalizedName.StartsWith("POSITIONVECTORTRANSFORMATION"))
                 return CreatePositionVectorTransformation(compilationParams);
             if (normalizedName.StartsWith("COORDINATEFRAMEROTATION"))

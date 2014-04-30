@@ -115,14 +115,21 @@ namespace Pigeoid.Epsg.Resources
 		}
 
 		private readonly object _sync;
-		private BinaryReader _reader;
+		private readonly BinaryReader _reader;
 
 		public EpsgTextLookUp(string wordPointerFile) : this(EpsgDataResource.CreateBinaryReader(wordPointerFile)) { }
 
 		private EpsgTextLookUp(BinaryReader reader) {
+            Contract.Requires(reader != null);
 			_sync = new object();
 			_reader = reader;
 		}
+
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(_sync != null);
+            Contract.Invariant(_reader != null);
+        }
 
 		public string GetString(ushort stringOffset) {
 			lock (_sync) {
@@ -139,7 +146,6 @@ namespace Pigeoid.Epsg.Resources
 		protected virtual void Dispose(bool disposing) {
 			lock(_sync) {
 				_reader.Dispose();
-				_reader = null;
 			}
 		}
 

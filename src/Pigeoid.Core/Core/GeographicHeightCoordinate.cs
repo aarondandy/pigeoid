@@ -141,13 +141,15 @@ namespace Pigeoid
         /// <inheritdoc/>
         [Pure] public override string ToString() {
             Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
-            return String.Concat(
+            var result = String.Concat(
                 "lat:",
                 Latitude.ToString(CultureInfo.InvariantCulture),
                 " lon:",
                 Longitude.ToString(CultureInfo.InvariantCulture),
                 " h:",
                 Height.ToString(CultureInfo.InvariantCulture));
+            Contract.Assume(!String.IsNullOrEmpty(result));
+            return result;
         }
 
     }

@@ -166,6 +166,7 @@ namespace Pigeoid.Epsg
             public EpsgCoordinateOperationMethodParamInfoLookUp(ushort coordinateOperationCode) {
                 _coordinateOperationCode = coordinateOperationCode;
                 _paramDatFileName = "param" + _coordinateOperationCode + ".dat";
+                Contract.Assume(!String.IsNullOrEmpty(_paramDatFileName));
                 using (var reader = EpsgDataResource.CreateBinaryReader(_paramDatFileName)) {
                     _paramUsage = new ParamUsage[reader.ReadByte()];
                     for (int i = 0; i < _paramUsage.Length; i++) {

@@ -10,8 +10,15 @@ namespace Pigeoid.Epsg.Utility
         public static ReadOnlyCollection<T> AsReadOnly<T>(this T[] items) {
             Contract.Requires(items != null);
             Contract.Ensures(Contract.Result<ReadOnlyCollection<T>>().Count == items.Length);
-            Contract.Ensures(Contract.ForAll(items.GetLowerBound(0), items.GetLowerBound(0) + items.Length, i => Contract.Result<ReadOnlyCollection<T>>()[i].Equals(items[i])));
+            Contract.Ensures(Contract.ForAll(0, items.Length, i => Contract.Result<ReadOnlyCollection<T>>()[i].Equals(items[i])));
+#if DEBUG
+            var result = new ReadOnlyCollection<T>(items);
+            Contract.Assume(result.Count == items.Length);
+            Contract.Assume(Contract.ForAll(0, items.Length, i => result[i].Equals(items[i])));
+            return result;
+#else
             return new ReadOnlyCollection<T>(items);
+#endif
         }
 
     }

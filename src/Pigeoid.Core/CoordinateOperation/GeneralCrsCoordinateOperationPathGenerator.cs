@@ -127,9 +127,8 @@ namespace Pigeoid.CoordinateOperation
                 }
             }
 
-            if (performWgs84Transform && null != toTransform) {
+            if (performWgs84Transform && ((ICoordinateOperationInfo)toTransform).HasInverse)
                 operations.Add(((ICoordinateOperationInfo)toTransform).GetInverse());
-            }
 
             return operations;
         }

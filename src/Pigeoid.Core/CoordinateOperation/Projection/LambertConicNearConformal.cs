@@ -19,9 +19,9 @@ namespace Pigeoid.CoordinateOperation.Projection
 
             public Inverted(LambertConicNearConformal core) : base(core) {
                 Contract.Requires(core != null);
-                _negateR = Core.GeographicOrigin.Latitude < 0;
-                _northOffsetBase = Core.FalseProjectedOffset.Y + Core.ROrigin;
-                _scaledA = Core.OriginScaleFactor * Core.A;
+                _negateR = core.GeographicOrigin.Latitude < 0;
+                _northOffsetBase = core.FalseProjectedOffset.Y + core.ROrigin;
+                _scaledA = core.OriginScaleFactor * Core.A;
             }
 
             public override GeographicCoordinate TransformValue(Point2 value) {
@@ -127,19 +127,19 @@ namespace Pigeoid.CoordinateOperation.Projection
 
             A = 1.0 / (6.0 * p0 * v0);
 
-            ConstantA = Spheroid.A * (
+            ConstantA = spheroid.A * (
                 1.0 - N + ((5.0 * (n2 - n3)) / 4.0) + ((81.0 * (n4 - n5)) / 64.0)
                 ) * (Math.PI / 180.0);
-            ConstantB = 3.0 * Spheroid.A * (
+            ConstantB = 3.0 * spheroid.A * (
                 N - n2 + ((7.0 * (n3 - n4)) / 8.0) + ((55.0 * n5) / 64.0)
                 ) / 2.0;
-            ConstantC = 15.0 * Spheroid.A * (
+            ConstantC = 15.0 * spheroid.A * (
                 n2 - n3 + ((3.0 * (n4 - n5)) / 4.0)
                 ) / 16.0;
-            ConstantD = 35.0 * Spheroid.A * (
+            ConstantD = 35.0 * spheroid.A * (
                 n3 - n4 + ((11 * n5) / 16.0)
                 ) / 48.0;
-            ConstantE = 315.0 * Spheroid.A * (n4 - n5) / 512.0;
+            ConstantE = 315.0 * spheroid.A * (n4 - n5) / 512.0;
 
             ROrigin = (OriginScaleFactor * v0) / Math.Tan(geographicOrigin.Latitude);
 

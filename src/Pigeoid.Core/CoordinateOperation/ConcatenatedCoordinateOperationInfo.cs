@@ -44,7 +44,7 @@ namespace Pigeoid.CoordinateOperation
 
             string ICoordinateOperationInfo.Name {
                 get {
-                    Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
+                    Contract.Ensures(Contract.Result<string>() != null);
                     return "Inverse " + ((ICoordinateOperationInfo)_core).Name;
                 }
             }

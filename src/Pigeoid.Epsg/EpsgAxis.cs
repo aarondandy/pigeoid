@@ -15,7 +15,7 @@ namespace Pigeoid.Epsg
         {
             public EpsgAxisSet(ushort key, EpsgAxis[] axes) {
                 Contract.Requires(axes != null);
-                Contract.Requires(Contract.ForAll(axes, x => x != null));
+                Contract.Requires(Contract.ForAll(0, axes.Length, i => axes[i] != null));
                 CsKey = key;
                 Axes = axes;
             }
@@ -26,7 +26,7 @@ namespace Pigeoid.Epsg
             [ContractInvariantMethod]
             private void ObjectInvariants() {
                 Contract.Invariant(Axes != null);
-                Contract.Invariant(Contract.ForAll(Axes, x => x != null));
+                Contract.Invariant(Contract.ForAll(0, Axes.Length, i => Axes[i] != null));
             }
 
         }
@@ -91,7 +91,9 @@ namespace Pigeoid.Epsg
                             var name = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
                             Contract.Assume(!String.IsNullOrEmpty(name));
                             var orientation = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
+                            Contract.Assume(!String.IsNullOrEmpty(orientation));
                             var abbreviation = EpsgTextLookUp.GetString(reader.ReadUInt16(), textReader);
+                            Contract.Assume(!String.IsNullOrEmpty(abbreviation));
                             axes[i] = new EpsgAxis(name, abbreviation, orientation, uom);
                         }
                     }

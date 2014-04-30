@@ -68,12 +68,17 @@ namespace Pigeoid.Interop.Proj4
         [ContractInvariantMethod]
         private void ObjectInvariants() {
             Contract.Invariant(Core != null);
+            Contract.Invariant(Core.Spheroid != null);
             Contract.Invariant(PrimeMeridian != null);
         }
 
         protected Datum Core { get; private set; }
 
-        public ISpheroidInfo Spheroid { get { return new Proj4SpheroidWrapper(Core.Spheroid); } }
+        public ISpheroidInfo Spheroid {
+            get {
+                return new Proj4SpheroidWrapper(Core.Spheroid);
+            }
+        }
 
         public Proj4MeridianWrapper PrimeMeridian { get; private set; }
 
@@ -81,8 +86,11 @@ namespace Pigeoid.Interop.Proj4
 
         public Helmert7Transformation BasicWgs84Transformation {
             get {
-                if (Core.ToWGS84 == null)
+                if (Core.ToWGS84 == null) {
+                    Contract.Assume(!IsTransformableToWgs84);
                     return null;
+                }
+
                 if (Core.ToWGS84.Length == 3)
                     return new Helmert7Transformation(
                         new Vector3(Core.ToWGS84[0], Core.ToWGS84[1], Core.ToWGS84[2]));
@@ -96,7 +104,9 @@ namespace Pigeoid.Interop.Proj4
         }
 
         public bool IsTransformableToWgs84 {
-            get { return BasicWgs84Transformation != null; }
+            get {
+                return Core.ToWGS84 != null;
+            }
         }
 
         public string Type {

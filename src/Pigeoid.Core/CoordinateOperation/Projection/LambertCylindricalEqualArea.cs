@@ -24,8 +24,8 @@ namespace Pigeoid.CoordinateOperation.Projection
                 // TODO: this is probably all wrong
                 Azimuth = 0;
                 P = new GeographicCoordinate(
-                    Math.Asin(Math.Cos(Core.GeographicOrigin.Latitude) * Math.Sin(Azimuth)),
-                    Math.Atan(-Math.Cos(Azimuth) / (-Math.Sin(Core.GeographicOrigin.Latitude) * Math.Sin(Azimuth))) + Core.GeographicOrigin.Longitude);
+                    Math.Asin(Math.Cos(core.GeographicOrigin.Latitude) * Math.Sin(Azimuth)),
+                    Math.Atan(-Math.Cos(Azimuth) / (-Math.Sin(core.GeographicOrigin.Latitude) * Math.Sin(Azimuth))) + core.GeographicOrigin.Longitude);
                 BConstant = 0.9991507126
                     + (-0.0008471537 * Math.Cos(2 * P.Latitude))
                     + (0.0000021283 * Math.Cos(4 * P.Latitude))

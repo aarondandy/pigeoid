@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using Pigeoid.CoordinateOperation;
+using Pigeoid.Utility;
 using Vertesaur;
 
 namespace Pigeoid.Ogc
@@ -28,8 +29,8 @@ namespace Pigeoid.Ogc
         public IEnumerable<ICoordinateOperationInfo> Steps {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>() != null);
-                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<ICoordinateOperationInfo>>(), x=> x != null));
-                return new[] { Core };
+                Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<ICoordinateOperationInfo>>(), x => x != null));
+                return ArrayUtil.CreateSingleElementArray(Core);
             }
         }
 
@@ -41,7 +42,9 @@ namespace Pigeoid.Ogc
         }
 
         public bool HasInverse {
-            [Pure] get { return FirstAffectedOrdinate == 0 && Core.HasInverse; }
+            [Pure] get {
+                return FirstAffectedOrdinate == 0 && Core.HasInverse;
+            }
         }
 
         public ICoordinateOperationInfo GetInverse() {
