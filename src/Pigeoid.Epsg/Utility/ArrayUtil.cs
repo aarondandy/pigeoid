@@ -13,6 +13,21 @@ namespace Pigeoid.Epsg.Utility
             return (T[])(array.Clone());
         }
 
+        [Pure]
+        public static T[] CreateSingleElementArray<T>(T item) {
+            Contract.Ensures(Contract.Result<T[]>() != null);
+            Contract.Ensures(Contract.Result<T[]>().Length == 1);
+            Contract.Ensures(Contract.Result<T[]>()[0].Equals(item));
+#if DEBUG
+            var result = new[] { item };
+            Contract.Assume(result.Length == 1);
+            Contract.Assume(result[0].Equals(item));
+            return result;
+#else
+            return new[] {item};
+#endif
+        }
+
     }
 
     internal static class ArrayUtil<T>

@@ -1,4 +1,5 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using NUnit.Framework;
 using Pigeoid.CoordinateOperation;
 using Pigeoid.CoordinateOperation.Projection;
 using Pigeoid.Unit;
@@ -49,7 +50,7 @@ namespace Pigeoid.Epsg.Transform.Test
             if (transformation is ITransformation<TFrom, TTo>)
                 return transformation as ITransformation<TFrom, TTo>;
             if (transformation is ConcatenatedTransformation)
-                return new ConcatenatedTransformation<TFrom, TTo>(((ConcatenatedTransformation)(transformation)).Transformations);
+                return new ConcatenatedTransformation<TFrom, TTo>((ConcatenatedTransformation)transformation);
             return null;
         }
 

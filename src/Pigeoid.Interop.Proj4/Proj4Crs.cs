@@ -256,6 +256,7 @@ namespace Pigeoid.Interop.Proj4
 
             result.Datum = Proj4DatumWrapper.Create(crsGeographic.Datum);
 
+            Contract.Assume(crsGeographic.Datum.PrimeMeridian != null);
             result.Meridian = Proj4MeridianWrapper.Create(crsGeographic.Datum.PrimeMeridian);
 
             return result;
@@ -266,6 +267,7 @@ namespace Pigeoid.Interop.Proj4
         {
             Contract.Requires(geographicInfo != null);
             Contract.Requires(geographicInfo.Meridian != null);
+            Contract.Requires(geographicInfo.Datum != null);
             Contract.Requires(geographicInfo.Datum.Spheroid != null);
             Core = geographicInfo;
             Datum = Proj4DatumWrapper.CreateWrapper(geographicInfo);

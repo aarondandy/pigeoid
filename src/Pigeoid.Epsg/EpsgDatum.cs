@@ -7,6 +7,7 @@ using System.Threading;
 using Pigeoid.CoordinateOperation.Transformation;
 using Pigeoid.Epsg.Resources;
 using Pigeoid.CoordinateOperation;
+using Pigeoid.Epsg.Utility;
 using Vertesaur;
 using Vertesaur.Transformation;
 
@@ -288,9 +289,8 @@ namespace Pigeoid.Epsg
                 new[] {bestTransform});
             var compileResult = compiler.Compile(compileRequest);
 
-            var transformationSteps = compileResult is ConcatenatedTransformation
-                ? ((ConcatenatedTransformation)compileResult).Transformations
-                : (IEnumerable<ITransformation>)new[] { compileResult };
+            var transformationSteps = (compileResult as IEnumerable<ITransformation>)
+                ?? ArrayUtil.CreateSingleElementArray(compileResult);
 
             transformationSteps = transformationSteps.Select(step => {
                 if (step is GeocentricTransformationGeographicWrapper) {

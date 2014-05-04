@@ -154,7 +154,7 @@ namespace Pigeoid.CoordinateOperation
             Contract.Ensures(Contract.Result<IEnumerable<ITransformation>>() != null);
             var concatTransformation = transformation as ConcatenatedTransformation;
             if (concatTransformation != null) {
-                return concatTransformation.Transformations.SelectMany(Linearize);
+                return concatTransformation.SelectMany(Linearize);
             }
             return new[] { transformation };
         }
