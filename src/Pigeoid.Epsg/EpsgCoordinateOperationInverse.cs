@@ -10,6 +10,7 @@ namespace Pigeoid.Epsg
             : base(core) { Contract.Requires(core != null);}
 
         public new EpsgCoordinateOperationInfoBase GetInverse() {
+            Contract.Requires(HasInverse);
             Contract.Ensures(Contract.Result<EpsgCoordinateOperationInfoBase>() != null);
             return (EpsgCoordinateOperationInfoBase)(base.GetInverse());
         }

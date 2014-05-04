@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Pigeoid.Utility;
 using Vertesaur.Search;
 
 namespace Pigeoid.Unit
@@ -51,6 +52,7 @@ namespace Pigeoid.Unit
 
             while (pending.Count > 0) {
                 var current = pending.Dequeue();
+                Contract.Assume(current != null);
                 if (visited.Contains(current))
                     continue;
 
@@ -117,16 +119,19 @@ namespace Pigeoid.Unit
 
         private IEnumerable<IUnitConversion<double>> Linearize(IEnumerable<IUnitConversion<double>> conversions) {
             Contract.Requires(conversions != null);
+            Contract.Requires(Contract.ForAll(conversions, x => x != null));
             Contract.Ensures(Contract.Result<IEnumerable<IUnitConversion<double>>>() != null);
+            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IUnitConversion<double>>>(), x => x != null));
             return conversions.SelectMany(Linearize);
         }
 
         private IEnumerable<IUnitConversion<double>> Linearize(IUnitConversion<double> conversion) {
             Contract.Requires(conversion != null);
             Contract.Ensures(Contract.Result<IEnumerable<IUnitConversion<double>>>() != null);
+            Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IUnitConversion<double>>>(), x => x != null));
             var catConv = conversion as ConcatenatedUnitConversion;
             if (null == catConv)
-                return new[] { conversion };
+                return ArrayUtil.CreateSingleElementArray(conversion);
             return Linearize(catConv.Conversions);
         }
 

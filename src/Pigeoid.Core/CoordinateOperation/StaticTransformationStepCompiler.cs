@@ -578,6 +578,11 @@ namespace Pigeoid.CoordinateOperation
             _coordinateOperationNameComparer = coordinateOperationNameComparer ?? CoordinateOperationNameNormalizedComparer.Default;
         }
 
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(_coordinateOperationNameComparer != null);
+        }
+
         public StaticCoordinateOperationCompiler.StepCompilationResult Compile(StaticCoordinateOperationCompiler.StepCompilationParameters stepParameters) {
             if(stepParameters == null) throw new ArgumentNullException("stepParameters");
             Contract.EndContractBlock();

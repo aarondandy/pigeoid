@@ -34,7 +34,7 @@ namespace Pigeoid.CoordinateOperation
             }
         }
 
-        bool ICoordinateOperationInfo.HasInverse {
+        public bool HasInverse {
             [Pure] get {
                 Contract.Ensures(Contract.Result<bool>() == true);
                 return true;

@@ -71,6 +71,7 @@ namespace Pigeoid.CoordinateOperation
                     }
                 }
                 if (bestIndex >= 0) {
+                    Contract.Assume(bestIndex < paramsToSearch.Count);
                     selector.Select(paramsToSearch[bestIndex].NamedParameter);
                     paramsToSearch.RemoveAt(bestIndex);
                 }

@@ -23,6 +23,7 @@ namespace Pigeoid.CoordinateOperation.Projection
 
             public Inverted(TransverseMercator core) : base(core) {
                 Contract.Requires(core != null);
+                Contract.Requires(core.Spheroid != null);
                 var n = core.Spheroid.F / (2.0 - core.Spheroid.F);
                 var n2 = n * n;
                 var n3 = n2 * n;
@@ -113,7 +114,7 @@ namespace Pigeoid.CoordinateOperation.Projection
             var n3 = n2 * n;
             var n4 = n3 * n;
 
-            ValueB = (Spheroid.A / (1 + n)) * (1 + (n * n / 4.0) + (n * n * n * n / 64.0));
+            ValueB = (spheroid.A / (1 + n)) * (1 + (n * n / 4.0) + (n * n * n * n / 64.0));
             Coefficient1 = (n / 2.0) - (n2 * 2.0 / 3.0) + (n3 * 5.0 / 16.0) + (n4 * 41.0 / 180.0);
             Coefficient2 = (n2 * 13.0 / 48.0) - (n3 * 3.0 / 5.0) + (n4 * 557.0 / 1440.0);
             Coefficient3 = (n3 * 61.0 / 240.0) - (n4 * 103 / 140);
@@ -138,7 +139,7 @@ namespace Pigeoid.CoordinateOperation.Projection
                     - (Math.Sin(naturalOrigin.Latitude * 2.0) * eCoefficient2)
                     + (Math.Sin(naturalOrigin.Latitude * 4.0) * eCoefficient4)
                     - (Math.Sin(naturalOrigin.Latitude * 6.0) * eCoefficient6)
-                ) * Spheroid.A;
+                ) * spheroid.A;
             }
             else {
                 var qOrigin = ArcSinH(Math.Tan(naturalOrigin.Latitude))

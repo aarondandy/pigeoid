@@ -266,6 +266,7 @@ namespace Pigeoid.Epsg
                     path = path.Prepend(current, projected.Projection);
                     result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path });
                 }
+                Contract.Assume(Contract.ForAll(result, x => x != null));
                 return result;
             }
 

@@ -54,7 +54,16 @@ namespace Pigeoid.Utility
     internal static class ArrayUtil<T>
     {
 
-        public static readonly T[] Empty = new T[0];
+        private static readonly T[] _empty = new T[0];
+
+        public static T[] Empty {
+            get {
+                Contract.Ensures(Contract.Result<T[]>() != null);
+                Contract.Ensures(Contract.Result<T[]>().Length == 0);
+                Contract.Assume(_empty.Length == 0);
+                return _empty;
+            }
+        }
 
     }
 

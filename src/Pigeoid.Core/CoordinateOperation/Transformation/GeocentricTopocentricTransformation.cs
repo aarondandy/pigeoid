@@ -67,7 +67,10 @@ namespace Pigeoid.CoordinateOperation.Transformation
         /// </summary>
         /// <param name="topocentricOrigin">The topocentric origin.</param>
         public void SetTopocentricOrigin(Point3 topocentricOrigin) {
-            _topocentricOrigin = topocentricOrigin;
+            if (!GeographicTransform.HasInverse)
+                throw new InvalidOperationException();
+
+            _topocentricOrigin = topocentricOrigin;           
             GeographicCoordinate ellipsoidalOrigin =
                 (GeographicTransform.GetInverse() as ITransformation<Point3, GeographicCoordinate>)
                 .TransformValue(_topocentricOrigin);

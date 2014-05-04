@@ -23,13 +23,13 @@ namespace Pigeoid.CoordinateOperation.Projection
 
             public Inverse(EquidistantCylindrical core) : base(core) {
                 Contract.Requires(core != null);
-                var e2 = Core.ESq;
+                var e2 = core.ESq;
                 var e4 = e2 * e2;
-                var e6 = e4 * Core.ESq;
-                var e8 = e6 * Core.ESq;
-                var e10 = e8 * Core.ESq;
-                var e12 = e10 * Core.ESq;
-                var e14 = e12 * Core.ESq;
+                var e6 = e4 * core.ESq;
+                var e8 = e6 * core.ESq;
+                var e10 = e8 * core.ESq;
+                var e12 = e10 * core.ESq;
+                var e14 = e12 * core.ESq;
                 _uNumerator = (
                     1.0
                     - (e2 / 4.0)
@@ -40,7 +40,7 @@ namespace Pigeoid.CoordinateOperation.Projection
                     - (4851.0 / 1048576.0 * e12)
                     - (14157.0 / 4194304.0 * e14)
                 ) * core.MajorAxis;
-                var sqrtOneMinusESq = Math.Sqrt(1.0 - Core.ESq);
+                var sqrtOneMinusESq = Math.Sqrt(1.0 - core.ESq);
                 var n = (1.0 - sqrtOneMinusESq) / (1.0 + sqrtOneMinusESq);
                 var n2 = n * n;
                 var n3 = n2 * n;

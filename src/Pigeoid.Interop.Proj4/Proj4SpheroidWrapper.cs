@@ -23,7 +23,7 @@ namespace Pigeoid.Interop.Proj4
         }
 
         public Proj4SpheroidWrapper(Spheroid spheroid)
-            : base(spheroid.Name, new AuthorityTag("PROJ4", spheroid.Code)) {
+            : base(spheroid.Name ?? "Unknown", new AuthorityTag("PROJ4", spheroid.Code)) {
             Contract.Requires(spheroid != null);
             Core = spheroid;
         }

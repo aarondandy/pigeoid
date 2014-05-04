@@ -90,10 +90,14 @@ namespace Pigeoid.Interop.Proj4
 
 
         private static string ToProj4MethodName(string name) {
-            string result;
-            return ToProj4NameLookup.TryGetValue(name, out result)
-                ? result
-                : name.ToLowerInvariant();
+            if (String.IsNullOrEmpty(name))
+                return name;
+
+            string lookupValue;
+            if (ToProj4NameLookup.TryGetValue(name, out lookupValue))
+                return lookupValue;
+
+            return name.ToLowerInvariant();
         }
 
         public static ProjectionInfo CreateProjection(ICrsProjected crsProjected) {
@@ -122,6 +126,9 @@ namespace Pigeoid.Interop.Proj4
                 return result;
 
             var projectionMethod = projectionInfo.Method;
+            if(projectionMethod == null)
+                throw new InvalidOperationException("No projection method.");
+
 
             var proj4Name = ToProj4MethodName(projectionMethod.Name);
             var transform = TransformManager.GetProj4(proj4Name);
@@ -141,6 +148,7 @@ namespace Pigeoid.Interop.Proj4
         public Proj4CrsProjected(ProjectionInfo projectionInfo)
             : base(projectionInfo.Name ?? projectionInfo.Transform.Name ?? "Unknown", CreateAuthorityTag(projectionInfo)) {
             Contract.Requires(projectionInfo != null);
+            Contract.Requires(projectionInfo.GeographicInfo != null);
             Core = projectionInfo;
             Geographic = new Proj4CrsGeographic(projectionInfo.GeographicInfo);
         }
@@ -203,10 +211,12 @@ namespace Pigeoid.Interop.Proj4
                 if (Core.NoDefs)
                     parameters.Add(new NamedParameter<bool>("no_defs", true));
 
-                var method = Core.Transform == null
-                    ? new OgcCoordinateOperationMethodInfo("Unknown")
-                    : new OgcCoordinateOperationMethodInfo(Core.Transform.Name ?? Core.Transform.Proj4Name);
-
+                var methodName = (
+                    Core.Transform == null
+                        ? null
+                        : (Core.Transform.Name ?? Core.Transform.Proj4Name)
+                ) ?? "Unknown";
+                var method = new OgcCoordinateOperationMethodInfo(methodName);
                 return new CoordinateOperationInfo(
                     Core.Name ?? "Unknown",
                     parameters,
@@ -237,6 +247,7 @@ namespace Pigeoid.Interop.Proj4
 
         public static GeographicInfo CreateGeographic(ICrsGeographic crsGeographic) {
             if(crsGeographic == null) throw new ArgumentNullException("crsGeographic");
+            Contract.Requires(crsGeographic.Datum.PrimeMeridian != null);
             Contract.Ensures(Contract.Result<GeographicInfo>() != null);
 
             var result = new GeographicInfo {
@@ -254,6 +265,8 @@ namespace Pigeoid.Interop.Proj4
             : base(geographicInfo.Name ?? geographicInfo.Datum.Name ?? "Unknown", new AuthorityTag("PROJ4", String.Empty))
         {
             Contract.Requires(geographicInfo != null);
+            Contract.Requires(geographicInfo.Meridian != null);
+            Contract.Requires(geographicInfo.Datum.Spheroid != null);
             Core = geographicInfo;
             Datum = Proj4DatumWrapper.CreateWrapper(geographicInfo);
         }

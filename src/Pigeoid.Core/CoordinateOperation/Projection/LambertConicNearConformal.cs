@@ -21,7 +21,7 @@ namespace Pigeoid.CoordinateOperation.Projection
                 Contract.Requires(core != null);
                 _negateR = core.GeographicOrigin.Latitude < 0;
                 _northOffsetBase = core.FalseProjectedOffset.Y + core.ROrigin;
-                _scaledA = core.OriginScaleFactor * Core.A;
+                _scaledA = core.OriginScaleFactor * core.A;
             }
 
             public override GeographicCoordinate TransformValue(Point2 value) {

@@ -37,7 +37,7 @@ namespace Pigeoid.Interop.Proj4
         }
 
         public Proj4MeridianWrapper(Meridian meridian)
-            : base(meridian.Name, new AuthorityTag("PROJ4", meridian.Code.ToString(CultureInfo.InvariantCulture))) {
+            : base(meridian.Name ?? "Unknown", new AuthorityTag("PROJ4", meridian.Code.ToString(CultureInfo.InvariantCulture))) {
             Contract.Requires(meridian != null);
             Core = meridian;
         }

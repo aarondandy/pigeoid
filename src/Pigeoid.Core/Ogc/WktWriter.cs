@@ -199,6 +199,7 @@ namespace Pigeoid.Ogc
                         var method = parameterizedOperation.Method;
                         WriteQuoted(FixName(null == method ? entity.Name : method.Name));
                         Indent();
+                        Contract.Assume(parameterizedOperation.Parameters != null);
                         foreach (var parameter in parameterizedOperation.Parameters) {
                             StartNextLineParameter();
                             if(parameter != null)
@@ -448,8 +449,10 @@ namespace Pigeoid.Ogc
             var parameterizedOperation = entity.Projection as IParameterizedCoordinateOperationInfo;
             if (null != parameterizedOperation) {
                 StartNextLineParameter();
-                WriteProjection(parameterizedOperation.Method);
+                if (parameterizedOperation.Method != null)
+                    WriteProjection(parameterizedOperation.Method);
 
+                Contract.Assume(parameterizedOperation.Parameters != null);
                 foreach (var parameter in parameterizedOperation.Parameters) {
                     StartNextLineParameter();
                     if (parameter != null)

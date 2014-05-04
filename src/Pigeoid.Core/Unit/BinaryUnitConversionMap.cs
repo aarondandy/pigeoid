@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Pigeoid.Utility;
 
 namespace Pigeoid.Unit
 {
@@ -41,7 +42,9 @@ namespace Pigeoid.Unit
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<IUnit>>() != null);
                 Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<IUnit>>(), x => x != null));
-                return new[] { FromDefined, ToDefined }.Distinct(EqualityComparer);
+                if (EqualityComparer.Equals(FromDefined, ToDefined))
+                    return ArrayUtil.CreateSingleElementArray(FromDefined);
+                return new[] {FromDefined, ToDefined};
             }
         }
 

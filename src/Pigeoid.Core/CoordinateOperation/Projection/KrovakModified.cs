@@ -15,6 +15,8 @@ namespace Pigeoid.CoordinateOperation.Projection
 
             public Inverse(KrovakModified core) : base(core) {
                 Contract.Requires(core != null);
+                Contract.Requires(core.Core != null);
+                Contract.Requires(core.Core.HasInverse);
                 _invertedCore = core.Core.GetInverse();
             }
 

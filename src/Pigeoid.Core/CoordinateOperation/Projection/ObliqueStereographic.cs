@@ -17,8 +17,8 @@ namespace Pigeoid.CoordinateOperation.Projection
 
             public Inverted(ObliqueStereographic core) : base(core) {
                 Contract.Requires(core != null);
-                _halfChiOrigin = Core.ChiOrigin / 2.0;
-                _rk4 = Core.Rk2 * 2.0;
+                _halfChiOrigin = core.ChiOrigin / 2.0;
+                _rk4 = core.Rk2 * 2.0;
             }
 
             public override GeographicCoordinate TransformValue(Point2 source) {

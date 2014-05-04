@@ -24,6 +24,8 @@ namespace Pigeoid.CoordinateOperation
         }
 
         public CoordinateOperationCrsPathInfo(ICrs node) {
+            if(node == null) throw new ArgumentNullException("node");
+            Contract.EndContractBlock();
             CrsNodesArray = new[] { node };
             OperationEdgesArray = new ICoordinateOperationInfo[0];
         }
@@ -56,14 +58,12 @@ namespace Pigeoid.CoordinateOperation
 
         public IEnumerable<ICrs> CoordinateReferenceSystems {
             get {
-                Contract.Ensures(Contract.Result<IEnumerable<ICrs>>() != null);
                 return new ReadOnlyCollection<ICrs>(CrsNodesArray);
             }
         }
 
         public IEnumerable<ICoordinateOperationInfo> CoordinateOperations {
             get {
-                Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>() != null);
                 return new ReadOnlyCollection<ICoordinateOperationInfo>(OperationEdgesArray);
             }
         }

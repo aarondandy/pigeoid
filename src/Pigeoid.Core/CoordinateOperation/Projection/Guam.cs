@@ -29,7 +29,7 @@ namespace Pigeoid.CoordinateOperation.Projection
             public Inverse(Guam core)
                 : base(core) {
                 Contract.Requires(core != null);
-                Ep1 = (1 - Math.Sqrt(1 - Core.ESq)) / (1 + Math.Sqrt(1 - Core.ESq));
+                Ep1 = (1 - Math.Sqrt(1 - core.ESq)) / (1 + Math.Sqrt(1 - core.ESq));
                 Ep2 = Ep1 * Ep1;
                 Ep3 = Ep2 * Ep1;
                 Ep4 = Ep3 * Ep1;

@@ -303,11 +303,13 @@ namespace Pigeoid.Epsg
         public ReadOnlyCollection<ParamUsage> ParameterUsage {
             get {
                 Contract.Ensures(Contract.Result<ReadOnlyCollection<ParamUsage>>() != null);
+                Contract.Assume(_paramData.Value != null);
                 return _paramData.Value.ParameterUsage;
             }
         }
 
         public ReadOnlyCollection<INamedParameter> GetOperationParameters(int operationCode) {
+            Contract.Assume(_paramData.Value != null);
             var info = _paramData.Value.GetParameterValueInfo(operationCode);
             return null == info ? null : info.Values;
         }

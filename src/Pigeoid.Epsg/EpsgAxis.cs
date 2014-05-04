@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.IO;
 using Pigeoid.Epsg.Resources;
@@ -11,11 +10,11 @@ namespace Pigeoid.Epsg
     public class EpsgAxis : IAxis
     {
 
-        private class EpsgAxisSet
+        private sealed class EpsgAxisSet
         {
             public EpsgAxisSet(ushort key, EpsgAxis[] axes) {
                 Contract.Requires(axes != null);
-                Contract.Requires(Contract.ForAll(0, axes.Length, i => axes[i] != null));
+                Contract.Requires(Contract.ForAll(axes, x => x != null));
                 CsKey = key;
                 Axes = axes;
             }
@@ -26,12 +25,12 @@ namespace Pigeoid.Epsg
             [ContractInvariantMethod]
             private void ObjectInvariants() {
                 Contract.Invariant(Axes != null);
-                Contract.Invariant(Contract.ForAll(0, Axes.Length, i => Axes[i] != null));
+                Contract.Invariant(Contract.ForAll(Axes, x => x != null));
             }
 
         }
 
-        private class EpsgAxisSetLookUp : EpsgDynamicLookUpBase<ushort, EpsgAxisSet>
+        private sealed class EpsgAxisSetLookUp : EpsgDynamicLookUpBase<ushort, EpsgAxisSet>
         {
             private const string DatFileName = "axis.dat";
             private const int AxisRecordSize = sizeof(ushort) * 4;
@@ -39,28 +38,41 @@ namespace Pigeoid.Epsg
 
             private class KeyData
             {
-                public ushort[] KeyLookUp;
-                public Dictionary<ushort, ushort> KeyAddress;
+
+                public KeyData(ushort[] keyLookUp, Dictionary<ushort, ushort> keyAddress) {
+                    Contract.Requires(keyLookUp != null);
+                    Contract.Requires(keyAddress != null);
+                    KeyLookUp = keyLookUp;
+                    KeyAddress = keyAddress;
+                }
+
+                [ContractInvariantMethod]
+                private void ObjectInvariants() {
+                    Contract.Invariant(KeyLookUp != null);
+                    Contract.Invariant(KeyAddress != null);
+                }
+
+                public ushort[] KeyLookUp { get; private set; }
+                public Dictionary<ushort, ushort> KeyAddress { get; private set; }
             }
 
             private static KeyData GetKeyData() {
                 Contract.Ensures(Contract.Result<KeyData>() != null);
                 Contract.Ensures(Contract.Result<KeyData>().KeyLookUp != null);
                 Contract.Ensures(Contract.Result<KeyData>().KeyAddress != null);
-                var keyData = new KeyData();
                 using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-                    keyData.KeyLookUp = new ushort[reader.ReadUInt16()];
-                    keyData.KeyAddress = new Dictionary<ushort, ushort>(keyData.KeyLookUp.Length);
-                    for (int i = 0; i < keyData.KeyLookUp.Length; i++) {
+                    var keyLookUp = new ushort[reader.ReadUInt16()];
+                    var keyAddress = new Dictionary<ushort, ushort>(keyLookUp.Length);
+                    for (int i = 0; i < keyLookUp.Length; i++) {
                         var address = (ushort)reader.BaseStream.Position;
                         var key = reader.ReadUInt16();
-                        keyData.KeyLookUp[i] = key;
-                        keyData.KeyAddress[key] = address;
+                        keyLookUp[i] = key;
+                        keyAddress[key] = address;
                         var axesCount = reader.ReadByte();
                         reader.BaseStream.Seek(axesCount * AxisRecordSize, SeekOrigin.Current);
                     }
+                    return new KeyData(keyLookUp, keyAddress);
                 }
-                return keyData;
             }
 
             private readonly KeyData _keyData;
@@ -98,6 +110,7 @@ namespace Pigeoid.Epsg
                         }
                     }
                     Contract.Assume(Contract.ForAll(axes, x => x != null));
+                    Contract.Assume(Contract.ForAll(0, axes.Length, i => axes[i] != null));
                     return new EpsgAxisSet(key, axes);
                 }
             }
@@ -110,12 +123,13 @@ namespace Pigeoid.Epsg
 
         private static readonly EpsgAxisSetLookUp SetLookUp = new EpsgAxisSetLookUp();
 
-        internal static ReadOnlyCollection<EpsgAxis> Get(ushort csCode) {
-            Contract.Ensures(Contract.Result<ReadOnlyCollection<EpsgAxis>>() != null);
-            Contract.Ensures(Contract.ForAll(Contract.Result<ReadOnlyCollection<EpsgAxis>>(), x => x != null));
+        internal static EpsgAxis[] Get(ushort csCode) {
+            Contract.Ensures(Contract.Result<EpsgAxis[]>() != null);
+            Contract.Ensures(Contract.ForAll(Contract.Result<EpsgAxis[]>(), x => x != null));
             var set = SetLookUp.Get(csCode);
-            var axes = set == null ? new EpsgAxis[0] : set.Axes;
-            return axes.AsReadOnly();
+            if (set == null)
+                return ArrayUtil<EpsgAxis>.Empty;
+            return set.Axes.ToArray();
         }
 
         private EpsgAxis(string name, string abbreviation, string orientation, EpsgUnit unit) {

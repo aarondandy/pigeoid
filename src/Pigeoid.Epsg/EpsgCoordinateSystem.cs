@@ -120,10 +120,10 @@ namespace Pigeoid.Epsg
 
         public CsType Type { get { return _csType; } }
 
-        public ReadOnlyCollection<EpsgAxis> Axes {
+        public IList<EpsgAxis> Axes {
             get {
-                Contract.Ensures(Contract.Result<ReadOnlyCollection<EpsgAxis>>() != null);
-                Contract.Ensures(Contract.ForAll(Contract.Result<ReadOnlyCollection<EpsgAxis>>(), x => x != null));
+                Contract.Ensures(Contract.Result<IList<EpsgAxis>>() != null);
+                Contract.Ensures(Contract.ForAll(Contract.Result<IList<EpsgAxis>>(), x => x != null));
                 return EpsgAxis.Get(_code);
             }
         }

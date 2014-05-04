@@ -38,7 +38,9 @@ namespace Pigeoid.CoordinateOperation
                 get {
                     Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>() != null);
                     Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<ICoordinateOperationInfo>>(), x => x != null));
-                    return _core.Steps.Reverse().Select(x => x.GetInverse());
+                    var result = Array.ConvertAll(_core.RawCoordinateOperations, x => x.GetInverse());
+                    Array.Reverse(result);
+                    return result;
                 }
             }
 
@@ -102,7 +104,9 @@ namespace Pigeoid.CoordinateOperation
                 Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>() != null);
                 Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<ICoordinateOperationInfo>>(), x => x != null));
                 Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationInfo>>().Any());
-                return RawCoordinateOperations.AsReadOnly();
+                var result = RawCoordinateOperations.AsReadOnly();
+                Contract.Assume(Contract.ForAll(result, x => x != null));
+                return result;
             }
         }
 

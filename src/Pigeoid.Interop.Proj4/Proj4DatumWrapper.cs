@@ -49,7 +49,10 @@ namespace Pigeoid.Interop.Proj4
         }
 
         public static Proj4DatumWrapper CreateWrapper(GeographicInfo geographicInfo) {
-            if(geographicInfo == null) throw new ArgumentNullException("geographicInfo");
+            if (geographicInfo == null) throw new ArgumentNullException("geographicInfo");
+            if (geographicInfo.Meridian == null) throw new ArgumentException("Must have a meridian.", "geographicInfo");
+            Contract.Requires(geographicInfo.Datum != null);
+            Contract.Requires(geographicInfo.Datum.Spheroid != null);
             Contract.Ensures(Contract.Result<Proj4DatumWrapper>() != null);
             return new Proj4DatumWrapper(
                 geographicInfo.Datum,
@@ -114,7 +117,9 @@ namespace Pigeoid.Interop.Proj4
         }
 
         public string Name {
-            get { return Core.Name; }
+            get {
+                return String.IsNullOrEmpty(Core.Name) ? "Unknown" : Core.Name;
+            }
         }
 
         public IAuthorityTag Authority {

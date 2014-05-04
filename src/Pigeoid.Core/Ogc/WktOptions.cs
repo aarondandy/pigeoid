@@ -148,9 +148,11 @@ namespace Pigeoid.Ogc
 
                 // TODO: can these values be cached?
                 var allNames = Enum.GetNames(typeof(OgcDatumType));
+                var allValues = ((OgcDatumType[]) Enum.GetValues(typeof (OgcDatumType)));
+                Contract.Assume(allValues.Length == allNames.Length);
                 for (int i = 0; i < allNames.Length; i++)
                     if (String.Equals(typeName, allNames[i], StringComparison.OrdinalIgnoreCase))
-                        return ((OgcDatumType[])Enum.GetValues(typeof(OgcDatumType)))[i];
+                        return allValues[i];
 
                 if (typeName.Equals("GEODETIC", StringComparison.OrdinalIgnoreCase) || typeName.Equals("GEOCENTRIC", StringComparison.OrdinalIgnoreCase))
                     return OgcDatumType.HorizontalGeocentric;

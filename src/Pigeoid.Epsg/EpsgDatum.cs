@@ -101,6 +101,7 @@ namespace Pigeoid.Epsg
         internal static EpsgFixedLookUpBase<ushort, EpsgDatumEngineering> LookUpEngineering {
             get {
                 Contract.Ensures(Contract.Result<EpsgFixedLookUpBase<ushort, EpsgDatumEngineering>>() != null);
+                Contract.Assume(LookUpEngineeringCore.Value != null);
                 return LookUpEngineeringCore.Value;
             }
         }
@@ -108,6 +109,7 @@ namespace Pigeoid.Epsg
         internal static EpsgFixedLookUpBase<ushort, EpsgDatumVertical> LookUpVertical {
             get {
                 Contract.Ensures(Contract.Result<EpsgFixedLookUpBase<ushort, EpsgDatumVertical>>() != null);
+                Contract.Assume(LookUpVerticalCore.Value != null);
                 return LookUpVerticalCore.Value;
             }
         }

@@ -63,13 +63,13 @@ namespace Pigeoid.Epsg
             }
         }
 
-        public IEnumerable<EpsgCoordinateOperationInfo> Steps {
+        public EpsgCoordinateOperationInfo[] Steps {
             get {
-                Contract.Ensures(Contract.Result<IEnumerable<EpsgCoordinateOperationInfo>>() != null);
-                Contract.Ensures(Contract.ForAll(
-                    Contract.Result<IEnumerable<EpsgCoordinateOperationInfo>>(),
-                    x => x != null));
-                return _stepCodes.Select(x => EpsgCoordinateOperationInfoRepository.GetOperationInfo(x));
+                Contract.Ensures(Contract.Result<EpsgCoordinateOperationInfo[]>() != null);
+                Contract.Ensures(Contract.ForAll(Contract.Result<EpsgCoordinateOperationInfo[]>(), x => x != null));
+                var result = Array.ConvertAll(_stepCodes, code => EpsgCoordinateOperationInfoRepository.GetOperationInfo(code));
+                Contract.Assume(Contract.ForAll(result, x => x != null));
+                return result;
             }
         }
 
