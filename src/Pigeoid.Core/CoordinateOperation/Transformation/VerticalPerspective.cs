@@ -28,7 +28,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
             ViewPointHeight = viewPointHeight;
             Spheroid = spheroid;
             SinLatOrigin = Math.Sin(origin.Latitude);
-            CosLatOrigin = Math.Sin(origin.Latitude);
+            CosLatOrigin = Math.Cos(origin.Latitude);
             ESq = spheroid.ESquared;
             OriginRadiusOfCurvature = spheroid.A / Math.Sqrt(1 - (ESq * SinLatOrigin * SinLatOrigin));
         }

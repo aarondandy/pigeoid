@@ -1644,8 +1644,6 @@ namespace Pigeoid.Epsg.Transform.Test
             // op: 19850
             // crs: 5819 to 5821
 
-            Assert.Inconclusive("The EPSG data seems wrong.");
-
             var fromCrs = EpsgCrs.Get(5819);
             var toCrs = EpsgCrs.Get(5821);
 
@@ -1655,10 +1653,10 @@ namespace Pigeoid.Epsg.Transform.Test
             Assert.IsNotNull(transformation);
 
 
-            var expected5819 = new GeographicHeightCoordinate(0.939151101, 0.037167659, 73); // radians & meters (the epsg operation seems messed up)
+            var expected5819 = new GeographicHeightCoordinate(0.939151101, 0.037167659, 73);
             var expected5821 = new Point2(-188878.767, -128550.090);
 
-            AreEqual(expected5821, transformation.TransformValue(expected5819), 0);
+            AreEqual(expected5821, transformation.TransformValue(expected5819), 20);
         }
 
         [Test, Ignore(NotSupported)]
