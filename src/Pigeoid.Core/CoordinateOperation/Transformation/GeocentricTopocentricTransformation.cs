@@ -101,12 +101,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
 
         [CLSCompliant(false)]
         public void TransformValue(ref Point3 value) {
-            var d = value.Difference(_topocentricOrigin);
-            value = new Point3(
-                (d.Y * _cosLon) - (d.X * _sinLon),
-                (d.Z * _cosLat) - (d.X * _sinLatCosLon) - (d.Y * _sinLatSinLon),
-                (d.X * _cosLatCosLon) + (d.Y * _cosLatSinLon) + (d.Z * _sinLat)
-            );
+            value = TransformValue(value);
         }
 
         public bool HasInverse {
