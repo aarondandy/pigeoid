@@ -21,6 +21,7 @@ namespace Pigeoid.Epsg
                 PopulateFromFile("uomang.dat", "Angle", readerTxt, numberLookUp, lookUpDictionary);
                 PopulateFromFile("uomlen.dat", "Length", readerTxt, numberLookUp, lookUpDictionary);
                 PopulateFromFile("uomscl.dat", "Scale", readerTxt, numberLookUp, lookUpDictionary);
+                PopulateFromFile("uomtim.dat", "Time", readerTxt, numberLookUp, lookUpDictionary);
             }
 
 
@@ -224,8 +225,10 @@ namespace Pigeoid.Epsg
                 unit = LookUp.Get(9001);
             else if (StringComparer.OrdinalIgnoreCase.Equals("Scale", Type))
                 unit = LookUp.Get(9201);
+            else if (StringComparer.OrdinalIgnoreCase.Equals("Time", Type))
+                unit = LookUp.Get(1040);
             else
-                unit = null;
+                unit = null; // TODO: consider, LookUp.Values.Where(x => x.Type == Type).Single(x => x.FactorB == 1 && x.FactorC == 1);
 
             if (unit != null)
                 return unit;

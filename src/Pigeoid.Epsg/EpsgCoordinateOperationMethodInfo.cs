@@ -100,8 +100,14 @@ namespace Pigeoid.Epsg
                             var uomCode = reader.ReadUInt16();
                             if (valueCode != 0xffff) {
                                 var paramName = _parent._paramUsage[i].Parameter.Name;
-                                var uom = EpsgUnit.Get(uomCode);
-                                Contract.Assume(uom != null);
+                                EpsgUnit uom;
+                                if (uomCode == UInt16.MaxValue) {
+                                    uom = null;
+                                }
+                                else {
+                                    uom = EpsgUnit.Get(uomCode);
+                                    Contract.Assume(uom != null);
+                                }
                                 paramValues.Add(CreateParameter(valueCode, paramName, uom, readerTxt, numberLookUp));
                             }
                         }
@@ -147,8 +153,14 @@ namespace Pigeoid.Epsg
                             var uomCode = reader.ReadUInt16();
                             if (valueCode != 0xffff) {
                                 var paramName = paramUsage[paramIndex].Parameter.Name;
-                                var uom = EpsgUnit.Get(uomCode);
-                                Contract.Assume(uom != null);
+                                EpsgUnit uom;
+                                if (uomCode == UInt16.MaxValue) {
+                                    uom = null;
+                                }
+                                else {
+                                    uom = EpsgUnit.Get(uomCode);
+                                    Contract.Assume(uom != null);
+                                }
                                 paramValues.Add(CreateParameter(valueCode, paramName, uom, readerTxt, numberLookUp));
                             }
                         }

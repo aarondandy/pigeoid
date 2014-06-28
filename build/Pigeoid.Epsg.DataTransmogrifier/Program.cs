@@ -11,6 +11,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
         static string GetDatabasePath(string dataFolderPath) {
             return new DirectoryInfo(dataFolderPath)
                 .GetFiles("*.mdb", SearchOption.AllDirectories)
+                .OrderByDescending(x => x.Name)
                 .Select(fi => fi.FullName)
                 .FirstOrDefault();
         }
@@ -164,9 +165,11 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                 using (var writerDataAngle = new BinaryWriter(streamDataAngle))
                 using (var streamDataScale = File.Open(Path.Combine(outFolder, "uomscl.dat"), FileMode.Create))
                 using (var writerDataScale = new BinaryWriter(streamDataScale))
+                using (var streamDataTime = File.Open(Path.Combine(outFolder, "uomtim.dat"), FileMode.Create))
+                using (var writerDataTime = new BinaryWriter(streamDataTime))
                 using (var streamText = File.Open(Path.Combine(outFolder, "uoms.txt"), FileMode.Create))
                 using (var writerText = new BinaryWriter(streamText))
-                    WriterUtils.WriteUnitOfMeasures(epsgData, writerDataLength, writerDataAngle, writerDataScale, writerText);
+                    WriterUtils.WriteUnitOfMeasures(epsgData, writerDataLength, writerDataAngle, writerDataScale, writerDataTime, writerText);
 
                 using (var streamData = File.Open(Path.Combine(outFolder, "parameters.dat"), FileMode.Create))
                 using (var writerData = new BinaryWriter(streamData))

@@ -322,7 +322,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		}
 
-		public static void WriteUnitOfMeasures(EpsgData data, BinaryWriter lengthWriter, BinaryWriter angleWriter, BinaryWriter scaleWriter, BinaryWriter textWriter) {
+		public static void WriteUnitOfMeasures(EpsgData data, BinaryWriter lengthWriter, BinaryWriter angleWriter, BinaryWriter scaleWriter, BinaryWriter timeWriter, BinaryWriter textWriter) {
 			var stringLookUp = WriteTextDictionary(data, textWriter,
 				data.Repository.Uoms.Select(x => x.Name)
 				.Where(x => !String.IsNullOrEmpty(x))
@@ -344,6 +344,10 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 						writer = scaleWriter;
 						break;
 					}
+                    case "TIME": {
+                        writer = timeWriter;
+                        break;
+                    }
 					default: throw new InvalidDataException("Invalid uom type: " + unit.Type);
 				}
 				writer.Write((ushort)unit.Code);

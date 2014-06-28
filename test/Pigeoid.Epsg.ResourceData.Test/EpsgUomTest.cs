@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
 
 namespace Pigeoid.Epsg.ResourceData.Test
@@ -20,7 +21,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 				new Tester((x, y) => x.Name == y.Name),
 // ReSharper disable CompareOfFloatsByEqualityOperator
 				new Tester((x, y) => x.FactorB == (y.FactorB ?? 0)),
-				new Tester((x, y) => x.FactorC == (y.FactorC ?? 0)),
+				new Tester((x, y) => x.FactorC.Equals(y.FactorC ?? Double.NaN)),
 // ReSharper restore CompareOfFloatsByEqualityOperator
 				new Tester((x, y) => String.Equals(x.Type, y.Type, StringComparison.OrdinalIgnoreCase))
 			);
