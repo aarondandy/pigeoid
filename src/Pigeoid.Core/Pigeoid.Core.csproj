@@ -208,7 +208,7 @@
     <Compile Include="CoordinateOperation\CoordinateOperationCrsPathInfo.cs" />
     <Compile Include="CoordinateOperation\CoordinateOperationInfo.cs" />
     <Compile Include="CoordinateOperation\CoordinateOperationInfoInverse.cs" />
-    <Compile Include="CoordinateOperation\GeneralCrsCoordinateOperationPathGenerator.cs" />
+    <Compile Include="CoordinateOperation\HelmertCrsCoordinateOperationPathGenerator.cs" />
     <Compile Include="Core\GeographicCoordinate.cs" />
     <Compile Include="Core\GeographicHeightCoordinate.cs" />
     <Compile Include="Interop\CoordinateOperationNameNormalizedComparer.cs" />

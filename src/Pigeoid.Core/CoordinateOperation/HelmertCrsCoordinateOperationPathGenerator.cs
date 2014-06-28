@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using Pigeoid.CoordinateOperation.Transformation;
@@ -6,8 +7,16 @@ using Pigeoid.Unit;
 
 namespace Pigeoid.CoordinateOperation
 {
-    public class GeneralCrsCoordinateOperationPathGenerator : ICoordinateOperationPathGenerator<ICrs>
+    public class HelmertCrsCoordinateOperationPathGenerator : ICoordinateOperationPathGenerator<ICrs>
     {
+
+
+        public ICoordinateOperationCrsPathInfo Generate(ICrs from, ICrs to) {
+            //return GenerateConcatenated(GenerateCore(from, to));
+            var pathInfo = GenerateCore(from, to);
+
+            throw new NotImplementedException();
+        }
 
         private static ICoordinateOperationInfo GenerateConcatenated(List<ICoordinateOperationInfo> operations) {
             if (null == operations)
@@ -22,39 +31,40 @@ namespace Pigeoid.CoordinateOperation
             return new ConcatenatedCoordinateOperationInfo(operations);
         }
 
-        public ICoordinateOperationCrsPathInfo Generate(ICrs from, ICrs to) {
-            throw new NotImplementedException();
-            //return GenerateConcatenated(GenerateCore(from, to));
-        }
-
-        private List<ICoordinateOperationInfo> GenerateCore(ICrs from, ICrs to) {
+        private ICoordinateOperationCrsPathInfo GenerateCore(ICrs from, ICrs to) {
             if (from is ICrsGeodetic && to is ICrsGeodetic) {
                 return GenerateCoreProjectedLevel(from as ICrsGeodetic, to as ICrsGeodetic);
             }
             return null;
         }
 
-        private List<ICoordinateOperationInfo> GenerateCoreProjectedLevel(ICrsGeodetic from, ICrsGeodetic to) {
+        private ICoordinateOperationCrsPathInfo GenerateCoreProjectedLevel(ICrsGeodetic from, ICrsGeodetic to) {
             Contract.Requires(from != null);
             Contract.Requires(to != null);
-            var result = new List<ICoordinateOperationInfo>();
+            var nodes = new List<ICrs>();
+            var operations = new List<ICoordinateOperationInfo>();
+
+            nodes.Add(from);
 
             // undo the from projection
             var unProjectedFrom = from;
             while (unProjectedFrom is ICrsProjected) {
                 var projected = unProjectedFrom as ICrsProjected;
                 var projectedBase = projected.BaseCrs;
-                result.Add(projected.Projection.GetInverse());
+                operations.Add(projected.Projection.GetInverse());
+                nodes.Add(projectedBase);
                 unProjectedFrom = projectedBase;
             }
 
             // undo the to projection
             var backDownToProjectionSteps = new Stack<ICoordinateOperationInfo>();
+            var backDownToProjectionNodes = new Stack<ICrs>();
             var unProjectedTo = to;
             while (unProjectedTo is ICrsProjected) {
                 var projected = unProjectedTo as ICrsProjected;
                 var projectedBase = projected.BaseCrs;
                 backDownToProjectionSteps.Push(projected.Projection);
+                backDownToProjectionNodes.Push(projected);
                 unProjectedTo = projectedBase;
             }
 
@@ -63,13 +73,16 @@ namespace Pigeoid.CoordinateOperation
             if (null == datumShiftOperation)
                 return null;
 
-            result.AddRange(datumShiftOperation);
+            operations.AddRange(datumShiftOperation.CoordinateOperations);
+            nodes.AddRange(datumShiftOperation.CoordinateReferenceSystems.Skip(1));
 
-            result.AddRange(backDownToProjectionSteps);
-            return result;
+            operations.AddRange(backDownToProjectionSteps);
+            nodes.AddRange(backDownToProjectionNodes);
+
+            return new CoordinateOperationCrsPathInfo(nodes, operations);
         }
 
-        private List<ICoordinateOperationInfo> GenerateCoreDatumShift(ICrsGeodetic from, ICrsGeodetic to) {
+        private ICoordinateOperationCrsPathInfo GenerateCoreDatumShift(ICrsGeodetic from, ICrsGeodetic to) {
             Contract.Requires(from != null);
             Contract.Requires(to != null);
             if (from is ICrsGeographic) {
@@ -87,14 +100,15 @@ namespace Pigeoid.CoordinateOperation
             return null;
         }
 
-        private List<ICoordinateOperationInfo> GenerateCoreDatumShiftGeocentric(ICrsGeocentric from, ICrsGeocentric to) {
+        private ICoordinateOperationCrsPathInfo GenerateCoreDatumShiftGeocentric(ICrsGeocentric from, ICrsGeocentric to) {
             Contract.Requires(from != null);
             Contract.Requires(to != null);
             Contract.Ensures(Contract.Result<List<ICoordinateOperationInfo>>() != null);
-            return GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum);
+            //return GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum);
+            throw new NotImplementedException();
         }
 
-        private List<ICoordinateOperationInfo> GenerateCoreDatumShiftGeocentric(IDatumGeodetic from, IDatumGeodetic to) {
+        private CoordinateOperationCrsPathInfo GenerateCoreDatumShiftGeocentric(IDatumGeodetic from, IDatumGeodetic to) {
             Contract.Requires(from != null);
             Contract.Requires(to != null);
             Contract.Ensures(Contract.Result<List<ICoordinateOperationInfo>>() != null);
@@ -130,15 +144,20 @@ namespace Pigeoid.CoordinateOperation
             if (performWgs84Transform && ((ICoordinateOperationInfo)toTransform).HasInverse)
                 operations.Add(((ICoordinateOperationInfo)toTransform).GetInverse());
 
-            return operations;
+            //return operations;
+            throw new NotImplementedException();
         }
 
-        private List<ICoordinateOperationInfo> GenerateCoreDatumShiftGeographic(ICrsGeographic from, ICrsGeographic to) {
+        private ICoordinateOperationCrsPathInfo GenerateCoreDatumShiftGeographic(ICrsGeographic from, ICrsGeographic to) {
             Contract.Requires(from != null);
             Contract.Requires(to != null);
             Contract.Ensures(Contract.Result<List<ICoordinateOperationInfo>>() != null);
             // ReSharper disable CompareOfFloatsByEqualityOperator
-            var operations = GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum);
+            var shiftPathInfo = GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum);
+            throw new NotImplementedException();
+
+            /*
+            var operations = shiftPathInfo.CoordinateOperations;
             var fromSpheroid = from.Datum.Spheroid;
             var toSpheroid = to.Datum.Spheroid;
 
@@ -146,28 +165,31 @@ namespace Pigeoid.CoordinateOperation
                 operations.Insert(0, new GeographicGeocentricTransformation(fromSpheroid));
                 operations.Add(new GeocentricGeographicTransformation(toSpheroid));
             }
-            return operations;
+            return operations;*/
             // ReSharper restore CompareOfFloatsByEqualityOperator
         }
 
-        private List<ICoordinateOperationInfo> GenerateCoreDatumShift(ICrsGeocentric from, ICrsGeographic to) {
+        private ICoordinateOperationCrsPathInfo GenerateCoreDatumShift(ICrsGeocentric from, ICrsGeographic to) {
             Contract.Requires(from != null);
             Contract.Requires(to != null);
             Contract.Ensures(Contract.Result<List<ICoordinateOperationInfo>>() != null);
+            throw new NotImplementedException();
+            /*
             var operations = GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum);
             operations.Add(new GeocentricGeographicTransformation(to.Datum.Spheroid));
-            return operations;
+            return operations;*/
         }
 
-        private List<ICoordinateOperationInfo> GenerateCoreDatumShift(ICrsGeographic from, ICrsGeocentric to) {
+        private ICoordinateOperationCrsPathInfo GenerateCoreDatumShift(ICrsGeographic from, ICrsGeocentric to) {
             Contract.Requires(from != null);
             Contract.Requires(to != null);
             Contract.Ensures(Contract.Result<List<ICoordinateOperationInfo>>() != null);
-            var operations = new List<ICoordinateOperationInfo>{
+            throw new NotImplementedException();
+            /*var operations = new List<ICoordinateOperationInfo>{
                 new GeographicGeocentricTransformation(from.Datum.Spheroid)
             };
             operations.AddRange(GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum));
-            return operations;
+            return operations;*/
         }
 
     }
