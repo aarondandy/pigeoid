@@ -128,6 +128,7 @@ namespace Pigeoid.Epsg.Transform.Test
         }
 
         [Test]
+        [Ignore("There are some problems with this datum: http://trac.osgeo.org/proj/ticket/230")]
         public void proj4_hermannskogel() {
             // I could not find a matching EPSG datum
             // 4312 to 4326 (6312) // 653.0,-212.0,449.0 // hermannskogel (overriden by 7 param?)
@@ -140,6 +141,7 @@ namespace Pigeoid.Epsg.Transform.Test
         }
 
         [Test]
+        [Ignore("This uses NTv2 now.")]
         public void proj4_potsdam() {
             // 4746 to 4326 (6746) // 606.0,23.0,413.0 // potsdam
             var datum = EpsgDatum.Get(6746) as EpsgDatumGeodetic;
