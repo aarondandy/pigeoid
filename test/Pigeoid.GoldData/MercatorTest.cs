@@ -20,7 +20,6 @@ namespace Pigeoid.GoldData
         public void Test(string geoResourceName, string mercResourceName, double projectDelta, double unprojectDelta) {
             var latLonData = GoldData.GetReadyReader(geoResourceName);
             var lccData = GoldData.GetReadyReader(mercResourceName);
-
             var latTrueScale = lccData["LATITUDE OF TRUE SCALE"];
             Mercator projection;
             if (null == latTrueScale) {

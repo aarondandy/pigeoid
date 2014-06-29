@@ -6,6 +6,8 @@ using Pigeoid.CoordinateOperation;
 using Pigeoid.CoordinateOperation.Transformation;
 using Pigeoid.Ogc;
 using Vertesaur;
+using Pigeoid.Unit;
+using System.Collections.Generic;
 
 namespace Pigeoid.GoldData
 {
@@ -60,14 +62,58 @@ namespace Pigeoid.GoldData
                 return CreateGeographicCrs(reader);
             case "Lambert Conformal Conic (1 parallel)":
                 return CreateLcc1Sp(reader);
+            case "Lambert Conformal Conic (2 parallel)":
+                return CreateLcc2Sp(reader);
+            case "Mercator":
+                return CreateMercator(reader);
             default:
                 throw new NotSupportedException("Not supported: " + coordinatesName);
             }
         }
 
+        private static ICrs CreateMercator(GeoTransGoldDataReader reader) {
+            var datum = GenerateDatum(reader["DATUM"]);
+            var linearUnit = OgcLinearUnit.DefaultMeter;
+            var latTrueScale = reader["LATITUDE OF TRUE SCALE"];
+            var parameters = new List<INamedParameter> {
+                new NamedParameter<double>("central_meridian", Double.Parse(reader["CENTRAL MERIDIAN"]), OgcAngularUnit.DefaultDegrees),
+                new NamedParameter<double>("false_easting", Double.Parse(reader["FALSE EASTING"]),linearUnit),
+                new NamedParameter<double>("false_northing", Double.Parse(reader["FALSE NORTHING"]),linearUnit)
+            };
+
+            if (null == latTrueScale) {
+                parameters.Add(new NamedParameter<double>("scale_factor", Double.Parse(reader["SCALE FACTOR"]), ScaleUnitUnity.Value));
+            }
+            else {
+                parameters.Add(new NamedParameter<double>("latitude_of_true_scale", Double.Parse(latTrueScale), OgcAngularUnit.DefaultDegrees));
+            }
+
+            return new OgcCrsProjected(
+                reader["PROJECTION"],
+                new OgcCrsGeographic(
+                    datum.Name,
+                    datum,
+                    datum.PrimeMeridian.Unit,
+                    new[] {
+                        new OgcAxis("Latitude", OgcOrientationType.East),
+                        new OgcAxis("Longitude", OgcOrientationType.North) 
+                    }
+                ),
+                new CoordinateOperationInfo(
+                    "Mercator",
+                    parameters
+                ),
+                linearUnit,
+                new IAxis[] {
+                    new OgcAxis("Easting", OgcOrientationType.East), 
+                    new OgcAxis("Northing", OgcOrientationType.North)
+                }
+            );
+        }
+
         private static ICrs CreateLcc1Sp(GeoTransGoldDataReader reader) {
             var datum = GenerateDatum(reader["DATUM"]);
-
+            var linearUnit = OgcLinearUnit.DefaultMeter;
             return new OgcCrsProjected(
                 reader["PROJECTION"],
                 new OgcCrsGeographic(
@@ -82,14 +128,48 @@ namespace Pigeoid.GoldData
                 new CoordinateOperationInfo(
                     "Lambert_Conformal_Conic_1SP",
                     new INamedParameter[] {
-                        new NamedParameter<double>("latitude_of_origin",Double.Parse(reader["ORIGIN LATITUDE"]) / 180 * Math.PI),
-                        new NamedParameter<double>("central_meridian", Double.Parse(reader["CENTRAL MERIDIAN"]) / 180 * Math.PI),
-                        new NamedParameter<double>("scale_factor", Double.Parse(reader["SCALE FACTOR"])),
-                        new NamedParameter<double>("false_easting", Double.Parse(reader["FALSE EASTING"])),
-                        new NamedParameter<double>("false_northing", Double.Parse(reader["FALSE NORTHING"]))
+                        new NamedParameter<double>("latitude_of_origin",Double.Parse(reader["ORIGIN LATITUDE"]), OgcAngularUnit.DefaultDegrees),
+                        new NamedParameter<double>("central_meridian", Double.Parse(reader["CENTRAL MERIDIAN"]), OgcAngularUnit.DefaultDegrees),
+                        new NamedParameter<double>("scale_factor", Double.Parse(reader["SCALE FACTOR"]), ScaleUnitUnity.Value),
+                        new NamedParameter<double>("false_easting", Double.Parse(reader["FALSE EASTING"]),linearUnit),
+                        new NamedParameter<double>("false_northing", Double.Parse(reader["FALSE NORTHING"]),linearUnit)
                     }
                 ),
-                OgcLinearUnit.DefaultMeter,
+                linearUnit,
+                new IAxis[] {
+                    new OgcAxis("Easting", OgcOrientationType.East), 
+                    new OgcAxis("Northing", OgcOrientationType.North)
+                }
+            );
+
+        }
+
+        private static ICrs CreateLcc2Sp(GeoTransGoldDataReader reader) {
+            var datum = GenerateDatum(reader["DATUM"]);
+            var linearUnit = OgcLinearUnit.DefaultMeter;
+            return new OgcCrsProjected(
+                reader["PROJECTION"],
+                new OgcCrsGeographic(
+                    datum.Name,
+                    datum,
+                    datum.PrimeMeridian.Unit,
+                    new[] {
+                        new OgcAxis("Latitude", OgcOrientationType.East),
+                        new OgcAxis("Longitude", OgcOrientationType.North) 
+                    }
+                ),
+                new CoordinateOperationInfo(
+                    "Lambert_Conformal_Conic_2SP",
+                    new INamedParameter[] {
+                        new NamedParameter<double>("latitude_of_origin",Double.Parse(reader["ORIGIN LATITUDE"]), OgcAngularUnit.DefaultDegrees),
+                        new NamedParameter<double>("central_meridian", Double.Parse(reader["CENTRAL MERIDIAN"]), OgcAngularUnit.DefaultDegrees),
+                        new NamedParameter<double>("parallel_1", Double.Parse(reader["STANDARD PARALLEL ONE"]), OgcAngularUnit.DefaultDegrees),
+                        new NamedParameter<double>("parallel_2", Double.Parse(reader["STANDARD PARALLEL TWO"]), OgcAngularUnit.DefaultDegrees),
+                        new NamedParameter<double>("false_easting", Double.Parse(reader["FALSE EASTING"]),linearUnit),
+                        new NamedParameter<double>("false_northing", Double.Parse(reader["FALSE NORTHING"]),linearUnit)
+                    }
+                ),
+                linearUnit,
                 new IAxis[] {
                     new OgcAxis("Easting", OgcOrientationType.East), 
                     new OgcAxis("Northing", OgcOrientationType.North)

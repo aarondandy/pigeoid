@@ -325,7 +325,7 @@ namespace Pigeoid.CoordinateOperation
         private ITransformation<GeographicCoordinate, Point2> CreateMercator(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
+            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN", "CENTRAL", "MERIDIAN");
             var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
             var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
             var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
@@ -360,7 +360,7 @@ namespace Pigeoid.CoordinateOperation
         private ITransformation<GeographicCoordinate, Point2> CreateLambertConicConformal(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
+            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN", "CENTRAL", "MERIDIAN");
             var parallel1Param = new KeywordNamedParameterSelector("LAT", "1", "PARALLEL");
             var parallel2Param = new KeywordNamedParameterSelector("LAT", "2", "PARALLEL");
             var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
@@ -388,9 +388,11 @@ namespace Pigeoid.CoordinateOperation
                 return new LambertConicConformal2Sp(origin, parallel1, parallel2, offset, spheroid);
             }
 
-            double scaleFactor;
-            if (scaleFactorParam.IsSelected && TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
-                return new LambertConicConformal1Sp(origin, scaleFactor, offset, spheroid);
+            if (scaleFactorParam.IsSelected){
+                double scaleFactor;
+                if(TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
+                    return new LambertConicConformal1Sp(origin, scaleFactor, offset, spheroid);
+            }
 
             return null;
         }
