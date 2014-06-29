@@ -33,6 +33,20 @@ namespace Pigeoid.GoldData
         [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.Mercator_8.csv", 0.0000005, 0.000000001)]
         [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.Mercator_8a.csv", 0.0000005, 0.000000001)]
         [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.Mercator_8b.csv", 0.0000005, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_09.csv", 0.00001, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_09a.csv", 0.00001, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_09b.csv", 0.0000006, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_10.csv", 0.000001, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_11.csv", 0.00001, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_11a.csv", 0.00001, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_11b.csv", 0.00001, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_12.csv", 0.00001, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_12a.csv", 0.00001, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_13.csv", 0.00001, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.PolarStereo_13a.csv", 0.00001, 0.000000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.TransMerc_26.csv", 0.009, 0.0000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.TransMerc_26a.csv", 0.009, 0.0000001)]
+        [TestCase("Wgs84.Lat_Lon.csv", "Wgs84.TransMerc_27.csv", 0.04, 0.0000001)]
         public void Test(string sourceResourceName, string targetResourceName, double projectDelta, double unprojectDelta) {
 
             var sourceData = GoldData.GetReadyReader(sourceResourceName);

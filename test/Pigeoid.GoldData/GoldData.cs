@@ -66,9 +66,88 @@ namespace Pigeoid.GoldData
                 return CreateLcc2Sp(reader);
             case "Mercator":
                 return CreateMercator(reader);
+            case "Polar Stereographic":
+                return CreatePolarStereographic(reader);
+            case "Transverse Mercator":
+                return CreateTMerc(reader);
             default:
                 throw new NotSupportedException("Not supported: " + coordinatesName);
             }
+        }
+
+        private static ICrs CreateTMerc(GeoTransGoldDataReader reader) {
+            var datum = GenerateDatum(reader["DATUM"]);
+            var linearUnit = OgcLinearUnit.DefaultMeter;
+            return new OgcCrsProjected(
+                reader["PROJECTION"],
+                new OgcCrsGeographic(
+                    datum.Name,
+                    datum,
+                    datum.PrimeMeridian.Unit,
+                    new[] {
+                        new OgcAxis("Latitude", OgcOrientationType.East),
+                        new OgcAxis("Longitude", OgcOrientationType.North) 
+                    }
+                ),
+                new CoordinateOperationInfo(
+                    "Transverse Mercator",
+                    new INamedParameter[] {
+                        new NamedParameter<double>("latitude_of_origin",Double.Parse(reader["ORIGIN LATITUDE"]), OgcAngularUnit.DefaultDegrees),
+                        new NamedParameter<double>("central_meridian", Double.Parse(reader["CENTRAL MERIDIAN"]), OgcAngularUnit.DefaultDegrees),
+                        new NamedParameter<double>("scale_factor", Double.Parse(reader["SCALE FACTOR"]), ScaleUnitUnity.Value),
+                        new NamedParameter<double>("false_easting", Double.Parse(reader["FALSE EASTING"]),linearUnit),
+                        new NamedParameter<double>("false_northing", Double.Parse(reader["FALSE NORTHING"]),linearUnit)
+                    }
+                ),
+                linearUnit,
+                new IAxis[] {
+                    new OgcAxis("Easting", OgcOrientationType.East), 
+                    new OgcAxis("Northing", OgcOrientationType.North)
+                }
+            );
+        }
+
+        private static ICrs CreatePolarStereographic(GeoTransGoldDataReader reader) {
+            var datum = GenerateDatum(reader["DATUM"]);
+            var linearUnit = OgcLinearUnit.DefaultMeter;
+            var scaleFactor = reader["SCALE FACTOR"];
+            var parameters = new List<INamedParameter> {
+                new NamedParameter<double>("longitude_down_from_pole", Double.Parse(reader["LONGITUDE DOWN FROM POLE"]), OgcAngularUnit.DefaultDegrees),
+                new NamedParameter<double>("false_easting", Double.Parse(reader["FALSE EASTING"]),linearUnit),
+                new NamedParameter<double>("false_northing", Double.Parse(reader["FALSE NORTHING"]),linearUnit)
+            };
+
+            if (null != scaleFactor) {
+                parameters.Add(new NamedParameter<double>("latitude_of_true_scale", 90, OgcAngularUnit.DefaultDegrees));
+                parameters.Add(new NamedParameter<double>("scale_factor", Double.Parse(scaleFactor), ScaleUnitUnity.Value));
+            }
+            else {
+                var latSp = Double.Parse(reader["LATITUDE OF TRUE SCALE"]);
+                parameters.Add(new NamedParameter<double>("standard_parallel", latSp, OgcAngularUnit.DefaultDegrees));
+                parameters.Add(new NamedParameter<double>("latitude_of_true_scale", latSp < 0 ? -90 : 90, OgcAngularUnit.DefaultDegrees));
+            }
+
+            return new OgcCrsProjected(
+                reader["PROJECTION"],
+                new OgcCrsGeographic(
+                    datum.Name,
+                    datum,
+                    datum.PrimeMeridian.Unit,
+                    new[] {
+                        new OgcAxis("Latitude", OgcOrientationType.East),
+                        new OgcAxis("Longitude", OgcOrientationType.North) 
+                    }
+                ),
+                new CoordinateOperationInfo(
+                    "Polar Stereographic",
+                    parameters
+                ),
+                linearUnit,
+                new IAxis[] {
+                    new OgcAxis("Easting", OgcOrientationType.East), 
+                    new OgcAxis("Northing", OgcOrientationType.North)
+                }
+            );
         }
 
         private static ICrs CreateMercator(GeoTransGoldDataReader reader) {

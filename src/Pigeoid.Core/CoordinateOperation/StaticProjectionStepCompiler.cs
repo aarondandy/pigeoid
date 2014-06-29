@@ -168,7 +168,7 @@ namespace Pigeoid.CoordinateOperation
         private static SpheroidProjectionBase CreateTransverseMercator(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
+            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN", "CENTRAL","MERIDIAN");
             var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
             var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
             var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
