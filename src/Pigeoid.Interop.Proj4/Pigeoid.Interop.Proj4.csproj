@@ -195,6 +195,7 @@
     <Compile Include="Proj4Spheroid.cs" />
     <Compile Include="Proj4SpheroidWrapper.cs" />
     <Compile Include="Proj4Transform.cs" />
+    <Compile Include="Proj4Unit.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

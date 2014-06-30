@@ -1,4 +1,5 @@
-﻿using Pigeoid.Utility;
+﻿using Pigeoid.Unit;
+using Pigeoid.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -69,6 +70,14 @@ namespace Pigeoid.CoordinateOperation
                     return dValue;
             }
             return null;
+        }
+
+        public double? GetValueAsDouble(IUnit unit) {
+            var value = GetValueAsDouble();
+            if (unit != null && Selection.Unit != null && value.HasValue) {
+                throw new NotImplementedException();
+            }
+            return value;
         }
 
     }

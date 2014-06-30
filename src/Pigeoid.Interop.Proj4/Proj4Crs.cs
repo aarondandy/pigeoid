@@ -140,17 +140,22 @@ namespace Pigeoid.Interop.Proj4
             var paramLookup = new NamedParameterLookup(projectionInfo.Parameters);
             paramLookup.Assign(lon0Param, lat0Param, x0Param, y0Param);
 
+            // TODO: set the unit
+
+            IUnit geographicUnit = null; // TODO: result.GeographicInfo.Unit
+            IUnit projectionUnit = null; // TODO: result.Unit
+
             if (lon0Param.IsSelected)
-                result.CentralMeridian = lon0Param.GetValueAsDouble(); // TODO: units
+                result.CentralMeridian = lon0Param.GetValueAsDouble(geographicUnit);
 
             if (lat0Param.IsSelected)
-                result.LatitudeOfOrigin = lat0Param.GetValueAsDouble(); // TODO: units
+                result.LatitudeOfOrigin = lat0Param.GetValueAsDouble(geographicUnit);
 
             if (x0Param.IsSelected)
-                result.FalseEasting = x0Param.GetValueAsDouble(); // TODO: units
+                result.FalseEasting = x0Param.GetValueAsDouble(projectionUnit);
 
             if (y0Param.IsSelected)
-                result.FalseNorthing = y0Param.GetValueAsDouble(); // TODO: units
+                result.FalseNorthing = y0Param.GetValueAsDouble(projectionUnit);
 
             return result;
         }
@@ -188,23 +193,27 @@ namespace Pigeoid.Interop.Proj4
         public ICoordinateOperationInfo Projection {
             get {
 
-                // TODO: units!
+                var geographicInfo = Core.GeographicInfo;
+
+                var projectionUnit = Core.Unit != null ? new Proj4LinearUnit(Core.Unit) : null;
+                var geographicUnit = geographicInfo != null && geographicInfo.Unit != null
+                    ? new Proj4AngularUnit(geographicInfo.Unit) : null;
 
                 var parameters = new List<INamedParameter>();
                 if (Core.FalseEasting.HasValue)
-                    parameters.Add(new NamedParameter<double>("x_0", Core.FalseEasting.Value));
+                    parameters.Add(new NamedParameter<double>("x_0", Core.FalseEasting.Value, projectionUnit));
                 if (Core.FalseNorthing.HasValue)
-                    parameters.Add(new NamedParameter<double>("y_0", Core.FalseNorthing.Value));
+                    parameters.Add(new NamedParameter<double>("y_0", Core.FalseNorthing.Value, projectionUnit));
                 if (!Double.IsNaN(Core.ScaleFactor) && Core.ScaleFactor != 0 && Core.ScaleFactor != 1)
-                    parameters.Add(new NamedParameter<double>("k_0", Core.ScaleFactor));
+                    parameters.Add(new NamedParameter<double>("k_0", Core.ScaleFactor, ScaleUnitUnity.Value));
                 if (Core.LatitudeOfOrigin.HasValue)
-                    parameters.Add(new NamedParameter<double>("lat_0", Core.LatitudeOfOrigin.Value));
+                    parameters.Add(new NamedParameter<double>("lat_0", Core.LatitudeOfOrigin.Value, geographicUnit));
                 if (Core.CentralMeridian.HasValue)
-                    parameters.Add(new NamedParameter<double>("lon_0", Core.CentralMeridian.Value));
+                    parameters.Add(new NamedParameter<double>("lon_0", Core.CentralMeridian.Value, geographicUnit));
                 if (Core.StandardParallel1.HasValue)
-                    parameters.Add(new NamedParameter<double>("lat_1", Core.StandardParallel1.Value));
+                    parameters.Add(new NamedParameter<double>("lat_1", Core.StandardParallel1.Value, geographicUnit));
                 if (Core.StandardParallel2.HasValue)
-                    parameters.Add(new NamedParameter<double>("lat_2", Core.StandardParallel2.Value));
+                    parameters.Add(new NamedParameter<double>("lat_2", Core.StandardParallel2.Value, geographicUnit));
                 if (Core.Over)
                     parameters.Add(new NamedParameter<int>("over", 1));
                 if (Core.Geoc)
@@ -212,7 +221,7 @@ namespace Pigeoid.Interop.Proj4
                 if (Core.alpha.HasValue)
                     parameters.Add(new NamedParameter<double>("alpha", Core.alpha.Value));
                 if (Core.LongitudeOfCenter.HasValue)
-                    parameters.Add(new NamedParameter<double>("lonc", Core.LongitudeOfCenter.Value));
+                    parameters.Add(new NamedParameter<double>("lonc", Core.LongitudeOfCenter.Value, geographicUnit));
                 if (Core.Zone.HasValue)
                     parameters.Add(new NamedParameter<int>("zone", Core.Zone.Value));
                 if (Core.IsLatLon) {
@@ -277,6 +286,8 @@ namespace Pigeoid.Interop.Proj4
             Contract.Assume(crsGeographic.Datum.PrimeMeridian != null);
             result.Meridian = Proj4MeridianWrapper.Create(crsGeographic.Datum.PrimeMeridian);
 
+            // TODO: set the unit
+
             return result;
         }
 
@@ -307,7 +318,7 @@ namespace Pigeoid.Interop.Proj4
 
         public IUnit Unit {
             get {
-                throw new NotImplementedException();
+                return Core.Unit == null ? null : new Proj4AngularUnit(Core.Unit);
             }
         }
 
