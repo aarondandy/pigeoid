@@ -14,7 +14,6 @@ namespace Pigeoid.Interop.Proj4.Test
             var expected = TransverseMercatorSystems.WGS1984lo33;
             var actual = Proj4CrsProjected.CreateProjection(new Proj4CrsProjected(TransverseMercatorSystems.WGS1984lo33));
             Assert.AreEqual(expected.ToProj4String(), actual.ToProj4String());
-            Assert.Inconclusive();
         }
 
     }

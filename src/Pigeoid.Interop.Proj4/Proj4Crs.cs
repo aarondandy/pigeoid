@@ -129,12 +129,30 @@ namespace Pigeoid.Interop.Proj4
             if(projectionMethod == null)
                 throw new InvalidOperationException("No projection method.");
 
-
             var proj4Name = ToProj4MethodName(projectionMethod.Name);
-            var transform = TransformManager.GetProj4(proj4Name);
+            result.Transform = TransformManager.GetProj4(proj4Name);
 
-             
-            throw new NotImplementedException("Need a new way to create proj4 CRSs from ours");
+            var lon0Param = new KeywordNamedParameterSelector("LON0", "CENTRALMERIDIAN");
+            var lat0Param = new KeywordNamedParameterSelector("LAT0", "LATITUDEORIGIN");
+            var x0Param = new KeywordNamedParameterSelector("X0", "FALSEEASTING");
+            var y0Param = new KeywordNamedParameterSelector("Y0", "FALSENORTHING");
+
+            var paramLookup = new NamedParameterLookup(projectionInfo.Parameters);
+            paramLookup.Assign(lon0Param, lat0Param, x0Param, y0Param);
+
+            if (lon0Param.IsSelected)
+                result.CentralMeridian = lon0Param.GetValueAsDouble(); // TODO: units
+
+            if (lat0Param.IsSelected)
+                result.LatitudeOfOrigin = lat0Param.GetValueAsDouble(); // TODO: units
+
+            if (x0Param.IsSelected)
+                result.FalseEasting = x0Param.GetValueAsDouble(); // TODO: units
+
+            if (y0Param.IsSelected)
+                result.FalseNorthing = y0Param.GetValueAsDouble(); // TODO: units
+
+            return result;
         }
 
         private static AuthorityTag CreateAuthorityTag(ProjectionInfo projectionInfo) {

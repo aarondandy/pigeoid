@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pigeoid.Utility;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
@@ -59,6 +60,17 @@ namespace Pigeoid.CoordinateOperation
             Selection = namedParameter;
             return true;
         }
+
+        public double? GetValueAsDouble() {
+            if (IsSelected) {
+                var rawValue = Selection.Value;
+                double dValue;
+                if (ConversionUtil.TryConvertDoubleMultiCulture(rawValue, out dValue))
+                    return dValue;
+            }
+            return null;
+        }
+
     }
 
     public class FullMatchParameterSelector : NamedParameterSelector

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 
 namespace Pigeoid.Utility
@@ -12,29 +13,36 @@ namespace Pigeoid.Utility
         }
 
         public static bool TryConvertDoubleMultiCulture(object rawValue, out double value) {
-            if (rawValue is double) {
-                value = (double)rawValue;
-                return true;
-            }
-            if (rawValue is int) {
-                value = (int)rawValue;
-                return true;
-            }
-            if (rawValue is uint) {
-                value = (uint)rawValue;
-                return true;
-            }
-            if (rawValue is string) {
-                return TryParseDoubleMultiCulture((string)rawValue, out value);
-            }
-            try {
-                value = Convert.ToDouble(rawValue);
-                return true;
-            }
-            catch {
+            if (rawValue == null) {
                 value = default(double);
                 return false;
             }
+
+            var valueType = rawValue.GetType();
+            if (valueType == typeof(double)) {
+                value = (double)rawValue;
+                return true;
+            }
+            if (valueType == typeof(int)) {
+                value = (int)rawValue;
+                return true;
+            }
+            if (valueType == typeof(uint)) {
+                value = (uint)rawValue;
+                return true;
+            }
+
+            if (rawValue == typeof(string))
+                return TryParseDoubleMultiCulture((string)rawValue, out value);
+
+            var converter = TypeDescriptor.GetConverter(valueType);
+            if (converter.CanConvertTo(typeof(double))) {
+                value = (double)converter.ConvertTo(rawValue, typeof(double));
+                return true;
+            }
+
+            value = default(double);
+            return false;
         }
 
     }
