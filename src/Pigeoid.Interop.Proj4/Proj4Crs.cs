@@ -170,6 +170,8 @@ namespace Pigeoid.Interop.Proj4
 
         public Proj4CrsProjected(ProjectionInfo projectionInfo)
             : base(projectionInfo.Name ?? projectionInfo.Transform.Name ?? "Unknown", CreateAuthorityTag(projectionInfo)) {
+                if (projectionInfo.Transform == null)
+                    throw new ArgumentException("Transform is required", "projectionInfo");
             Contract.Requires(projectionInfo != null);
             Contract.Requires(projectionInfo.GeographicInfo != null);
             Core = projectionInfo;
