@@ -61,14 +61,27 @@ namespace Pigeoid.Interop.Proj4.Test
             var catagory = CategoryInstances[set.CategoryType];
             var expected = (ProjectionInfo)(set.CategoryType.GetField(set.FieldName).GetValue(catagory));
 
-            if (expected.Transform == null) {
-                var actual = Proj4CrsGeographic.CreateGeographic(new Proj4CrsGeographic(expected.GeographicInfo));
-                Assert.AreEqual(expected.ToProj4String(), actual.ToProj4String());
+            ProjectionInfo actual;
+            if (expected.Transform == null || expected.IsLatLon) {
+                actual = Proj4CrsGeographic.CreateProjection(new Proj4CrsGeographic(expected.GeographicInfo));
             }
             else {
-                var actual = Proj4CrsProjected.CreateProjection(new Proj4CrsProjected(expected));
-                Assert.AreEqual(expected.ToProj4String(), actual.ToProj4String());
+                actual = Proj4CrsProjected.CreateProjection(new Proj4CrsProjected(expected));
             }
+
+            Assert.AreEqual(expected.alpha, actual.alpha);
+            // TODO: authority
+            Assert.AreEqual(expected.AuxiliarySphereType, actual.AuxiliarySphereType);
+            Assert.AreEqual(expected.bns, actual.bns);
+            Assert.AreEqual(expected.CentralMeridian, actual.CentralMeridian);
+
+            if (set.FieldName == "Accra")
+                return; // this projection says it has a known ellipsoid of WGS84 but has different parameters for it than Proj4Ellipsoid.WGS_1984
+
+
+
+            Assert.AreEqual(expected.ToProj4String(), actual.ToProj4String());
+
         }
 
     }

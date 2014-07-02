@@ -293,6 +293,69 @@ namespace Pigeoid.Interop.Proj4
             return result;
         }
 
+        public static ProjectionInfo CreateProjection(ICrsGeographic crsGeographic) {
+            if (crsGeographic == null) throw new ArgumentNullException("crsGeographic");
+            Contract.Ensures(Contract.Result<ProjectionInfo>() != null);
+
+            var geographic = CreateGeographic(crsGeographic);
+
+            var result = new ProjectionInfo {
+                GeographicInfo = geographic,
+                IsLatLon = true
+            };
+
+            /*if (crsProjected.Authority != null) {
+                int epsgCode;
+                if (crsProjected.Authority.Name == "EPSG" && Int32.TryParse(crsProjected.Authority.Code, out epsgCode))
+                    result.EpsgCode = epsgCode;
+
+                result.Authority = crsProjected.Authority.Name;
+            }
+
+            if (crsProjected.BaseCrs is ICrsGeographic)
+                result.GeographicInfo = Proj4CrsGeographic.CreateGeographic((ICrsGeographic)(crsProjected.BaseCrs));
+
+
+            var projectionInfo = crsProjected.Projection as IParameterizedCoordinateOperationInfo;
+
+            if (projectionInfo == null)
+                return result;
+
+            var projectionMethod = projectionInfo.Method;
+            if (projectionMethod == null)
+                throw new InvalidOperationException("No projection method.");
+
+            var proj4Name = ToProj4MethodName(projectionMethod.Name);
+            result.Transform = TransformManager.GetProj4(proj4Name);
+
+            var lon0Param = new KeywordNamedParameterSelector("LON0", "CENTRALMERIDIAN");
+            var lat0Param = new KeywordNamedParameterSelector("LAT0", "LATITUDEORIGIN");
+            var x0Param = new KeywordNamedParameterSelector("X0", "FALSEEASTING");
+            var y0Param = new KeywordNamedParameterSelector("Y0", "FALSENORTHING");
+
+            var paramLookup = new NamedParameterLookup(projectionInfo.Parameters);
+            paramLookup.Assign(lon0Param, lat0Param, x0Param, y0Param);
+
+            // TODO: set the unit
+
+            IUnit geographicUnit = null; // TODO: result.GeographicInfo.Unit
+            IUnit projectionUnit = null; // TODO: result.Unit
+
+            if (lon0Param.IsSelected)
+                result.CentralMeridian = lon0Param.GetValueAsDouble(geographicUnit);
+
+            if (lat0Param.IsSelected)
+                result.LatitudeOfOrigin = lat0Param.GetValueAsDouble(geographicUnit);
+
+            if (x0Param.IsSelected)
+                result.FalseEasting = x0Param.GetValueAsDouble(projectionUnit);
+
+            if (y0Param.IsSelected)
+                result.FalseNorthing = y0Param.GetValueAsDouble(projectionUnit);
+            */
+            return result;
+        }
+
         public Proj4CrsGeographic(GeographicInfo geographicInfo)
             : base(geographicInfo.Name ?? geographicInfo.Datum.Name ?? "Unknown", new AuthorityTag("PROJ4", String.Empty))
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using DotSpatial.Projections;
 using Pigeoid.Ogc;
 using Pigeoid.Unit;
@@ -10,14 +11,38 @@ namespace Pigeoid.Interop.Proj4
     public class Proj4SpheroidWrapper : OgcNamedAuthorityBoundEntity, ISpheroidInfo
     {
 
+        private static Spheroid[] AllKnownSpheroids;
+
+        static Proj4SpheroidWrapper() {
+            var allSpheroidEnums = (Proj4Ellipsoid[])Enum.GetValues(typeof(Proj4Ellipsoid));
+            AllKnownSpheroids = allSpheroidEnums
+                .Where(x => x != Proj4Ellipsoid.Custom)
+                .Select(known => new Spheroid(known))
+                .ToArray();
+        }
+
         public static Spheroid Create(ISpheroidInfo spheroidInfo) {
             if(spheroidInfo == null) throw new ArgumentNullException("spheroidInfo");
             Contract.Ensures(Contract.Result<Spheroid>() != null);
 
-            var result = spheroidInfo is SpheroidEquatorialPolar
-                ? new Spheroid(spheroidInfo.A)
-                : new Spheroid(spheroidInfo.A, spheroidInfo.InvF);
-
+            Spheroid result;
+            if (spheroidInfo.A == spheroidInfo.B) {
+                foreach (var known in AllKnownSpheroids) {
+                    if (known.PolarRadius == spheroidInfo.A)
+                        return new Spheroid(known.KnownEllipsoid);
+                }
+                result = new Spheroid(Proj4Ellipsoid.Custom);
+                result.PolarRadius = spheroidInfo.A;
+            }
+            else{
+                foreach (var known in AllKnownSpheroids) {
+                    if(known.EquatorialRadius == spheroidInfo.A && known.InverseFlattening == spheroidInfo.InvF)
+                        return new Spheroid(known.KnownEllipsoid);
+                }
+                result = new Spheroid(Proj4Ellipsoid.Custom);
+                result.EquatorialRadius = spheroidInfo.A;
+                result.InverseFlattening = spheroidInfo.InvF;
+            }
             result.Name = spheroidInfo.Name;
             return result;
         }
