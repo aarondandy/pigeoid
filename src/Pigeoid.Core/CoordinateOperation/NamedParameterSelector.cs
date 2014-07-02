@@ -74,8 +74,12 @@ namespace Pigeoid.CoordinateOperation
 
         public double? GetValueAsDouble(IUnit unit) {
             var value = GetValueAsDouble();
-            if (unit != null && Selection.Unit != null && value.HasValue) {
-                throw new NotImplementedException();
+            if (unit != null && Selection.Unit != null && value.HasValue && !unit.Equals(Selection.Unit)) {
+                var conversion = SimpleUnitConversionGenerator.FindConversion(Selection.Unit, unit);
+                if (conversion == null)
+                    throw new InvalidOperationException();
+
+                value = conversion.TransformValue(value.GetValueOrDefault());
             }
             return value;
         }

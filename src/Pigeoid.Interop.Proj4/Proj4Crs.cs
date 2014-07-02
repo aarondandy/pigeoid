@@ -116,7 +116,8 @@ namespace Pigeoid.Interop.Proj4
                 result.Authority = crsProjected.Authority.Name;
             }
 
-            if(crsProjected.BaseCrs is ICrsGeographic)
+            var geographicBase = crsProjected.BaseCrs as ICrsGeographic;
+            if (geographicBase != null)
                 result.GeographicInfo = Proj4CrsGeographic.CreateGeographic((ICrsGeographic)(crsProjected.BaseCrs));
 
 
@@ -132,30 +133,46 @@ namespace Pigeoid.Interop.Proj4
             var proj4Name = ToProj4MethodName(projectionMethod.Name);
             result.Transform = TransformManager.GetProj4(proj4Name);
 
-            var lon0Param = new KeywordNamedParameterSelector("LON0", "CENTRALMERIDIAN");
-            var lat0Param = new KeywordNamedParameterSelector("LAT0", "LATITUDEORIGIN");
-            var x0Param = new KeywordNamedParameterSelector("X0", "FALSEEASTING");
-            var y0Param = new KeywordNamedParameterSelector("Y0", "FALSENORTHING");
+            var lon0Param = new KeywordNamedParameterSelector("LON0", "LON", "ORIGIN", "CENTRAL", "MERIDIAN", "CENTRALMERIDIAN");
+            var loncParam = new KeywordNamedParameterSelector("LONC", "LON", "CENTER", "LONGITUDECENTER");
+            var lat0Param = new KeywordNamedParameterSelector("LAT0", "LAT", "ORIGIN", "CENTER", "LATITUDEORIGIN", "LATITUDECENTER");
+            var lat1Param = new KeywordNamedParameterSelector("LAT1", "LAT", "1", "PARALLEL");
+            var lat2Param = new KeywordNamedParameterSelector("LAT2", "LAT", "2", "PARALLEL");
+            var x0Param = new KeywordNamedParameterSelector("X0", "FALSE", "OFFSET", "X", "EAST");
+            var y0Param = new KeywordNamedParameterSelector("Y0", "FALSE", "OFFSET", "Y", "NORTH");
+            var k0Param = new KeywordNamedParameterSelector("K0", "SCALE");
+            var alphaParam = new KeywordNamedParameterSelector("ALPHA","AZIMUTH");
 
             var paramLookup = new NamedParameterLookup(projectionInfo.Parameters);
-            paramLookup.Assign(lon0Param, lat0Param, x0Param, y0Param);
+            paramLookup.Assign(lon0Param, loncParam, lat0Param, lat1Param, lat2Param, x0Param, y0Param, k0Param, alphaParam);
 
             // TODO: set the unit
 
-            IUnit geographicUnit = null; // TODO: result.GeographicInfo.Unit
-            IUnit projectionUnit = null; // TODO: result.Unit
+
+
+            IUnit geographicUnit = geographicBase == null ? null : geographicBase.Unit;
+            IUnit projectionUnit = crsProjected.Unit; // TODO: result.Unit
+            if (projectionUnit != null)
+                result.Unit = Proj4LinearUnit.ConvertToProj4(projectionUnit);
 
             if (lon0Param.IsSelected)
                 result.CentralMeridian = lon0Param.GetValueAsDouble(geographicUnit);
-
+            if (loncParam.IsSelected)
+                result.LongitudeOfCenter = loncParam.GetValueAsDouble(geographicUnit);
             if (lat0Param.IsSelected)
                 result.LatitudeOfOrigin = lat0Param.GetValueAsDouble(geographicUnit);
-
+            if (lat1Param.IsSelected)
+                result.StandardParallel1 = lat1Param.GetValueAsDouble(geographicUnit);
+            if (lat2Param.IsSelected)
+                result.StandardParallel2 = lat2Param.GetValueAsDouble(geographicUnit);
             if (x0Param.IsSelected)
                 result.FalseEasting = x0Param.GetValueAsDouble(projectionUnit);
-
             if (y0Param.IsSelected)
                 result.FalseNorthing = y0Param.GetValueAsDouble(projectionUnit);
+            if (k0Param.IsSelected)
+                result.ScaleFactor = k0Param.GetValueAsDouble(ScaleUnitUnity.Value) ?? 1.0;
+            if (alphaParam.IsSelected)
+                result.alpha = alphaParam.GetValueAsDouble();
 
             return result;
         }
@@ -203,27 +220,33 @@ namespace Pigeoid.Interop.Proj4
 
                 var parameters = new List<INamedParameter>();
                 if (Core.FalseEasting.HasValue)
-                    parameters.Add(new NamedParameter<double>("x_0", Core.FalseEasting.Value, projectionUnit));
+                    parameters.Add(new NamedParameter<double>("False_Easting", Core.FalseEasting.Value, projectionUnit));
                 if (Core.FalseNorthing.HasValue)
-                    parameters.Add(new NamedParameter<double>("y_0", Core.FalseNorthing.Value, projectionUnit));
+                    parameters.Add(new NamedParameter<double>("False_Northing", Core.FalseNorthing.Value, projectionUnit));
                 if (!Double.IsNaN(Core.ScaleFactor) && Core.ScaleFactor != 0 && Core.ScaleFactor != 1)
-                    parameters.Add(new NamedParameter<double>("k_0", Core.ScaleFactor, ScaleUnitUnity.Value));
+                    parameters.Add(new NamedParameter<double>("Scale_Factor", Core.ScaleFactor, ScaleUnitUnity.Value));
                 if (Core.LatitudeOfOrigin.HasValue)
-                    parameters.Add(new NamedParameter<double>("lat_0", Core.LatitudeOfOrigin.Value, geographicUnit));
+                    parameters.Add(new NamedParameter<double>("Latitude_Of_Origin", Core.LatitudeOfOrigin.Value, geographicUnit));
                 if (Core.CentralMeridian.HasValue)
-                    parameters.Add(new NamedParameter<double>("lon_0", Core.CentralMeridian.Value, geographicUnit));
+                    parameters.Add(new NamedParameter<double>("Central_Meridian", Core.CentralMeridian.Value, geographicUnit));
+                if (Core.LongitudeOfCenter.HasValue)
+                    parameters.Add(new NamedParameter<double>("Longitude_Of_Center", Core.LongitudeOfCenter.Value, geographicUnit));
                 if (Core.StandardParallel1.HasValue)
-                    parameters.Add(new NamedParameter<double>("lat_1", Core.StandardParallel1.Value, geographicUnit));
+                    parameters.Add(new NamedParameter<double>("Standard_Parallel_1", Core.StandardParallel1.Value, geographicUnit));
                 if (Core.StandardParallel2.HasValue)
-                    parameters.Add(new NamedParameter<double>("lat_2", Core.StandardParallel2.Value, geographicUnit));
+                    parameters.Add(new NamedParameter<double>("Standard_Parallel_2", Core.StandardParallel2.Value, geographicUnit));
                 if (Core.Over)
                     parameters.Add(new NamedParameter<int>("over", 1));
                 if (Core.Geoc)
                     parameters.Add(new NamedParameter<int>("geoc", 1));
-                if (Core.alpha.HasValue)
-                    parameters.Add(new NamedParameter<double>("alpha", Core.alpha.Value));
-                if (Core.LongitudeOfCenter.HasValue)
-                    parameters.Add(new NamedParameter<double>("lonc", Core.LongitudeOfCenter.Value, geographicUnit));
+                if (Core.alpha.HasValue) {
+                    var paramName = "Alpha";
+                    if (Core.Transform != null) {
+                        if(Core.Transform.Proj4Name == "omerc")
+                            paramName = "Azimuth";
+                    }
+                    parameters.Add(new NamedParameter<double>(paramName, Core.alpha.Value));
+                }
                 if (Core.Zone.HasValue)
                     parameters.Add(new NamedParameter<int>("zone", Core.Zone.Value));
                 if (Core.IsLatLon) {
@@ -243,7 +266,7 @@ namespace Pigeoid.Interop.Proj4
                 var methodName = (
                     Core.Transform == null
                         ? null
-                        : (Core.Transform.Name ?? Core.Transform.Proj4Name)
+                        : (Core.Transform.Proj4Name ?? Core.Transform.Name)
                 ) ?? "Unknown";
                 var method = new OgcCoordinateOperationMethodInfo(methodName);
                 return new CoordinateOperationInfo(
@@ -260,7 +283,9 @@ namespace Pigeoid.Interop.Proj4
 
         public IUnit Unit {
             get {
-                throw new NotImplementedException();
+                if (Core.Unit == null)
+                    return null;
+                return new Proj4LinearUnit(Core.Unit);
             }
         }
 
@@ -304,55 +329,6 @@ namespace Pigeoid.Interop.Proj4
                 IsLatLon = true
             };
 
-            /*if (crsProjected.Authority != null) {
-                int epsgCode;
-                if (crsProjected.Authority.Name == "EPSG" && Int32.TryParse(crsProjected.Authority.Code, out epsgCode))
-                    result.EpsgCode = epsgCode;
-
-                result.Authority = crsProjected.Authority.Name;
-            }
-
-            if (crsProjected.BaseCrs is ICrsGeographic)
-                result.GeographicInfo = Proj4CrsGeographic.CreateGeographic((ICrsGeographic)(crsProjected.BaseCrs));
-
-
-            var projectionInfo = crsProjected.Projection as IParameterizedCoordinateOperationInfo;
-
-            if (projectionInfo == null)
-                return result;
-
-            var projectionMethod = projectionInfo.Method;
-            if (projectionMethod == null)
-                throw new InvalidOperationException("No projection method.");
-
-            var proj4Name = ToProj4MethodName(projectionMethod.Name);
-            result.Transform = TransformManager.GetProj4(proj4Name);
-
-            var lon0Param = new KeywordNamedParameterSelector("LON0", "CENTRALMERIDIAN");
-            var lat0Param = new KeywordNamedParameterSelector("LAT0", "LATITUDEORIGIN");
-            var x0Param = new KeywordNamedParameterSelector("X0", "FALSEEASTING");
-            var y0Param = new KeywordNamedParameterSelector("Y0", "FALSENORTHING");
-
-            var paramLookup = new NamedParameterLookup(projectionInfo.Parameters);
-            paramLookup.Assign(lon0Param, lat0Param, x0Param, y0Param);
-
-            // TODO: set the unit
-
-            IUnit geographicUnit = null; // TODO: result.GeographicInfo.Unit
-            IUnit projectionUnit = null; // TODO: result.Unit
-
-            if (lon0Param.IsSelected)
-                result.CentralMeridian = lon0Param.GetValueAsDouble(geographicUnit);
-
-            if (lat0Param.IsSelected)
-                result.LatitudeOfOrigin = lat0Param.GetValueAsDouble(geographicUnit);
-
-            if (x0Param.IsSelected)
-                result.FalseEasting = x0Param.GetValueAsDouble(projectionUnit);
-
-            if (y0Param.IsSelected)
-                result.FalseNorthing = y0Param.GetValueAsDouble(projectionUnit);
-            */
             return result;
         }
 
