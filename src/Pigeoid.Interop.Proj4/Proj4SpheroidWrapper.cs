@@ -5,6 +5,7 @@ using DotSpatial.Projections;
 using Pigeoid.Ogc;
 using Pigeoid.Unit;
 using Vertesaur;
+using System.Collections.Generic;
 
 namespace Pigeoid.Interop.Proj4
 {
@@ -27,18 +28,24 @@ namespace Pigeoid.Interop.Proj4
 
             Spheroid result;
             if (spheroidInfo.A == spheroidInfo.B) {
-                foreach (var known in AllKnownSpheroids) {
-                    if (known.PolarRadius == spheroidInfo.A)
-                        return new Spheroid(known.KnownEllipsoid);
-                }
+                var knownMatch = AllKnownSpheroids
+                    .Where(k => k.PolarRadius == spheroidInfo.A)
+                    .OrderByDescending(k => SpheroidNameNormalizedComparer.Default.Equals(k.Name, spheroidInfo.Name))
+                    .FirstOrDefault();
+                if (knownMatch != null)
+                    return knownMatch;
+                
                 result = new Spheroid(Proj4Ellipsoid.Custom);
                 result.PolarRadius = spheroidInfo.A;
             }
             else{
-                foreach (var known in AllKnownSpheroids) {
-                    if(known.EquatorialRadius == spheroidInfo.A && known.InverseFlattening == spheroidInfo.InvF)
-                        return new Spheroid(known.KnownEllipsoid);
-                }
+                var knownMatch = AllKnownSpheroids
+                    .Where(k => k.EquatorialRadius == spheroidInfo.A && k.InverseFlattening == spheroidInfo.InvF)
+                    .OrderByDescending(k => SpheroidNameNormalizedComparer.Default.Equals(k.Name, spheroidInfo.Name))
+                    .FirstOrDefault();
+                if (knownMatch != null)
+                    return knownMatch;
+
                 result = new Spheroid(Proj4Ellipsoid.Custom);
                 result.EquatorialRadius = spheroidInfo.A;
                 result.InverseFlattening = spheroidInfo.InvF;

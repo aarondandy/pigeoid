@@ -62,12 +62,32 @@ namespace Pigeoid.CoordinateOperation
             return true;
         }
 
+        public bool? GetValueAsBoolean() {
+            if (IsSelected) {
+                var rawValue = Selection.Value;
+                return ConversionUtil.ConvertBooleanMultiCulture(rawValue);
+            }
+            return null;
+        }
+
+        public int? GetValueAsInt32()
+        {
+            if (IsSelected)
+            {
+                var rawValue = Selection.Value;
+                int value;
+                if (ConversionUtil.TryConvertInt32MultiCulture(rawValue, out value))
+                    return value;
+            }
+            return null;
+        }
+
         public double? GetValueAsDouble() {
             if (IsSelected) {
                 var rawValue = Selection.Value;
-                double dValue;
-                if (ConversionUtil.TryConvertDoubleMultiCulture(rawValue, out dValue))
-                    return dValue;
+                double value;
+                if (ConversionUtil.TryConvertDoubleMultiCulture(rawValue, out value))
+                    return value;
             }
             return null;
         }

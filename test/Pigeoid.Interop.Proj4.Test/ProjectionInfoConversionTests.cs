@@ -76,12 +76,11 @@ namespace Pigeoid.Interop.Proj4.Test
             if (expected.Transform == null || expected.IsLatLon) {
                 actual = Proj4CrsGeographic.CreateProjection(new Proj4CrsGeographic(expected.GeographicInfo));
 
-                if (
-                    expected.Transform == null
-                    || set.FieldName.StartsWith("DeirezZorLevant")
-                    || set.FieldName.StartsWith("EverestModified1969")
-                )
-                    actual.IsLatLon = false; // TODO: not sure why, but these are set to false for latlon
+                // NOTE: TEST HACK
+                if (expected.Transform == null) {
+                    actual.IsLatLon = false; // TODO: not sure why, but these are set to false for latlon on some CRSs
+                    actual.Transform = null;
+                }
 
             }
             else {
@@ -93,11 +92,54 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(expected.AuxiliarySphereType, actual.AuxiliarySphereType);
             Assert.AreEqual(expected.bns, actual.bns);
             Assert.AreEqual(expected.CentralMeridian, actual.CentralMeridian);
+            Assert.AreEqual(expected.czech, actual.czech);
+            Assert.AreEqual(expected.EpsgCode, actual.EpsgCode);
+            Assert.AreEqual(expected.FalseEasting, actual.FalseEasting);
+            Assert.AreEqual(expected.FalseNorthing, actual.FalseNorthing);
+            Assert.AreEqual(expected.Geoc, actual.Geoc);
+            // TODO: geographic info
+            Assert.AreEqual(expected.guam, actual.guam);
+            Assert.AreEqual(expected.h, actual.h);
+            Assert.AreEqual(expected.IsGeocentric, actual.IsGeocentric);
+            Assert.AreEqual(expected.IsLatLon, actual.IsLatLon);
+            Assert.AreEqual(expected.IsSouth, actual.IsSouth);
+            Assert.AreEqual(expected.IsValid, actual.IsValid);
+            Assert.AreEqual(expected.Lam0, actual.Lam0, 0.000001);
+            Assert.AreEqual(expected.Lam1, actual.Lam1, 0.000001);
+            Assert.AreEqual(expected.Lam2, actual.Lam2, 0.000001);
+            Assert.AreEqual(expected.lat_ts, actual.lat_ts);
+            Assert.AreEqual(expected.LatitudeOfOrigin, actual.LatitudeOfOrigin);
+            Assert.AreEqual(expected.lon_1, actual.lon_1);
+            Assert.AreEqual(expected.lon_2, actual.lon_2);
+            Assert.AreEqual(expected.lonc, actual.lonc);
+            Assert.AreEqual(expected.LongitudeOfCenter, actual.LongitudeOfCenter);
+            Assert.AreEqual(expected.M, actual.M);
+            Assert.AreEqual(expected.mGeneral, actual.mGeneral);
+            Assert.AreEqual(expected.n, actual.n);
+            //Assert.AreEqual(expected.Name, actual.Name);
+            Assert.AreEqual(expected.no_rot, actual.no_rot);
+            Assert.AreEqual(expected.no_uoff, actual.no_uoff);
+            Assert.AreEqual(expected.NoDefs, actual.NoDefs);
+            Assert.AreEqual(expected.Over, actual.Over);
+            Assert.AreEqual(expected.Phi0, actual.Phi0, 0.000001);
+            Assert.AreEqual(expected.Phi1, actual.Phi1, 0.000001);
+            Assert.AreEqual(expected.Phi2, actual.Phi2, 0.000001);
+            Assert.AreEqual(expected.rot_conv, actual.rot_conv);
+            Assert.AreEqual(expected.ScaleFactor, actual.ScaleFactor);
+            Assert.AreEqual(expected.StandardParallel1, actual.StandardParallel1);
+            Assert.AreEqual(expected.StandardParallel2, actual.StandardParallel2);
+            Assert.AreEqual(expected.to_meter, actual.to_meter);
+            // TODO: transform
+            // TODO: unit
+            Assert.AreEqual(expected.W, actual.W);
+            Assert.AreEqual(expected.Zone, actual.Zone);
 
+            // NOTE: TEST HACK
             // this projection may have a known ellipsoid of WGS84 but different parameters for it than Proj4Ellipsoid.WGS_1984
             if (IsFalseWgs84(expected.GeographicInfo.Datum.Spheroid))
                 actual.GeographicInfo.Datum.Spheroid = new Spheroid(expected.GeographicInfo.Datum.Spheroid.KnownEllipsoid);
 
+            // NOTE: TEST HACK
             if (IsInvalidSpheroid(expected.GeographicInfo.Datum.Spheroid))
                 return; // this ellipsoid is all wrong
 

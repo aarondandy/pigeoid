@@ -131,7 +131,6 @@ namespace Pigeoid.Interop.Proj4
                 throw new InvalidOperationException("No projection method.");
 
             var proj4Name = ToProj4MethodName(projectionMethod.Name);
-            result.Transform = TransformManager.GetProj4(proj4Name);
 
             var lon0Param = new KeywordNamedParameterSelector("LON0", "LON", "ORIGIN", "CENTRAL", "MERIDIAN", "CENTRALMERIDIAN");
             var loncParam = new KeywordNamedParameterSelector("LONC", "LON", "CENTER", "LONGITUDECENTER");
@@ -142,9 +141,11 @@ namespace Pigeoid.Interop.Proj4
             var y0Param = new KeywordNamedParameterSelector("Y0", "FALSE", "OFFSET", "Y", "NORTH");
             var k0Param = new KeywordNamedParameterSelector("K0", "SCALE");
             var alphaParam = new KeywordNamedParameterSelector("ALPHA","AZIMUTH");
+            var zoneParam = new FullMatchParameterSelector("ZONE");
+            var southParam = new FullMatchParameterSelector("SOUTH");
 
             var paramLookup = new NamedParameterLookup(projectionInfo.Parameters);
-            paramLookup.Assign(lon0Param, loncParam, lat0Param, lat1Param, lat2Param, x0Param, y0Param, k0Param, alphaParam);
+            paramLookup.Assign(lon0Param, loncParam, lat0Param, lat1Param, lat2Param, x0Param, y0Param, k0Param, alphaParam, zoneParam, southParam);
 
             // TODO: set the unit
 
@@ -173,6 +174,16 @@ namespace Pigeoid.Interop.Proj4
                 result.ScaleFactor = k0Param.GetValueAsDouble(ScaleUnitUnity.Value) ?? 1.0;
             if (alphaParam.IsSelected)
                 result.alpha = alphaParam.GetValueAsDouble();
+            if (southParam.IsSelected)
+                result.IsSouth = southParam.GetValueAsBoolean().GetValueOrDefault();
+
+            if(zoneParam.IsSelected)
+                result.Zone = zoneParam.GetValueAsInt32();
+
+            if (result.Zone.HasValue && proj4Name == "tmerc")
+                proj4Name = "utm";
+
+            result.Transform = TransformManager.GetProj4(proj4Name);
 
             return result;
         }
@@ -220,21 +231,19 @@ namespace Pigeoid.Interop.Proj4
 
                 var parameters = new List<INamedParameter>();
                 if (Core.FalseEasting.HasValue)
-                    parameters.Add(new NamedParameter<double>("False_Easting", Core.FalseEasting.Value, projectionUnit));
+                    parameters.Add(new NamedParameter<double>("False_Easting", Core.FalseEasting.GetValueOrDefault(), projectionUnit));
                 if (Core.FalseNorthing.HasValue)
-                    parameters.Add(new NamedParameter<double>("False_Northing", Core.FalseNorthing.Value, projectionUnit));
+                    parameters.Add(new NamedParameter<double>("False_Northing", Core.FalseNorthing.GetValueOrDefault(), projectionUnit));
                 if (!Double.IsNaN(Core.ScaleFactor) && Core.ScaleFactor != 0 && Core.ScaleFactor != 1)
                     parameters.Add(new NamedParameter<double>("Scale_Factor", Core.ScaleFactor, ScaleUnitUnity.Value));
                 if (Core.LatitudeOfOrigin.HasValue)
-                    parameters.Add(new NamedParameter<double>("Latitude_Of_Origin", Core.LatitudeOfOrigin.Value, geographicUnit));
-                if (Core.CentralMeridian.HasValue)
-                    parameters.Add(new NamedParameter<double>("Central_Meridian", Core.CentralMeridian.Value, geographicUnit));
+                    parameters.Add(new NamedParameter<double>("Latitude_Of_Origin", Core.LatitudeOfOrigin.GetValueOrDefault(), geographicUnit));
                 if (Core.LongitudeOfCenter.HasValue)
-                    parameters.Add(new NamedParameter<double>("Longitude_Of_Center", Core.LongitudeOfCenter.Value, geographicUnit));
+                    parameters.Add(new NamedParameter<double>("Longitude_Of_Center", Core.LongitudeOfCenter.GetValueOrDefault(), geographicUnit));
                 if (Core.StandardParallel1.HasValue)
-                    parameters.Add(new NamedParameter<double>("Standard_Parallel_1", Core.StandardParallel1.Value, geographicUnit));
+                    parameters.Add(new NamedParameter<double>("Standard_Parallel_1", Core.StandardParallel1.GetValueOrDefault(), geographicUnit));
                 if (Core.StandardParallel2.HasValue)
-                    parameters.Add(new NamedParameter<double>("Standard_Parallel_2", Core.StandardParallel2.Value, geographicUnit));
+                    parameters.Add(new NamedParameter<double>("Standard_Parallel_2", Core.StandardParallel2.GetValueOrDefault(), geographicUnit));
                 if (Core.Over)
                     parameters.Add(new NamedParameter<int>("over", 1));
                 if (Core.Geoc)
@@ -245,10 +254,21 @@ namespace Pigeoid.Interop.Proj4
                         if(Core.Transform.Proj4Name == "omerc")
                             paramName = "Azimuth";
                     }
-                    parameters.Add(new NamedParameter<double>(paramName, Core.alpha.Value));
+                    parameters.Add(new NamedParameter<double>(paramName, Core.alpha.GetValueOrDefault()));
                 }
+
+
+                double? centralMeridian = Core.CentralMeridian;
+
                 if (Core.Zone.HasValue)
-                    parameters.Add(new NamedParameter<int>("zone", Core.Zone.Value));
+                {
+                    parameters.Add(new NamedParameter<int>("zone", Core.Zone.GetValueOrDefault()));
+                    // (Core.Zone.GetValueOrDefault() * 6) - 183;
+                }
+
+                if (centralMeridian.HasValue)
+                    parameters.Add(new NamedParameter<double>("Central_Meridian", centralMeridian.GetValueOrDefault(), geographicUnit));
+
                 if (Core.IsLatLon) {
                     parameters.Add(new NamedParameter<string>("proj", "longlat"));
                 }
@@ -326,7 +346,8 @@ namespace Pigeoid.Interop.Proj4
 
             var result = new ProjectionInfo {
                 GeographicInfo = geographic,
-                IsLatLon = true
+                IsLatLon = true,
+                Transform = new DotSpatial.Projections.Transforms.LongLat()
             };
 
             return result;

@@ -194,6 +194,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\ISpheroidInfo.cs" />
+    <Compile Include="Interop\SpheroidNameNormalizedComparer.cs" />
     <Compile Include="Unit\IUnit.cs">
       <SubType>Code</SubType>
     </Compile>
