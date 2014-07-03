@@ -13,6 +13,28 @@ namespace Pigeoid.Interop.Proj4
     public abstract class Proj4Crs : OgcNamedAuthorityBoundEntity, ICrs
     {
 
+        public static ProjectionInfo CreateProjection(ICrs crs) {
+            var projectedCrs = crs as ICrsProjected;
+            if (projectedCrs != null)
+                return Proj4CrsProjected.CreateProjection(projectedCrs);
+            var geographicCrs = crs as ICrsGeographic;
+            if (geographicCrs != null)
+                return Proj4CrsGeographic.CreateProjection(geographicCrs);
+
+            throw new NotSupportedException();
+        }
+
+        public static Proj4Crs Wrap(ProjectionInfo projectionInfo) {
+            if (projectionInfo == null) throw new ArgumentNullException("projectionInfo");
+            Contract.EndContractBlock();
+
+            if (projectionInfo.Transform == null || projectionInfo.IsLatLon) {
+                return new Proj4CrsGeographic(projectionInfo.GeographicInfo);
+            }
+
+            return new Proj4CrsProjected(projectionInfo);
+        }
+
         protected Proj4Crs(string name, string authority, string code)
             : this(name, new AuthorityTag(authority ?? "PROJ4", code ?? String.Empty)) {
             Contract.Requires(name != null);
@@ -147,12 +169,8 @@ namespace Pigeoid.Interop.Proj4
             var paramLookup = new NamedParameterLookup(projectionInfo.Parameters);
             paramLookup.Assign(lon0Param, loncParam, lat0Param, lat1Param, lat2Param, x0Param, y0Param, k0Param, alphaParam, zoneParam, southParam);
 
-            // TODO: set the unit
-
-
-
             IUnit geographicUnit = geographicBase == null ? null : geographicBase.Unit;
-            IUnit projectionUnit = crsProjected.Unit; // TODO: result.Unit
+            IUnit projectionUnit = crsProjected.Unit;
             if (projectionUnit != null)
                 result.Unit = Proj4LinearUnit.ConvertToProj4(projectionUnit);
 

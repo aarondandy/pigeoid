@@ -10,7 +10,7 @@ using System.Reflection;
 namespace Pigeoid.Interop.Proj4.Test
 {
     [TestFixture]
-    public class ProjectionInfoConversionTests
+    public class ProjectionInfoRoundTripTests
     {
 
         public class TestSet
@@ -37,7 +37,7 @@ namespace Pigeoid.Interop.Proj4.Test
             }
         }
 
-        public ProjectionInfoConversionTests() {
+        public ProjectionInfoRoundTripTests() {
             CategoryInstances = GetCoordinateSystemCategoryTypes
                 .ToDictionary(t => t, Activator.CreateInstance);
         }

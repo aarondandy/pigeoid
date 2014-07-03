@@ -48,7 +48,8 @@ namespace Pigeoid.Interop.Proj4
 
                 result = new Spheroid(Proj4Ellipsoid.Custom);
                 result.EquatorialRadius = spheroidInfo.A;
-                result.InverseFlattening = spheroidInfo.InvF;
+                // NOTE: do not directly set the InverseFlattening as it is stored as PolarRadius
+                result.PolarRadius = spheroidInfo.B;
             }
             result.Name = spheroidInfo.Name;
             return result;
