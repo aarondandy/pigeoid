@@ -126,9 +126,9 @@ namespace Pigeoid.Interop.Proj4
             if (crsProjected == null) throw new ArgumentNullException("crsProjected");
             Contract.Ensures(Contract.Result<ProjectionInfo>() != null);
 
-            var result = new ProjectionInfo {
-                Name = crsProjected.Name
-            };
+            var result = ProjectionInfo.FromProj4String(String.Empty);
+
+            result.Name = crsProjected.Name;
 
             if (crsProjected.Authority != null) {
                 int epsgCode;
@@ -203,7 +203,13 @@ namespace Pigeoid.Interop.Proj4
 
             result.Transform = TransformManager.GetProj4(proj4Name);
 
-            return result;
+            /*if (!result.czech.HasValue)
+                result.czech = 0;*/
+
+            result.GeographicInfo.Datum.Spheroid.Code = "!!";
+
+            var finalResult = ProjectionInfo.FromProj4String(result.ToProj4String()); // TODO: fix this hack
+            return finalResult;
         }
 
         private static AuthorityTag CreateAuthorityTag(ProjectionInfo projectionInfo) {
@@ -368,7 +374,8 @@ namespace Pigeoid.Interop.Proj4
                 Transform = new DotSpatial.Projections.Transforms.LongLat()
             };
 
-            return result;
+            var finalResult = ProjectionInfo.FromProj4String(result.ToProj4String()); // TODO: fix this hack
+            return finalResult;
         }
 
         public Proj4CrsGeographic(GeographicInfo geographicInfo)
