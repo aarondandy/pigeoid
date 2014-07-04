@@ -109,7 +109,7 @@ namespace Pigeoid.CoordinateOperation.Projection
 
         private static readonly PeriodicOperations LongitudePeriod = new PeriodicOperations(-Math.PI, Math.PI * 2.0);
 
-        public static PolarStereographic CreateFromStandardParallel(double standardParallel, double longitude, Vector2 falseProjectedOffset, ISpheroid<double> spheroid) {
+        public static PolarStereographic CreateFromStandardParallel(double longitude, double standardParallel, Vector2 falseProjectedOffset, ISpheroid<double> spheroid) {
             Contract.Requires(spheroid != null);
             Contract.Ensures(Contract.Result<PolarStereographic>() != null);
             return CreateFromStandardParallel(
@@ -144,7 +144,7 @@ namespace Pigeoid.CoordinateOperation.Projection
             return new PolarStereographic(geographicOrigin, scaleFactor, falseProjectedOffset, spheroid);
         }
 
-        public static PolarStereographic CreateFromStandardParallelAndFalseOffsetAtOrigin(double standardParallel, double longitude, Vector2 falseProjectedOffset, ISpheroid<double> spheroid) {
+        public static PolarStereographic CreateFromStandardParallelAndFalseOffsetAtOrigin(double longitude, double standardParallel, Vector2 falseProjectedOffset, ISpheroid<double> spheroid) {
             Contract.Requires(spheroid != null);
             Contract.Ensures(Contract.Result<PolarStereographic>() != null);
             return CreateFromStandardParallelAndFalseOffsetAtOrigin(

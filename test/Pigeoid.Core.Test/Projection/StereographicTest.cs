@@ -80,7 +80,7 @@ namespace Pigeoid.Core.Test.Projection
         [Test]
         public void EpsgExample_1_3_7_2_B() {
             var projection = PolarStereographic.CreateFromStandardParallel(
-                new GeographicCoordinate(-Math.PI / 2.0, 1.221730476),
+                1.221730476,
                 -1.239183769,
                 new Vector2(6000000.00, 6000000.00),
                 new SpheroidEquatorialInvF(6378137, 298.2572236)
@@ -97,7 +97,7 @@ namespace Pigeoid.Core.Test.Projection
         [Test]
         public void EpsgExample_1_3_7_2_B_Inverse() {
             var projection = PolarStereographic.CreateFromStandardParallel(
-                new GeographicCoordinate(-Math.PI / 2.0, 1.221730476),
+                1.221730476,
                 -1.239183769,
                 new Vector2(6000000.00, 6000000.00),
                 new SpheroidEquatorialInvF(6378137, 298.2572236)
@@ -114,7 +114,7 @@ namespace Pigeoid.Core.Test.Projection
         [Test]
         public void EpsgExample_1_3_7_2_C() {
             var projection = PolarStereographic.CreateFromStandardParallelAndFalseOffsetAtOrigin(
-                new GeographicCoordinate(-Math.PI / 2.0, 2.443460953),
+                2.443460953,
                 -1.169370599,
                 new Vector2(300000.00, 200000.00),
                 new SpheroidEquatorialInvF(6378388, 297)
@@ -131,7 +131,7 @@ namespace Pigeoid.Core.Test.Projection
         [Test]
         public void EpsgExample_1_3_7_2_C_Inverse() {
             var projection = PolarStereographic.CreateFromStandardParallelAndFalseOffsetAtOrigin(
-                new GeographicCoordinate(-Math.PI / 2.0, 2.443460953),
+                2.443460953,
                 -1.169370599,
                 new Vector2(300000.00, 200000.00),
                 new SpheroidEquatorialInvF(6378388, 297)

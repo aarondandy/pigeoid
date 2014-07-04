@@ -15,26 +15,45 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg26931_to_epsg3574() {
-            var crs26931 = EpsgCrs.Get(26931);
-            Assert.IsNotNull(crs26931);
-            var crs3574 = EpsgCrs.Get(3574);
-            Assert.IsNotNull(crs3574);
+            var from = EpsgCrs.Get(26931);
+            Assert.IsNotNull(from);
+            var to = EpsgCrs.Get(3574);
+            Assert.IsNotNull(to);
 
-            var prj26931 = Proj4Crs.CreateProjection(crs26931);
-            Assert.IsNotNull(prj26931);
-            Assert.AreEqual(57, prj26931.LatitudeOfOrigin);
-            Assert.AreEqual(-133.6666666666667, prj26931.LongitudeOfCenter, 0.000000001);
-            Assert.AreEqual(323.1301023611111, prj26931.alpha, 0.000000001);
-            Assert.AreEqual(0.9999, prj26931.ScaleFactor, 0.000000001);
-            Assert.AreEqual(5000000, prj26931.FalseEasting, 0.000000001);
-            Assert.AreEqual(-5000000, prj26931.FalseNorthing, 0.000000001);
+            var prjFrom = Proj4Crs.CreateProjection(from);
+            Assert.IsNotNull(prjFrom);
+            Assert.AreEqual(57, prjFrom.LatitudeOfOrigin);
+            Assert.AreEqual(-133.6666666666667, prjFrom.LongitudeOfCenter, 0.000000001);
+            Assert.AreEqual(323.1301023611111, prjFrom.alpha, 0.000000001);
+            Assert.AreEqual(0.9999, prjFrom.ScaleFactor, 0.000000001);
+            Assert.AreEqual(5000000, prjFrom.FalseEasting, 0.000000001);
+            Assert.AreEqual(-5000000, prjFrom.FalseNorthing, 0.000000001);
 
-            var prj3574 = Proj4Crs.CreateProjection(crs3574);
-            Assert.IsNotNull(prj3574);
-            Assert.AreEqual(90, prj3574.LatitudeOfOrigin);
-            Assert.AreEqual(-40, prj3574.CentralMeridian);
-            Assert.AreEqual(0, prj3574.FalseEasting);
-            Assert.AreEqual(0, prj3574.FalseNorthing);
+            var prjTo = Proj4Crs.CreateProjection(to);
+            Assert.IsNotNull(prjTo);
+            Assert.AreEqual(90, prjTo.LatitudeOfOrigin);
+            Assert.AreEqual(-40, prjTo.CentralMeridian);
+            Assert.AreEqual(0, prjTo.FalseEasting);
+            Assert.AreEqual(0, prjTo.FalseNorthing);
+        }
+
+        [Test]
+        public void epsg2281_to_epsg32411() {
+            var from = EpsgCrs.Get(2281);
+            Assert.IsNotNull(from);
+            var to = EpsgCrs.Get(32411);
+            Assert.IsNotNull(to);
+
+            var prjFrom = Proj4Crs.CreateProjection(from);
+            Assert.IsNotNull(prjFrom);
+            Assert.AreEqual(40.65, prjFrom.StandardParallel1);
+            Assert.AreEqual(39.01666666666667, prjFrom.StandardParallel2, 0.0000000001);
+            Assert.AreEqual(-111.5, prjFrom.CentralMeridian);
+            Assert.AreEqual(500000, prjFrom.FalseEasting); // NOTE: looks like a unit error
+            Assert.AreEqual(2000000, prjFrom.FalseNorthing); // NOTE: looks like a unit error
+
+            var prjTo = Proj4Crs.CreateProjection(to);
+            Assert.IsNotNull(prjTo);
         }
 
 

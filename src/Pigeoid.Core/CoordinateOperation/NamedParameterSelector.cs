@@ -30,6 +30,10 @@ namespace Pigeoid.CoordinateOperation
 
             public INamedParameter NamedParameter { get; private set; }
             public string NormalizedName { get; private set; }
+
+            public override string ToString() {
+                return NormalizedName + ": " + NamedParameter.Value;
+            }
         }
 
         public static bool AllAreSelected(params NamedParameterSelector[] selectors) {
@@ -104,6 +108,29 @@ namespace Pigeoid.CoordinateOperation
             return value;
         }
 
+        public bool TryGetValueAsDouble(out double value) {
+            if (IsSelected) {
+                var rawValue = Selection.Value;
+                return ConversionUtil.TryConvertDoubleMultiCulture(rawValue, out value);
+            }
+            value = default(double);
+            return false;
+        }
+
+        public bool TryGetValueAsDouble(IUnit unit, out double value) {
+            if (!TryGetValueAsDouble(out value))
+                return false;
+            if (unit != null && Selection.Unit != null && !unit.Equals(Selection.Unit)) {
+                var conversion = SimpleUnitConversionGenerator.FindConversion(Selection.Unit, unit);
+                if (conversion == null)
+                    throw new InvalidOperationException();
+
+                value = conversion.TransformValue(value);
+            }
+            return true;
+
+        }
+
     }
 
     public class MultiParameterSelector : NamedParameterSelector
@@ -159,6 +186,7 @@ namespace Pigeoid.CoordinateOperation
 
         private readonly string[] _keywords;
 
+        [Obsolete("Keywords will need to be weighted")]
         public KeywordNamedParameterSelector(params string[] keywords) {
             if(keywords == null) throw new ArgumentNullException("keywords");
             Contract.Requires(Contract.ForAll(keywords, x => x != null));
@@ -256,6 +284,106 @@ namespace Pigeoid.CoordinateOperation
         }
     }
 
+    public class LatitudeOfTrueScaleParameterSelector : NamedParameterSelector
+    {
+        public override int Score(ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("LATOFTRUESCALE".Equals(parameterName))
+                return 100;
+
+            int startPoints;
+            if (parameterName.StartsWith("LATITUDE"))
+                startPoints = 10;
+            else if (parameterName.StartsWith("LAT"))
+                startPoints = 5;
+            else
+                return 0;
+
+            int endPoints;
+            if (parameterName.EndsWith("SCALE"))
+                endPoints = 10;
+            else
+                return 0;
+
+            var middlePoints = 0;
+            if (parameterName.Contains("TRUE"))
+                middlePoints += 10;
+
+            if (startPoints > 0 && endPoints > 0)
+                return startPoints + endPoints + middlePoints;
+
+            return 0;
+        }
+    }
+
+    public class StandardParallelParameterSelector : NamedParameterSelector
+    {
+
+        public readonly int? _number;
+
+        public StandardParallelParameterSelector() {
+            _number = null;
+        }
+
+        public StandardParallelParameterSelector(int number) {
+            _number = number;
+        }
+
+        public override int Score(ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+
+            int startPoints, endPoints;
+            if (_number.HasValue) {
+                if("STANDARDPARALLEL".Equals(parameterName))
+                    return 1;// if the number is set, it must also match
+
+
+                var number = _number.GetValueOrDefault();
+                var numberString = number.ToString();
+
+                if (parameterName.StartsWith("STANDARDPARALLEL"))
+                    startPoints = 10;
+                else if (parameterName.StartsWith("STANDARD") || parameterName.StartsWith("PARALLEL"))
+                    startPoints = 5;
+                else
+                    return 0;
+
+                if (parameterName.EndsWith(numberString))
+                    endPoints = 10;
+                else if (number == 1 && (parameterName.EndsWith("ONE") || parameterName.EndsWith("1ST")))
+                    endPoints = 10;
+                else if (number == 2 && (parameterName.EndsWith("TWO") || parameterName.EndsWith("2ND")))
+                    endPoints = 10;
+                else if (number == 3 && (parameterName.EndsWith("THREE") || parameterName.EndsWith("3RD")))
+                    endPoints = 10;
+                else
+                    return 0;
+            }
+            else {
+                if("STANDARDPARALLEL".Equals(parameterName))
+                    return 100;
+                if(parameterName.EndsWith("STANDARDPARALLEL"))
+                    return 50;
+
+                if (parameterName.StartsWith("STANDARD"))
+                    startPoints = 10;
+                else
+                    return 0;
+
+                if (parameterName.EndsWith("PARALLEL"))
+                    endPoints = 10;
+                else if (parameterName.Contains("PARALLEL"))
+                    endPoints = 5; // because it may not know about the ordinal suffix
+                else
+                    return 0;
+            }
+
+            if (startPoints > 0 && endPoints > 0)
+                return startPoints + endPoints;
+            return 0;
+        }
+    }
+
     public class LongitudeOfCenterParameterSelector : NamedParameterSelector
     {
 
@@ -344,6 +472,62 @@ namespace Pigeoid.CoordinateOperation
                 return startPoints + endPoints;
 
             return 0;
+        }
+    }
+
+    public class ScaleFactorParameterSelector : NamedParameterSelector
+    {
+        public override int Score(NamedParameterSelector.ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("SCALEFACTOR".Equals(parameterName))
+                return 100;
+            if ("SCALE".Equals(parameterName))
+                return 75;
+            if (parameterName.StartsWith("SCALE") || parameterName.EndsWith("SCALE"))
+                return 1;
+            return 0;
+        }
+    }
+
+    public class FalseEastingParameterSelector : NamedParameterSelector
+    {
+        public override int Score(ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("FALSEEASTING".Equals(parameterName))
+                return 100;
+            if ("EASTINGOFFSET".Equals(parameterName))
+                return 75;
+
+            int score = 0;
+            if (parameterName.Contains("EASTING")) {
+                score = 1;
+                if (parameterName.Contains("OFFSET"))
+                    ++score;
+                if (parameterName.Contains("FALSE"))
+                    ++score;
+            }
+            return score;
+        }
+    }
+
+    public class FalseNorthingParameterSelector : NamedParameterSelector
+    {
+        public override int Score(ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("FALSENORTHING".Equals(parameterName))
+                return 100;
+            if ("NORTHINGOFFSET".Equals(parameterName))
+                return 75;
+
+            int score = 0;
+            if (parameterName.Contains("NORTHING")) {
+                score = 1;
+                if (parameterName.Contains("OFFSET"))
+                    ++score;
+                if (parameterName.Contains("FALSE"))
+                    ++score;
+            }
+            return score;
         }
     }
 

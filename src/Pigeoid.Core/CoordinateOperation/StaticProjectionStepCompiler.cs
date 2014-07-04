@@ -114,6 +114,7 @@ namespace Pigeoid.CoordinateOperation
             return false;
         }
 
+        [Obsolete]
         private static bool TryCreatePoint2(INamedParameter xParam, INamedParameter yParam, IUnit linearUnit, out Point2 result) {
             double x, y;
             if (TryGetDouble(xParam, linearUnit, out x) | TryGetDouble(yParam, linearUnit, out y)) {
@@ -126,52 +127,55 @@ namespace Pigeoid.CoordinateOperation
 
         private SpheroidProjectionBase CreatePolarStereographic(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var parallelLatParam = new KeywordNamedParameterSelector("LAT", "PARALLEL");
+            var latParam = new MultiParameterSelector(
+                new KeywordNamedParameterSelector("LAT", "ORIGIN"),
+                new LatitudeOfTrueScaleParameterSelector());
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
-            var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
-            opData.ParameterLookup.Assign(originLatParam, originLonParam, parallelLatParam, offsetXParam, offsetYParam, scaleFactorParam);
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
+            var standardParallelParam = new StandardParallelParameterSelector();
+            var scaleFactorParam = new ScaleFactorParameterSelector();
+            opData.ParameterLookup.Assign(latParam, originLonParam, offsetXParam, offsetYParam, standardParallelParam, scaleFactorParam);
 
             var fromSpheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
             if (null == fromSpheroid)
                 return null;
 
-            GeographicCoordinate origin;
-            if (!(originLatParam.IsSelected || originLonParam.IsSelected) || !TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin))
-                origin = GeographicCoordinate.Zero;
+            double latitude, longitude;
+            if (!latParam.TryGetValueAsDouble(OgcAngularUnit.DefaultRadians, out latitude))
+                latitude = 0;
+            if (!originLonParam.TryGetValueAsDouble(OgcAngularUnit.DefaultRadians, out longitude))
+                longitude = 0;
 
             Vector2 offset;
             if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
                 offset = Vector2.Zero;
 
-            double latParallel;
-            if (!parallelLatParam.IsSelected || !TryGetDouble(parallelLatParam.Selection, OgcAngularUnit.DefaultRadians, out latParallel))
-                latParallel = origin.Latitude;
-
             double scaleFactor;
-            if (scaleFactorParam.IsSelected && TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor)) {
-                return new PolarStereographic(origin, scaleFactor, offset, fromSpheroid);
+            if (scaleFactorParam.TryGetValueAsDouble(ScaleUnitUnity.Value, out scaleFactor))
+                return new PolarStereographic(new GeographicCoordinate(latitude,longitude), scaleFactor, offset, fromSpheroid);
+
+            double standardParallel;
+            if (standardParallelParam.TryGetValueAsDouble(OgcAngularUnit.DefaultRadians, out standardParallel)) {
+                if (
+                    (offsetXParam.IsSelected && opData.ParameterLookup.ParameterNameNormalizedComparer.Normalize(offsetXParam.Selection.Name).Contains("ORIGIN"))
+                    || (offsetYParam.IsSelected && opData.ParameterLookup.ParameterNameNormalizedComparer.Normalize(offsetYParam.Selection.Name).Contains("ORIGIN"))
+                ) {
+                    return PolarStereographic.CreateFromStandardParallelAndFalseOffsetAtOrigin(longitude, standardParallel, offset, fromSpheroid);
+                }
+                return PolarStereographic.CreateFromStandardParallel(longitude, standardParallel, offset, fromSpheroid);
             }
 
-            if (
-                (offsetXParam.IsSelected && opData.ParameterLookup.ParameterNameNormalizedComparer.Normalize(offsetXParam.Selection.Name).Contains("ORIGIN"))
-                || (offsetYParam.IsSelected && opData.ParameterLookup.ParameterNameNormalizedComparer.Normalize(offsetYParam.Selection.Name).Contains("ORIGIN"))
-            ) {
-                return PolarStereographic.CreateFromStandardParallelAndFalseOffsetAtOrigin(latParallel, origin.Longitude, offset, fromSpheroid);
-            }
-
-            return PolarStereographic.CreateFromStandardParallel(latParallel, origin.Longitude, offset, fromSpheroid);
+            throw new InvalidOperationException();
         }
 
         private static SpheroidProjectionBase CreateTransverseMercator(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN", "CENTRAL","MERIDIAN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
-            var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
+            var scaleFactorParam = new ScaleFactorParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
 
             var fromSpheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
