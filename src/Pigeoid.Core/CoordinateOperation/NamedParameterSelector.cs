@@ -176,8 +176,7 @@ namespace Pigeoid.CoordinateOperation
         public string Match { get; private set; }
 
         public override int Score(ParameterData parameterData) {
-            var parameterName = parameterData.NormalizedName;
-            return Match.Equals(parameterName) ? 1 : 0;
+            return Match.Equals(parameterData.NormalizedName) ? 100 : 0;
         }
     }
 
@@ -258,6 +257,8 @@ namespace Pigeoid.CoordinateOperation
             var parameterName = parameterData.NormalizedName;
             if ("LATOFNATURALORIGIN".Equals(parameterName))
                 return 100;
+            if ("LATOFORIGIN".Equals(parameterName))
+                return 50;
 
             int startPoints;
             if (parameterName.StartsWith("LATITUDE"))
@@ -341,6 +342,8 @@ namespace Pigeoid.CoordinateOperation
                 var number = _number.GetValueOrDefault();
                 var numberString = number.ToString();
 
+                // TODO: cover the case where ordinal comes first
+
                 if (parameterName.StartsWith("STANDARDPARALLEL"))
                     startPoints = 10;
                 else if (parameterName.StartsWith("STANDARD") || parameterName.StartsWith("PARALLEL"))
@@ -423,6 +426,8 @@ namespace Pigeoid.CoordinateOperation
             var parameterName = parameterData.NormalizedName;
             if ("LONOFNATURALORIGIN".Equals(parameterName))
                 return 100;
+            if ("LONOFORIGIN".Equals(parameterName))
+                return 50;
 
             int startPoints;
             if (parameterName.StartsWith("LONGITUDE"))

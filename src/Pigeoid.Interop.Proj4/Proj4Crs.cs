@@ -166,7 +166,9 @@ namespace Pigeoid.Interop.Proj4
             var lat2Param = new KeywordNamedParameterSelector("LAT2", "LAT", "2", "PARALLEL");
             var x0Param = new KeywordNamedParameterSelector("X0", "FALSE", "OFFSET", "X", "EAST");
             var y0Param = new KeywordNamedParameterSelector("Y0", "FALSE", "OFFSET", "Y", "NORTH");
-            var k0Param = new KeywordNamedParameterSelector("K0", "SCALE");
+            var k0Param = new MultiParameterSelector(
+                new ScaleFactorParameterSelector(),
+                new FullMatchParameterSelector("K0"));
             var alphaParam = new KeywordNamedParameterSelector("ALPHA","AZIMUTH");
             var zoneParam = new FullMatchParameterSelector("ZONE");
             var southParam = new FullMatchParameterSelector("SOUTH");
@@ -221,6 +223,17 @@ namespace Pigeoid.Interop.Proj4
             finalResult.IsSouth = result.IsSouth;
             finalResult.Zone = result.Zone;
             finalResult.Unit = result.Unit;
+            if (result.GeographicInfo == null) { // NOTE: this is all so terrible
+                finalResult.GeographicInfo = null;
+            }
+            else {
+                if (finalResult.GeographicInfo == null) {
+                    finalResult.GeographicInfo = result.GeographicInfo;
+                }
+                else {
+                    finalResult.GeographicInfo.Datum.Spheroid = result.GeographicInfo.Datum.Spheroid;
+                }
+            }
             return finalResult;
         }
 

@@ -14,31 +14,21 @@ namespace Pigeoid.Interop.Proj4.Test
     {
 
         [Test]
-        public void epsg26931() {
-            var crs = EpsgCrs.Get(26931);
+        public void epsg2039() {
+            var crs = EpsgCrs.Get(2039);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
             Assert.IsNotNull(prj);
-            Assert.AreEqual(57, prj.LatitudeOfOrigin);
-            Assert.AreEqual(-133.6666666666667, prj.LongitudeOfCenter, 0.000000001);
-            Assert.AreEqual(323.1301023611111, prj.alpha, 0.000000001);
-            Assert.AreEqual(0.9999, prj.ScaleFactor, 0.000000001);
-            Assert.AreEqual(5000000, prj.FalseEasting, 0.000000001);
-            Assert.AreEqual(-5000000, prj.FalseNorthing, 0.000000001);
-        }
+            Assert.AreEqual(31.73439361111111, prj.LatitudeOfOrigin, 0.000000001);
+            Assert.AreEqual(35.20451694444445, prj.CentralMeridian, 0.000000001);
+            Assert.AreEqual(1.0000067, prj.ScaleFactor);
+            Assert.AreEqual(219529.584, prj.FalseEasting);
+            Assert.AreEqual(626907.39, prj.FalseNorthing);
 
-        [Test]
-        public void epsg3574() {
-            var crs = EpsgCrs.Get(3574);
-            Assert.IsNotNull(crs);
-
-            var prj = Proj4Crs.CreateProjection(crs);
-            Assert.IsNotNull(prj);
-            Assert.AreEqual(90, prj.LatitudeOfOrigin);
-            Assert.AreEqual(-40, prj.CentralMeridian);
-            Assert.AreEqual(0, prj.FalseEasting);
-            Assert.AreEqual(0, prj.FalseNorthing);
+            Assert.AreEqual(-48, prj.GeographicInfo.Datum.ToWGS84[0]);
+            Assert.AreEqual(55, prj.GeographicInfo.Datum.ToWGS84[1]);
+            Assert.AreEqual(52, prj.GeographicInfo.Datum.ToWGS84[2]);
         }
 
         [Test]
@@ -56,6 +46,36 @@ namespace Pigeoid.Interop.Proj4.Test
         }
 
         [Test]
+        public void epsg2318() {
+            var crs = EpsgCrs.Get(2318);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(17, prj.StandardParallel1);
+            Assert.AreEqual(33, prj.StandardParallel2);
+            Assert.AreEqual(25.08951, prj.LatitudeOfOrigin, 0.0001);
+            Assert.AreEqual(48, prj.CentralMeridian);
+            Assert.AreEqual(0, prj.FalseEasting);
+            Assert.AreEqual(0, prj.FalseNorthing);
+
+        }
+
+        [Test]
+        public void epsg2469() {
+            var crs = EpsgCrs.Get(2469);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(0, prj.LatitudeOfOrigin);
+            Assert.AreEqual(57, prj.CentralMeridian);
+            Assert.AreEqual(1, prj.ScaleFactor);
+            Assert.AreEqual(500000, prj.FalseEasting);
+            Assert.AreEqual(0, prj.FalseNorthing);
+        }
+
+        [Test]
         public void epsg3079() {
             var crs = EpsgCrs.Get(3079);
             Assert.IsNotNull(crs);
@@ -69,6 +89,96 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(-4354009.816, prj.FalseNorthing);
         }
 
+        [Test]
+        public void epsg3574() {
+            var crs = EpsgCrs.Get(3574);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(90, prj.LatitudeOfOrigin);
+            Assert.AreEqual(-40, prj.CentralMeridian);
+            Assert.AreEqual(0, prj.FalseEasting);
+            Assert.AreEqual(0, prj.FalseNorthing);
+        }
+
+        [Test]
+        public void epsg26931() {
+            var crs = EpsgCrs.Get(26931);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(57, prj.LatitudeOfOrigin);
+            Assert.AreEqual(-133.6666666666667, prj.LongitudeOfCenter, 0.000000001);
+            Assert.AreEqual(323.1301023611111, prj.alpha, 0.000000001);
+            Assert.AreEqual(0.9999, prj.ScaleFactor, 0.000000001);
+            Assert.AreEqual(5000000, prj.FalseEasting, 0.000000001);
+            Assert.AreEqual(-5000000, prj.FalseNorthing, 0.000000001);
+        }
+
+        [Test]
+        public void epsg28191() {
+            var crs = EpsgCrs.Get(28191);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(31.73409694444445, prj.LatitudeOfOrigin, 0.000000001);
+            Assert.AreEqual(35.21208055555556, prj.CentralMeridian, 0.000000001);
+            Assert.AreEqual(170251.555, prj.FalseEasting);
+            Assert.AreEqual(126867.909, prj.FalseNorthing);
+
+            Assert.AreEqual(-275.722, prj.GeographicInfo.Datum.ToWGS84[0], 0.001);
+            Assert.AreEqual(94.7824, prj.GeographicInfo.Datum.ToWGS84[1], 0.001);
+            Assert.AreEqual(340.894, prj.GeographicInfo.Datum.ToWGS84[2], 0.001);
+            Assert.AreEqual(-8.001, prj.GeographicInfo.Datum.ToWGS84[3], 0.001);
+            Assert.AreEqual(-4.42, prj.GeographicInfo.Datum.ToWGS84[4], 0.001);
+            Assert.AreEqual(-11.821, prj.GeographicInfo.Datum.ToWGS84[5], 0.001);
+            Assert.AreEqual(1, prj.GeographicInfo.Datum.ToWGS84[6]);
+
+            Assert.AreEqual(6378300.789, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius, 0.001);
+            Assert.AreEqual(6356566.435, prj.GeographicInfo.Datum.Spheroid.PolarRadius, 0.001);
+        }
+
+        [Test]
+        public void epsg28192() {
+            var crs = EpsgCrs.Get(28192);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(31.73409694444445, prj.LatitudeOfOrigin, 0.000000001);
+            Assert.AreEqual(35.21208055555556, prj.CentralMeridian, 0.000000001);
+            Assert.AreEqual(170251.555, prj.FalseEasting);
+            Assert.AreEqual(1126867.909, prj.FalseNorthing);
+
+            Assert.AreEqual(-275.722, prj.GeographicInfo.Datum.ToWGS84[0],0.001);
+            Assert.AreEqual(94.7824, prj.GeographicInfo.Datum.ToWGS84[1], 0.001);
+            Assert.AreEqual(340.894, prj.GeographicInfo.Datum.ToWGS84[2], 0.001);
+            Assert.AreEqual(-8.001, prj.GeographicInfo.Datum.ToWGS84[3], 0.001);
+            Assert.AreEqual(-4.42, prj.GeographicInfo.Datum.ToWGS84[4], 0.001);
+            Assert.AreEqual(-11.821, prj.GeographicInfo.Datum.ToWGS84[5], 0.001);
+            Assert.AreEqual(1, prj.GeographicInfo.Datum.ToWGS84[6]);
+
+            Assert.AreEqual(6378300.789, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius, 0.001);
+            Assert.AreEqual(6356566.435, prj.GeographicInfo.Datum.Spheroid.PolarRadius, 0.001);
+        }
+
+        [Test]
+        public void epsg2039_to_epsg28191() {
+            var from = EpsgCrs.Get(2039);
+            var to = EpsgCrs.Get(28191);
+
+            var epsgPathGen = new EpsgCrsCoordinateOperationPathGenerator(
+                new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+                    x => !x.Deprecated,
+                    x => !x.Deprecated));
+            var epsgPath = epsgPathGen.Generate(from, to);
+            Assert.IsNotNull(epsgPath);
+            var proj4Transform = new Proj4Transform(from, to);
+            Assert.IsNotNull(proj4Transform);
+        }
 
     }
 }

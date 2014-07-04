@@ -114,30 +114,23 @@ namespace Pigeoid.CoordinateOperation
             return false;
         }
 
-        [Obsolete]
-        private static bool TryCreatePoint2(INamedParameter xParam, INamedParameter yParam, IUnit linearUnit, out Point2 result) {
-            double x, y;
-            if (TryGetDouble(xParam, linearUnit, out x) | TryGetDouble(yParam, linearUnit, out y)) {
-                result = new Point2(x, y);
-                return true;
-            }
-            result = Point2.Zero;
-            return false;
-        }
-
         private SpheroidProjectionBase CreatePolarStereographic(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var latParam = new MultiParameterSelector(
-                new KeywordNamedParameterSelector("LAT", "ORIGIN"),
+                new LatitudeOfNaturalOriginParameterSelector(),
                 new LatitudeOfTrueScaleParameterSelector());
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
+            var originLonParam = new MultiParameterSelector(
+                new LongitudeOfNaturalOriginParameterSelector(),
+                new FullMatchParameterSelector("LONDOWNFROMPOLE"));// new KeywordNamedParameterSelector("LON", "ORIGIN");
             var offsetXParam = new FalseEastingParameterSelector();
             var offsetYParam = new FalseNorthingParameterSelector();
             var standardParallelParam = new StandardParallelParameterSelector();
             var scaleFactorParam = new ScaleFactorParameterSelector();
             opData.ParameterLookup.Assign(latParam, originLonParam, offsetXParam, offsetYParam, standardParallelParam, scaleFactorParam);
 
-            var fromSpheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+            var linearUnit = opData.StepParams.RelatedOutputCrsUnit;
+
+            var fromSpheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(linearUnit);
             if (null == fromSpheroid)
                 return null;
 
@@ -147,9 +140,10 @@ namespace Pigeoid.CoordinateOperation
             if (!originLonParam.TryGetValueAsDouble(OgcAngularUnit.DefaultRadians, out longitude))
                 longitude = 0;
 
-            Vector2 offset;
-            if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
-                offset = Vector2.Zero;
+            double xOffset, yOffset;
+            var offset = (offsetXParam.TryGetValueAsDouble(linearUnit, out xOffset) && offsetYParam.TryGetValueAsDouble(linearUnit, out yOffset))
+                ? new Vector2(xOffset, yOffset)
+                : Vector2.Zero;
 
             double scaleFactor;
             if (scaleFactorParam.TryGetValueAsDouble(ScaleUnitUnity.Value, out scaleFactor))
@@ -171,8 +165,10 @@ namespace Pigeoid.CoordinateOperation
 
         private static SpheroidProjectionBase CreateTransverseMercator(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN", "CENTRAL","MERIDIAN");
+            var originLatParam = new LatitudeOfNaturalOriginParameterSelector();
+            var originLonParam = new MultiParameterSelector(
+                new CentralMeridianParameterSelector(),
+                new LongitudeOfNaturalOriginParameterSelector());
             var offsetXParam = new FalseEastingParameterSelector();
             var offsetYParam = new FalseNorthingParameterSelector();
             var scaleFactorParam = new ScaleFactorParameterSelector();
@@ -199,11 +195,13 @@ namespace Pigeoid.CoordinateOperation
 
         private static SpheroidProjectionBase CreateTransverseMercatorSouth(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
-            var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
+            var originLatParam = new LatitudeOfNaturalOriginParameterSelector();
+            var originLonParam = new MultiParameterSelector(
+                new CentralMeridianParameterSelector(),
+                new LongitudeOfNaturalOriginParameterSelector());
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
+            var scaleFactorParam = new ScaleFactorParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
 
             var fromSpheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
@@ -227,10 +225,10 @@ namespace Pigeoid.CoordinateOperation
 
         private static PopularVisualizationPseudoMercator CreatePopularVisualisationPseudoMercator(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "NATURALORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "NATURALORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+            var originLatParam = new LatitudeOfNaturalOriginParameterSelector();
+            var originLonParam = new LongitudeOfNaturalOriginParameterSelector();
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
             if (!opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam))
                 return null;
 
@@ -248,10 +246,10 @@ namespace Pigeoid.CoordinateOperation
 
         private SpheroidProjectionBase CreateLambertAzimuthalEqualArea(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "NATURALORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "NATURALORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+            var originLatParam = new LatitudeOfNaturalOriginParameterSelector();
+            var originLonParam = new LongitudeOfNaturalOriginParameterSelector();
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
@@ -276,9 +274,9 @@ namespace Pigeoid.CoordinateOperation
         private SpheroidProjectionBase CreateEquidistantCylindrical(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "PARALLEL");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "NATURALORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+            var originLonParam = new LongitudeOfNaturalOriginParameterSelector();
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
@@ -305,10 +303,10 @@ namespace Pigeoid.CoordinateOperation
 
         private ITransformation<GeographicCoordinate, Point2> CreateCassiniSoldner(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+            var originLatParam = new LatitudeOfNaturalOriginParameterSelector();
+            var originLonParam = new LongitudeOfNaturalOriginParameterSelector();
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
@@ -372,9 +370,9 @@ namespace Pigeoid.CoordinateOperation
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN", "CENTRAL", "MERIDIAN");
             var parallel1Param = new KeywordNamedParameterSelector("LAT", "1", "PARALLEL");
             var parallel2Param = new KeywordNamedParameterSelector("LAT", "2", "PARALLEL");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
-            var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
+            var scaleFactorParam = new ScaleFactorParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam, parallel1Param, parallel2Param);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
@@ -408,11 +406,11 @@ namespace Pigeoid.CoordinateOperation
 
         private SpheroidProjectionBase CreateLambertConicNearConformal(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
-            var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
+            var originLatParam = new LatitudeOfNaturalOriginParameterSelector();
+            var originLonParam = new LongitudeOfNaturalOriginParameterSelector();
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
+            var scaleFactorParam = new ScaleFactorParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
@@ -441,8 +439,8 @@ namespace Pigeoid.CoordinateOperation
             var latPseudoParallelParam = new KeywordNamedParameterSelector("LAT", "PSEUDO", "PARALLEL"); // Latitude of pseudo standard parallel
             var scaleFactorParallelParam = new KeywordNamedParameterSelector("SCALE", "PARALLEL"); // Scale factor on pseudo standard parallel
             var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN"); // Longitude of origin
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
             var evalXParam = new KeywordNamedParameterSelector("ORDINATE1", "EVALUATION", "POINT");
             var evalYParam = new KeywordNamedParameterSelector("ORDINATE2", "EVALUATION", "POINT");
             opData.ParameterLookup.Assign(latConeAxisParam, latProjectionCenterParam, latPseudoParallelParam, scaleFactorParallelParam, originLonParam, offsetXParam, offsetYParam, evalXParam, evalYParam);
@@ -521,11 +519,11 @@ namespace Pigeoid.CoordinateOperation
 
         private SpheroidProjectionBase CreateObliqueStereographic(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
-            var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
+            var originLatParam = new LatitudeOfNaturalOriginParameterSelector();
+            var originLonParam = new LongitudeOfNaturalOriginParameterSelector();
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
+            var scaleFactorParam = new ScaleFactorParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
@@ -549,10 +547,10 @@ namespace Pigeoid.CoordinateOperation
 
         private static SpheroidProjectionBase CreateGuam(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+            var originLatParam = new LatitudeOfNaturalOriginParameterSelector();
+            var originLonParam = new LongitudeOfNaturalOriginParameterSelector();
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
@@ -572,10 +570,10 @@ namespace Pigeoid.CoordinateOperation
 
         private static SpheroidProjectionBase CreateHyperbolicCassiniSoldner(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+            var originLatParam = new LatitudeOfNaturalOriginParameterSelector();
+            var originLonParam = new LongitudeOfNaturalOriginParameterSelector();
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
@@ -595,10 +593,10 @@ namespace Pigeoid.CoordinateOperation
 
         private static SpheroidProjectionBase CreateModifiedAzimuthalEquidistant(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+            var originLatParam = new LatitudeOfNaturalOriginParameterSelector();
+            var originLonParam = new LongitudeOfNaturalOriginParameterSelector();
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
@@ -618,10 +616,12 @@ namespace Pigeoid.CoordinateOperation
 
         private static SpheroidProjectionBase CreateLambertCylindricalEqualAreaSpherical(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
+            var originLatParam = new MultiParameterSelector(
+                new LatitudeOfNaturalOriginParameterSelector(),
+                new StandardParallelParameterSelector());
+            var originLonParam = new LongitudeOfNaturalOriginParameterSelector();
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
@@ -643,9 +643,9 @@ namespace Pigeoid.CoordinateOperation
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "CENTER");
             var originLonParam = new KeywordNamedParameterSelector("LON", "CENTER");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
-            var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
+            var scaleFactorParam = new ScaleFactorParameterSelector();
             var azimuthParam = new KeywordNamedParameterSelector("AZIMUTH");
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam, azimuthParam);
 
@@ -676,9 +676,9 @@ namespace Pigeoid.CoordinateOperation
             Contract.Requires(opData != null);
             var originLatParam = new KeywordNamedParameterSelector("LAT", "CENTER");
             var originLonParam = new KeywordNamedParameterSelector("LON", "CENTER");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
-            var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
+            var scaleFactorParam = new ScaleFactorParameterSelector();
             var azimuthParam = new KeywordNamedParameterSelector("AZIMUTH");
             var angleSkewParam = new KeywordNamedParameterSelector("ANGLE", "SKEW");
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam, azimuthParam, angleSkewParam);
