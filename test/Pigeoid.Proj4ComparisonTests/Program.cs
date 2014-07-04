@@ -19,7 +19,7 @@ namespace Pigeoid.Proj4ComparisonTests
                     Console.WriteLine(testCase.ToString());
                     var testResult = runner.Execute(testCase);
                     var statsData = testResult.StatsData;
-                    if (statsData != null) {
+                    if (statsData != null && !Double.IsNaN(statsData.AvgDistance) && !Double.IsNaN(statsData.AvgErrorRatio)) {
                         writer.Write(testCase.Source.ToString() + "," + testCase.Target.ToString());
                         writer.Write(",{0},{1},{2}", statsData.AvgErrorRatio, statsData.MinErrorRatio, statsData.MaxErrorRatio);
                         writer.Write(",{0},{1},{2}", statsData.AvgDistance,statsData.MinDistance, statsData.MaxDistance);

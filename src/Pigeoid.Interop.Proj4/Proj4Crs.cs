@@ -154,9 +154,14 @@ namespace Pigeoid.Interop.Proj4
 
             var proj4Name = ToProj4MethodName(projectionMethod.Name);
 
-            var lon0Param = new KeywordNamedParameterSelector("LON0", "LON", "ORIGIN", "CENTRAL", "MERIDIAN", "CENTRALMERIDIAN");
-            var loncParam = new KeywordNamedParameterSelector("LONC", "LON", "CENTER", "LONGITUDECENTER");
-            var lat0Param = new KeywordNamedParameterSelector("LAT0", "LAT", "ORIGIN", "CENTER", "LATITUDEORIGIN", "LATITUDECENTER");
+            // new KeywordNamedParameterSelector("LON0", "LON", "ORIGIN", "CENTRAL", "MERIDIAN", "CENTRALMERIDIAN");
+            var lon0Param = new MultiParameterSelector(
+                new CentralMeridianParameterSelector(),
+                new LongitudeOfNaturalOriginParameterSelector()
+            );
+            var lonNaturalOrigin = new LongitudeOfNaturalOriginParameterSelector();
+            var loncParam = new LongitudeOfCenterParameterSelector(); // new KeywordNamedParameterSelector("LONC", "LON", "CENTER", "LONGITUDECENTER");
+            var lat0Param = new LatitudeOfCenterParameterSelector();// new KeywordNamedParameterSelector("LAT0", "LAT", "ORIGIN", "CENTER", "LATITUDEORIGIN", "LATITUDECENTER");
             var lat1Param = new KeywordNamedParameterSelector("LAT1", "LAT", "1", "PARALLEL");
             var lat2Param = new KeywordNamedParameterSelector("LAT2", "LAT", "2", "PARALLEL");
             var x0Param = new KeywordNamedParameterSelector("X0", "FALSE", "OFFSET", "X", "EAST");
@@ -191,7 +196,7 @@ namespace Pigeoid.Interop.Proj4
             if (k0Param.IsSelected)
                 result.ScaleFactor = k0Param.GetValueAsDouble(ScaleUnitUnity.Value) ?? 1.0;
             if (alphaParam.IsSelected)
-                result.alpha = alphaParam.GetValueAsDouble();
+                result.alpha = alphaParam.GetValueAsDouble(geographicUnit);
             if (southParam.IsSelected)
                 result.IsSouth = southParam.GetValueAsBoolean().GetValueOrDefault();
 
@@ -203,12 +208,19 @@ namespace Pigeoid.Interop.Proj4
 
             result.Transform = TransformManager.GetProj4(proj4Name);
 
-            /*if (!result.czech.HasValue)
-                result.czech = 0;*/
-
-            result.GeographicInfo.Datum.Spheroid.Code = "!!";
-
             var finalResult = ProjectionInfo.FromProj4String(result.ToProj4String()); // TODO: fix this hack
+            finalResult.CentralMeridian = result.CentralMeridian;
+            finalResult.LongitudeOfCenter = result.LongitudeOfCenter;
+            finalResult.LatitudeOfOrigin = result.LatitudeOfOrigin;
+            finalResult.StandardParallel1 = result.StandardParallel1;
+            finalResult.StandardParallel2 = result.StandardParallel2;
+            finalResult.FalseEasting = result.FalseEasting;
+            finalResult.FalseNorthing = result.FalseNorthing;
+            finalResult.ScaleFactor = result.ScaleFactor;
+            finalResult.alpha = result.alpha;
+            finalResult.IsSouth = result.IsSouth;
+            finalResult.Zone = result.Zone;
+            finalResult.Unit = result.Unit;
             return finalResult;
         }
 

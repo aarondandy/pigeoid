@@ -51,11 +51,28 @@ namespace Pigeoid.CoordinateOperation
             Contract.Requires(parameters != null);
         }
 
+        private struct SelectorScore
+        {
+            public int Score;
+            public NamedParameterSelector Selector;
+        }
+
+        private struct ParamSelectorData
+        {
+            public int ParameterIndex;
+            public List<SelectorScore> Selectors;
+
+            public SelectorScore GetBestSelector() {
+                return Selectors.Where(x => !x.Selector.IsSelected).FirstOrDefault();
+            }
+
+        }
+
         public bool Assign(params NamedParameterSelector[] selectors) {
             if(selectors == null) throw new ArgumentNullException("selectors");
             Contract.Requires(Contract.ForAll(selectors, x => x != null));
 
-            var paramsToSearch = _data.ToList();
+            /*var paramsToSearch = _data.ToList();
             foreach (var selector in selectors) {
                 Contract.Assume(selector != null);
                 if (paramsToSearch.Count == 0)
@@ -76,6 +93,56 @@ namespace Pigeoid.CoordinateOperation
                     paramsToSearch.RemoveAt(bestIndex);
                 }
             }
+            return selectors.All(x => x.IsSelected);*/
+
+            var scoredSelectors = new List<ParamSelectorData>(_data.Length);
+            for (int parameterIndex = 0; parameterIndex < _data.Length; ++parameterIndex) {
+                var parameter = _data[parameterIndex];
+                var localSelectors = new List<SelectorScore>();
+
+                for (int selectorIndex = 0; selectorIndex < selectors.Length; ++selectorIndex) {
+                    var selector = selectors[selectorIndex];
+                    var score = selector.Score(parameter);
+                    if (score > 0)
+                        localSelectors.Add(new SelectorScore {
+                            Selector = selector,
+                            Score = score });
+                }
+
+                if (localSelectors.Count > 0) {
+                    localSelectors.Sort((a, b) => b.Score.CompareTo(a.Score));
+                    scoredSelectors.Add(new ParamSelectorData {
+                        ParameterIndex = parameterIndex,
+                        Selectors = localSelectors
+                    });
+                }
+            }
+
+            var checkRequired = true;
+            while (checkRequired) {
+                checkRequired = false;
+                int highScore = 0;
+                int bestRootIndex = -1;
+                NamedParameterSelector bestSelector = null;
+                for (int i = 0; i < scoredSelectors.Count; i++) {
+                    var paramSelectorData = scoredSelectors[i];
+                    var best = paramSelectorData.GetBestSelector();
+                    if (best.Selector != null && best.Score > highScore) {
+                        highScore = best.Score;
+                        bestSelector = best.Selector;
+                        bestRootIndex = i;
+                    }
+                }
+
+                if (bestRootIndex >= 0 && bestSelector != null) {
+                    var parameter = _data[scoredSelectors[bestRootIndex].ParameterIndex];
+                    bestSelector.Select(parameter.NamedParameter);
+                    scoredSelectors.RemoveAt(bestRootIndex);
+                    checkRequired = scoredSelectors.Count > 0;
+                }
+
+            }
+
             return selectors.All(x => x.IsSelected);
         }
 

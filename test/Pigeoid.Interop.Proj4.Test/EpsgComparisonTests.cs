@@ -13,44 +13,28 @@ namespace Pigeoid.Interop.Proj4.Test
     public class EpsgComparisonTests
     {
 
-        public class TestSet
-        {
-            public TestSet(ProjectionInfo projectionInfo, EpsgCrs epsgCrs) {
-                ProjectionInfo = projectionInfo;
-                EpsgCrs = epsgCrs;
-            }
+        [Test]
+        public void epsg26931_to_epsg3574() {
+            var crs26931 = EpsgCrs.Get(26931);
+            Assert.IsNotNull(crs26931);
+            var crs3574 = EpsgCrs.Get(3574);
+            Assert.IsNotNull(crs3574);
 
-            public ProjectionInfo ProjectionInfo { get; private set; }
-            public EpsgCrs EpsgCrs { get; private set; }
+            var prj26931 = Proj4Crs.CreateProjection(crs26931);
+            Assert.IsNotNull(prj26931);
+            Assert.AreEqual(57, prj26931.LatitudeOfOrigin);
+            Assert.AreEqual(-133.6666666666667, prj26931.LongitudeOfCenter, 0.000000001);
+            Assert.AreEqual(323.1301023611111, prj26931.alpha, 0.000000001);
+            Assert.AreEqual(0.9999, prj26931.ScaleFactor, 0.000000001);
+            Assert.AreEqual(5000000, prj26931.FalseEasting, 0.000000001);
+            Assert.AreEqual(-5000000, prj26931.FalseNorthing, 0.000000001);
 
-
-            public override string ToString() {
-                return "EPSG: " + EpsgCrs.Code + " proj4:" + ProjectionInfo.ToProj4String();
-            }
-        }
-
-        public IEnumerable<TestSet> AllSets {
-            get {
-
-                var africaGeographic = new DotSpatial.Projections.GeographicCategories.Africa();
-                var africaProjected = new DotSpatial.Projections.ProjectedCategories.Africa();
-                var europeGeographic = new DotSpatial.Projections.GeographicCategories.Europe();
-                var europeProjected = new DotSpatial.Projections.ProjectedCategories.Europe();
-
-                yield return new TestSet(europeGeographic.NGO1948Oslo, EpsgCrs.Get(4817));
-            }
-        }
-
-        [Test, TestCaseSource("AllSets")]
-        public void Test(TestSet set) {
-
-            var expectedProj4 = set.ProjectionInfo;
-            var expectedEpsg = set.EpsgCrs;
-            var actualProj4 = Pigeoid.Interop.Proj4.Proj4Crs.CreateProjection(expectedEpsg);
-            var actualEpsg = Proj4Crs.Wrap(expectedProj4);
-
-            Assert.AreEqual(expectedProj4.ToProj4String(), actualProj4.ToProj4String());
-
+            var prj3574 = Proj4Crs.CreateProjection(crs3574);
+            Assert.IsNotNull(prj3574);
+            Assert.AreEqual(90, prj3574.LatitudeOfOrigin);
+            Assert.AreEqual(-40, prj3574.CentralMeridian);
+            Assert.AreEqual(0, prj3574.FalseEasting);
+            Assert.AreEqual(0, prj3574.FalseNorthing);
         }
 
 

@@ -106,6 +106,32 @@ namespace Pigeoid.CoordinateOperation
 
     }
 
+    public class MultiParameterSelector : NamedParameterSelector
+    {
+        private readonly NamedParameterSelector[] _selectors;
+
+        public MultiParameterSelector(params NamedParameterSelector[] selectors) {
+            if (selectors == null) throw new ArgumentNullException();
+            Contract.EndContractBlock();
+            _selectors = selectors;
+        }
+
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(_selectors != null);
+        }
+
+        public override int Score(ParameterData parameterData) {
+            int highScore = 0;
+            foreach (var selector in _selectors) {
+                var score = selector.Score(parameterData);
+                if (score > highScore)
+                    highScore = score;
+            }
+            return highScore;
+        }
+    }
+
     public class FullMatchParameterSelector : NamedParameterSelector
     {
 
@@ -155,8 +181,6 @@ namespace Pigeoid.CoordinateOperation
         public override int Score(ParameterData parameterData) {
             Contract.Ensures(Contract.Result<int>() >= 0);
             var parameterName = parameterData.NormalizedName;
-            if (String.IsNullOrEmpty(parameterName)) // TODO: this check is redundant
-                return 0;
 
             var score = 0;
             for (int keywordIndex = 0; keywordIndex < _keywords.Length; keywordIndex++) {
@@ -164,6 +188,162 @@ namespace Pigeoid.CoordinateOperation
                     score++;
             }
             return score;
+        }
+    }
+
+    public class LatitudeOfCenterParameterSelector : NamedParameterSelector
+    {
+
+        public override int Score(ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("LATOFPROJECTIONCENTER".Equals(parameterName))
+                return 100;
+
+            int startPoints;
+            if (parameterName.StartsWith("LATITUDE"))
+                startPoints = 10;
+            else if (parameterName.StartsWith("LAT"))
+                startPoints = 5;
+            else
+                return 0;
+
+            int endPoints;
+            if (parameterName.EndsWith("ORIGIN") || parameterName.EndsWith("CENTER") || parameterName.EndsWith("CENTRE"))
+                endPoints = 10;
+            else
+                return 0;
+
+            var middlePoint = 0;
+            if (parameterName.Contains("PROJECTED") || parameterName.Contains("PROJECTION"))
+                middlePoint = 10;
+
+            if (startPoints > 0 && endPoints > 0)
+                return startPoints + endPoints + middlePoint;
+
+            return 0;
+        }
+    }
+
+    public class LatitudeOfNaturalOriginParameterSelector : NamedParameterSelector
+    {
+        public override int Score(NamedParameterSelector.ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("LATOFNATURALORIGIN".Equals(parameterName))
+                return 100;
+
+            int startPoints;
+            if (parameterName.StartsWith("LATITUDE"))
+                startPoints = 10;
+            else if (parameterName.StartsWith("LAT"))
+                startPoints = 5;
+            else
+                return 0;
+
+            int endPoints;
+            if (parameterName.EndsWith("ORIGIN"))
+                endPoints = 10;
+            else
+                return 0;
+
+            var middlePoint = 0;
+            if (parameterName.Contains("NATURAL"))
+                middlePoint += 10;
+
+            if (startPoints > 0 && endPoints > 0)
+                return startPoints + endPoints + middlePoint;
+
+            return 0;
+        }
+    }
+
+    public class LongitudeOfCenterParameterSelector : NamedParameterSelector
+    {
+
+        public override int Score(NamedParameterSelector.ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("LONOFPROJECTIONCENTER".Equals(parameterName))
+                return 100;
+
+            int startPoints;
+            if (parameterName.StartsWith("LONGITUDE"))
+                startPoints = 10;
+            else if (parameterName.StartsWith("LON"))
+                startPoints = 5;
+            else
+                return 0;
+
+            int endPoints;
+            if (parameterName.EndsWith("CENTER") || parameterName.EndsWith("CENTRE"))
+                endPoints = 10;
+            else
+                return 0;
+
+            var middlePoint = 0;
+            if (parameterName.Contains("PROJECTED") || parameterName.Contains("PROJECTION"))
+                middlePoint = 10;
+
+            if (startPoints > 0 && endPoints > 0)
+                return startPoints + endPoints + middlePoint;
+
+            return 0;
+        }
+    }
+
+    public class LongitudeOfNaturalOriginParameterSelector : NamedParameterSelector
+    {
+        public override int Score(NamedParameterSelector.ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("LONOFNATURALORIGIN".Equals(parameterName))
+                return 100;
+
+            int startPoints;
+            if (parameterName.StartsWith("LONGITUDE"))
+                startPoints = 10;
+            else if (parameterName.StartsWith("LON"))
+                startPoints = 5;
+            else
+                return 0;
+
+            int endPoints;
+            if (parameterName.EndsWith("ORIGIN"))
+                endPoints = 10;
+            else
+                return 0;
+
+            var middlePoint = 0;
+            if (parameterName.Contains("NATURAL"))
+                middlePoint += 10;
+
+            if (startPoints > 0 && endPoints > 0)
+                return startPoints + endPoints + middlePoint;
+
+            return 0;
+        }
+    }
+
+    public class CentralMeridianParameterSelector : NamedParameterSelector
+    {
+        public override int Score(NamedParameterSelector.ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("CENTRALMERIDIAN".Equals(parameterName))
+                return 100;
+
+            int startPoints;
+            if (parameterName.StartsWith("CENTRAL"))
+                startPoints = 10;
+            else
+                return 0;
+
+            int endPoints;
+            if (parameterName.EndsWith("MERIDIAN") || parameterName.EndsWith("MERIDIAN"))
+                endPoints = 10;
+            else
+                return 0;
+
+            if (startPoints > 0 && endPoints > 0)
+                return startPoints + endPoints;
+
+            return 0;
         }
     }
 
