@@ -190,9 +190,9 @@ namespace Pigeoid.Interop.Proj4
             if (lat2Param.IsSelected)
                 result.StandardParallel2 = lat2Param.GetValueAsDouble(geographicUnit);
             if (x0Param.IsSelected)
-                result.FalseEasting = x0Param.GetValueAsDouble(projectionUnit);
+                result.FalseEasting = x0Param.GetValueAsDouble(OgcLinearUnit.DefaultMeter);
             if (y0Param.IsSelected)
-                result.FalseNorthing = y0Param.GetValueAsDouble(projectionUnit);
+                result.FalseNorthing = y0Param.GetValueAsDouble(OgcLinearUnit.DefaultMeter);
             if (k0Param.IsSelected)
                 result.ScaleFactor = k0Param.GetValueAsDouble(ScaleUnitUnity.Value) ?? 1.0;
             if (alphaParam.IsSelected)
@@ -267,9 +267,9 @@ namespace Pigeoid.Interop.Proj4
 
                 var parameters = new List<INamedParameter>();
                 if (Core.FalseEasting.HasValue)
-                    parameters.Add(new NamedParameter<double>("False_Easting", Core.FalseEasting.GetValueOrDefault(), projectionUnit));
+                    parameters.Add(new NamedParameter<double>("False_Easting", Core.FalseEasting.GetValueOrDefault(), OgcLinearUnit.DefaultMeter));
                 if (Core.FalseNorthing.HasValue)
-                    parameters.Add(new NamedParameter<double>("False_Northing", Core.FalseNorthing.GetValueOrDefault(), projectionUnit));
+                    parameters.Add(new NamedParameter<double>("False_Northing", Core.FalseNorthing.GetValueOrDefault(), OgcLinearUnit.DefaultMeter));
                 if (!Double.IsNaN(Core.ScaleFactor) && Core.ScaleFactor != 0 && Core.ScaleFactor != 1)
                     parameters.Add(new NamedParameter<double>("Scale_Factor", Core.ScaleFactor, ScaleUnitUnity.Value));
                 if (Core.LatitudeOfOrigin.HasValue)

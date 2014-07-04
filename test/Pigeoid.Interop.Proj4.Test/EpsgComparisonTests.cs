@@ -49,8 +49,8 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(40.65, prjFrom.StandardParallel1);
             Assert.AreEqual(39.01666666666667, prjFrom.StandardParallel2, 0.0000000001);
             Assert.AreEqual(-111.5, prjFrom.CentralMeridian);
-            Assert.AreEqual(500000, prjFrom.FalseEasting); // NOTE: looks like a unit error
-            Assert.AreEqual(2000000, prjFrom.FalseNorthing); // NOTE: looks like a unit error
+            Assert.AreEqual(500000, prjFrom.FalseEasting, 0.001);
+            Assert.AreEqual(2000000, prjFrom.FalseNorthing, 0.001);
 
             var prjTo = Proj4Crs.CreateProjection(to);
             Assert.IsNotNull(prjTo);
