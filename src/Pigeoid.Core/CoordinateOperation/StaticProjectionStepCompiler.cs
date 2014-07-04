@@ -328,11 +328,16 @@ namespace Pigeoid.CoordinateOperation
 
         private ITransformation<GeographicCoordinate, Point2> CreateMercator(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "ORIGIN");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "ORIGIN", "CENTRAL", "MERIDIAN");
-            var offsetXParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "X", "EAST");
-            var offsetYParam = new KeywordNamedParameterSelector("FALSE", "OFFSET", "Y", "NORTH");
-            var scaleFactorParam = new KeywordNamedParameterSelector("SCALE");
+            var originLatParam = new MultiParameterSelector(
+                new LatitudeOfNaturalOriginParameterSelector(),
+                new LatitudeOfTrueScaleParameterSelector(),
+                new StandardParallelParameterSelector());
+            var originLonParam = new MultiParameterSelector(
+                new CentralMeridianParameterSelector(),
+                new LongitudeOfNaturalOriginParameterSelector());
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
+            var scaleFactorParam = new ScaleFactorParameterSelector();
             opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
