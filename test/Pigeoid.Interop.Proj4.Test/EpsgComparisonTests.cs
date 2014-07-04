@@ -14,46 +14,59 @@ namespace Pigeoid.Interop.Proj4.Test
     {
 
         [Test]
-        public void epsg26931_to_epsg3574() {
-            var from = EpsgCrs.Get(26931);
-            Assert.IsNotNull(from);
-            var to = EpsgCrs.Get(3574);
-            Assert.IsNotNull(to);
+        public void epsg26931() {
+            var crs = EpsgCrs.Get(26931);
+            Assert.IsNotNull(crs);
 
-            var prjFrom = Proj4Crs.CreateProjection(from);
-            Assert.IsNotNull(prjFrom);
-            Assert.AreEqual(57, prjFrom.LatitudeOfOrigin);
-            Assert.AreEqual(-133.6666666666667, prjFrom.LongitudeOfCenter, 0.000000001);
-            Assert.AreEqual(323.1301023611111, prjFrom.alpha, 0.000000001);
-            Assert.AreEqual(0.9999, prjFrom.ScaleFactor, 0.000000001);
-            Assert.AreEqual(5000000, prjFrom.FalseEasting, 0.000000001);
-            Assert.AreEqual(-5000000, prjFrom.FalseNorthing, 0.000000001);
-
-            var prjTo = Proj4Crs.CreateProjection(to);
-            Assert.IsNotNull(prjTo);
-            Assert.AreEqual(90, prjTo.LatitudeOfOrigin);
-            Assert.AreEqual(-40, prjTo.CentralMeridian);
-            Assert.AreEqual(0, prjTo.FalseEasting);
-            Assert.AreEqual(0, prjTo.FalseNorthing);
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(57, prj.LatitudeOfOrigin);
+            Assert.AreEqual(-133.6666666666667, prj.LongitudeOfCenter, 0.000000001);
+            Assert.AreEqual(323.1301023611111, prj.alpha, 0.000000001);
+            Assert.AreEqual(0.9999, prj.ScaleFactor, 0.000000001);
+            Assert.AreEqual(5000000, prj.FalseEasting, 0.000000001);
+            Assert.AreEqual(-5000000, prj.FalseNorthing, 0.000000001);
         }
 
         [Test]
-        public void epsg2281_to_epsg32411() {
-            var from = EpsgCrs.Get(2281);
-            Assert.IsNotNull(from);
-            var to = EpsgCrs.Get(32411);
-            Assert.IsNotNull(to);
+        public void epsg3574() {
+            var crs = EpsgCrs.Get(3574);
+            Assert.IsNotNull(crs);
 
-            var prjFrom = Proj4Crs.CreateProjection(from);
-            Assert.IsNotNull(prjFrom);
-            Assert.AreEqual(40.65, prjFrom.StandardParallel1);
-            Assert.AreEqual(39.01666666666667, prjFrom.StandardParallel2, 0.0000000001);
-            Assert.AreEqual(-111.5, prjFrom.CentralMeridian);
-            Assert.AreEqual(500000, prjFrom.FalseEasting, 0.001);
-            Assert.AreEqual(2000000, prjFrom.FalseNorthing, 0.001);
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(90, prj.LatitudeOfOrigin);
+            Assert.AreEqual(-40, prj.CentralMeridian);
+            Assert.AreEqual(0, prj.FalseEasting);
+            Assert.AreEqual(0, prj.FalseNorthing);
+        }
 
-            var prjTo = Proj4Crs.CreateProjection(to);
-            Assert.IsNotNull(prjTo);
+        [Test]
+        public void epsg2281() {
+            var crs = EpsgCrs.Get(2281);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(40.65, prj.StandardParallel1);
+            Assert.AreEqual(39.01666666666667, prj.StandardParallel2, 0.0000000001);
+            Assert.AreEqual(-111.5, prj.CentralMeridian);
+            Assert.AreEqual(500000, prj.FalseEasting, 0.001);
+            Assert.AreEqual(2000000, prj.FalseNorthing, 0.001);
+        }
+
+        [Test]
+        public void epsg3079() {
+            var crs = EpsgCrs.Get(3079);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(45.30916666666666, prj.LatitudeOfOrigin, 0.00000001);
+            Assert.AreEqual(-86, prj.LongitudeOfCenter);
+            Assert.AreEqual(0.9996, prj.ScaleFactor);
+            Assert.AreEqual(2546731.496, prj.FalseEasting);
+            Assert.AreEqual(-4354009.816, prj.FalseNorthing);
         }
 
 

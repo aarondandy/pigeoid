@@ -180,15 +180,15 @@ namespace Pigeoid.Interop.Proj4
                 result.Unit = Proj4LinearUnit.ConvertToProj4(projectionUnit);
 
             if (lon0Param.IsSelected)
-                result.CentralMeridian = lon0Param.GetValueAsDouble(geographicUnit);
+                result.CentralMeridian = lon0Param.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
             if (loncParam.IsSelected)
-                result.LongitudeOfCenter = loncParam.GetValueAsDouble(geographicUnit);
+                result.LongitudeOfCenter = loncParam.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
             if (lat0Param.IsSelected)
-                result.LatitudeOfOrigin = lat0Param.GetValueAsDouble(geographicUnit);
+                result.LatitudeOfOrigin = lat0Param.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
             if (lat1Param.IsSelected)
-                result.StandardParallel1 = lat1Param.GetValueAsDouble(geographicUnit);
+                result.StandardParallel1 = lat1Param.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
             if (lat2Param.IsSelected)
-                result.StandardParallel2 = lat2Param.GetValueAsDouble(geographicUnit);
+                result.StandardParallel2 = lat2Param.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
             if (x0Param.IsSelected)
                 result.FalseEasting = x0Param.GetValueAsDouble(OgcLinearUnit.DefaultMeter);
             if (y0Param.IsSelected)
@@ -196,7 +196,7 @@ namespace Pigeoid.Interop.Proj4
             if (k0Param.IsSelected)
                 result.ScaleFactor = k0Param.GetValueAsDouble(ScaleUnitUnity.Value) ?? 1.0;
             if (alphaParam.IsSelected)
-                result.alpha = alphaParam.GetValueAsDouble(geographicUnit);
+                result.alpha = alphaParam.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
             if (southParam.IsSelected)
                 result.IsSouth = southParam.GetValueAsBoolean().GetValueOrDefault();
 
