@@ -76,6 +76,24 @@ namespace Pigeoid.Interop.Proj4.Test
         }
 
         [Test]
+        public void epsg3078() {
+            var crs = EpsgCrs.Get(3078);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(45.30916666666666, prj.LatitudeOfOrigin, 0.00000001);
+            Assert.AreEqual(-86, prj.LongitudeOfCenter);
+            Assert.AreEqual(337.25556, prj.alpha);
+            Assert.AreEqual(0.9996, prj.ScaleFactor);
+            Assert.AreEqual(2546731.496, prj.FalseEasting);
+            Assert.AreEqual(-4354009.816, prj.FalseNorthing);
+
+            Assert.AreEqual(6378137, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius, 0.001);
+            Assert.AreEqual(298.257222101, prj.GeographicInfo.Datum.Spheroid.InverseFlattening, 0.001);
+        }
+
+        [Test]
         public void epsg3079() {
             var crs = EpsgCrs.Get(3079);
             Assert.IsNotNull(crs);
@@ -98,6 +116,19 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.IsNotNull(prj);
             Assert.AreEqual(90, prj.LatitudeOfOrigin);
             Assert.AreEqual(-40, prj.CentralMeridian);
+            Assert.AreEqual(0, prj.FalseEasting);
+            Assert.AreEqual(0, prj.FalseNorthing);
+        }
+
+        [Test]
+        public void epsg3575() {
+            var crs = EpsgCrs.Get(3575);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual(90, prj.LatitudeOfOrigin);
+            Assert.AreEqual(10, prj.CentralMeridian);
             Assert.AreEqual(0, prj.FalseEasting);
             Assert.AreEqual(0, prj.FalseNorthing);
         }
@@ -169,7 +200,20 @@ namespace Pigeoid.Interop.Proj4.Test
         public void epsg2039_to_epsg28191() {
             var from = EpsgCrs.Get(2039);
             var to = EpsgCrs.Get(28191);
+            var epsgPathGen = new EpsgCrsCoordinateOperationPathGenerator(
+                new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+                    x => !x.Deprecated,
+                    x => !x.Deprecated));
+            var epsgPath = epsgPathGen.Generate(from, to);
+            Assert.IsNotNull(epsgPath);
+            var proj4Transform = new Proj4Transform(from, to);
+            Assert.IsNotNull(proj4Transform);
+        }
 
+        [Test]
+        public void epsg3078_to_epsg3575() {
+            var from = EpsgCrs.Get(3078);
+            var to = EpsgCrs.Get(3575);
             var epsgPathGen = new EpsgCrsCoordinateOperationPathGenerator(
                 new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
                     x => !x.Deprecated,

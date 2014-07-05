@@ -57,9 +57,50 @@ namespace Pigeoid.Proj4ComparisonTests
                     yield return new GeographicCoordinate(latValues[r], lonValues[c]);
         }
 
+        private HashSet<int> _restrictedOperationMethodCodes = new HashSet<int> {
+            9613,
+            9661,
+            9658,
+            9615,
+            1025,
+            9634,
+            9662,
+            1036,
+            9614,
+            1030,
+            1040,
+            1050,
+            9655,
+            9664,
+            1050,
+            1047,
+            9620,
+            1060,
+            1048
+        };
+
         public TestRunner() {
             _epsgPathGenerator = new EpsgCrsCoordinateOperationPathGenerator(
-                new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(x => !x.Deprecated, x => !x.Deprecated));
+                new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+                    x => !x.Deprecated,
+                    x => {
+                        if (x.Deprecated)
+                            return false;
+
+                        var cat = x as EpsgConcatenatedCoordinateOperationInfo;
+                        if (cat != null) {
+                            return !cat.Steps.Any(op => _restrictedOperationMethodCodes.Contains(op.Method.Code));
+                        }
+
+                        var cti = x as EpsgCoordinateTransformInfo;
+                        if (cti != null) {
+                            return !_restrictedOperationMethodCodes.Contains(cti.Method.Code);
+                        }
+
+                        return false;
+                    }
+                )
+            );
             _coordinateOperationCompiler = new StaticCoordinateOperationCompiler();
         }
 
