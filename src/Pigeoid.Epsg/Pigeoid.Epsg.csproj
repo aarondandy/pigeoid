@@ -144,6 +144,7 @@
     <Compile Include="EpsgCrsDatumBased.cs" />
     <Compile Include="EpsgCrsEngineering.cs" />
     <Compile Include="EpsgCrsGeodetic.cs" />
+    <Compile Include="EpsgCrsGraphSearcher.cs" />
     <Compile Include="EpsgCrsProjected.cs" />
     <Compile Include="EpsgCrsVertical.cs" />
     <Compile Include="EpsgDatum.cs" />
