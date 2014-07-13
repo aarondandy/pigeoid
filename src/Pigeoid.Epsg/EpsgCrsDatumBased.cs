@@ -100,5 +100,7 @@ namespace Pigeoid.Epsg
 
         public abstract EpsgDatum Datum { get; }
 
+        public abstract override EpsgCrsKind Kind { get; }
+
     }
 }

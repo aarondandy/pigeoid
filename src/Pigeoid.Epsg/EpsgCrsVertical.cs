@@ -51,5 +51,9 @@ namespace Pigeoid.Epsg
         }
 
         IAxis ICrsVertical.Axis { get { return Axis; } }
+
+        public override EpsgCrsKind Kind {
+            get { return EpsgCrsKind.Vertical; }
+        }
     }
 }

@@ -6,7 +6,7 @@ using Pigeoid.Unit;
 
 namespace Pigeoid.Epsg
 {
-    public class EpsgCrsGeodetic : EpsgCrsDatumBased, ICrsGeodetic
+    public abstract class EpsgCrsGeodetic : EpsgCrsDatumBased, ICrsGeodetic
     {
 
         internal EpsgCrsGeodetic(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum)
@@ -56,6 +56,8 @@ namespace Pigeoid.Epsg
         }
 
         IList<IAxis> ICrsGeodetic.Axes { get { return Axes.Cast<IAxis>().ToArray(); } }
+
+        public abstract override EpsgCrsKind Kind { get; }
     }
 
     public class EpsgCrsGeocentric : EpsgCrsGeodetic, ICrsGeocentric
@@ -68,6 +70,8 @@ namespace Pigeoid.Epsg
             Contract.Requires(cs != null);
             Contract.Requires(geodeticDatum != null);
         }
+
+        public override EpsgCrsKind Kind { get { return EpsgCrsKind.Geocentric; } }
     }
 
     public class EpsgCrsGeographic : EpsgCrsGeodetic, ICrsGeographic
@@ -80,6 +84,8 @@ namespace Pigeoid.Epsg
             Contract.Requires(cs != null);
             Contract.Requires(geodeticDatum != null);
         }
+
+        public override EpsgCrsKind Kind { get { return EpsgCrsKind.Geographic; } }
     }
 
 }

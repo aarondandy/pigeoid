@@ -100,5 +100,9 @@ namespace Pigeoid.Epsg
 
         ICrs ICrsCompound.Tail { get { return Vertical; } }
 
+        public override EpsgCrsKind Kind {
+            get { return EpsgCrsKind.Compound; }
+        }
+
     }
 }

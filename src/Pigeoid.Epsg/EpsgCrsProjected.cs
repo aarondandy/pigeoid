@@ -234,5 +234,9 @@ namespace Pigeoid.Epsg
         }
 
         IList<IAxis> ICrsGeodetic.Axes { get { return Axes.Cast<IAxis>().ToArray(); } }
+
+        public override EpsgCrsKind Kind {
+            get { return EpsgCrsKind.Projected; }
+        }
     }
 }

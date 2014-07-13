@@ -32,7 +32,7 @@ namespace Pigeoid.CoordinateOpFullTester
 
 
                 try {
-                    var proj4Transform = Proj4Transform.Create(From, To);
+                    var proj4Transform = new Proj4Transform(From, To);
                     ;
                 }
                 catch (Exception ex) {

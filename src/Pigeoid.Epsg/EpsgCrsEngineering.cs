@@ -58,5 +58,9 @@ namespace Pigeoid.Epsg
         }
 
         IList<IAxis> ICrsLocal.Axes { get { return Axes.Cast<IAxis>().ToArray(); } }
+
+        public override EpsgCrsKind Kind {
+            get { return EpsgCrsKind.Engineering; }
+        }
     }
 }

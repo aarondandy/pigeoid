@@ -55,7 +55,7 @@ namespace Pigeoid.Epsg.Transform.Test
             return null;
         }
 
-        public EpsgCrsCoordinateOperationPathGenerator PathGenerator;
+        public EpsgCrsCoordinateOperationPathGeneratorOld PathGenerator;
         public StaticCoordinateOperationCompiler StaticCompiler;
         public IUnitConversion<double> DegreesToRadians;
         public GeographicCoordinate DenverWgs84Degrees;
@@ -63,7 +63,7 @@ namespace Pigeoid.Epsg.Transform.Test
 
         [TestFixtureSetUp]
         public void TestFixtureSetUp() {
-            PathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
+            PathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld();
             StaticCompiler = new StaticCoordinateOperationCompiler();
             DegreesToRadians = SimpleUnitConversionGenerator.FindConversion(EpsgUnit.Get(9102), EpsgUnit.Get(9101));
             DenverWgs84Degrees = new GeographicCoordinate(39.739167, -104.984722);
@@ -426,7 +426,7 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4181);
             var toCrs = EpsgCrs.Get(4326);
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => {
                     var coi = x as EpsgCoordinateOperationInfo;
@@ -463,7 +463,7 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4181);
             var toCrs = EpsgCrs.Get(4326);
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => {
                     var coi = x as EpsgCoordinateOperationInfo;
@@ -538,7 +538,7 @@ namespace Pigeoid.Epsg.Transform.Test
             // op: 1026
             // crs: 4903 to 4230
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => {
                     var coi = x as EpsgCoordinateOperationInfo;
@@ -568,7 +568,7 @@ namespace Pigeoid.Epsg.Transform.Test
             // op: 1335
             // crs: 4301 to 4326
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => {
                     var coi = x as EpsgCoordinateOperationInfo;
@@ -748,7 +748,7 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4181);
             var toCrs = EpsgCrs.Get(4326);
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => {
                     var coi = x as EpsgCoordinateOperationInfo;
@@ -885,7 +885,7 @@ namespace Pigeoid.Epsg.Transform.Test
             // op: 15539
             // crs: 4645 to 4969
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator(new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => !(x is EpsgCoordinateOperationInfo) || ((EpsgCoordinateOperationInfo)x).Method.Code == 9659
             ));

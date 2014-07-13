@@ -72,6 +72,8 @@ namespace Pigeoid.Epsg
 
         public bool Deprecated { get { return _deprecated; } }
 
+        public abstract EpsgCrsKind Kind { get; }
+
         public override string ToString() {
             Contract.Ensures(!String.IsNullOrEmpty(Contract.Result<string>()));
             return Authority.ToString();

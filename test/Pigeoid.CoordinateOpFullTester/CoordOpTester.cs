@@ -67,12 +67,12 @@ namespace Pigeoid.CoordinateOpFullTester
         }
 
         public CoordOpTester() {
-            _epsgPathGenerator = new EpsgCrsCoordinateOperationPathGenerator(
-                new EpsgCrsCoordinateOperationPathGenerator.SharedOptionsAreaPredicate(x => !x.Deprecated, x => !x.Deprecated));
+            _epsgPathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(
+                new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(x => !x.Deprecated, x => !x.Deprecated));
             _coordinateOperationCompiler = new StaticCoordinateOperationCompiler();
         }
 
-        private readonly EpsgCrsCoordinateOperationPathGenerator _epsgPathGenerator;
+        private readonly EpsgCrsCoordinateOperationPathGeneratorOld _epsgPathGenerator;
         private readonly StaticCoordinateOperationCompiler _coordinateOperationCompiler;
         
         public IEnumerable<ICrs> GetAllCrs() {

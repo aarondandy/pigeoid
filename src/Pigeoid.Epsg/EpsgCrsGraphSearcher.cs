@@ -16,7 +16,16 @@ namespace Pigeoid.Epsg
             public static PathNode CreateStartNode(EpsgCrs crs) {
                 Contract.Requires(crs != null);
                 Contract.Ensures(Contract.Result<PathNode>() != null);
-                return new PathNode { Crs = crs };
+                return new PathNode(crs);
+            }
+
+            private PathNode(EpsgCrs crs) {
+                Contract.Requires(crs != null);
+            }
+
+            [ContractInvariantMethod]
+            private void ObjectInvariants() {
+                Contract.Invariant(Crs != null);
             }
 
             public PathNode Parent;
@@ -40,20 +49,52 @@ namespace Pigeoid.Epsg
             }
         }
 
-        public IEnumerable<ICoordinateOperationCrsPathInfo> FinalAllPaths(ICrs from, ICrs to) {
-            var fromEpsg = from as EpsgCrs;
-            var toEpsg = to as EpsgCrs;
-            if (fromEpsg != null && toEpsg != null)
-                return FinalAllPaths(fromEpsg, toEpsg);
+        public EpsgCrsGraphSearcher(EpsgCrs sourceCrs, EpsgCrs targetCrs) {
+            if (sourceCrs == null) throw new ArgumentNullException("sourceCrs");
+            if (targetCrs == null) throw new ArgumentNullException("targetCrs");
+            Contract.EndContractBlock();
+            SourceCrs = sourceCrs;
+            SourceCrsCode = sourceCrs.Code;
+            TargetCrs = targetCrs;
+            TargetCrsCode = targetCrs.Code;
+        }
+
+        public EpsgCrs SourceCrs { get; private set; }
+
+        public EpsgCrs TargetCrs { get; private set; }
+
+        private readonly int SourceCrsCode;
+
+        private readonly int TargetCrsCode;
+
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
+            Contract.Invariant(SourceCrs != null);
+            Contract.Invariant(TargetCrs != null);
+        }
+
+        public IEnumerable<ICoordinateOperationCrsPathInfo> FindAllPaths() {
+            var rootNode = PathNode.CreateStartNode(SourceCrs);
+            var allPaths = FindAllPathsFrom(rootNode);
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ICoordinateOperationCrsPathInfo> FinalAllPaths(EpsgCrs from, EpsgCrs to) {
-            var startPathNode = PathNode.CreateStartNode(from);
+        private IEnumerable<PathNode> FindAllPathsFrom(PathNode current) {
+            Contract.Requires(current != null);
+            Contract.Ensures(Contract.Result<IEnumerable<PathNode>>() != null);
 
+            // enforce this ordering of operations:
+
+            // A) projected to base (geographic or geocentric)
+            // B) geographic to geocentric
+            // C) geocentric to geographic
+            // D) base (geocentric or geographic) to projected
+
+            // steps can be skipped but order must be enforced
 
             throw new NotImplementedException();
         }
+
 
     }
 }
