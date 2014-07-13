@@ -30,7 +30,8 @@ namespace Pigeoid.Epsg
             Contract.Requires(to != null);
             Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationCrsPathInfo>>() != null);
             var searcher = new EpsgCrsGraphSearcher(from, to);
-            throw new NotImplementedException();
+            var allPaths = searcher.FindAllPaths();
+            return allPaths;
         }
 
     }

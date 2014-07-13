@@ -55,7 +55,7 @@ namespace Pigeoid.Epsg.Transform.Test
             return null;
         }
 
-        public EpsgCrsCoordinateOperationPathGeneratorOld PathGenerator;
+        public EpsgCrsCoordinateOperationPathGenerator PathGenerator;
         public StaticCoordinateOperationCompiler StaticCompiler;
         public IUnitConversion<double> DegreesToRadians;
         public GeographicCoordinate DenverWgs84Degrees;
@@ -63,7 +63,7 @@ namespace Pigeoid.Epsg.Transform.Test
 
         [TestFixtureSetUp]
         public void TestFixtureSetUp() {
-            PathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld();
+            PathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
             StaticCompiler = new StaticCoordinateOperationCompiler();
             DegreesToRadians = SimpleUnitConversionGenerator.FindConversion(EpsgUnit.Get(9102), EpsgUnit.Get(9101));
             DenverWgs84Degrees = new GeographicCoordinate(39.739167, -104.984722);
@@ -426,7 +426,7 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4181);
             var toCrs = EpsgCrs.Get(4326);
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
+            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => {
                     var coi = x as EpsgCoordinateOperationInfo;
@@ -435,7 +435,9 @@ namespace Pigeoid.Epsg.Transform.Test
                             return false;
                     }
                     return true;
-                }));
+                }));*/
+
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
 
             var opPath = pathGenerator.Generate(fromCrs, toCrs);
             Assert.IsNotNull(opPath);
@@ -463,7 +465,7 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4181);
             var toCrs = EpsgCrs.Get(4326);
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
+            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => {
                     var coi = x as EpsgCoordinateOperationInfo;
@@ -472,7 +474,8 @@ namespace Pigeoid.Epsg.Transform.Test
                             return false;
                     }
                     return true;
-                }));
+                }));*/
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
 
             var opPath = pathGenerator.Generate(fromCrs, toCrs);
             Assert.IsNotNull(opPath);
@@ -538,12 +541,14 @@ namespace Pigeoid.Epsg.Transform.Test
             // op: 1026
             // crs: 4903 to 4230
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
+            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => {
                     var coi = x as EpsgCoordinateOperationInfo;
                     return coi == null || coi.Method.Code == 9617;
-                }));
+                }));*/
+
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
 
             var fromCrs = EpsgCrs.Get(4903);
             var toCrs = EpsgCrs.Get(4230);
@@ -568,12 +573,13 @@ namespace Pigeoid.Epsg.Transform.Test
             // op: 1335
             // crs: 4301 to 4326
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
+            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => {
                     var coi = x as EpsgCoordinateOperationInfo;
                     return coi == null || coi.Method.Code == 9618;
-                }));
+                }));*/
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
 
             var fromCrs = EpsgCrs.Get(4301);
             var toCrs = EpsgCrs.Get(4326);
@@ -748,7 +754,7 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4181);
             var toCrs = EpsgCrs.Get(4326);
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
+            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => {
                     var coi = x as EpsgCoordinateOperationInfo;
@@ -757,7 +763,9 @@ namespace Pigeoid.Epsg.Transform.Test
                             return false;
                     }
                     return true;
-                }));
+                }));*/
+
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
 
             var opPath = pathGenerator.Generate(fromCrs, toCrs);
             Assert.IsNotNull(opPath);
@@ -885,10 +893,11 @@ namespace Pigeoid.Epsg.Transform.Test
             // op: 15539
             // crs: 4645 to 4969
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
+            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                 x => !x.Deprecated,
                 x => !(x is EpsgCoordinateOperationInfo) || ((EpsgCoordinateOperationInfo)x).Method.Code == 9659
-            ));
+            ));*/
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
 
             var fromCrs = EpsgCrs.Get(4645);
             var toCrs = EpsgCrs.Get(4969);

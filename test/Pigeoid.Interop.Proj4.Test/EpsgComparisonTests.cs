@@ -200,11 +200,12 @@ namespace Pigeoid.Interop.Proj4.Test
         public void epsg2039_to_epsg28191() {
             var from = EpsgCrs.Get(2039);
             var to = EpsgCrs.Get(28191);
-            var epsgPathGen = new EpsgCrsCoordinateOperationPathGeneratorOld(
+            /*var epsgPathGen = new EpsgCrsCoordinateOperationPathGeneratorOld(
                 new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                     x => !x.Deprecated,
-                    x => !x.Deprecated));
-            var epsgPath = epsgPathGen.Generate(from, to);
+                    x => !x.Deprecated));*/
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
+            var epsgPath = pathGenerator.Generate(from, to);
             Assert.IsNotNull(epsgPath);
             var proj4Transform = new Proj4Transform(from, to);
             Assert.IsNotNull(proj4Transform);
@@ -214,11 +215,12 @@ namespace Pigeoid.Interop.Proj4.Test
         public void epsg3078_to_epsg3575() {
             var from = EpsgCrs.Get(3078);
             var to = EpsgCrs.Get(3575);
-            var epsgPathGen = new EpsgCrsCoordinateOperationPathGeneratorOld(
+            /*var epsgPathGen = new EpsgCrsCoordinateOperationPathGeneratorOld(
                 new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                     x => !x.Deprecated,
-                    x => !x.Deprecated));
-            var epsgPath = epsgPathGen.Generate(from, to);
+                    x => !x.Deprecated));*/
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
+            var epsgPath = pathGenerator.Generate(from, to);
             Assert.IsNotNull(epsgPath);
             var proj4Transform = new Proj4Transform(from, to);
             Assert.IsNotNull(proj4Transform);

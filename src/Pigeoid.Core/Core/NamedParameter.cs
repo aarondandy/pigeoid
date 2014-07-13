@@ -51,7 +51,7 @@ namespace Pigeoid
                 return String.Empty;
             var result = Value.ToString();
             if (null != Unit)
-                result += Unit.ToString();
+                result += " " + Unit.ToString();
             return result;
         }
 

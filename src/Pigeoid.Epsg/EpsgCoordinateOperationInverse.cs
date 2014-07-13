@@ -15,5 +15,12 @@ namespace Pigeoid.Epsg
             return (EpsgCoordinateOperationInfoBase)(base.GetInverse());
         }
 
+        public new EpsgCoordinateOperationInfoBase Core {
+            get {
+                Contract.Ensures(Contract.Result<EpsgCoordinateOperationInfoBase>() != null);
+                return (EpsgCoordinateOperationInfoBase)Core;
+            }
+        }
+
     }
 }

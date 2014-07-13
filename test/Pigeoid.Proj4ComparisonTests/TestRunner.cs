@@ -80,7 +80,7 @@ namespace Pigeoid.Proj4ComparisonTests
         };
 
         public TestRunner() {
-            _epsgPathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(
+            /*_epsgPathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(
                 new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
                     x => !x.Deprecated,
                     x => {
@@ -100,11 +100,12 @@ namespace Pigeoid.Proj4ComparisonTests
                         return false;
                     }
                 )
-            );
+            );*/
+            _epsgPathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
             _coordinateOperationCompiler = new StaticCoordinateOperationCompiler();
         }
 
-        private readonly EpsgCrsCoordinateOperationPathGeneratorOld _epsgPathGenerator;
+        private readonly EpsgCrsCoordinateOperationPathGenerator _epsgPathGenerator;
         private readonly StaticCoordinateOperationCompiler _coordinateOperationCompiler;
 
         public IEnumerable<ICrs> GetAllCrs() {
