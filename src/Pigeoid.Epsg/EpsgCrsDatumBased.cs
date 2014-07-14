@@ -46,16 +46,16 @@ namespace Pigeoid.Epsg
                     var name = TextLookUp.GetString(reader.ReadUInt16());
                     Contract.Assume(!string.IsNullOrEmpty(name));
                     var deprecated = reader.ReadByte() == 0xff;
-                    var kind = reader.ReadByte();
+                    var kind = (EpsgCrsKind)reader.ReadByte();
                     switch (kind) {
-                    case (byte)'3': // geographic3D
-                    case (byte)'2': // geographic2D
-                        return new EpsgCrsGeographic(code, name, area, deprecated, cs, (EpsgDatumGeodetic)datum);
-                    case (byte)'G': // geocentric
+                    case EpsgCrsKind.Geographic3D: // geographic3D
+                    case EpsgCrsKind.Geographic2D: // geographic2D
+                        return new EpsgCrsGeographic(code, name, area, deprecated, cs, (EpsgDatumGeodetic)datum, kind);
+                    case EpsgCrsKind.Geocentric: // geocentric
                         return new EpsgCrsGeocentric(code, name, area, deprecated, cs, (EpsgDatumGeodetic)datum);
-                    case (byte)'V': // vertical
+                    case EpsgCrsKind.Vertical: // vertical
                         return new EpsgCrsVertical(code, name, area, deprecated, cs, (EpsgDatumVertical)datum);
-                    case (byte)'E': // engineering
+                    case EpsgCrsKind.Engineering: // engineering
                         return new EpsgCrsEngineering(code, name, area, deprecated, cs, (EpsgDatumEngineering)datum);
                     default:
                         throw new InvalidDataException();

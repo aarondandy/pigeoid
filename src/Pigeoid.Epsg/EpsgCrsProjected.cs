@@ -17,7 +17,7 @@ namespace Pigeoid.Epsg
         {
             private const string DatFileName = "crsprj.dat";
             private const string TxtFileName = "crs.txt";
-            private const int RecordDataSize = (sizeof(ushort) * 5) + sizeof(byte);
+            private const int RecordDataSize = (sizeof(ushort) * 5) + (sizeof(byte) * 2);
             private const int CodeSize = sizeof(uint);
             private const int RecordSize = CodeSize + RecordDataSize;
             private const int RecordIndexSkipSize = RecordDataSize - sizeof(ushort);
@@ -94,7 +94,8 @@ namespace Pigeoid.Epsg
                     var name = TextLookUp.GetString(reader.ReadUInt16());
                     Contract.Assume(!String.IsNullOrEmpty(name));
                     var deprecated = reader.ReadByte() == 0xff;
-                    return new EpsgCrsProjected(code, name, area, deprecated, baseCrs, cs, projectionCode);
+                    var kind = (EpsgCrsKind)reader.ReadByte();
+                    return new EpsgCrsProjected(code, name, area, deprecated, baseCrs, cs, projectionCode, kind);
                 }
             }
 
@@ -149,8 +150,9 @@ namespace Pigeoid.Epsg
         }
 
         private readonly int _projectionCode;
+        private readonly EpsgCrsKind _kind;
 
-        internal EpsgCrsProjected(int code, string name, EpsgArea area, bool deprecated, EpsgCrs baseCrs, EpsgCoordinateSystem cs, int projectionCode)
+        internal EpsgCrsProjected(int code, string name, EpsgArea area, bool deprecated, EpsgCrs baseCrs, EpsgCoordinateSystem cs, int projectionCode, EpsgCrsKind kind)
             : base(code, name, area, deprecated) {
             Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
@@ -163,6 +165,7 @@ namespace Pigeoid.Epsg
             BaseCrs = baseCrs;
             CoordinateSystem = cs;
             _projectionCode = projectionCode;
+            _kind = kind;
         }
 
         [ContractInvariantMethod] 
@@ -235,8 +238,6 @@ namespace Pigeoid.Epsg
 
         IList<IAxis> ICrsGeodetic.Axes { get { return Axes.Cast<IAxis>().ToArray(); } }
 
-        public override EpsgCrsKind Kind {
-            get { return EpsgCrsKind.Projected; }
-        }
+        public override EpsgCrsKind Kind { get { return _kind; } }
     }
 }

@@ -12,6 +12,9 @@ namespace Pigeoid.Epsg
         ICoordinateOperationPathGenerator<ICrs>
     {
 
+        public List<Predicate<EpsgCrs>> CrsFilters { get; set; }
+        public List<Predicate<ICoordinateOperationInfo>> OpFilters { get; set; }
+
         public ICoordinateOperationCrsPathInfo Generate(ICrs from, ICrs to) {
             var fromEpsg = from as EpsgCrs;
             var toEpsg = to as EpsgCrs;
@@ -29,7 +32,15 @@ namespace Pigeoid.Epsg
             Contract.Requires(from != null);
             Contract.Requires(to != null);
             Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationCrsPathInfo>>() != null);
-            var searcher = new EpsgCrsGraphSearcher(from, to);
+            var crsFilters = CrsFilters == null ? new List<Predicate<EpsgCrs>>() : CrsFilters.ToList();
+            var opFilters = OpFilters == null ? new List<Predicate<ICoordinateOperationInfo>>() : OpFilters.ToList();
+            var searcher = new EpsgCrsGraphSearcher(from, to) {
+                CrsFilters = crsFilters,
+                OpFilters = OpFilters
+            };
+
+            searcher.CrsFilters.Add(searcher.AreaIntersectionTest); // TODO: need a better way to handle this
+
             var allPaths = searcher.FindAllPaths();
             return allPaths;
         }

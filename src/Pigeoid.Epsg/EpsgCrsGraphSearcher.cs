@@ -11,14 +11,6 @@ namespace Pigeoid.Epsg
     public class EpsgCrsGraphSearcher
     {
 
-
-        private enum EpsgPathNodeFlowDirection
-        {
-            None = 0,
-            AwayFromProjected = 1,
-            TowardsProjected = 2
-        }
-
         private class PathNode
         {
 
@@ -31,13 +23,6 @@ namespace Pigeoid.Epsg
             private PathNode(EpsgCrs crs) {
                 Contract.Requires(crs != null);
                 Crs = crs;
-                FlowDirection = EpsgPathNodeFlowDirection.None;
-            }
-
-            private PathNode(EpsgCrs crs, EpsgPathNodeFlowDirection flowDirection) {
-                Contract.Requires(crs != null);
-                Crs = crs;
-                FlowDirection = flowDirection;
             }
 
             [ContractInvariantMethod]
@@ -48,7 +33,6 @@ namespace Pigeoid.Epsg
             public PathNode Parent;
             public ICoordinateOperationInfo EdgeFromParent;
             public readonly EpsgCrs Crs;
-            public readonly EpsgPathNodeFlowDirection FlowDirection;
 
             public EpsgCrsKind CrsKind {
                 get {
@@ -61,61 +45,6 @@ namespace Pigeoid.Epsg
                     if (Parent == null)
                         return EpsgCrsKind.Unknown;
                     return Parent.CrsKind;
-                }
-            }
-
-            public bool IsPathTowardsProjected {
-                get {
-                    return FlowDirection == EpsgPathNodeFlowDirection.TowardsProjected;
-
-                    /*var parentKind = ParentKind;
-                    if(parentKind == EpsgCrsKind.Unknown)
-                        return false;
-
-                    switch (CrsKind) {
-                        case EpsgCrsKind.Projected:
-                            return parentKind == EpsgCrsKind.Geographic
-                                || parentKind == EpsgCrsKind.Geocentric
-                                || parentKind == EpsgCrsKind.Compound;
-                        case EpsgCrsKind.Geographic:
-                        case EpsgCrsKind.Compound:
-                            return parentKind == EpsgCrsKind.Geocentric;
-                        case EpsgCrsKind.Geocentric:
-                        default:
-                            return false;
-                    }*/
-                }
-            }
-
-            public bool HasAnyPathTowardsProjected() {
-                var pathNode = this;
-                do {
-                    if (pathNode.IsPathTowardsProjected)
-                        return true;
-                    pathNode = pathNode.Parent;
-                } while (pathNode != null);
-                return false;
-            }
-
-            public bool IsPathAwayFromProjected {
-                get {
-                    return FlowDirection == EpsgPathNodeFlowDirection.AwayFromProjected;
-                    /*var paretKind = ParentKind;
-                    if (paretKind == EpsgCrsKind.Unknown)
-                        return false;
-
-                    switch (CrsKind) {
-                        case EpsgCrsKind.Geocentric:
-                            return ParentKind == EpsgCrsKind.Geographic
-                                || ParentKind == EpsgCrsKind.Compound
-                                || ParentKind == EpsgCrsKind.Projected;
-                        case EpsgCrsKind.Compound:
-                        case EpsgCrsKind.Geographic:
-                            return ParentKind == EpsgCrsKind.Projected;
-                        case EpsgCrsKind.Projected:
-                        default:
-                            return false;
-                    }*/
                 }
             }
 
@@ -178,10 +107,10 @@ namespace Pigeoid.Epsg
                 } while (true); // pathNode != null
             }
 
-            public PathNode Append(EpsgCrs crs, ICoordinateOperationInfo edgeFromParent, EpsgPathNodeFlowDirection flowDirection) {
+            public PathNode Append(EpsgCrs crs, ICoordinateOperationInfo edgeFromParent) {
                 Contract.Requires(edgeFromParent != null);
                 Contract.Ensures(Contract.Result<PathNode>() != null);
-                var newNode = new PathNode(crs, flowDirection) {
+                var newNode = new PathNode(crs) {
                     Parent = this,
                     EdgeFromParent = edgeFromParent
                 };
@@ -220,17 +149,52 @@ namespace Pigeoid.Epsg
             Contract.EndContractBlock();
             SourceCrs = sourceCrs;
             SourceCrsCode = sourceCrs.Code;
+            SourceArea = sourceCrs.Area;
             TargetCrs = targetCrs;
             TargetCrsCode = targetCrs.Code;
+            TargetArea = targetCrs.Area;
         }
 
         public EpsgCrs SourceCrs { get; private set; }
 
-        public EpsgCrs TargetCrs { get; private set; }
+        public EpsgArea SourceArea { get; protected set; }
 
         private readonly int SourceCrsCode;
 
         private readonly int TargetCrsCode;
+
+        public EpsgCrs TargetCrs { get; private set; }
+
+        public EpsgArea TargetArea { get; protected set; }
+
+        public List<Predicate<EpsgCrs>> CrsFilters { get; set; }
+        public List<Predicate<ICoordinateOperationInfo>> OpFilters { get; set; }
+
+        public bool AreaIntersectionTest(EpsgCrs crs) {
+            Contract.Requires(crs != null);
+            var area = crs.Area;
+            return area == null
+                || SourceArea == null
+                || SourceArea.Intersects(area)
+                || TargetArea == null
+                || TargetArea.Intersects(area);
+        }
+
+        private bool IsCrsAllowed(EpsgCrs crs) {
+            Contract.Requires(crs != null);
+            if (CrsFilters == null || CrsFilters.Count == 0)
+                return true;
+
+            return CrsFilters.All(f => f(crs));
+        }
+
+        private bool IsOpAllowed(ICoordinateOperationInfo op) {
+            Contract.Requires(op != null);
+            if (OpFilters == null || OpFilters.Count == 0)
+                return true;
+
+            return OpFilters.All(f => f(op));
+        }
 
         [ContractInvariantMethod]
         private void ObjectInvariants() {
@@ -240,14 +204,11 @@ namespace Pigeoid.Epsg
 
         public IEnumerable<ICoordinateOperationCrsPathInfo> FindAllPaths() {
             var rootNode = PathNode.CreateStartNode(SourceCrs);
-            var allPaths = FindAllPathsFrom(rootNode);
-
-            foreach (var pathNode in allPaths) {
-                yield return pathNode.CreateCoordinateOperationCrsPathInfo();
-            }
+            var allPaths = FindAllPathsFrom(rootNode, false).ToList(); // TODO: optimize
+            return allPaths.Select(p => p.CreateCoordinateOperationCrsPathInfo());
         }
 
-        private IEnumerable<PathNode> FindAllPathsFrom(PathNode current) {
+        private IEnumerable<PathNode> FindAllPathsFrom(PathNode current, bool mustMoveToProjected) {
             Contract.Requires(current != null);
             Contract.Ensures(Contract.Result<IEnumerable<PathNode>>() != null);
 
@@ -255,40 +216,44 @@ namespace Pigeoid.Epsg
             if (currentCode == TargetCrs.Code)
                 return ArrayUtil.CreateSingleElementArray(current);
 
-            var results = new List<PathNode>();
+            var currentKind = current.CrsKind;
             var visitedCrsCodes = new HashSet<int>(current.GetCrsCodes());
+            var results = new List<PathNode>();
 
-            // projections with this as a base
             var derrivedProjectionCodes = EpsgCrsProjected.GetProjectionCodesBasedOn(currentCode);
             if (derrivedProjectionCodes.Count != 0) {
-
+                // move down to projected from here, all new nodes must now move towards projected
                 foreach (var derrivedProjectionCode in derrivedProjectionCodes) {
                     if (visitedCrsCodes.Contains(derrivedProjectionCode))
                         continue;
 
-                    // TODO: is this path OK?
-
                     var derrivedProjection = EpsgCrsProjected.GetProjected(derrivedProjectionCode);
-                    var projection = derrivedProjection.Projection;
-                    var nextNode = current.Append(derrivedProjection, projection, EpsgPathNodeFlowDirection.TowardsProjected);
+                    if (!IsCrsAllowed(derrivedProjection))
+                        continue;
 
-                    var localResults = FindAllPathsFrom(nextNode);
+                    var projection = derrivedProjection.Projection;
+                    if (!IsOpAllowed(projection))
+                        continue;
+
+                    var nextNode = current.Append(derrivedProjection, projection);
+                    var localResults = FindAllPathsFrom(nextNode, true);
                     results.AddRange(localResults);
                 }
             }
 
-            if (current.CrsKind == EpsgCrsKind.Projected) {
+            if (currentKind == EpsgCrsKind.Projected && !mustMoveToProjected) {
+                // can only move away from projected if not restricted and if this is projected
                 var projectedCrs = (EpsgCrsProjected)current.Crs;
                 var baseCrs = projectedCrs.BaseCrs;
-                if (!visitedCrsCodes.Contains(baseCrs.Code)) {
+                if (baseCrs != null && !visitedCrsCodes.Contains(baseCrs.Code) && IsCrsAllowed(baseCrs)) {
                     var projection = projectedCrs.Projection;
-                    if (baseCrs != null && projection != null && projection.HasInverse) {
-
-                        // TODO: is this path OK?
-
-                        var nextNode = current.Append(baseCrs, projection.GetInverse(), EpsgPathNodeFlowDirection.AwayFromProjected);
-                        var localResults = FindAllPathsFrom(nextNode);
-                        results.AddRange(localResults);
+                    if (projection != null && projection.HasInverse) {
+                        var projectionInverse = projection.GetInverse();
+                        if (IsOpAllowed(projectionInverse)) {
+                            var nextNode = current.Append(baseCrs, projectionInverse);
+                            var localResults = FindAllPathsFrom(nextNode, false);
+                            results.AddRange(localResults);
+                        }
                     }
                 }
             }
@@ -297,41 +262,53 @@ namespace Pigeoid.Epsg
             foreach (var catOp in concatenatedForward) {
                 if (visitedCrsCodes.Contains(catOp.TargetCrsCode))
                     continue;
-
-                var targetCrs = catOp.TargetCrs;
+                if (!IsOpAllowed(catOp))
+                    continue;
 
                 // TODO: is this path OK?
-
+                // NOTE: ignore mustMoveToProjected ... for now
+                var targetCrs = catOp.TargetCrs;
+                if (!IsCrsAllowed(targetCrs))
+                    continue;
                 var nextNode = current.Append(targetCrs, catOp);
-                var localResults = FindAllPathsFrom(nextNode);
+                var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected);
                 results.AddRange(localResults);
             }
+
             var concatenatedReverse = EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(currentCode);
             foreach (var catOp in concatenatedReverse) {
                 if (!catOp.HasInverse)
                     continue;
                 if (visitedCrsCodes.Contains(catOp.SourceCrsCode))
                     continue;
-
-                var sourceCrs = catOp.SourceCrs;
+                var inverseCatOp = catOp.GetInverse();
+                if (!IsOpAllowed(inverseCatOp))
+                    continue;
 
                 // TODO: is this path OK?
-
-                var nextNode = current.Append(sourceCrs, catOp.GetInverse());
-                var localResults = FindAllPathsFrom(nextNode);
+                // NOTE: ignore mustMoveToProjected ... for now
+                var sourceCrs = catOp.SourceCrs;
+                if (!IsCrsAllowed(sourceCrs))
+                    continue;
+                var nextNode = current.Append(sourceCrs, inverseCatOp);
+                var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected);
                 results.AddRange(localResults);
             }
+            
             var transformForward = EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced(currentCode);
             foreach (var txOp in transformForward) {
                 if (visitedCrsCodes.Contains(txOp.TargetCrsCode))
                     continue;
-
-                var targetCrs = txOp.TargetCrs;
-                var nextNode = current.Append(targetCrs, txOp);
+                if (!IsOpAllowed(txOp))
+                    continue;
 
                 // TODO: is this path OK?
-
-                var localResults = FindAllPathsFrom(nextNode);
+                // TODO: enforce mustMoveToProjected
+                var targetCrs = txOp.TargetCrs;
+                if (!IsCrsAllowed(targetCrs))
+                    continue;
+                var nextNode = current.Append(targetCrs, txOp);
+                var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected);
                 results.AddRange(localResults);
             }
             var transformReverse = EpsgCoordinateOperationInfoRepository.GetTransformReverseReferenced(currentCode);
@@ -340,19 +317,22 @@ namespace Pigeoid.Epsg
                     continue;
                 if (visitedCrsCodes.Contains(txOp.SourceCrsCode))
                     continue;
-
-                var sourceCrs = txOp.SourceCrs;
-                var nextNode = current.Append(sourceCrs, txOp.GetInverse());
+                var inverseOp = txOp.GetInverse();
+                if (!IsOpAllowed(inverseOp))
+                    continue;
 
                 // TODO: is this path OK?
-
-                var localResults = FindAllPathsFrom(nextNode);
+                // TODO: enforce mustMoveToProjected
+                var sourceCrs = txOp.SourceCrs;
+                if (!IsCrsAllowed(sourceCrs))
+                    continue;
+                var nextNode = current.Append(sourceCrs, inverseOp);
+                var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected);
                 results.AddRange(localResults);
             }
 
             return results;
         }
-
 
     }
 }
