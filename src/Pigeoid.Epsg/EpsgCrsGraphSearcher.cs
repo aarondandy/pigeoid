@@ -11,6 +11,14 @@ namespace Pigeoid.Epsg
     public class EpsgCrsGraphSearcher
     {
 
+
+        private enum EpsgPathNodeFlowDirection
+        {
+            None = 0,
+            AwayFromProjected = 1,
+            TowardsProjected = 2
+        }
+
         private class PathNode
         {
 
@@ -23,6 +31,13 @@ namespace Pigeoid.Epsg
             private PathNode(EpsgCrs crs) {
                 Contract.Requires(crs != null);
                 Crs = crs;
+                FlowDirection = EpsgPathNodeFlowDirection.None;
+            }
+
+            private PathNode(EpsgCrs crs, EpsgPathNodeFlowDirection flowDirection) {
+                Contract.Requires(crs != null);
+                Crs = crs;
+                FlowDirection = flowDirection;
             }
 
             [ContractInvariantMethod]
@@ -33,6 +48,76 @@ namespace Pigeoid.Epsg
             public PathNode Parent;
             public ICoordinateOperationInfo EdgeFromParent;
             public readonly EpsgCrs Crs;
+            public readonly EpsgPathNodeFlowDirection FlowDirection;
+
+            public EpsgCrsKind CrsKind {
+                get {
+                    return Crs.Kind;
+                }
+            }
+
+            public EpsgCrsKind ParentKind {
+                get {
+                    if (Parent == null)
+                        return EpsgCrsKind.Unknown;
+                    return Parent.CrsKind;
+                }
+            }
+
+            public bool IsPathTowardsProjected {
+                get {
+                    return FlowDirection == EpsgPathNodeFlowDirection.TowardsProjected;
+
+                    /*var parentKind = ParentKind;
+                    if(parentKind == EpsgCrsKind.Unknown)
+                        return false;
+
+                    switch (CrsKind) {
+                        case EpsgCrsKind.Projected:
+                            return parentKind == EpsgCrsKind.Geographic
+                                || parentKind == EpsgCrsKind.Geocentric
+                                || parentKind == EpsgCrsKind.Compound;
+                        case EpsgCrsKind.Geographic:
+                        case EpsgCrsKind.Compound:
+                            return parentKind == EpsgCrsKind.Geocentric;
+                        case EpsgCrsKind.Geocentric:
+                        default:
+                            return false;
+                    }*/
+                }
+            }
+
+            public bool HasAnyPathTowardsProjected() {
+                var pathNode = this;
+                do {
+                    if (pathNode.IsPathTowardsProjected)
+                        return true;
+                    pathNode = pathNode.Parent;
+                } while (pathNode != null);
+                return false;
+            }
+
+            public bool IsPathAwayFromProjected {
+                get {
+                    return FlowDirection == EpsgPathNodeFlowDirection.AwayFromProjected;
+                    /*var paretKind = ParentKind;
+                    if (paretKind == EpsgCrsKind.Unknown)
+                        return false;
+
+                    switch (CrsKind) {
+                        case EpsgCrsKind.Geocentric:
+                            return ParentKind == EpsgCrsKind.Geographic
+                                || ParentKind == EpsgCrsKind.Compound
+                                || ParentKind == EpsgCrsKind.Projected;
+                        case EpsgCrsKind.Compound:
+                        case EpsgCrsKind.Geographic:
+                            return ParentKind == EpsgCrsKind.Projected;
+                        case EpsgCrsKind.Projected:
+                        default:
+                            return false;
+                    }*/
+                }
+            }
 
             public int PathLength {
                 get {
@@ -93,8 +178,10 @@ namespace Pigeoid.Epsg
                 } while (true); // pathNode != null
             }
 
-            public PathNode Append(EpsgCrs crs, ICoordinateOperationInfo edgeFromParent) {
-                var newNode = new PathNode(crs) {
+            public PathNode Append(EpsgCrs crs, ICoordinateOperationInfo edgeFromParent, EpsgPathNodeFlowDirection flowDirection) {
+                Contract.Requires(edgeFromParent != null);
+                Contract.Ensures(Contract.Result<PathNode>() != null);
+                var newNode = new PathNode(crs, flowDirection) {
                     Parent = this,
                     EdgeFromParent = edgeFromParent
                 };
@@ -164,13 +251,12 @@ namespace Pigeoid.Epsg
             Contract.Requires(current != null);
             Contract.Ensures(Contract.Result<IEnumerable<PathNode>>() != null);
 
-            var results = new List<PathNode>();
             var currentCode = current.Crs.Code;
-
-            var visitedCrsCodes = new HashSet<int>(current.GetCrsCodes());
-
             if (currentCode == TargetCrs.Code)
                 return ArrayUtil.CreateSingleElementArray(current);
+
+            var results = new List<PathNode>();
+            var visitedCrsCodes = new HashSet<int>(current.GetCrsCodes());
 
             // projections with this as a base
             var derrivedProjectionCodes = EpsgCrsProjected.GetProjectionCodesBasedOn(currentCode);
@@ -180,25 +266,27 @@ namespace Pigeoid.Epsg
                     if (visitedCrsCodes.Contains(derrivedProjectionCode))
                         continue;
 
+                    // TODO: is this path OK?
+
                     var derrivedProjection = EpsgCrsProjected.GetProjected(derrivedProjectionCode);
                     var projection = derrivedProjection.Projection;
-                    var nextNode = current.Append(derrivedProjection, projection);
-
-                    // TODO: make sure this path is OK
+                    var nextNode = current.Append(derrivedProjection, projection, EpsgPathNodeFlowDirection.TowardsProjected);
 
                     var localResults = FindAllPathsFrom(nextNode);
                     results.AddRange(localResults);
                 }
             }
 
-            if (current.Crs.Kind == EpsgCrsKind.Projected) {
+            if (current.CrsKind == EpsgCrsKind.Projected) {
                 var projectedCrs = (EpsgCrsProjected)current.Crs;
                 var baseCrs = projectedCrs.BaseCrs;
                 if (!visitedCrsCodes.Contains(baseCrs.Code)) {
                     var projection = projectedCrs.Projection;
                     if (baseCrs != null && projection != null && projection.HasInverse) {
-                        // TODO: make sure this path is OK
-                        var nextNode = current.Append(baseCrs, projection.GetInverse());
+
+                        // TODO: is this path OK?
+
+                        var nextNode = current.Append(baseCrs, projection.GetInverse(), EpsgPathNodeFlowDirection.AwayFromProjected);
                         var localResults = FindAllPathsFrom(nextNode);
                         results.AddRange(localResults);
                     }
@@ -211,7 +299,9 @@ namespace Pigeoid.Epsg
                     continue;
 
                 var targetCrs = catOp.TargetCrs;
-                // TODO: make sure this path is OK
+
+                // TODO: is this path OK?
+
                 var nextNode = current.Append(targetCrs, catOp);
                 var localResults = FindAllPathsFrom(nextNode);
                 results.AddRange(localResults);
@@ -224,7 +314,9 @@ namespace Pigeoid.Epsg
                     continue;
 
                 var sourceCrs = catOp.SourceCrs;
-                // TODO: make sure this path is OK
+
+                // TODO: is this path OK?
+
                 var nextNode = current.Append(sourceCrs, catOp.GetInverse());
                 var localResults = FindAllPathsFrom(nextNode);
                 results.AddRange(localResults);
@@ -235,8 +327,10 @@ namespace Pigeoid.Epsg
                     continue;
 
                 var targetCrs = txOp.TargetCrs;
-                // TODO: make sure this path is OK
                 var nextNode = current.Append(targetCrs, txOp);
+
+                // TODO: is this path OK?
+
                 var localResults = FindAllPathsFrom(nextNode);
                 results.AddRange(localResults);
             }
@@ -248,8 +342,10 @@ namespace Pigeoid.Epsg
                     continue;
 
                 var sourceCrs = txOp.SourceCrs;
-                // TODO: make sure this path is OK
                 var nextNode = current.Append(sourceCrs, txOp.GetInverse());
+
+                // TODO: is this path OK?
+
                 var localResults = FindAllPathsFrom(nextNode);
                 results.AddRange(localResults);
             }
