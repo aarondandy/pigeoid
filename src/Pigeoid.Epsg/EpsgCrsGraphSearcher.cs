@@ -218,8 +218,6 @@ namespace Pigeoid.Epsg
             return allPaths.Select(p => p.CreateCoordinateOperationCrsPathInfo());
         }
 
-
-
         private IEnumerable<PathNode> FindAllPathsFrom(PathNode current, bool mustMoveToProjected, bool transformationRestricted) {
             Contract.Requires(current != null);
             Contract.Ensures(Contract.Result<IEnumerable<PathNode>>() != null);

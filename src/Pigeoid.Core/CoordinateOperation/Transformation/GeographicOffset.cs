@@ -9,7 +9,9 @@ namespace Pigeoid.CoordinateOperation.Transformation
 {
     public class GeographicOffset :
         ITransformation<GeographicCoordinate>,
-        ITransformation<GeographicHeightCoordinate>
+        ITransformation<GeographicHeightCoordinate>,
+        ITransformation<GeographicCoordinate, GeographicHeightCoordinate>,
+        ITransformation<GeographicHeightCoordinate, GeographicCoordinate>
     {
 
         private readonly GeographicHeightCoordinate _delta;
@@ -67,6 +69,32 @@ namespace Pigeoid.CoordinateOperation.Transformation
             return values.Select(TransformValue);
         }
 
+        ITransformation<GeographicHeightCoordinate, GeographicCoordinate> ITransformation<GeographicCoordinate, GeographicHeightCoordinate>.GetInverse() {
+            return GetInverse();
+        }
+
+        GeographicHeightCoordinate ITransformation<GeographicCoordinate, GeographicHeightCoordinate>.TransformValue(GeographicCoordinate value) {
+            return new GeographicHeightCoordinate(value.Latitude + Delta.Latitude, value.Longitude + Delta.Longitude, Delta.Height);
+        }
+
+        IEnumerable<GeographicHeightCoordinate> ITransformation<GeographicCoordinate, GeographicHeightCoordinate>.TransformValues(IEnumerable<GeographicCoordinate> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicHeightCoordinate>>() != null);
+            return values.Select(((ITransformation<GeographicCoordinate, GeographicHeightCoordinate>)this).TransformValue);
+        }
+
+        ITransformation<GeographicCoordinate, GeographicHeightCoordinate> ITransformation<GeographicHeightCoordinate, GeographicCoordinate>.GetInverse() {
+            return GetInverse();
+        }
+
+        GeographicCoordinate ITransformation<GeographicHeightCoordinate, GeographicCoordinate>.TransformValue(GeographicHeightCoordinate value) {
+            return new GeographicCoordinate(value.Latitude + Delta.Latitude, value.Longitude + Delta.Longitude);
+        }
+
+        IEnumerable<GeographicCoordinate> ITransformation<GeographicHeightCoordinate, GeographicCoordinate>.TransformValues(IEnumerable<GeographicHeightCoordinate> values) {
+            Contract.Ensures(Contract.Result<IEnumerable<GeographicCoordinate>>() != null);
+            return values.Select(((ITransformation<GeographicHeightCoordinate, GeographicCoordinate>)this).TransformValue);
+        }
+
         ITransformation<GeographicCoordinate, GeographicCoordinate> ITransformation<GeographicCoordinate, GeographicCoordinate>.GetInverse() {
             return GetInverse();
         }
@@ -119,5 +147,6 @@ namespace Pigeoid.CoordinateOperation.Transformation
             Contract.Ensures(Contract.Result<IEnumerable<object>>() != null);
             return values.Select(TransformValue);
         }
+
     }
 }

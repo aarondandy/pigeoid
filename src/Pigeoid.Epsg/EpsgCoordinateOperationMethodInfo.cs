@@ -332,5 +332,10 @@ namespace Pigeoid.Epsg
                 return new EpsgAuthorityTag(_code);
             }
         }
+
+        public override string ToString() {
+            return Code.ToString() + " " + Name;
+        }
+
     }
 }

@@ -6,6 +6,7 @@ using Pigeoid.CoordinateOperation.Projection;
 using Pigeoid.Unit;
 using Vertesaur;
 using Vertesaur.Transformation;
+using System;
 
 namespace Pigeoid.Epsg.Transform.Test
 {
@@ -45,6 +46,28 @@ namespace Pigeoid.Epsg.Transform.Test
             Assert.AreEqual(expected.Z, actual.Z, delta);
         }
 
+        private static bool FilterForMethodCode(int methodCode, ICoordinateOperationCrsPathInfo opPathInfo) {
+            if (opPathInfo != null) {
+                foreach (var rawOp in opPathInfo.CoordinateOperations) {
+
+                    var epsgInverseOp = rawOp as EpsgCoordinateOperationInverse;
+                    var epsgOpBase = (epsgInverseOp != null)
+                        ? epsgInverseOp.Core
+                        : rawOp as EpsgCoordinateOperationInfoBase;
+
+                    var catOp = epsgOpBase as EpsgConcatenatedCoordinateOperationInfo;
+                    if (catOp != null)
+                        return catOp.Steps.Any(x => x.Method.Code == methodCode);
+
+                    var normalOp = epsgOpBase as EpsgCoordinateOperationInfo;
+                    if (normalOp != null)
+                        return normalOp.Method.Code == methodCode;
+
+                }
+            }
+            return false;
+        }
+
         private static ITransformation<TFrom, TTo> CreateTyped<TFrom, TTo>(ITransformation transformation) {
             if (transformation == null)
                 return null;
@@ -52,7 +75,7 @@ namespace Pigeoid.Epsg.Transform.Test
                 return transformation as ITransformation<TFrom, TTo>;
             if (transformation is ConcatenatedTransformation)
                 return new ConcatenatedTransformation<TFrom, TTo>((ConcatenatedTransformation)transformation);
-            return null;
+            throw new NotSupportedException();
         }
 
         public EpsgCrsCoordinateOperationPathGenerator PathGenerator;
@@ -103,12 +126,12 @@ namespace Pigeoid.Epsg.Transform.Test
             // crs: 4979 to 3855
             var fromCrs = EpsgCrs.Get(4979);
             var toCrs = EpsgCrs.Get(3855);
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -214,7 +237,7 @@ namespace Pigeoid.Epsg.Transform.Test
             var toCrs = EpsgCrs.Get(5332);
 
             var forwardPaths = PathGenerator.Generate(fromCrs, toCrs)
-                .Where(x => x.CoordinateOperations.OfType<EpsgCoordinateOperationInfo>().Any(op => op.Method.Code == 1033));
+                .Where(x => FilterForMethodCode(1033, x));
 
             var opPath = forwardPaths.Single();
             Assert.IsNotNull(opPath);
@@ -222,8 +245,7 @@ namespace Pigeoid.Epsg.Transform.Test
             Assert.IsNotNull(transformation);
 
             var reversePaths = PathGenerator.Generate(toCrs, fromCrs)
-                .Where(x => x.CoordinateOperations.OfType<EpsgCoordinateOperationInverse>().Select(iop => iop.Core).OfType<EpsgCoordinateOperationInfo>().Any(op => op.Method.Code == 1033));
-
+                .Where(x => FilterForMethodCode(1033, x));
             var invOpPath = reversePaths.Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point3, Point3>(StaticCompiler.Compile(invOpPath));
@@ -361,20 +383,23 @@ namespace Pigeoid.Epsg.Transform.Test
         [Test]
         public void m9601_longitudeRotation() {
             // method: 9601
-            // op: 1258
             // crs: 4802 to 4218
 
             var fromCrs = EpsgCrs.Get(4802);
             var toCrs = EpsgCrs.Get(4218);
 
-            var forwardOperations = 
+            var forwardOperations = PathGenerator.Generate(fromCrs, toCrs)
+                .Where(x => FilterForMethodCode(9601, x));
 
-            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
+            var opPath = forwardOperations.First();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
+            var reverseOperations = PathGenerator.Generate(toCrs, fromCrs)
+                .Where(x => FilterForMethodCode(9601, x));
+
+            var invOpPath = reverseOperations.First();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -394,17 +419,25 @@ namespace Pigeoid.Epsg.Transform.Test
         [Test]
         public void m9603_geocentricTranslationsGeog2DDomain() {
             // method: 9603
-            // op: 1173
             // crs: 4267 to 4326
 
             var fromCrs = EpsgCrs.Get(4204);
             var toCrs = EpsgCrs.Get(4326);
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+
+            var forwardOps = PathGenerator.Generate(fromCrs, toCrs)
+                .Where(x => FilterForMethodCode(9603, x))
+                .OrderBy(op => op.CoordinateOperations.OfType<EpsgCoordinateTransformInfo>().Sum(x => x.Accuracy));
+
+            var opPath = forwardOps.First();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var reverseOperations = PathGenerator.Generate(toCrs, fromCrs)
+                .Where(x => FilterForMethodCode(9603, x))
+                .OrderBy(op => op.CoordinateOperations.OfType<EpsgCoordinateOperationInverse>().Sum(x => ((EpsgCoordinateTransformInfo)x.Core).Accuracy));
+
+            var invOpPath = reverseOperations.First();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -429,31 +462,25 @@ namespace Pigeoid.Epsg.Transform.Test
         [Test]
         public void m9606_positionVectorTransformation_geog2DDomain() {
             // method: 9606
-            // op: 1643
             // crs: 4181 to 4326
 
             var fromCrs = EpsgCrs.Get(4181);
             var toCrs = EpsgCrs.Get(4326);
 
-            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
-                x => !x.Deprecated,
-                x => {
-                    var coi = x as EpsgCoordinateOperationInfo;
-                    if (coi != null) {
-                        if (coi.Method.Code != 9606)
-                            return false;
-                    }
-                    return true;
-                }));*/
+            var forwardOps = PathGenerator.Generate(fromCrs, toCrs)
+                .Where(x => FilterForMethodCode(9606, x))
+                .OrderBy(op => op.CoordinateOperations.OfType<EpsgCoordinateTransformInfo>().Sum(x => x.Accuracy));
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
-
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// pathGenerator.Generate(fromCrs, toCrs);
+            var opPath = forwardOps.First();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// pathGenerator.Generate(toCrs, fromCrs);
+            var reverseOperations = PathGenerator.Generate(toCrs, fromCrs)
+                .Where(x => FilterForMethodCode(9606, x))
+                .OrderBy(op => op.CoordinateOperations.OfType<EpsgCoordinateOperationInverse>().Sum(x => ((EpsgCoordinateTransformInfo)x.Core).Accuracy));
+
+            var invOpPath = reverseOperations.First();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(invOpPath);
@@ -468,30 +495,25 @@ namespace Pigeoid.Epsg.Transform.Test
         [Test]
         public void m9607_coordinateFrameRotation_geog2DDomain() {
             // method: 9607
-            // op: 5486
             // crs: 4181 to 4326
 
             var fromCrs = EpsgCrs.Get(4181);
             var toCrs = EpsgCrs.Get(4326);
 
-            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
-                x => !x.Deprecated,
-                x => {
-                    var coi = x as EpsgCoordinateOperationInfo;
-                    if (coi != null) {
-                        if (coi.Method.Code != 9607)
-                            return false;
-                    }
-                    return true;
-                }));*/
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
+            var forwardOps = PathGenerator.Generate(fromCrs, toCrs)
+                .Where(x => FilterForMethodCode(9607, x))
+                .OrderBy(op => op.CoordinateOperations.OfType<EpsgCoordinateTransformInfo>().Sum(x => x.Accuracy));
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// pathGenerator.Generate(fromCrs, toCrs);
+            var opPath = forwardOps.First();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// pathGenerator.Generate(toCrs, fromCrs);
+            var reverseOperations = PathGenerator.Generate(toCrs, fromCrs)
+                .Where(x => FilterForMethodCode(9607, x))
+                .OrderBy(op => op.CoordinateOperations.OfType<EpsgCoordinateOperationInverse>().Sum(x => ((EpsgCoordinateTransformInfo)x.Core).Accuracy));
+
+            var invOpPath = reverseOperations.First();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(invOpPath);
@@ -527,12 +549,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(5705);
             var toCrs = EpsgCrs.Get(5797);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<double, double>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<double, double>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -550,19 +572,16 @@ namespace Pigeoid.Epsg.Transform.Test
             // op: 1026
             // crs: 4903 to 4230
 
-            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
-                x => !x.Deprecated,
-                x => {
-                    var coi = x as EpsgCoordinateOperationInfo;
-                    return coi == null || coi.Method.Code == 9617;
-                }));*/
-
             var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
 
             var fromCrs = EpsgCrs.Get(4903);
             var toCrs = EpsgCrs.Get(4230);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// pathGenerator.Generate(fromCrs, toCrs);
+            var forwardOps = PathGenerator.Generate(fromCrs, toCrs)
+                .Where(x => FilterForMethodCode(9617, x))
+                .OrderBy(op => op.CoordinateOperations.OfType<EpsgCoordinateTransformInfo>().Sum(x => x.Accuracy));
+
+            var opPath = forwardOps.First();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
@@ -576,34 +595,30 @@ namespace Pigeoid.Epsg.Transform.Test
             Assert.AreEqual(expectedResult.Longitude, result.Longitude, 0.00005);
         }
 
-        [Test, Ignore(NotSupported)]
+        [Test]
         public void m9618_geographic2DWithHeightOffset() {
             // method: 9618
             // op: 1335
             // crs: 4301 to 4326
 
-            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
-                x => !x.Deprecated,
-                x => {
-                    var coi = x as EpsgCoordinateOperationInfo;
-                    return coi == null || coi.Method.Code == 9618;
-                }));*/
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
-
             var fromCrs = EpsgCrs.Get(4301);
             var toCrs = EpsgCrs.Get(4326);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// pathGenerator.Generate(fromCrs, toCrs);
+            var forwardOps = PathGenerator.Generate(fromCrs, toCrs)
+                .Where(x => FilterForMethodCode(9618, x));
+
+            var opPath = forwardOps.Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, GeographicHeightCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// pathGenerator.Generate(toCrs, fromCrs);
+            var reverseOperations = PathGenerator.Generate(toCrs, fromCrs)
+                .Where(x => FilterForMethodCode(9618, x));
+
+            var invOpPath = reverseOperations.Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicHeightCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
-
-            Assert.Inconclusive(NotSupported);
         }
 
         [Test]
@@ -615,12 +630,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4120);
             var toCrs = EpsgCrs.Get(4121);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -646,12 +661,18 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(23031);
             var toCrs = EpsgCrs.Get(25831);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var forwardOps = PathGenerator.Generate(fromCrs, toCrs)
+                .Where(x => FilterForMethodCode(9621, x));
+
+            var opPath = forwardOps.Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var reverseOperations = PathGenerator.Generate(toCrs, fromCrs)
+                .Where(x => FilterForMethodCode(9621, x));
+
+            var invOpPath = reverseOperations.Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -682,12 +703,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(3367);
             var toCrs = EpsgCrs.Get(3343);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -757,31 +778,25 @@ namespace Pigeoid.Epsg.Transform.Test
         [Test]
         public void m9636_molodenskyBadekas_geog2DDomain() {
             // method: 9636
-            // op: 5484
             // crs: 4181 to 4326
 
             var fromCrs = EpsgCrs.Get(4181);
             var toCrs = EpsgCrs.Get(4326);
 
-            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
-                x => !x.Deprecated,
-                x => {
-                    var coi = x as EpsgCoordinateOperationInfo;
-                    if (coi != null) {
-                        if (coi.Method.Code != 9636)
-                            return false;
-                    }
-                    return true;
-                }));*/
+            var forwardOps = PathGenerator.Generate(fromCrs, toCrs)
+                .Where(x => FilterForMethodCode(9636, x))
+                .OrderBy(op => op.CoordinateOperations.OfType<EpsgCoordinateTransformInfo>().Sum(x => x.Accuracy));
 
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
-
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// pathGenerator.Generate(fromCrs, toCrs);
+            var opPath = forwardOps.First();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// pathGenerator.Generate(toCrs, fromCrs);
+            var reverseOperations = PathGenerator.Generate(toCrs, fromCrs)
+                .Where(x => FilterForMethodCode(9636, x))
+                .OrderBy(op => op.CoordinateOperations.OfType<EpsgCoordinateOperationInverse>().Sum(x => ((EpsgCoordinateTransformInfo)x.Core).Accuracy));
+
+            var invOpPath = reverseOperations.First();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -896,27 +911,27 @@ namespace Pigeoid.Epsg.Transform.Test
             Assert.Inconclusive(NotSupported);
         }
 
-        [Test]
+        [Test, Explicit("Example is deprecated")]
         public void m9659_geographic3DTo2D() {
             // method: 9659
             // op: 15539
             // crs: 4645 to 4969
 
-            /*var pathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
-                x => !x.Deprecated,
-                x => !(x is EpsgCoordinateOperationInfo) || ((EpsgCoordinateOperationInfo)x).Method.Code == 9659
-            ));*/
-            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
-
             var fromCrs = EpsgCrs.Get(4645);
             var toCrs = EpsgCrs.Get(4969);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// pathGenerator.Generate(fromCrs, toCrs);
+            var forwardOps = PathGenerator.Generate(fromCrs, toCrs)
+                .Where(x => FilterForMethodCode(9659, x));
+
+            var opPath = forwardOps.Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicHeightCoordinate, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// pathGenerator.Generate(toCrs, fromCrs);
+            var reverseOperations = PathGenerator.Generate(toCrs, fromCrs)
+                .Where(x => FilterForMethodCode(9659, x));
+
+            var invOpPath = reverseOperations.Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, GeographicHeightCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -972,12 +987,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(24200);
             var toCrs = EpsgCrs.Get(4242);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -998,12 +1013,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(32040);
             var toCrs = EpsgCrs.Get(4267);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1024,12 +1039,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(31300);
             var toCrs = EpsgCrs.Get(4313);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1050,12 +1065,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(3002);
             var toCrs = EpsgCrs.Get(4257);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1076,12 +1091,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(3388);
             var toCrs = EpsgCrs.Get(4284);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1102,12 +1117,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(30200);
             var toCrs = EpsgCrs.Get(4302);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1128,12 +1143,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(27700);
             var toCrs = EpsgCrs.Get(4277);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1154,12 +1169,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(2053);
             var toCrs = EpsgCrs.Get(4148);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1180,12 +1195,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(28992);
             var toCrs = EpsgCrs.Get(4289);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1206,12 +1221,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(5041);
             var toCrs = EpsgCrs.Get(4326);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1242,12 +1257,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(29701);
             var toCrs = EpsgCrs.Get(4810);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1273,12 +1288,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4298);
             var toCrs = EpsgCrs.Get(29873);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1299,12 +1314,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4816);
             var toCrs = EpsgCrs.Get(22300);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1325,12 +1340,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4227);
             var toCrs = EpsgCrs.Get(22700);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1356,12 +1371,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4818);
             var toCrs = EpsgCrs.Get(2065);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1382,12 +1397,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4258);
             var toCrs = EpsgCrs.Get(3035);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1448,12 +1463,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4326);
             var toCrs = EpsgCrs.Get(3032);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1474,12 +1489,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4636);
             var toCrs = EpsgCrs.Get(2985);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1500,12 +1515,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4675);
             var toCrs = EpsgCrs.Get(3993);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1526,12 +1541,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4675);
             var toCrs = EpsgCrs.Get(3295);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1552,12 +1567,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4748);
             var toCrs = EpsgCrs.Get(3139);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1578,12 +1593,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4053);
             var toCrs = EpsgCrs.Get(3410);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1616,7 +1631,7 @@ namespace Pigeoid.Epsg.Transform.Test
             Assert.AreEqual(0.006739497, fromCrs.Datum.Spheroid.ESecondSquared, 0.0000000003);
             Assert.AreEqual(6356752.314, fromCrs.Datum.Spheroid.B, 0.0003);
 
-            var opPath = PathGenerator.Generate(fromCrs, toCrs) as CoordinateOperationCrsPathInfo;
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
 
             // NOTE: due to an apparent bug in the G7-2 or EPSG database there is a difference in topocentric origin
             // this hack corrects that difference
@@ -1641,7 +1656,7 @@ namespace Pigeoid.Epsg.Transform.Test
             var transformation = CreateTyped<Point3, Point3>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
 
             // NOTE: this is a hack, see above
@@ -1666,12 +1681,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4979);
             var toCrs = EpsgCrs.Get(5819);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicHeightCoordinate, Point3>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point3, GeographicHeightCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1692,7 +1707,7 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(5819);
             var toCrs = EpsgCrs.Get(5821);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicHeightCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
@@ -1722,12 +1737,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4055);
             var toCrs = EpsgCrs.Get(3785);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1739,7 +1754,7 @@ namespace Pigeoid.Epsg.Transform.Test
             AreEqual(expected4055, inverse.TransformValue(expected3785), 0.0000002);
         }
 
-        [Test, Ignore(NoSampleData)]
+        [Test, Explicit]
         public void m9842_equidistantCylindrical() {
             // method: 9842
             // op: 19846
@@ -1748,12 +1763,12 @@ namespace Pigeoid.Epsg.Transform.Test
             var fromCrs = EpsgCrs.Get(4326);
             var toCrs = EpsgCrs.Get(32663);
 
-            var opPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(fromCrs, toCrs);
+            var opPath = PathGenerator.Generate(fromCrs, toCrs).Single();
             Assert.IsNotNull(opPath);
             var transformation = CreateTyped<GeographicCoordinate, Point2>(StaticCompiler.Compile(opPath));
             Assert.IsNotNull(transformation);
 
-            var invOpPath = (ICoordinateOperationCrsPathInfo)null;// PathGenerator.Generate(toCrs, fromCrs);
+            var invOpPath = PathGenerator.Generate(toCrs, fromCrs).Single();
             Assert.IsNotNull(invOpPath);
             var inverse = CreateTyped<Point2, GeographicCoordinate>(StaticCompiler.Compile(invOpPath));
             Assert.IsNotNull(inverse);
@@ -1763,8 +1778,8 @@ namespace Pigeoid.Epsg.Transform.Test
 
             Assert.Inconclusive("Accuracy issues.");
 
-            AreEqual(expected32663, transformation.TransformValue(expected4326), 30000);
-            AreEqual(expected4326, inverse.TransformValue(expected32663), 1);
+            AreEqual(expected32663, transformation.TransformValue(expected4326), 10);
+            AreEqual(expected4326, inverse.TransformValue(expected32663), 0);
         }
 
         [Test, Ignore(NoUsages)]
