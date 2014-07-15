@@ -7,9 +7,9 @@ using Vertesaur.Search;
 namespace Pigeoid.Epsg
 {
     [Obsolete("Use EpsgCrsCoordinateOperationPathGenerator")]
-    internal class EpsgCrsCoordinateOperationPathGeneratorOld :
+    internal class EpsgCrsCoordinateOperationPathGeneratorOld /*:
         ICoordinateOperationPathGenerator<ICrs>,
-        ICoordinateOperationPathGenerator<EpsgCrs>
+        ICoordinateOperationPathGenerator<EpsgCrs>*/
     {
 
         public class SharedOptions

@@ -67,12 +67,13 @@ namespace Pigeoid.CoordinateOpFullTester
         }
 
         public CoordOpTester() {
-            _epsgPathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(
-                new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(x => !x.Deprecated, x => !x.Deprecated));
+            /*_epsgPathGenerator = new EpsgCrsCoordinateOperationPathGenerator(
+                new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(x => !x.Deprecated, x => !x.Deprecated));*/
+            var _epsgPathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
             _coordinateOperationCompiler = new StaticCoordinateOperationCompiler();
         }
 
-        private readonly EpsgCrsCoordinateOperationPathGeneratorOld _epsgPathGenerator;
+        private readonly EpsgCrsCoordinateOperationPathGenerator _epsgPathGenerator;
         private readonly StaticCoordinateOperationCompiler _coordinateOperationCompiler;
         
         public IEnumerable<ICrs> GetAllCrs() {
@@ -152,7 +153,8 @@ namespace Pigeoid.CoordinateOpFullTester
         }
 
         public ICoordinateOperationCrsPathInfo CreateOperationPath(ICrs from, ICrs to) {
-            return _epsgPathGenerator.Generate(from, to);
+            throw new NotImplementedException();
+            //return _epsgPathGenerator.Generate(from, to);
         }
     }
 }

@@ -58,6 +58,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EpsgAssumptionsTests.cs" />
     <Compile Include="EpsgCoordinateOperationCoverage.cs" />
     <Compile Include="EpsgHelmertDatumShiftTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

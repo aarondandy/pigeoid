@@ -15,7 +15,7 @@ namespace Pigeoid.Epsg
         public List<Predicate<EpsgCrs>> CrsFilters { get; set; }
         public List<Predicate<ICoordinateOperationInfo>> OpFilters { get; set; }
 
-        public ICoordinateOperationCrsPathInfo Generate(ICrs from, ICrs to) {
+        public IEnumerable<ICoordinateOperationCrsPathInfo> Generate(ICrs from, ICrs to) {
             var fromEpsg = from as EpsgCrs;
             var toEpsg = to as EpsgCrs;
             if (fromEpsg != null && toEpsg != null)
@@ -23,12 +23,7 @@ namespace Pigeoid.Epsg
             throw new NotImplementedException();
         }
 
-        public ICoordinateOperationCrsPathInfo Generate(EpsgCrs from, EpsgCrs to) {
-            var allPaths = FinalAllPaths(from, to);
-            return allPaths.FirstOrDefault();
-        }
-
-        private IEnumerable<ICoordinateOperationCrsPathInfo> FinalAllPaths(EpsgCrs from, EpsgCrs to) {
+        public IEnumerable<ICoordinateOperationCrsPathInfo> Generate(EpsgCrs from, EpsgCrs to) {
             Contract.Requires(from != null);
             Contract.Requires(to != null);
             Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationCrsPathInfo>>() != null);
@@ -39,7 +34,7 @@ namespace Pigeoid.Epsg
                 OpFilters = OpFilters
             };
 
-            searcher.CrsFilters.Add(searcher.AreaIntersectionTest); // TODO: need a better way to handle this
+            searcher.CrsFilters.Add(searcher.AreaContainsTest); // TODO: need a better way to handle this
 
             var allPaths = searcher.FindAllPaths();
             return allPaths;

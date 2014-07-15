@@ -120,7 +120,8 @@ namespace Pigeoid.Proj4ComparisonTests
         }
 
         public ICoordinateOperationCrsPathInfo CreateOperationPath(ICrs from, ICrs to) {
-            return _epsgPathGenerator.Generate(from, to);
+            throw new NotImplementedException();
+            //return _epsgPathGenerator.Generate(from, to);
         }
 
         public IEnumerable<TestCase> CreateTestCases() {

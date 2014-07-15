@@ -224,6 +224,8 @@ namespace Pigeoid.CoordinateOperation
             if (operationPath == null) throw new ArgumentNullException("operationPath");
             Contract.EndContractBlock();
 
+            
+
             var allOps = operationPath.CoordinateOperations.ToList();
             var allCrs = operationPath.CoordinateReferenceSystems.ToList();
             if (allCrs.Count <= 1)

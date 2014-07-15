@@ -2,6 +2,7 @@
 using Pigeoid.CoordinateOperation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Vertesaur;
 using Vertesaur.Transformation;
 
@@ -58,7 +59,7 @@ namespace Pigeoid.GoldData
             Assert.IsNotNull(targetCrs);
 
             var operationGenerator = new HelmertCrsCoordinateOperationPathGenerator();
-            var operationPath = operationGenerator.Generate(sourceCrs, targetCrs);
+            var operationPath = operationGenerator.Generate(sourceCrs, targetCrs).First();
             Assert.IsNotNull(operationPath);
             var compiler = new StaticCoordinateOperationCompiler();
             var forward = new CompiledConcatenatedTransformation<GeographicCoordinate, Point2>(compiler.Compile(operationPath) as IEnumerable<ITransformation>);

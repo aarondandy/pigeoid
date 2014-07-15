@@ -4,22 +4,23 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using Pigeoid.CoordinateOperation.Transformation;
 using Pigeoid.Unit;
+using Pigeoid.Utility;
 
 namespace Pigeoid.CoordinateOperation
 {
     public class HelmertCrsCoordinateOperationPathGenerator : ICoordinateOperationPathGenerator<ICrs>
     {
 
-        public ICoordinateOperationCrsPathInfo Generate(ICrs from, ICrs to) {
+        public IEnumerable<ICoordinateOperationCrsPathInfo> Generate(ICrs from, ICrs to) {
             if (from == to)
-                return new CoordinateOperationCrsPathInfo(from);
+                return ArrayUtil.CreateSingleElementArray(new CoordinateOperationCrsPathInfo(from));
 
             var fromGeodetic = from as ICrsGeodetic;
             var toGeodetic = to as ICrsGeodetic;
             if (fromGeodetic != null && toGeodetic != null)
-                return GenerateCoreProjectedLevel(fromGeodetic, toGeodetic);
+                return ArrayUtil.CreateSingleElementArray(GenerateCoreProjectedLevel(fromGeodetic, toGeodetic));
 
-            return null;
+            return ArrayUtil<ICoordinateOperationCrsPathInfo>.Empty;
         }
 
         private ICoordinateOperationCrsPathInfo GenerateCoreProjectedLevel(ICrsGeodetic from, ICrsGeodetic to) {

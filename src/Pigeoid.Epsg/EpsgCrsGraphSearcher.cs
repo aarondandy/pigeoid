@@ -180,6 +180,16 @@ namespace Pigeoid.Epsg
                 || TargetArea.Intersects(area);
         }
 
+        public bool AreaContainsTest(EpsgCrs crs) {
+            Contract.Requires(crs != null);
+            var area = crs.Area;
+            return area == null
+                || SourceArea == null
+                || area.Contains(SourceArea)
+                || TargetArea == null
+                || area.Contains(TargetArea);
+        }
+
         private bool IsCrsAllowed(EpsgCrs crs) {
             Contract.Requires(crs != null);
             if (CrsFilters == null || CrsFilters.Count == 0)
@@ -204,11 +214,13 @@ namespace Pigeoid.Epsg
 
         public IEnumerable<ICoordinateOperationCrsPathInfo> FindAllPaths() {
             var rootNode = PathNode.CreateStartNode(SourceCrs);
-            var allPaths = FindAllPathsFrom(rootNode, false).ToList(); // TODO: optimize
+            var allPaths = FindAllPathsFrom(rootNode, false, false).ToList(); // TODO: optimize
             return allPaths.Select(p => p.CreateCoordinateOperationCrsPathInfo());
         }
 
-        private IEnumerable<PathNode> FindAllPathsFrom(PathNode current, bool mustMoveToProjected) {
+
+
+        private IEnumerable<PathNode> FindAllPathsFrom(PathNode current, bool mustMoveToProjected, bool transformationRestricted) {
             Contract.Requires(current != null);
             Contract.Ensures(Contract.Result<IEnumerable<PathNode>>() != null);
 
@@ -236,7 +248,7 @@ namespace Pigeoid.Epsg
                         continue;
 
                     var nextNode = current.Append(derrivedProjection, projection);
-                    var localResults = FindAllPathsFrom(nextNode, true);
+                    var localResults = FindAllPathsFrom(nextNode, true, transformationRestricted);
                     results.AddRange(localResults);
                 }
             }
@@ -251,84 +263,87 @@ namespace Pigeoid.Epsg
                         var projectionInverse = projection.GetInverse();
                         if (IsOpAllowed(projectionInverse)) {
                             var nextNode = current.Append(baseCrs, projectionInverse);
-                            var localResults = FindAllPathsFrom(nextNode, false);
+                            var localResults = FindAllPathsFrom(nextNode, false, transformationRestricted);
                             results.AddRange(localResults);
                         }
                     }
                 }
             }
 
-            var concatenatedForward = EpsgCoordinateOperationInfoRepository.GetConcatenatedForwardReferenced(currentCode);
-            foreach (var catOp in concatenatedForward) {
-                if (visitedCrsCodes.Contains(catOp.TargetCrsCode))
-                    continue;
-                if (!IsOpAllowed(catOp))
-                    continue;
+            if (!transformationRestricted) {
 
-                // TODO: is this path OK?
-                // NOTE: ignore mustMoveToProjected ... for now
-                var targetCrs = catOp.TargetCrs;
-                if (!IsCrsAllowed(targetCrs))
-                    continue;
-                var nextNode = current.Append(targetCrs, catOp);
-                var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected);
-                results.AddRange(localResults);
-            }
+                var concatenatedForward = EpsgCoordinateOperationInfoRepository.GetConcatenatedForwardReferenced(currentCode);
+                foreach (var catOp in concatenatedForward) {
+                    if (visitedCrsCodes.Contains(catOp.TargetCrsCode))
+                        continue;
+                    if (!IsOpAllowed(catOp))
+                        continue;
 
-            var concatenatedReverse = EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(currentCode);
-            foreach (var catOp in concatenatedReverse) {
-                if (!catOp.HasInverse)
-                    continue;
-                if (visitedCrsCodes.Contains(catOp.SourceCrsCode))
-                    continue;
-                var inverseCatOp = catOp.GetInverse();
-                if (!IsOpAllowed(inverseCatOp))
-                    continue;
+                    // TODO: is this path OK?
+                    // NOTE: ignore mustMoveToProjected ... for now
+                    var targetCrs = catOp.TargetCrs;
+                    if (!IsCrsAllowed(targetCrs))
+                        continue;
+                    var nextNode = current.Append(targetCrs, catOp);
+                    var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected, true);
+                    results.AddRange(localResults);
+                }
 
-                // TODO: is this path OK?
-                // NOTE: ignore mustMoveToProjected ... for now
-                var sourceCrs = catOp.SourceCrs;
-                if (!IsCrsAllowed(sourceCrs))
-                    continue;
-                var nextNode = current.Append(sourceCrs, inverseCatOp);
-                var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected);
-                results.AddRange(localResults);
-            }
-            
-            var transformForward = EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced(currentCode);
-            foreach (var txOp in transformForward) {
-                if (visitedCrsCodes.Contains(txOp.TargetCrsCode))
-                    continue;
-                if (!IsOpAllowed(txOp))
-                    continue;
+                var concatenatedReverse = EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(currentCode);
+                foreach (var catOp in concatenatedReverse) {
+                    if (!catOp.HasInverse)
+                        continue;
+                    if (visitedCrsCodes.Contains(catOp.SourceCrsCode))
+                        continue;
+                    var inverseCatOp = catOp.GetInverse();
+                    if (!IsOpAllowed(inverseCatOp))
+                        continue;
 
-                // TODO: is this path OK?
-                // TODO: enforce mustMoveToProjected
-                var targetCrs = txOp.TargetCrs;
-                if (!IsCrsAllowed(targetCrs))
-                    continue;
-                var nextNode = current.Append(targetCrs, txOp);
-                var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected);
-                results.AddRange(localResults);
-            }
-            var transformReverse = EpsgCoordinateOperationInfoRepository.GetTransformReverseReferenced(currentCode);
-            foreach (var txOp in transformReverse) {
-                if (!txOp.HasInverse)
-                    continue;
-                if (visitedCrsCodes.Contains(txOp.SourceCrsCode))
-                    continue;
-                var inverseOp = txOp.GetInverse();
-                if (!IsOpAllowed(inverseOp))
-                    continue;
+                    // TODO: is this path OK?
+                    // NOTE: ignore mustMoveToProjected ... for now
+                    var sourceCrs = catOp.SourceCrs;
+                    if (!IsCrsAllowed(sourceCrs))
+                        continue;
+                    var nextNode = current.Append(sourceCrs, inverseCatOp);
+                    var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected, true);
+                    results.AddRange(localResults);
+                }
 
-                // TODO: is this path OK?
-                // TODO: enforce mustMoveToProjected
-                var sourceCrs = txOp.SourceCrs;
-                if (!IsCrsAllowed(sourceCrs))
-                    continue;
-                var nextNode = current.Append(sourceCrs, inverseOp);
-                var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected);
-                results.AddRange(localResults);
+                var transformForward = EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced(currentCode);
+                foreach (var txOp in transformForward) {
+                    if (visitedCrsCodes.Contains(txOp.TargetCrsCode))
+                        continue;
+                    if (!IsOpAllowed(txOp))
+                        continue;
+
+                    // TODO: is this path OK?
+                    // TODO: enforce mustMoveToProjected
+                    var targetCrs = txOp.TargetCrs;
+                    if (!IsCrsAllowed(targetCrs))
+                        continue;
+                    var nextNode = current.Append(targetCrs, txOp);
+                    var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected, true);
+                    results.AddRange(localResults);
+                }
+                var transformReverse = EpsgCoordinateOperationInfoRepository.GetTransformReverseReferenced(currentCode);
+                foreach (var txOp in transformReverse) {
+                    if (!txOp.HasInverse)
+                        continue;
+                    if (visitedCrsCodes.Contains(txOp.SourceCrsCode))
+                        continue;
+                    var inverseOp = txOp.GetInverse();
+                    if (!IsOpAllowed(inverseOp))
+                        continue;
+
+                    // TODO: is this path OK?
+                    // TODO: enforce mustMoveToProjected
+                    var sourceCrs = txOp.SourceCrs;
+                    if (!IsCrsAllowed(sourceCrs))
+                        continue;
+                    var nextNode = current.Append(sourceCrs, inverseOp);
+                    var localResults = FindAllPathsFrom(nextNode, mustMoveToProjected, true);
+                    results.AddRange(localResults);
+                }
             }
 
             return results;

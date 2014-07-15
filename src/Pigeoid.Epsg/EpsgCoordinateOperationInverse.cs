@@ -18,7 +18,7 @@ namespace Pigeoid.Epsg
         public new EpsgCoordinateOperationInfoBase Core {
             get {
                 Contract.Ensures(Contract.Result<EpsgCoordinateOperationInfoBase>() != null);
-                return (EpsgCoordinateOperationInfoBase)Core;
+                return (EpsgCoordinateOperationInfoBase)base.Core;
             }
         }
 
