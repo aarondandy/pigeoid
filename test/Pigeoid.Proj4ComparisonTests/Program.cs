@@ -10,6 +10,8 @@ namespace Pigeoid.Proj4ComparisonTests
     class Program
     {
         static void Main(string[] args) {
+            var stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Start();
             using (var file = File.Open("results.csv", FileMode.Create, FileAccess.ReadWrite, FileShare.Read))
             using(var writer = new StreamWriter(file))
             {
@@ -27,6 +29,8 @@ namespace Pigeoid.Proj4ComparisonTests
                     }
                 }
             }
+            stopwatch.Stop();
+            Console.WriteLine("Full runtime: {0}", stopwatch.Elapsed);
 
         }
     }

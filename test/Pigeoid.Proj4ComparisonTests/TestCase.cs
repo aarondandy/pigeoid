@@ -21,7 +21,6 @@ namespace Pigeoid.Proj4ComparisonTests
         public ProjectionInfo Proj4Target { get { return Proj4Crs.CreateProjection(Target); } } 
 
         public IGeographicMbr Area { get; set; }
-        public ICoordinateOperationCrsPathInfo Path { get; set; }
         public List<GeographicCoordinate> InputWgs84Coordinates { get; set; }
         public List<object> InputCoordinates { get; set; }
 

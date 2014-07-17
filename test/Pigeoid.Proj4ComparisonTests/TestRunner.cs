@@ -49,15 +49,47 @@ namespace Pigeoid.Proj4ComparisonTests
             return GetValues(range.Low, range.High, count);
         }
 
-        public static IEnumerable<GeographicCoordinate> CreateTestPoints(IGeographicMbr mbr, int lonValueCount = 10, int latValueCount = 10) {
+        public static List<GeographicCoordinate> CreateTestPoints(IGeographicMbr mbr, int lonValueCount = 10, int latValueCount = 10) {
+            var resultPoints = new List<GeographicCoordinate>(lonValueCount * latValueCount);
             var lonValues = GetValues(mbr.LongitudeRange, lonValueCount);
             var latValues = GetValues(mbr.LatitudeRange, latValueCount);
             for (int r = 0; r < latValues.Length; r++)
                 for (int c = 0; c < lonValues.Length; c++)
-                    yield return new GeographicCoordinate(latValues[r], lonValues[c]);
+                    resultPoints.Add(new GeographicCoordinate(latValues[r], lonValues[c]));
+            return resultPoints;
         }
 
-        private HashSet<int> _restrictedOperationMethodCodes = new HashSet<int> {
+        private static double? GetEpsgAccuracy(ICoordinateOperationCrsPathInfo path) {
+            double? sum = null;
+            foreach (var op in path.CoordinateOperations) {
+                EpsgCoordinateOperationInfoBase epsgOp;
+                var epsgInverse = op as EpsgCoordinateOperationInverse;
+                if (epsgInverse != null) {
+                    epsgOp = epsgInverse.Core;
+                }
+                else {
+                    epsgOp = op as EpsgCoordinateOperationInfoBase;
+                    if (epsgOp == null)
+                        continue;
+                }
+
+                var tx = epsgOp as EpsgCoordinateTransformInfo;
+                if (tx != null) {
+                    var accuracy = tx.Accuracy;
+                    if (!Double.IsNaN(accuracy)) {
+                        if (sum.HasValue) {
+                            sum += accuracy;
+                        }
+                        else {
+                            sum = accuracy;
+                        }
+                    }
+                }
+            }
+            return sum;
+        }
+
+        private static HashSet<int> _restrictedOperationMethodCodes = new HashSet<int> {
             9613,
             9661,
             9658,
@@ -79,49 +111,58 @@ namespace Pigeoid.Proj4ComparisonTests
             1048
         };
 
+        private static bool IsNotDeprecated(EpsgCrs crs) {
+            return !crs.Deprecated;
+        }
+
+        private static bool IsNotDeprecated(ICoordinateOperationInfo op) {
+            var epsgInverseOp = op as EpsgCoordinateOperationInverse;
+            var epsgOp = epsgInverseOp != null
+                ? epsgInverseOp.Core
+                : op as EpsgCoordinateOperationInfoBase;
+            return epsgOp == null || !epsgOp.Deprecated;
+        }
+
+        private static bool IsNotRestricted(ICoordinateOperationInfo op) {
+            var epsgInverseOp = op as EpsgCoordinateOperationInverse;
+            var epsgOp = epsgInverseOp != null
+                ? epsgInverseOp.Core
+                : op as EpsgCoordinateOperationInfoBase;
+
+            if (epsgOp == null)
+                return true;
+
+            var catOp = epsgOp as EpsgConcatenatedCoordinateOperationInfo;
+            if (catOp != null) {
+                return catOp.Steps.All(s => !_restrictedOperationMethodCodes.Contains(s.Code));
+            }
+            return !_restrictedOperationMethodCodes.Contains(epsgOp.Code);
+        }
+
         public TestRunner() {
-            /*_epsgPathGenerator = new EpsgCrsCoordinateOperationPathGeneratorOld(
-                new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
-                    x => !x.Deprecated,
-                    x => {
-                        if (x.Deprecated)
-                            return false;
-
-                        var cat = x as EpsgConcatenatedCoordinateOperationInfo;
-                        if (cat != null) {
-                            return !cat.Steps.Any(op => _restrictedOperationMethodCodes.Contains(op.Method.Code));
-                        }
-
-                        var cti = x as EpsgCoordinateTransformInfo;
-                        if (cti != null) {
-                            return !_restrictedOperationMethodCodes.Contains(cti.Method.Code);
-                        }
-
-                        return false;
-                    }
-                )
-            );*/
             _epsgPathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
+            _epsgPathGenerator.CrsFilters = new List<Predicate<EpsgCrs>> {
+                IsNotDeprecated
+            };
+            _epsgPathGenerator.OpFilters = new List<Predicate<ICoordinateOperationInfo>>{
+                IsNotDeprecated,
+                IsNotRestricted
+            };
             _coordinateOperationCompiler = new StaticCoordinateOperationCompiler();
         }
 
         private readonly EpsgCrsCoordinateOperationPathGenerator _epsgPathGenerator;
         private readonly StaticCoordinateOperationCompiler _coordinateOperationCompiler;
 
-        public IEnumerable<ICrs> GetAllCrs() {
-            return EpsgCrs.Values.Where(x => !x.Deprecated);
+        public IEnumerable<EpsgCrs> GetAllCrs() {
+            return EpsgCrs.Values.Where(IsNotDeprecated);
         }
 
-        private IGeographicMbr ExtractMbr(ICrs crs) {
-            var epsgCrs = crs as EpsgCrs;
-            if (epsgCrs != null)
-                return epsgCrs.Area;
-            return null;
-        }
-
-        public ICoordinateOperationCrsPathInfo CreateOperationPath(ICrs from, ICrs to) {
-            throw new NotImplementedException();
-            //return _epsgPathGenerator.Generate(from, to);
+        private class TestableCrs
+        {
+            public EpsgCrs Crs;
+            public ITransformation From4325Transform;
+            public EpsgArea Area;
         }
 
         public IEnumerable<TestCase> CreateTestCases() {
@@ -129,59 +170,56 @@ namespace Pigeoid.Proj4ComparisonTests
             if (crs4326 == null)
                 throw new InvalidOperationException("No implementation of EPSG:4326 has been found.");
 
-            var testableCrsList = GetAllCrs()
-                .Where(x => /*x is ICrsGeocentric || x is ICrsGeographic ||*/ x is ICrsProjected)
-                .ToList();
-
-            var from4326 = testableCrsList
-                .Select(crs => CreateOperationPath(crs4326, crs))
-                .Where(x => x != null);
-
-            foreach (var from4326Path in from4326) {
-                var fromCrs = from4326Path.To;
-
-                var fromArea = ExtractMbr(fromCrs);
-                if (fromArea == null)
+            var testableCrsList = new List<TestableCrs>();
+            foreach (var crs in GetAllCrs().Where(x => x.Kind == EpsgCrsKind.Projected)) {
+                if (crs.Area == null)
                     continue;
 
-                ITransformation from4326Transformation;
-                try {
-                    from4326Transformation = _coordinateOperationCompiler.Compile(from4326Path);
-                }
-                catch {
-                    Console.WriteLine("EPSG:4326 Transformation failed for {0}", fromCrs);
-                    continue;
-                }
-
-                if (from4326Transformation == null)
+                var paths = _epsgPathGenerator.Generate(crs4326, crs)
+                    .OrderBy(x => GetEpsgAccuracy(x) ?? 999);
+                var transform = paths
+                    .Select(p => _coordinateOperationCompiler.Compile(p))
+                    .Where(x => x != null)
+                    .FirstOrDefault();
+                if (transform == null)
                     continue;
 
-                foreach (var toCrs in testableCrsList) {
-                    if (toCrs == fromCrs)
+                Console.WriteLine("Preparing {1}: {0} ", crs, testableCrsList.Count);
+
+                testableCrsList.Add(new TestableCrs {
+                    Crs = crs,
+                    From4325Transform = transform,
+                    Area = crs.Area
+                });
+            }
+
+            Console.WriteLine("Prepared tests for {0} CRSs.", testableCrsList.Count);
+
+            for (var fromTestableIndex = 0; fromTestableIndex < testableCrsList.Count; ++fromTestableIndex){
+                var fromTestable = testableCrsList[fromTestableIndex];
+                var fromCrs = fromTestable.Crs;
+                var fromArea = fromTestable.Area;
+
+                Console.WriteLine("{0:P} complete...", (fromTestableIndex / (double)testableCrsList.Count));
+
+                foreach (var toTestable in testableCrsList) {
+                    if (fromTestable == toTestable)
                         continue;
 
-                    var toArea = ExtractMbr(toCrs);
-                    if (toArea == null)
-                        continue;
+                    var toCrs = toTestable.Crs;
+                    var toArea = toTestable.Area;
 
                     var areaIntersection = fromArea.Intersection(toArea);
                     if (areaIntersection == null)
                         continue;
 
-                    var path = CreateOperationPath(fromCrs, toCrs);
-                    if (path == null)
-                        continue;
-
-                    var inputCoordsWgs84 = CreateTestPoints(areaIntersection).ToList();
-                    var transformedInputCoords = inputCoordsWgs84
-                        .Select(x => from4326Transformation.TransformValue(x))
-                        .ToList();
+                    var inputCoordsWgs84 = CreateTestPoints(areaIntersection);
+                    var transformedInputCoords = inputCoordsWgs84.ConvertAll(c => fromTestable.From4325Transform.TransformValue(c));
 
                     yield return new TestCase {
                         Source = fromCrs,
                         Target = toCrs,
                         Area = areaIntersection,
-                        Path = path,
                         InputWgs84Coordinates = inputCoordsWgs84,
                         InputCoordinates = transformedInputCoords
                     };
@@ -195,7 +233,7 @@ namespace Pigeoid.Proj4ComparisonTests
                 Target = testCase.Target
             };
 
-            var staticResult = ExecuteStatic(testCase);
+            var staticResult = ExecuteStaticEpsg(testCase);
             var proj4Results = ExecuteProj4(testCase);
             try {
                 var statsData = new CoordinateComparisonStatistics();
@@ -209,13 +247,22 @@ namespace Pigeoid.Proj4ComparisonTests
             return result;
         }
 
-        private ConversionResult ExecuteStatic(TestCase testCase) {
+        private ConversionResult ExecuteStaticEpsg(TestCase testCase) {
             var result = new ConversionResult();
             try {
+
+                var paths = _epsgPathGenerator.Generate(testCase.Source, testCase.Target)
+                    .OrderBy(x => GetEpsgAccuracy(x) ?? 999);
+
                 var compiler = new StaticCoordinateOperationCompiler();
-                var transformation = compiler.Compile(testCase.Path);
+                var compiledPaths = paths
+                    .Select(x => compiler.Compile(x));
+
+                var bestCompiledPath = compiledPaths.FirstOrDefault(x => x != null);
+
+                var transformation = bestCompiledPath;
                 if (transformation == null)
-                    throw new InvalidOperationException("No transformation");
+                    throw new InvalidOperationException("No compiled transformation");
 
                 result.ResultData = transformation.TransformValues(testCase.InputCoordinates).ToArray();
             }
