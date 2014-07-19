@@ -330,59 +330,94 @@ namespace Pigeoid.CoordinateOperation
             _number = number;
         }
 
+        private static readonly string[] StandardParallelStrings = new[] {
+            "STANDARDPARALLEL",
+            "STANDARD",
+            "PARALLEL"
+        };
+
+        private static bool StartsWithStandardParallel(string normalizedParamemterName, out int points) {
+            foreach (var searchText in StandardParallelStrings) {
+                if (normalizedParamemterName.StartsWith(searchText)) {
+                    points = searchText.Length;
+                    return true;
+                }
+            }
+            points = 0;
+            return false;
+        }
+
+        private static bool EndsWithStandardParallel(string normalizedParamemterName, out int points) {
+            foreach (var searchText in StandardParallelStrings) {
+                if (normalizedParamemterName.EndsWith(searchText)) {
+                    points = searchText.Length;
+                    return true;
+                }
+            }
+            points = 0;
+            return false;
+        }
+
         public override int Score(ParameterData parameterData) {
             var parameterName = parameterData.NormalizedName;
-
-            int startPoints, endPoints;
             if (_number.HasValue) {
                 if("STANDARDPARALLEL".Equals(parameterName))
                     return 1;// if the number is set, it must also match
 
+                int spPoints, numberPoints;
+                if (parameterName.Contains("STANDARDPARALLEL")) {
+                    spPoints = 50;
+                }
+                else {
+                    spPoints = 0;
+                    if (parameterName.Contains("STANDARD"))
+                        spPoints += 25;
+                    if (parameterName.Contains("PARALLEL"))
+                        spPoints += 25;
+                }
+
+                if (spPoints <= 0)
+                    return 0;
 
                 var number = _number.GetValueOrDefault();
-                var numberString = number.ToString();
-
-                // TODO: cover the case where ordinal comes first
-
-                if (parameterName.StartsWith("STANDARDPARALLEL"))
-                    startPoints = 10;
-                else if (parameterName.StartsWith("STANDARD") || parameterName.StartsWith("PARALLEL"))
-                    startPoints = 5;
+                if(number == 1 && (parameterName.Contains("ONE") || parameterName.Contains("1ST")))
+                    numberPoints = 50;
+                else if(number == 2 && (parameterName.Contains("TWO") || parameterName.Contains("2ND")))
+                    numberPoints = 50;
+                else if(number == 3 && (parameterName.Contains("THREE") || parameterName.Contains("3RD")))
+                    numberPoints = 50;
+                else if (parameterName.Contains(number.ToString()))
+                    numberPoints = 25;
                 else
                     return 0;
-
-                if (parameterName.EndsWith(numberString))
-                    endPoints = 10;
-                else if (number == 1 && (parameterName.EndsWith("ONE") || parameterName.EndsWith("1ST")))
-                    endPoints = 10;
-                else if (number == 2 && (parameterName.EndsWith("TWO") || parameterName.EndsWith("2ND")))
-                    endPoints = 10;
-                else if (number == 3 && (parameterName.EndsWith("THREE") || parameterName.EndsWith("3RD")))
-                    endPoints = 10;
-                else
-                    return 0;
+                
+                if(spPoints > 0 && numberPoints > 0)
+                    return spPoints + numberPoints;
             }
             else {
-                if("STANDARDPARALLEL".Equals(parameterName))
+                int startPoints, endPoints;
+                if ("STANDARDPARALLEL".Equals(parameterName))
                     return 100;
-                if(parameterName.EndsWith("STANDARDPARALLEL"))
+                if (parameterName.EndsWith("STANDARDPARALLEL"))
+                    return 50;
+                if (parameterName.StartsWith("STANDARDPARALLEL"))
                     return 50;
 
                 if (parameterName.StartsWith("STANDARD"))
-                    startPoints = 10;
+                    startPoints = 25;
                 else
                     return 0;
 
                 if (parameterName.EndsWith("PARALLEL"))
-                    endPoints = 10;
+                    endPoints = 25;
                 else if (parameterName.Contains("PARALLEL"))
                     endPoints = 5; // because it may not know about the ordinal suffix
                 else
                     return 0;
+                if (startPoints > 0 && endPoints > 0)
+                    return startPoints + endPoints;
             }
 
-            if (startPoints > 0 && endPoints > 0)
-                return startPoints + endPoints;
             return 0;
         }
     }

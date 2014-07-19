@@ -100,7 +100,7 @@ namespace Pigeoid.Interop.Proj4
             {CoordinateOperationStandardNames.SwissObliqueCylindrical, "somerc"},
             {CoordinateOperationStandardNames.TransverseMercator, "tmerc"},
             {CoordinateOperationStandardNames.TwoPointEquidistant, "tpeqd"},
-            {CoordinateOperationStandardNames.PolarStereographic, "ups"},
+            {CoordinateOperationStandardNames.PolarStereographic, "stere"},
             {CoordinateOperationStandardNames.VanDerGrinten, "vandg"},
             {CoordinateOperationStandardNames.Wagner4, "wag4"},
             {CoordinateOperationStandardNames.Wagner5, "wag5"},
@@ -154,32 +154,71 @@ namespace Pigeoid.Interop.Proj4
 
             var proj4Name = ToProj4MethodName(projectionMethod.Name);
 
-            // new KeywordNamedParameterSelector("LON0", "LON", "ORIGIN", "CENTRAL", "MERIDIAN", "CENTRALMERIDIAN");
-            var lon0Param = new MultiParameterSelector(
-                new CentralMeridianParameterSelector(),
-                new LongitudeOfNaturalOriginParameterSelector()
-            );
-            var lonNaturalOrigin = new LongitudeOfNaturalOriginParameterSelector();
-            var loncParam = new LongitudeOfCenterParameterSelector(); // new KeywordNamedParameterSelector("LONC", "LON", "CENTER", "LONGITUDECENTER");
-            var lat0Param = new LatitudeOfCenterParameterSelector();// new KeywordNamedParameterSelector("LAT0", "LAT", "ORIGIN", "CENTER", "LATITUDEORIGIN", "LATITUDECENTER");
-            var lat1Param = new KeywordNamedParameterSelector("LAT1", "LAT", "1", "PARALLEL");
-            var lat2Param = new KeywordNamedParameterSelector("LAT2", "LAT", "2", "PARALLEL");
-            var x0Param = new KeywordNamedParameterSelector("X0", "FALSE", "OFFSET", "X", "EAST");
-            var y0Param = new KeywordNamedParameterSelector("Y0", "FALSE", "OFFSET", "Y", "NORTH");
-            var k0Param = new MultiParameterSelector(
-                new ScaleFactorParameterSelector(),
-                new FullMatchParameterSelector("K0"));
-            var alphaParam = new KeywordNamedParameterSelector("ALPHA","AZIMUTH");
-            var zoneParam = new FullMatchParameterSelector("ZONE");
-            var southParam = new FullMatchParameterSelector("SOUTH");
-
-            var paramLookup = new NamedParameterLookup(projectionInfo.Parameters);
-            paramLookup.Assign(lon0Param, loncParam, lat0Param, lat1Param, lat2Param, x0Param, y0Param, k0Param, alphaParam, zoneParam, southParam);
-
             IUnit geographicUnit = geographicBase == null ? null : geographicBase.Unit;
             IUnit projectionUnit = crsProjected.Unit;
             if (projectionUnit != null)
                 result.Unit = Proj4LinearUnit.ConvertToProj4(projectionUnit);
+
+            DecodeParametersDefault(result, projectionInfo.Parameters);
+
+            if (result.Zone.HasValue && proj4Name == "tmerc")
+                proj4Name = "utm";
+
+            result.Transform = TransformManager.GetProj4(proj4Name);
+
+            var finalResult = ProjectionInfo.FromProj4String(result.ToProj4String()); // TODO: fix this hack
+            finalResult.CentralMeridian = result.CentralMeridian;
+            finalResult.LongitudeOfCenter = result.LongitudeOfCenter;
+            finalResult.LatitudeOfOrigin = result.LatitudeOfOrigin;
+            finalResult.StandardParallel1 = result.StandardParallel1;
+            finalResult.StandardParallel2 = result.StandardParallel2;
+            finalResult.FalseEasting = result.FalseEasting;
+            finalResult.FalseNorthing = result.FalseNorthing;
+            finalResult.ScaleFactor = result.ScaleFactor;
+            finalResult.alpha = result.alpha;
+            finalResult.lat_ts = result.lat_ts;
+            finalResult.IsSouth = result.IsSouth;
+            finalResult.Zone = result.Zone;
+            finalResult.Unit = result.Unit;
+            if (result.GeographicInfo == null) { // NOTE: this is all so terrible
+                finalResult.GeographicInfo = null;
+            }
+            else {
+                if (finalResult.GeographicInfo == null) {
+                    finalResult.GeographicInfo = result.GeographicInfo;
+                }
+                else {
+                    finalResult.GeographicInfo.Datum.Spheroid = result.GeographicInfo.Datum.Spheroid;
+                }
+            }
+            return finalResult;
+        }
+
+        private static void DecodeParametersDefault(ProjectionInfo result, IEnumerable<INamedParameter> parameters) {
+            var lon0Param = new MultiParameterSelector(
+                new CentralMeridianParameterSelector(),
+                new LongitudeOfNaturalOriginParameterSelector()
+            );
+            var loncParam = new LongitudeOfCenterParameterSelector();
+            var lat0Param = new MultiParameterSelector(
+                new LatitudeOfCenterParameterSelector(),
+                new LatitudeOfNaturalOriginParameterSelector());
+            var lat1Param = new StandardParallelParameterSelector(1);
+            var lat2Param = new StandardParallelParameterSelector(2);
+            var x0Param = new FalseEastingParameterSelector();
+            var y0Param = new FalseNorthingParameterSelector();
+            var k0Param = new MultiParameterSelector(
+                new ScaleFactorParameterSelector(),
+                new FullMatchParameterSelector("K0"));
+            var alphaParam = new KeywordNamedParameterSelector("ALPHA", "AZIMUTH");
+            var zoneParam = new FullMatchParameterSelector("ZONE");
+            var southParam = new FullMatchParameterSelector("SOUTH");
+            var latTsParam = new MultiParameterSelector(
+                new LatitudeOfTrueScaleParameterSelector(),
+                new StandardParallelParameterSelector());
+
+            var paramLookup = new NamedParameterLookup(parameters);
+            paramLookup.Assign(lon0Param, loncParam, lat0Param, lat1Param, lat2Param, x0Param, y0Param, k0Param, alphaParam, zoneParam, southParam, latTsParam);
 
             if (lon0Param.IsSelected)
                 result.CentralMeridian = lon0Param.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
@@ -201,40 +240,10 @@ namespace Pigeoid.Interop.Proj4
                 result.alpha = alphaParam.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
             if (southParam.IsSelected)
                 result.IsSouth = southParam.GetValueAsBoolean().GetValueOrDefault();
-
-            if(zoneParam.IsSelected)
+            if (latTsParam.IsSelected)
+                result.lat_ts = latTsParam.GetValueAsDouble().GetValueOrDefault();
+            if (zoneParam.IsSelected)
                 result.Zone = zoneParam.GetValueAsInt32();
-
-            if (result.Zone.HasValue && proj4Name == "tmerc")
-                proj4Name = "utm";
-
-            result.Transform = TransformManager.GetProj4(proj4Name);
-
-            var finalResult = ProjectionInfo.FromProj4String(result.ToProj4String()); // TODO: fix this hack
-            finalResult.CentralMeridian = result.CentralMeridian;
-            finalResult.LongitudeOfCenter = result.LongitudeOfCenter;
-            finalResult.LatitudeOfOrigin = result.LatitudeOfOrigin;
-            finalResult.StandardParallel1 = result.StandardParallel1;
-            finalResult.StandardParallel2 = result.StandardParallel2;
-            finalResult.FalseEasting = result.FalseEasting;
-            finalResult.FalseNorthing = result.FalseNorthing;
-            finalResult.ScaleFactor = result.ScaleFactor;
-            finalResult.alpha = result.alpha;
-            finalResult.IsSouth = result.IsSouth;
-            finalResult.Zone = result.Zone;
-            finalResult.Unit = result.Unit;
-            if (result.GeographicInfo == null) { // NOTE: this is all so terrible
-                finalResult.GeographicInfo = null;
-            }
-            else {
-                if (finalResult.GeographicInfo == null) {
-                    finalResult.GeographicInfo = result.GeographicInfo;
-                }
-                else {
-                    finalResult.GeographicInfo.Datum.Spheroid = result.GeographicInfo.Datum.Spheroid;
-                }
-            }
-            return finalResult;
         }
 
         private static AuthorityTag CreateAuthorityTag(ProjectionInfo projectionInfo) {

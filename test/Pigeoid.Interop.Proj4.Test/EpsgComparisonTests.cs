@@ -76,6 +76,22 @@ namespace Pigeoid.Interop.Proj4.Test
         }
 
         [Test]
+        public void epsg3031() {
+            var crs = EpsgCrs.Get(3031);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual("stere", prj.Transform.Proj4Name);
+            Assert.AreEqual(-90, prj.LatitudeOfOrigin);
+            Assert.AreEqual(-71, prj.lat_ts);
+            Assert.AreEqual(0, prj.LongitudeOfCenter ?? 0);
+            Assert.AreEqual(1, prj.ScaleFactor);
+            Assert.AreEqual(0, prj.FalseEasting);
+            Assert.AreEqual(0, prj.FalseNorthing);
+        }
+
+        [Test]
         public void epsg3078() {
             var crs = EpsgCrs.Get(3078);
             Assert.IsNotNull(crs);
@@ -206,7 +222,7 @@ namespace Pigeoid.Interop.Proj4.Test
                     x => !x.Deprecated));*/
             var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
             var epsgPath = pathGenerator.Generate(from, to);
-            Assert.IsNotNull(epsgPath);
+            Assert.IsNotEmpty(epsgPath);
             var proj4Transform = new Proj4Transform(from, to);
             Assert.IsNotNull(proj4Transform);
         }
@@ -221,7 +237,18 @@ namespace Pigeoid.Interop.Proj4.Test
                     x => !x.Deprecated));*/
             var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
             var epsgPath = pathGenerator.Generate(from, to);
-            Assert.IsNotNull(epsgPath);
+            Assert.IsNotEmpty(epsgPath);
+            var proj4Transform = new Proj4Transform(from, to);
+            Assert.IsNotNull(proj4Transform);
+        }
+
+        [Test]
+        public void epsg3031_to_epsg3293() {
+            var from = EpsgCrs.Get(3031);
+            var to = EpsgCrs.Get(3293);
+            var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
+            var epsgPath = pathGenerator.Generate(from, to);
+            Assert.IsNotEmpty(epsgPath);
             var proj4Transform = new Proj4Transform(from, to);
             Assert.IsNotNull(proj4Transform);
         }
