@@ -47,12 +47,14 @@ namespace Pigeoid.Proj4ComparisonTests
                         MaxDistance = distance;
 
                     var magnitude = ((Vector2)ptA).GetMagnitude();
-                    var errorRatio = distance / magnitude;
-                    errorRatioSum += errorRatio;
-                    if (Double.IsNaN(MinErrorRatio) || MinErrorRatio > errorRatio)
-                        MinErrorRatio = errorRatio;
-                    if (Double.IsNaN(MaxErrorRatio) || MaxErrorRatio < errorRatio)
-                        MaxErrorRatio = errorRatio;
+                    var errorRatio = magnitude == 0 || Double.IsNaN(magnitude) ? Double.NaN : distance / magnitude;
+                    if (!Double.IsNaN(errorRatio)) {
+                        errorRatioSum += errorRatio;
+                        if (Double.IsNaN(MinErrorRatio) || MinErrorRatio > errorRatio)
+                            MinErrorRatio = errorRatio;
+                        if (Double.IsNaN(MaxErrorRatio) || MaxErrorRatio < errorRatio)
+                            MaxErrorRatio = errorRatio;
+                    }
                 }
                 else {
                     throw new NotImplementedException();

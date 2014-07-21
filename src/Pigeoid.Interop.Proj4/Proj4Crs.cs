@@ -158,8 +158,14 @@ namespace Pigeoid.Interop.Proj4
             IUnit projectionUnit = crsProjected.Unit;
             if (projectionUnit != null)
                 result.Unit = Proj4LinearUnit.ConvertToProj4(projectionUnit);
-
-            DecodeParametersDefault(result, projectionInfo.Parameters);
+            switch (proj4Name) { 
+                case "stere":
+                    ApplyParametersStere(result, projectionInfo.Parameters);
+                    break;
+                default:
+                    ApplyParametersDefault(result, projectionInfo.Parameters);
+                    break;
+            }
 
             if (result.Zone.HasValue && proj4Name == "tmerc")
                 proj4Name = "utm";
@@ -194,7 +200,9 @@ namespace Pigeoid.Interop.Proj4
             return finalResult;
         }
 
-        private static void DecodeParametersDefault(ProjectionInfo result, IEnumerable<INamedParameter> parameters) {
+        private static void ApplyParametersDefault(ProjectionInfo result, IEnumerable<INamedParameter> parameters) {
+            Contract.Requires(result != null);
+            Contract.Requires(parameters != null);
             var lon0Param = new MultiParameterSelector(
                 new CentralMeridianParameterSelector(),
                 new LongitudeOfNaturalOriginParameterSelector()
@@ -207,9 +215,7 @@ namespace Pigeoid.Interop.Proj4
             var lat2Param = new StandardParallelParameterSelector(2);
             var x0Param = new FalseEastingParameterSelector();
             var y0Param = new FalseNorthingParameterSelector();
-            var k0Param = new MultiParameterSelector(
-                new ScaleFactorParameterSelector(),
-                new FullMatchParameterSelector("K0"));
+            var k0Param = new ScaleFactorParameterSelector();
             var alphaParam = new KeywordNamedParameterSelector("ALPHA", "AZIMUTH");
             var zoneParam = new FullMatchParameterSelector("ZONE");
             var southParam = new FullMatchParameterSelector("SOUTH");
@@ -241,9 +247,43 @@ namespace Pigeoid.Interop.Proj4
             if (southParam.IsSelected)
                 result.IsSouth = southParam.GetValueAsBoolean().GetValueOrDefault();
             if (latTsParam.IsSelected)
-                result.lat_ts = latTsParam.GetValueAsDouble().GetValueOrDefault();
+                result.lat_ts = latTsParam.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
             if (zoneParam.IsSelected)
                 result.Zone = zoneParam.GetValueAsInt32();
+        }
+
+        private static void ApplyParametersStere(ProjectionInfo result, IEnumerable<INamedParameter> parameters) {
+            Contract.Requires(result != null);
+            Contract.Requires(parameters != null);
+            var lon0Param = new MultiParameterSelector(
+                new CentralMeridianParameterSelector(),
+                new LongitudeOfNaturalOriginParameterSelector(),
+                new LongitudeOfCenterParameterSelector());
+            var latTsParam = new MultiParameterSelector(
+                new LatitudeOfTrueScaleParameterSelector(),
+                new StandardParallelParameterSelector(),
+                new LatitudeOfNaturalOriginParameterSelector(),
+                new LatitudeOfCenterParameterSelector());
+            var k0Param = new ScaleFactorParameterSelector();
+            var x0Param = new FalseEastingParameterSelector();
+            var y0Param = new FalseNorthingParameterSelector();
+
+            var paramLookup = new NamedParameterLookup(parameters);
+            paramLookup.Assign(lon0Param, latTsParam, k0Param, x0Param, y0Param);
+
+            if (lon0Param.IsSelected)
+                result.CentralMeridian = lon0Param.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
+            if (latTsParam.IsSelected)
+                result.lat_ts = latTsParam.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
+            if (k0Param.IsSelected)
+                result.ScaleFactor = k0Param.GetValueAsDouble(ScaleUnitUnity.Value) ?? 1.0;
+            if (x0Param.IsSelected)
+                result.FalseEasting = x0Param.GetValueAsDouble(OgcLinearUnit.DefaultMeter);
+            if (y0Param.IsSelected)
+                result.FalseNorthing = y0Param.GetValueAsDouble(OgcLinearUnit.DefaultMeter);
+
+            if (!result.LatitudeOfOrigin.HasValue && result.lat_ts.HasValue)
+                result.LatitudeOfOrigin = result.lat_ts.GetValueOrDefault() >= 0 ? 90.0 : -90.0;
         }
 
         private static AuthorityTag CreateAuthorityTag(ProjectionInfo projectionInfo) {
