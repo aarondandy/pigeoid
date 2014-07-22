@@ -76,6 +76,22 @@ namespace Pigeoid.Interop.Proj4.Test
         }
 
         [Test]
+        public void epsg2985() {
+            var crs = EpsgCrs.Get(2985);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual("stere", prj.Transform.Proj4Name);
+            Assert.AreEqual(-90, prj.LatitudeOfOrigin);
+            Assert.AreEqual(-67, prj.StandardParallel1);
+            Assert.AreEqual(140, prj.CentralMeridian);
+            Assert.AreEqual(1, prj.ScaleFactor);
+            Assert.AreEqual(300000, prj.FalseEasting);
+            Assert.AreEqual(200000, prj.FalseNorthing);
+        }
+
+        [Test]
         public void epsg3031() {
             var crs = EpsgCrs.Get(3031);
             Assert.IsNotNull(crs);
@@ -84,8 +100,8 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.IsNotNull(prj);
             Assert.AreEqual("stere", prj.Transform.Proj4Name);
             Assert.AreEqual(-90, prj.LatitudeOfOrigin);
-            Assert.AreEqual(-71, prj.lat_ts);
-            Assert.AreEqual(0, prj.LongitudeOfCenter ?? 0);
+            Assert.AreEqual(-71, prj.StandardParallel1);
+            Assert.AreEqual(0, prj.CentralMeridian ?? 0);
             Assert.AreEqual(1, prj.ScaleFactor);
             Assert.AreEqual(0, prj.FalseEasting);
             Assert.AreEqual(0, prj.FalseNorthing);
@@ -132,9 +148,23 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.IsNotNull(prj);
             Assert.AreEqual("stere", prj.Transform.Proj4Name);
             Assert.AreEqual(-90, prj.LatitudeOfOrigin);
-            Assert.AreEqual(-80.23861111111111, prj.lat_ts, 0.0000001);
+            Assert.AreEqual(-80.23861111111111, prj.StandardParallel1, 0.0000001);
             Assert.AreEqual(0, prj.LongitudeOfCenter ?? 0);
             Assert.AreEqual(1, prj.ScaleFactor);
+            Assert.AreEqual(0, prj.FalseEasting);
+            Assert.AreEqual(0, prj.FalseNorthing);
+        }
+
+        [Test]
+        public void epsg3571() {
+            var crs = EpsgCrs.Get(3571);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual("laea", prj.Transform.Proj4Name);
+            Assert.AreEqual(90, prj.LatitudeOfOrigin);
+            Assert.AreEqual(180, prj.CentralMeridian);
             Assert.AreEqual(0, prj.FalseEasting);
             Assert.AreEqual(0, prj.FalseNorthing);
         }
@@ -159,6 +189,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
             var prj = Proj4Crs.CreateProjection(crs);
             Assert.IsNotNull(prj);
+            Assert.AreEqual("laea", prj.Transform.Proj4Name);
             Assert.AreEqual(90, prj.LatitudeOfOrigin);
             Assert.AreEqual(10, prj.CentralMeridian);
             Assert.AreEqual(0, prj.FalseEasting);
