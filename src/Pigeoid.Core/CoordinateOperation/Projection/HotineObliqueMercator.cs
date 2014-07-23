@@ -22,8 +22,8 @@ namespace Pigeoid.CoordinateOperation.Projection
                     // common
                     var dx = value.X - Core.FalseProjectedOffset.X;
                     var dy = value.Y - Core.FalseProjectedOffset.Y;
-                    var vScalar = (dx * Math.Cos(Core.GammaOrigin)) - (dy * Math.Sin(Core.GammaOrigin));
-                    var uScalar = (dy * Math.Cos(Core.GammaOrigin)) - (dx * Math.Sin(Core.GammaOrigin));
+                    var vScalar = (dx * Math.Cos(Core.AngleFromRectified)) - (dy * Math.Sin(Core.AngleFromRectified));
+                    var uScalar = (dy * Math.Cos(Core.AngleFromRectified)) + (dx * Math.Sin(Core.AngleFromRectified));
 
                     // common
                     var q = Math.Pow(Math.E, -(Core.B * vScalar / Core.A));
@@ -60,7 +60,7 @@ namespace Pigeoid.CoordinateOperation.Projection
                 var invQ = 1 / q;
                 var sFactor = (q - invQ) / 2.0; // S
                 var tFactor = (q + invQ) / 2.0; // T
-                var vFactor = Math.Sin(B * (lonDelta)); // V
+                var vFactor = Math.Sin(B * lonDelta); // V
                 var uFactor = ((-vFactor * Math.Cos(GammaOrigin)) + (sFactor * Math.Sin(GammaOrigin))) / tFactor; // U
                 var vScalar = A * Math.Log((1 - uFactor) / (1 + uFactor)) / (2.0 * B); // v
 
@@ -68,8 +68,8 @@ namespace Pigeoid.CoordinateOperation.Projection
                 var uScalar = A * Math.Atan(((sFactor * Math.Cos(GammaOrigin)) + (vFactor * Math.Sin(GammaOrigin))) / Math.Cos(B * lonDelta)) / B;
 
                 // common
-                var x = (vScalar * Math.Cos(GammaOrigin)) + (uScalar * Math.Sin(GammaOrigin)) + FalseProjectedOffset.X;
-                var y = (uScalar * Math.Cos(GammaOrigin)) - (vScalar * Math.Sin(GammaOrigin)) + FalseProjectedOffset.Y;
+                var x = (vScalar * Math.Cos(AngleFromRectified)) + (uScalar * Math.Sin(AngleFromRectified)) + FalseProjectedOffset.X;
+                var y = (uScalar * Math.Cos(AngleFromRectified)) - (vScalar * Math.Sin(AngleFromRectified)) + FalseProjectedOffset.Y;
                 return new Point2(x, y);
             }
 
@@ -93,8 +93,8 @@ namespace Pigeoid.CoordinateOperation.Projection
                     // common
                     var dx = value.X - Core.FalseProjectedOffset.X;
                     var dy = value.Y - Core.FalseProjectedOffset.Y;
-                    var vScalar = (dx * Math.Cos(Core.GammaOrigin)) - (dy * Math.Sin(Core.GammaOrigin));
-                    var uScalar = (dy * Math.Cos(Core.GammaOrigin)) + (dx * Math.Sin(Core.GammaOrigin));
+                    var vScalar = (dx * Math.Cos(Core.AngleFromRectified)) - (dy * Math.Sin(Core.AngleFromRectified));
+                    var uScalar = (dy * Math.Cos(Core.AngleFromRectified)) + (dx * Math.Sin(Core.AngleFromRectified));
 
                     // variantB
                     uScalar = Core.Uc < 0 ? uScalar - Math.Abs(Core.Uc) : uScalar + Math.Abs(Core.Uc);
@@ -134,7 +134,7 @@ namespace Pigeoid.CoordinateOperation.Projection
                 var invQ = 1 / q;
                 var sFactor = (q - invQ) / 2.0; // S
                 var tFactor = (q + invQ) / 2.0; // T
-                var vFactor = Math.Sin(B * (lonDelta)); // V
+                var vFactor = Math.Sin(B * lonDelta); // V
                 var uFactor = ((-vFactor * Math.Cos(GammaOrigin)) + (sFactor * Math.Sin(GammaOrigin))) / tFactor; // U
                 var vScalar = A * Math.Log((1 - uFactor) / (1 + uFactor)) / (2.0 * B); // v
 
@@ -161,8 +161,8 @@ namespace Pigeoid.CoordinateOperation.Projection
                 }
 
                 // common
-                var x = (vScalar * Math.Cos(GammaOrigin)) + (uScalar * Math.Sin(GammaOrigin)) + FalseProjectedOffset.X;
-                var y = (uScalar * Math.Cos(GammaOrigin)) - (vScalar * Math.Sin(GammaOrigin)) + FalseProjectedOffset.Y;
+                var x = (vScalar * Math.Cos(AngleFromRectified)) + (uScalar * Math.Sin(AngleFromRectified)) + FalseProjectedOffset.X;
+                var y = (uScalar * Math.Cos(AngleFromRectified)) - (vScalar * Math.Sin(AngleFromRectified)) + FalseProjectedOffset.Y;
                 return new Point2(x, y);
             }
 
@@ -231,11 +231,9 @@ namespace Pigeoid.CoordinateOperation.Projection
                 , EHalf);
 
             D = (B * Math.Sqrt(1 - ESq)) / (cosLatCenter * Math.Sqrt(1 - (ESq * sinLatCenter * sinLatCenter)));
-
+            var dSq = D < 1 ? 1 : (D * D);
             CenterLatitudeIsNegative = geographicCenter.Latitude < 0;
-            F = D >= 1
-                ? D + Math.Sqrt((D * D) - 1)
-                : D;
+            F = D + Math.Sqrt(dSq - 1);
             if (CenterLatitudeIsNegative)
                 F = -F;
 
@@ -252,7 +250,7 @@ namespace Pigeoid.CoordinateOperation.Projection
                 Uc = A * (GeographicCenter.Longitude - LongitudeOrigin);
             }
             else {
-                Uc = (A / B) * Math.Atan(Math.Sqrt((D * D) - 1.0) / cosAzimuth);
+                Uc = (A / B) * Math.Atan(Math.Sqrt(dSq - 1.0) / cosAzimuth);
                 if (CenterLatitudeIsNegative)
                     Uc = -Uc;
             }

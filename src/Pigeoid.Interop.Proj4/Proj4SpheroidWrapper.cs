@@ -40,7 +40,7 @@ namespace Pigeoid.Interop.Proj4
             }
             else{
                 var knownMatch = AllKnownSpheroids
-                    .Where(k => k.EquatorialRadius == spheroidInfo.A && k.InverseFlattening == spheroidInfo.InvF)
+                    .Where(k => k.EquatorialRadius == spheroidInfo.A && (k.InverseFlattening == spheroidInfo.InvF || k.PolarRadius == spheroidInfo.B))
                     .OrderByDescending(k => SpheroidNameNormalizedComparer.Default.Equals(k.Name, spheroidInfo.Name))
                     .FirstOrDefault();
                 if (knownMatch != null)

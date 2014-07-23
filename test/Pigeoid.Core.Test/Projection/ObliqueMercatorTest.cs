@@ -25,7 +25,7 @@ namespace Pigeoid.Core.Test.Projection
             var result = projection.TransformValue(input);
 
             Assert.AreEqual(expected.X, result.X, 0.003);
-            Assert.AreEqual(expected.Y, result.Y, 0.0001);
+            Assert.AreEqual(expected.Y, result.Y, 0.001);
         }
 
         [Test]

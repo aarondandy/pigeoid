@@ -83,8 +83,8 @@ namespace Pigeoid.Interop.Proj4
 
         public static LinearUnit ConvertToProj4(IUnit unit) {
             if (unit == null) throw new ArgumentNullException("unit");
-            // TODO: check unit type?
             Contract.EndContractBlock();
+
             var conversion = SimpleUnitConversionGenerator.FindConversion(unit, MetersUnitWrapped);
             if(conversion != null){
                 if(conversion is UnitUnityConversion)
@@ -101,7 +101,10 @@ namespace Pigeoid.Interop.Proj4
                     return customResult;
                 }
             }
-            throw new InvalidOperationException();
+            return new LinearUnit {
+                Meters = 1,
+                Name = unit.Name
+            };
         }
 
         public Proj4LinearUnit(LinearUnit core) {

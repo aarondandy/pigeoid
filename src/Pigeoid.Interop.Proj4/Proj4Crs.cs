@@ -7,6 +7,7 @@ using DotSpatial.Projections.Transforms;
 using Pigeoid.CoordinateOperation;
 using Pigeoid.Ogc;
 using Pigeoid.Unit;
+using System.Text.RegularExpressions;
 
 namespace Pigeoid.Interop.Proj4
 {
@@ -122,6 +123,8 @@ namespace Pigeoid.Interop.Proj4
             return name.ToLowerInvariant();
         }
 
+        private static readonly Regex GeodeticOperationNameRegex = new Regex("geographic|geocentric|geodetic", RegexOptions.IgnoreCase);
+
         public static ProjectionInfo CreateProjection(ICrsProjected crsProjected) {
             if (crsProjected == null) throw new ArgumentNullException("crsProjected");
             Contract.Ensures(Contract.Result<ProjectionInfo>() != null);
@@ -138,9 +141,9 @@ namespace Pigeoid.Interop.Proj4
                 result.Authority = crsProjected.Authority.Name;
             }
 
-            var geographicBase = crsProjected.BaseCrs as ICrsGeographic;
+            var geographicBase = (crsProjected.BaseCrs as ICrsGeodetic) ?? (crsProjected as ICrsGeodetic);
             if (geographicBase != null)
-                result.GeographicInfo = Proj4CrsGeographic.CreateGeographic((ICrsGeographic)(crsProjected.BaseCrs));
+                result.GeographicInfo = Proj4CrsGeographic.CreateGeographic(geographicBase);
 
 
             var projectionInfo = crsProjected.Projection as IParameterizedCoordinateOperationInfo;
@@ -169,6 +172,15 @@ namespace Pigeoid.Interop.Proj4
 
             if (result.Zone.HasValue && proj4Name == "tmerc")
                 proj4Name = "utm";
+
+            if (!TransformManager.Transforms.Exists(x => x.Proj4Name == proj4Name)) {
+                if (GeodeticOperationNameRegex.IsMatch(proj4Name)) {
+                    proj4Name = "longlat";
+                }
+                else {
+                    throw new InvalidOperationException();
+                }
+            }
 
             result.Transform = TransformManager.GetProj4(proj4Name);
 
@@ -419,19 +431,19 @@ namespace Pigeoid.Interop.Proj4
     public class Proj4CrsGeographic : Proj4Crs, ICrsGeographic
     {
 
-        public static GeographicInfo CreateGeographic(ICrsGeographic crsGeographic) {
-            if(crsGeographic == null) throw new ArgumentNullException("crsGeographic");
-            Contract.Requires(crsGeographic.Datum.PrimeMeridian != null);
+        public static GeographicInfo CreateGeographic(ICrsGeodetic crsGeodetic) {
+            if (crsGeodetic == null) throw new ArgumentNullException("crsGeodetic");
+            Contract.Requires(crsGeodetic.Datum.PrimeMeridian != null);
             Contract.Ensures(Contract.Result<GeographicInfo>() != null);
 
             var result = new GeographicInfo {
-                Name = crsGeographic.Name
+                Name = crsGeodetic.Name
             };
 
-            result.Datum = Proj4DatumWrapper.Create(crsGeographic.Datum);
+            result.Datum = Proj4DatumWrapper.Create(crsGeodetic.Datum);
 
-            Contract.Assume(crsGeographic.Datum.PrimeMeridian != null);
-            result.Meridian = Proj4MeridianWrapper.Create(crsGeographic.Datum.PrimeMeridian);
+            Contract.Assume(crsGeodetic.Datum.PrimeMeridian != null);
+            result.Meridian = Proj4MeridianWrapper.Create(crsGeodetic.Datum.PrimeMeridian);
 
             // TODO: set the unit
 

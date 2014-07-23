@@ -1,11 +1,13 @@
 ﻿using DotSpatial.Projections;
 using DotSpatial.Projections.ProjectedCategories;
 using NUnit.Framework;
+using Pigeoid.CoordinateOperation;
 using Pigeoid.Epsg;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Vertesaur;
 
 namespace Pigeoid.Interop.Proj4.Test
 {
@@ -132,11 +134,15 @@ namespace Pigeoid.Interop.Proj4.Test
 
             var prj = Proj4Crs.CreateProjection(crs);
             Assert.IsNotNull(prj);
+            Assert.AreEqual("omerc", prj.Transform.Proj4Name);
             Assert.AreEqual(45.30916666666666, prj.LatitudeOfOrigin, 0.00000001);
             Assert.AreEqual(-86, prj.LongitudeOfCenter);
+            Assert.AreEqual(337.25556, prj.alpha);
             Assert.AreEqual(0.9996, prj.ScaleFactor);
             Assert.AreEqual(2546731.496, prj.FalseEasting);
             Assert.AreEqual(-4354009.816, prj.FalseNorthing);
+            Assert.AreEqual(6378137, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius);
+            Assert.AreEqual(298.257222101, prj.GeographicInfo.Datum.Spheroid.InverseFlattening, 0.0000001);
         }
 
         [Test]
@@ -194,6 +200,20 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(10, prj.CentralMeridian);
             Assert.AreEqual(0, prj.FalseEasting);
             Assert.AreEqual(0, prj.FalseNorthing);
+            Assert.AreEqual(6378137, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius);
+            Assert.AreEqual(298.257223563, prj.GeographicInfo.Datum.Spheroid.InverseFlattening, 0.0000001);
+        }
+
+        [Test]
+        public void epsg4326() {
+            var crs = EpsgCrs.Get(4326);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual("longlat", prj.Transform.Proj4Name);
+            Assert.AreEqual(6378137, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius);
+            Assert.AreEqual(298.257223563, prj.GeographicInfo.Datum.Spheroid.InverseFlattening, 0.0000001);
         }
 
         [Test]
@@ -263,10 +283,6 @@ namespace Pigeoid.Interop.Proj4.Test
         public void epsg2039_to_epsg28191() {
             var from = EpsgCrs.Get(2039);
             var to = EpsgCrs.Get(28191);
-            /*var epsgPathGen = new EpsgCrsCoordinateOperationPathGeneratorOld(
-                new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
-                    x => !x.Deprecated,
-                    x => !x.Deprecated));*/
             var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
             var epsgPath = pathGenerator.Generate(from, to);
             Assert.IsNotEmpty(epsgPath);
@@ -278,10 +294,6 @@ namespace Pigeoid.Interop.Proj4.Test
         public void epsg3078_to_epsg3575() {
             var from = EpsgCrs.Get(3078);
             var to = EpsgCrs.Get(3575);
-            /*var epsgPathGen = new EpsgCrsCoordinateOperationPathGeneratorOld(
-                new EpsgCrsCoordinateOperationPathGeneratorOld.SharedOptionsAreaPredicate(
-                    x => !x.Deprecated,
-                    x => !x.Deprecated));*/
             var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
             var epsgPath = pathGenerator.Generate(from, to);
             Assert.IsNotEmpty(epsgPath);
@@ -298,6 +310,73 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.IsNotEmpty(epsgPath);
             var proj4Transform = new Proj4Transform(from, to);
             Assert.IsNotNull(proj4Transform);
+        }
+
+        [Test]
+        public void epsg3079_to_epsg3575_proj4() {
+            var from = EpsgCrs.Get(3079);
+            var fromProj4 = Proj4Crs.CreateProjection(from);
+            var to = EpsgCrs.Get(3575);
+            var toProj4 = Proj4Crs.CreateProjection(to);
+            var wgs = EpsgCrs.Get(4326);
+            var wgsProj4 = Proj4Crs.CreateProjection(wgs);
+
+            var somePlaceInMichigan = new GeographicCoordinate(40.4, -91.8);
+            var expected3079 = new Point2(6992.885640195105, -644.956855237484);
+            var expected3575 = new Point2(-5244224.354585549, 1095575.5476152631);
+
+            var proj4_3079_to_4326 = new Proj4Transform(from, wgs);
+            var a = (GeographicCoordinate)proj4_3079_to_4326.TransformValue(expected3079);
+
+            var proj4_4326_to_3079 = new Proj4Transform(wgs, from);
+            var b = (Point2)proj4_4326_to_3079.TransformValue(somePlaceInMichigan);
+
+            var proj4_3575_to_4326 = new Proj4Transform(to, wgs);
+            var c = (GeographicCoordinate)proj4_3575_to_4326.TransformValue(expected3575);
+
+            var proj4_4326_to_3575 = new Proj4Transform(wgs, to);
+            var d = (Point2)proj4_4326_to_3575.TransformValue(somePlaceInMichigan);
+
+            Assert.Inconclusive();
+        }
+
+        [Test]
+        public void epsg3079_to_epsg3575_epsg() {
+            var from = EpsgCrs.Get(3079);
+            var to = EpsgCrs.Get(3575);
+            var wgs = EpsgCrs.Get(4326);
+
+            var somePlaceInMichigan = new GeographicCoordinate(40.4, -91.8);
+            var expected3079 = new Point2(6992.885640195105, -644.956855237484);
+            var expected3575 = new Point2(-5244224.354585549, 1095575.5476152631);
+
+            var gen = new EpsgCrsCoordinateOperationPathGenerator();
+            var fromPath = gen.Generate(from, wgs).First();
+            var toPath = gen.Generate(to, wgs).First();
+
+            var compiler = new StaticCoordinateOperationCompiler();
+
+            var fromTx = compiler.Compile(fromPath);
+            var toTx = compiler.Compile(toPath);
+
+            var a = (GeographicCoordinate)fromTx.TransformValue(expected3079);
+            Assert.AreEqual(somePlaceInMichigan.Latitude, a.Latitude, 0.01);
+            Assert.AreEqual(somePlaceInMichigan.Longitude, a.Longitude, 0.01);
+            // TODO: check values
+            var b = (Point2)fromTx.GetInverse().TransformValue(somePlaceInMichigan);
+            Assert.AreEqual(expected3079.X, b.X, 0.01);
+            Assert.AreEqual(expected3079.Y, b.Y, 0.01);
+            var c = (GeographicCoordinate)toTx.TransformValue(expected3575);
+            // TODO: check values
+            var d = (Point2)toTx.GetInverse().TransformValue(somePlaceInMichigan);
+            // TODO: check values
+
+            var totalPath = gen.Generate(from, to).First();
+            var totalTx = compiler.Compile(totalPath);
+            var actual3575 = (Point2)totalTx.TransformValue(expected3079);
+
+            Assert.AreEqual(expected3575.X, actual3575.X, 0.001);
+            Assert.AreEqual(expected3575.Y, actual3575.Y, 0.001);
         }
 
     }

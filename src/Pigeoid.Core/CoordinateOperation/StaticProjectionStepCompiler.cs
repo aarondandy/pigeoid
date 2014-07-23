@@ -674,26 +674,35 @@ namespace Pigeoid.CoordinateOperation
 
         private SpheroidProjectionBase CreateHotineObliqueMercator(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
-            var originLatParam = new KeywordNamedParameterSelector("LAT", "CENTER");
-            var originLonParam = new KeywordNamedParameterSelector("LON", "CENTER");
-            var offsetXParam = new FalseEastingParameterSelector();
-            var offsetYParam = new FalseNorthingParameterSelector();
+
+            var latParam = new MultiParameterSelector(
+                new LatitudeOfCenterParameterSelector(),
+                new LatitudeOfNaturalOriginParameterSelector());
+            var lonParam = new MultiParameterSelector(
+                new LongitudeOfCenterParameterSelector(),
+                new LongitudeOfNaturalOriginParameterSelector());
+
             var scaleFactorParam = new ScaleFactorParameterSelector();
             var azimuthParam = new KeywordNamedParameterSelector("AZIMUTH");
             var angleSkewParam = new KeywordNamedParameterSelector("ANGLE", "SKEW");
-            opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, scaleFactorParam, azimuthParam, angleSkewParam);
+
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
+            var xAtOriginParam = new EastingAtCenterParameterSelector();
+            var yAtOriginParam = new NorthingAtCenterParameterSelector();
+
+            opData.ParameterLookup.Assign(latParam, lonParam, offsetXParam, offsetYParam, xAtOriginParam, yAtOriginParam, scaleFactorParam, azimuthParam, angleSkewParam);
 
             var spheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
             if (null == spheroid)
                 return null;
 
-            GeographicCoordinate origin;
-            if (!(originLatParam.IsSelected || originLonParam.IsSelected) || !TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin))
-                origin = GeographicCoordinate.Zero;
-
-            Vector2 offset;
-            if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
-                offset = Vector2.Zero;
+            double lat, lon;
+            if(!latParam.IsSelected || !latParam.TryGetValueAsDouble(OgcAngularUnit.DefaultRadians, out lat))
+                lat = 0;
+            if(!lonParam.IsSelected || !lonParam.TryGetValueAsDouble(OgcAngularUnit.DefaultRadians, out lon))
+                lon = 0;
+            var origin = new GeographicCoordinate(lat, lon);
 
             double scaleFactor;
             if (!scaleFactorParam.IsSelected || !TryGetDouble(scaleFactorParam.Selection, ScaleUnitUnity.Value, out scaleFactor))
@@ -707,9 +716,22 @@ namespace Pigeoid.CoordinateOperation
             if (!angleSkewParam.IsSelected || !TryGetDouble(angleSkewParam.Selection, OgcAngularUnit.DefaultRadians, out angleSkew))
                 angleSkew = 0;
 
-            // TODO: in which cases would variant A be used?
-
-            return new HotineObliqueMercator.VariantB(origin, azimuth, angleSkew, scaleFactor, offset, spheroid);
+            var outputUnit = opData.StepParams.RelatedOutputCrsUnit;
+            double x,y;
+            if(xAtOriginParam.IsSelected || yAtOriginParam.IsSelected){
+                if (!xAtOriginParam.IsSelected || !xAtOriginParam.TryGetValueAsDouble(outputUnit, out x))
+                    x = 0;
+                if (!yAtOriginParam.IsSelected || !yAtOriginParam.TryGetValueAsDouble(outputUnit, out y))
+                    y = 0;
+                return new HotineObliqueMercator.VariantB(new GeographicCoordinate(lat, lon), azimuth, angleSkew, scaleFactor, new Vector2(x,y), spheroid);
+            }
+            else {
+                if (!offsetXParam.IsSelected || !offsetXParam.TryGetValueAsDouble(outputUnit, out x))
+                    x = 0;
+                if (!offsetYParam.IsSelected || !offsetYParam.TryGetValueAsDouble(outputUnit, out y))
+                    y = 0;
+                return new HotineObliqueMercator.VariantA(new GeographicCoordinate(lat, lon), azimuth, angleSkew, scaleFactor, new Vector2(x,y), spheroid);
+            }
         }
 
         public StaticProjectionStepCompiler(INameNormalizedComparer coordinateOperationNameComparer = null) {

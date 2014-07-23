@@ -53,10 +53,13 @@ namespace Pigeoid.Interop.Proj4
         }
 
         public object TransformValue(object value) {
-            if (value is Point2) {
+            if (value == null)
+                return null;
+            var valueType = value.GetType();
+            if (valueType == typeof(Point2)) {
                 var p2 = (Point2)value;
                 var xy = new double[] { p2.X, p2.Y };
-                var z = new double[] { 1 };
+                var z = new double[] { 0 }; // TODO: 0?
                 Reproject.ReprojectPoints(
                     xy,
                     z,
@@ -65,6 +68,28 @@ namespace Pigeoid.Interop.Proj4
                     0,
                     1
                 );
+                if (TargetProj4.IsLatLon)
+                    return new GeographicCoordinate(xy[1], xy[0]);
+                else if (TargetProj4.IsGeocentric)
+                    return new Point3(xy[0], xy[1], z[0]);
+                return new Point2(xy[0], xy[1]);
+            }
+            else if (valueType == typeof(GeographicCoordinate)) {
+                var g2 = (GeographicCoordinate)value;
+                var xy = new double[] { g2.Longitude, g2.Latitude};
+                var z = new double[] { 0 }; // TODO: 0?
+                Reproject.ReprojectPoints(
+                    xy,
+                    z,
+                    SourceProj4,
+                    TargetProj4,
+                    0,
+                    1
+                );
+                if (TargetProj4.IsLatLon)
+                    return new GeographicCoordinate(xy[1], xy[0]);
+                else if (TargetProj4.IsGeocentric)
+                    return new Point3(xy[0], xy[1], z[0]);
                 return new Point2(xy[0], xy[1]);
             }
             throw new NotImplementedException();

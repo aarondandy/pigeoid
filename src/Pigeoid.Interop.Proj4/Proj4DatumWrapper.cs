@@ -17,11 +17,16 @@ namespace Pigeoid.Interop.Proj4
                 Name = datum.Name
             };
 
+            result.Spheroid = Proj4SpheroidWrapper.Create(datum.Spheroid);
+
             if (datum.IsTransformableToWgs84) {
                 var helmert = datum.BasicWgs84Transformation;
                 if (helmert.ScaleDeltaPartsPerMillion == 0 && Vector3.Zero.Equals(helmert.RotationArcSeconds)) {
                     if (Vector3.Zero.Equals(helmert.Delta)) {
-                        result.DatumType = DatumType.WGS84;
+                        if (result.Spheroid.Name == "WE")
+                            result.Proj4DatumName = "wgs84";
+                        else
+                            result.DatumType = DatumType.WGS84;
                     }
                     else{
                         result.ToWGS84 = new[] {
@@ -42,8 +47,6 @@ namespace Pigeoid.Interop.Proj4
             else {
                 result.DatumType = DatumType.Unknown;
             }
-
-            result.Spheroid = Proj4SpheroidWrapper.Create(datum.Spheroid);
 
             return result;
         }

@@ -540,11 +540,11 @@ namespace Pigeoid.CoordinateOperation
 
             int score = 0;
             if (parameterName.Contains("EASTING")) {
-                score = 1;
+                score = 25;
                 if (parameterName.Contains("OFFSET"))
-                    ++score;
+                    score+=25;
                 if (parameterName.Contains("FALSE"))
-                    ++score;
+                    score+=25;
             }
             return score;
         }
@@ -561,11 +561,55 @@ namespace Pigeoid.CoordinateOperation
 
             int score = 0;
             if (parameterName.Contains("NORTHING")) {
-                score = 1;
+                score = 25;
                 if (parameterName.Contains("OFFSET"))
-                    ++score;
+                    score+=25;
                 if (parameterName.Contains("FALSE"))
-                    ++score;
+                    score+=25;
+            }
+            return score;
+        }
+    }
+
+    public class EastingAtCenterParameterSelector : NamedParameterSelector
+    {
+
+        public override int Score(NamedParameterSelector.ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("EASTINGATPROJECTIONCENTER".Equals(parameterName))
+                return 100;
+            if ("EASTINGATFALSEORIGIN".Equals(parameterName))
+                return 75;
+            
+            int score = 0;
+            if (parameterName.Contains("EASTING")) {
+                score = 25;
+                if (parameterName.Contains("PROJECTIONCENTER"))
+                    score+=25;
+                if (parameterName.Contains("FALSEORIGIN"))
+                    score+=25;
+            }
+            return score;
+        }
+    }
+
+    public class NorthingAtCenterParameterSelector : NamedParameterSelector
+    {
+
+        public override int Score(NamedParameterSelector.ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("NORTHINGATPROJECTIONCENTER".Equals(parameterName))
+                return 100;
+            if ("NORTHINGATFALSEORIGIN".Equals(parameterName))
+                return 75;
+
+            int score = 0;
+            if (parameterName.Contains("NORTHING")) {
+                score = 25;
+                if (parameterName.Contains("PROJECTIONCENTER"))
+                    score += 25;
+                if (parameterName.Contains("FALSEORIGIN"))
+                    score += 25;
             }
             return score;
         }
