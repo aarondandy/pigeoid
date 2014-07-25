@@ -67,7 +67,7 @@ namespace Pigeoid.Interop.Proj4.Test
             return spheroid.InverseFlattening == 0;
         }
 
-        [Test, TestCaseSource("AllProjections")]
+        [Test, TestCaseSource("AllProjections"), Explicit]
         public void Test(TestSet set) {
             var catagory = CategoryInstances[set.CategoryType];
             var expected = (ProjectionInfo)(set.CategoryType.GetField(set.FieldName).GetValue(catagory));

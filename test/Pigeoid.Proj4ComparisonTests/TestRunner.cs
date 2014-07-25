@@ -108,7 +108,9 @@ namespace Pigeoid.Proj4ComparisonTests
             1047,
             9620,
             1060,
-            1048
+            1048,
+            9812, // dotspatial impl seems buggy
+            9815 // dotspatial impl seems buggy
         };
 
         private static bool IsNotDeprecated(EpsgCrs crs) {

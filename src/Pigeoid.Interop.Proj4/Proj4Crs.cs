@@ -228,6 +228,7 @@ namespace Pigeoid.Interop.Proj4
             var y0Param = new FalseNorthingParameterSelector();
             var k0Param = new ScaleFactorParameterSelector();
             var alphaParam = new KeywordNamedParameterSelector("ALPHA", "AZIMUTH");
+            var angleSkewParam = new KeywordNamedParameterSelector("SKEW", "GAMMA");
             var zoneParam = new FullMatchParameterSelector("ZONE");
             var southParam = new FullMatchParameterSelector("SOUTH");
             var standardParallel1Param = new MultiParameterSelector(
@@ -236,7 +237,7 @@ namespace Pigeoid.Interop.Proj4
             var standardParallel2Param = new StandardParallelParameterSelector(2);
 
             var paramLookup = new NamedParameterLookup(parameters);
-            paramLookup.Assign(lon0Param, loncParam, lat0Param, lat1Param, lat2Param, x0Param, y0Param, k0Param, alphaParam, zoneParam, southParam, standardParallel1Param, standardParallel2Param);
+            paramLookup.Assign(lon0Param, loncParam, lat0Param, lat1Param, lat2Param, x0Param, y0Param, k0Param, alphaParam, angleSkewParam, zoneParam, southParam, standardParallel1Param, standardParallel2Param);
 
             if (lon0Param.IsSelected)
                 result.CentralMeridian = lon0Param.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
@@ -256,6 +257,8 @@ namespace Pigeoid.Interop.Proj4
                 result.ScaleFactor = k0Param.GetValueAsDouble(ScaleUnitUnity.Value) ?? 1.0;
             if (alphaParam.IsSelected)
                 result.alpha = alphaParam.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);
+            /*if (angleSkewParam.IsSelected)
+                result.gamma = angleSkewParam.GetValueAsDouble(OgcAngularUnit.DefaultDegrees);*/
             if (southParam.IsSelected)
                 result.IsSouth = southParam.GetValueAsBoolean().GetValueOrDefault();
             if (standardParallel1Param.IsSelected)

@@ -312,7 +312,7 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.IsNotNull(proj4Transform);
         }
 
-        [Test]
+        [Test, Explicit]
         public void epsg3079_to_epsg3575_proj4() {
             var from = EpsgCrs.Get(3079);
             var fromProj4 = Proj4Crs.CreateProjection(from);
@@ -338,45 +338,6 @@ namespace Pigeoid.Interop.Proj4.Test
             var d = (Point2)proj4_4326_to_3575.TransformValue(somePlaceInMichigan);
 
             Assert.Inconclusive();
-        }
-
-        [Test]
-        public void epsg3079_to_epsg3575_epsg() {
-            var from = EpsgCrs.Get(3079);
-            var to = EpsgCrs.Get(3575);
-            var wgs = EpsgCrs.Get(4326);
-
-            var somePlaceInMichigan = new GeographicCoordinate(40.4, -91.8);
-            var expected3079 = new Point2(6992.885640195105, -644.956855237484);
-            var expected3575 = new Point2(-5244224.354585549, 1095575.5476152631);
-
-            var gen = new EpsgCrsCoordinateOperationPathGenerator();
-            var fromPath = gen.Generate(from, wgs).First();
-            var toPath = gen.Generate(to, wgs).First();
-
-            var compiler = new StaticCoordinateOperationCompiler();
-
-            var fromTx = compiler.Compile(fromPath);
-            var toTx = compiler.Compile(toPath);
-
-            var a = (GeographicCoordinate)fromTx.TransformValue(expected3079);
-            Assert.AreEqual(somePlaceInMichigan.Latitude, a.Latitude, 0.01);
-            Assert.AreEqual(somePlaceInMichigan.Longitude, a.Longitude, 0.01);
-            // TODO: check values
-            var b = (Point2)fromTx.GetInverse().TransformValue(somePlaceInMichigan);
-            Assert.AreEqual(expected3079.X, b.X, 0.01);
-            Assert.AreEqual(expected3079.Y, b.Y, 0.01);
-            var c = (GeographicCoordinate)toTx.TransformValue(expected3575);
-            // TODO: check values
-            var d = (Point2)toTx.GetInverse().TransformValue(somePlaceInMichigan);
-            // TODO: check values
-
-            var totalPath = gen.Generate(from, to).First();
-            var totalTx = compiler.Compile(totalPath);
-            var actual3575 = (Point2)totalTx.TransformValue(expected3079);
-
-            Assert.AreEqual(expected3575.X, actual3575.X, 0.001);
-            Assert.AreEqual(expected3575.Y, actual3575.Y, 0.001);
         }
 
     }

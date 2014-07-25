@@ -8,6 +8,7 @@ using Pigeoid.Utility;
 
 namespace Pigeoid.CoordinateOperation
 {
+    [Obsolete("Rename: Helmert Bridge Coordinate Op Path Gen?")]
     public class HelmertCrsCoordinateOperationPathGenerator : ICoordinateOperationPathGenerator<ICrs>
     {
 

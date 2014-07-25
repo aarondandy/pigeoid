@@ -265,10 +265,15 @@ namespace Pigeoid.CoordinateOperation
                 offset = Vector2.Zero;
 
             var spherical = _coordinateOperationNameComparer.Normalize(opData.OperationName).EndsWith("SPHERICAL");
+            if (spherical)
+                return new LambertAzimuthalEqualAreaSpherical(origin, offset, spheroid);
 
-            return spherical
-                ? (SpheroidProjectionBase)new LambertAzimuthalEqualAreaSpherical(origin, offset, spheroid)
-                : new LambertAzimuthalEqualArea(origin, offset, spheroid);
+            if (Math.Abs(origin.Latitude - (Math.PI / 2.0)) < 0.00000001)
+                return new LambertAzimuthalEqualAreaPolar(origin, offset, spheroid); // N
+            if (Math.Abs(origin.Latitude - (Math.PI / -2.0)) < 0.00000001)
+                return new LambertAzimuthalEqualAreaPolar(origin, offset, spheroid); // S
+
+            return new LambertAzimuthalEqualAreaOblique(origin, offset, spheroid);
         }
 
         private SpheroidProjectionBase CreateEquidistantCylindrical(ProjectionCompilationParams opData) {
