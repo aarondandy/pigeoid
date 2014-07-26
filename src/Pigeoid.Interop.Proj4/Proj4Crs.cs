@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Linq;
 using DotSpatial.Projections;
 using DotSpatial.Projections.Transforms;
 using Pigeoid.CoordinateOperation;
@@ -182,7 +183,29 @@ namespace Pigeoid.Interop.Proj4
                 }
             }
 
-            result.Transform = TransformManager.GetProj4(proj4Name);
+            switch (proj4Name) {
+                case "omerc": {
+
+                    var offsetXParam = new FalseEastingParameterSelector();
+                    var offsetYParam = new FalseNorthingParameterSelector();
+                    var xAtOriginParam = new EastingAtCenterParameterSelector();
+                    var yAtOriginParam = new NorthingAtCenterParameterSelector();
+                    var paramLookup = new NamedParameterLookup(projectionInfo.Parameters);
+                    paramLookup.Assign(offsetXParam, offsetYParam, xAtOriginParam, yAtOriginParam);
+
+                    if (offsetXParam.IsSelected || offsetYParam.IsSelected)
+                        result.Transform = TransformManager.GetProjection("Hotine_Oblique_Mercator_Azimuth_Center");
+                    else if(xAtOriginParam.IsSelected || yAtOriginParam.IsSelected)
+                        result.Transform = TransformManager.GetProjection("Hotine_Oblique_Mercator_Azimuth_Natural_Origin");
+                    else
+                        result.Transform = TransformManager.GetProj4(proj4Name);
+
+                    break;
+                }
+                default:
+                    result.Transform = TransformManager.GetProj4(proj4Name);
+                    break;
+            }
 
             var finalResult = ProjectionInfo.FromProj4String(result.ToProj4String()); // TODO: fix this hack
             finalResult.CentralMeridian = result.CentralMeridian;

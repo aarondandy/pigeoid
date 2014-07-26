@@ -312,7 +312,7 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.IsNotNull(proj4Transform);
         }
 
-        [Test, Explicit]
+        [Test]
         public void epsg3079_to_epsg3575_proj4() {
             var from = EpsgCrs.Get(3079);
             var fromProj4 = Proj4Crs.CreateProjection(from);
