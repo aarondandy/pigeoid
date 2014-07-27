@@ -143,6 +143,23 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(-4354009.816, prj.FalseNorthing);
             Assert.AreEqual(6378137, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius);
             Assert.AreEqual(298.257222101, prj.GeographicInfo.Datum.Spheroid.InverseFlattening, 0.0000001);
+
+            var wgs = EpsgCrs.Get(4326);
+            var wgsProj4 = Proj4Crs.CreateProjection(wgs);
+
+            var somePlaceInMichigan = new GeographicCoordinate(40.4, -91.8);
+            var expected3079 = new Point2(6992.885640195105, -644.956855237484);
+
+            var proj4_3079_to_4326 = new Proj4Transform(crs, wgs);
+            var a = (GeographicCoordinate)proj4_3079_to_4326.TransformValue(expected3079);
+            Assert.AreEqual(somePlaceInMichigan.Latitude, a.Latitude);
+            Assert.AreEqual(somePlaceInMichigan.Longitude, a.Longitude);
+
+            var proj4_4326_to_3079 = new Proj4Transform(wgs, crs);
+            var b = (Point2)proj4_4326_to_3079.TransformValue(somePlaceInMichigan);
+            Assert.AreEqual(expected3079.X, b.X);
+            Assert.AreEqual(expected3079.Y, b.Y);
+
         }
 
         [Test]
@@ -202,6 +219,21 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(0, prj.FalseNorthing);
             Assert.AreEqual(6378137, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius);
             Assert.AreEqual(298.257223563, prj.GeographicInfo.Datum.Spheroid.InverseFlattening, 0.0000001);
+
+            var wgs = EpsgCrs.Get(4326);
+            var wgsProj4 = Proj4Crs.CreateProjection(wgs);
+            var somePlaceInMichigan = new GeographicCoordinate(40.4, -91.8);
+            var expected3575 = new Point2(-5244224.354585549, 1095575.5476152631);
+
+            var proj4_3575_to_4326 = new Proj4Transform(crs, wgs);
+            var c = (GeographicCoordinate)proj4_3575_to_4326.TransformValue(expected3575);
+            Assert.AreEqual(somePlaceInMichigan.Latitude, c.Latitude, 0.2);
+            Assert.AreEqual(somePlaceInMichigan.Longitude, c.Longitude, 0.2);
+
+            var proj4_4326_to_3575 = new Proj4Transform(wgs, crs);
+            var d = (Point2)proj4_4326_to_3575.TransformValue(somePlaceInMichigan);
+            Assert.AreEqual(expected3575.X, d.X, 50000);
+            Assert.AreEqual(expected3575.Y, d.Y, 50000);
         }
 
         [Test]
@@ -318,26 +350,14 @@ namespace Pigeoid.Interop.Proj4.Test
             var fromProj4 = Proj4Crs.CreateProjection(from);
             var to = EpsgCrs.Get(3575);
             var toProj4 = Proj4Crs.CreateProjection(to);
-            var wgs = EpsgCrs.Get(4326);
-            var wgsProj4 = Proj4Crs.CreateProjection(wgs);
 
-            var somePlaceInMichigan = new GeographicCoordinate(40.4, -91.8);
             var expected3079 = new Point2(6992.885640195105, -644.956855237484);
             var expected3575 = new Point2(-5244224.354585549, 1095575.5476152631);
 
-            var proj4_3079_to_4326 = new Proj4Transform(from, wgs);
-            var a = (GeographicCoordinate)proj4_3079_to_4326.TransformValue(expected3079);
-
-            var proj4_4326_to_3079 = new Proj4Transform(wgs, from);
-            var b = (Point2)proj4_4326_to_3079.TransformValue(somePlaceInMichigan);
-
-            var proj4_3575_to_4326 = new Proj4Transform(to, wgs);
-            var c = (GeographicCoordinate)proj4_3575_to_4326.TransformValue(expected3575);
-
-            var proj4_4326_to_3575 = new Proj4Transform(wgs, to);
-            var d = (Point2)proj4_4326_to_3575.TransformValue(somePlaceInMichigan);
-
-            Assert.Inconclusive();
+            var proj = new Proj4Transform(from, to);
+            var actual = (Point2)proj.TransformValue(expected3079);
+            Assert.AreEqual(expected3575.X, actual.X, 10);
+            Assert.AreEqual(expected3575.Y, actual.Y, 10);
         }
 
     }
