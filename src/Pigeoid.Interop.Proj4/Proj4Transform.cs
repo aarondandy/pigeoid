@@ -45,11 +45,11 @@ namespace Pigeoid.Interop.Proj4
         }
 
         public ITransformation GetInverse() {
-            throw new NotImplementedException();
+            return new Proj4Transform(Target, Source);
         }
 
         public bool HasInverse {
-            get { throw new NotImplementedException(); }
+            get { return true; ; }
         }
 
         public object TransformValue(object value) {
@@ -101,69 +101,6 @@ namespace Pigeoid.Interop.Proj4
             return values.Select(TransformValue);
         }
     }
-
-    /*
-
-    public class Proj4ProjectionTransform : Proj4Transform
-    {
-
-        public Proj4ProjectionTransform(ProjectionInfo piFrom, ProjectionInfo piTo) {
-            if (piFrom == null) throw new ArgumentNullException("piFrom");
-            if (piTo == null) throw new ArgumentNullException("piTo");
-            Contract.Ensures(From == From);
-            Contract.Ensures(To == To);
-            From = From;
-            To = To;
-        }
-
-        [ContractInvariantMethod]
-        private void ObjectInvariants() {
-            Contract.Invariant(PiFrom != null);
-            Contract.Invariant(PiTo != null);
-        }
-
-        protected ProjectionInfo From { get; private set; }
-
-        protected ProjectionInfo To { get; private set; }
-
-        public override object TransformValue(object value) {
-            if (value is Point2) {
-                var p2 = (Point2)value;
-                var xy = new double[] { 0, 0};
-                var z = new double[] { 1 };
-                Reproject.ReprojectPoints(
-                    xy,
-                    z,
-                    KnownCoordinateSystems.Projected.NorthAmerica.USAContiguousLambertConformalConic,
-                    KnownCoordinateSystems.Geographic.World.WGS1984,
-                    0,
-                    1);
-                return new Point2(xy[0], xy[1]);
-            }
-            throw new NotImplementedException();
-        }
-
-        public override Type[] GetInputTypes() {
-            return new[] {
-                typeof(double[])
-            };
-        }
-
-        public override Type[] GetOutputTypes(Type inputType) {
-            if (inputType == typeof (double[]))
-                return new[] {inputType};
-            return new Type[0];
-        }
-
-        public override bool HasInverse {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override ITransformation GetInverse() {
-            throw new NotImplementedException();
-        }
-
-    }*/
 
 
 }

@@ -136,9 +136,14 @@ namespace Pigeoid.Proj4ComparisonTests
 
             var catOp = epsgOp as EpsgConcatenatedCoordinateOperationInfo;
             if (catOp != null) {
-                return catOp.Steps.All(s => !_restrictedOperationMethodCodes.Contains(s.Code));
+                return catOp.Steps.All(s => !_restrictedOperationMethodCodes.Contains(s.Method.Code));
             }
-            return !_restrictedOperationMethodCodes.Contains(epsgOp.Code);
+
+            var epsgOpInfo = epsgOp as EpsgCoordinateOperationInfo;
+            if(epsgOpInfo != null)
+                return !_restrictedOperationMethodCodes.Contains(epsgOpInfo.Method.Code);
+
+            return true;
         }
 
         public TestRunner() {

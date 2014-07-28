@@ -159,7 +159,37 @@ namespace Pigeoid.Interop.Proj4.Test
             var b = (Point2)proj4_4326_to_3079.TransformValue(somePlaceInMichigan);
             Assert.AreEqual(expected3079.X, b.X);
             Assert.AreEqual(expected3079.Y, b.Y);
+        }
 
+        [Test]
+        public void epsg3140() {
+            var crs = EpsgCrs.Get(3140);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual("cass", prj.Transform.Proj4Name);
+            Assert.AreEqual(-18, prj.LatitudeOfOrigin);
+            Assert.AreEqual(178, prj.CentralMeridian);
+            Assert.AreEqual(109435, prj.FalseEasting, 1);
+            Assert.AreEqual(141622, prj.FalseNorthing, 1);
+
+            Assert.AreEqual(6378306, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius, 1);
+            Assert.AreEqual(6356571.996, prj.GeographicInfo.Datum.Spheroid.PolarRadius, 1);
+
+            var wgs = EpsgCrs.Get(4326);
+            var ptWgs = new GeographicCoordinate(-18, 178);
+            var pt3140 = new Point2(545951.34693297, 703208.56983734); // units in links
+
+            var tx = new Proj4Transform(wgs, crs);
+            var actualForward = (Point2)tx.TransformValue(ptWgs);
+            Assert.AreEqual(pt3140.X, actualForward.X, 2000);
+            Assert.AreEqual(pt3140.Y, actualForward.Y, 1000);
+
+            var inv = tx.GetInverse();
+            var actualReverse = (GeographicCoordinate)inv.TransformValue(pt3140);
+            Assert.AreEqual(ptWgs.Longitude, actualReverse.Longitude, 0.01);
+            Assert.AreEqual(ptWgs.Latitude, actualReverse.Latitude, 0.01);
         }
 
         [Test]
@@ -176,6 +206,33 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(1, prj.ScaleFactor);
             Assert.AreEqual(0, prj.FalseEasting);
             Assert.AreEqual(0, prj.FalseNorthing);
+        }
+
+        [Test]
+        public void epsg3395() {
+            var crs = EpsgCrs.Get(3395);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual("merc", prj.Transform.Proj4Name);
+            Assert.AreEqual(0, prj.CentralMeridian);
+            Assert.AreEqual(0, prj.FalseEasting);
+            Assert.AreEqual(0, prj.FalseNorthing);
+
+            var wgs = EpsgCrs.Get(4326);
+            var ptWgs = new GeographicCoordinate(40, -105);
+            var pt3395 = new Point2(-11688546, 4838471);
+
+            var tx = new Proj4Transform(wgs, crs);
+            var actual3395 = (Point2)tx.TransformValue(ptWgs);
+            Assert.AreEqual(pt3395.X, actual3395.X, 1);
+            Assert.AreEqual(pt3395.Y, actual3395.Y, 1);
+
+            var inv = tx.GetInverse();
+            var actual4326 = (GeographicCoordinate)inv.TransformValue(pt3395);
+            Assert.AreEqual(ptWgs.Longitude, actual4326.Longitude, 0.001);
+            Assert.AreEqual(ptWgs.Latitude, actual4326.Latitude, 0.001);
         }
 
         [Test]
@@ -234,6 +291,37 @@ namespace Pigeoid.Interop.Proj4.Test
             var d = (Point2)proj4_4326_to_3575.TransformValue(somePlaceInMichigan);
             Assert.AreEqual(expected3575.X, d.X, 50000);
             Assert.AreEqual(expected3575.Y, d.Y, 50000);
+        }
+
+        [Test]
+        public void epsg3832() {
+            var crs = EpsgCrs.Get(3832);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual("merc", prj.Transform.Proj4Name);
+            Assert.AreEqual(150, prj.CentralMeridian);
+            Assert.AreEqual(1, prj.ScaleFactor);
+            Assert.AreEqual(0, prj.FalseEasting);
+            Assert.AreEqual(0, prj.FalseNorthing);
+
+            Assert.AreEqual(6378137, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius, 0.001);
+            Assert.AreEqual(298.257223563, prj.GeographicInfo.Datum.Spheroid.InverseFlattening, 0.001);
+
+            var wgs = EpsgCrs.Get(4326);
+            var ptWgs = new GeographicCoordinate(7, -160);
+            var pt3832 = new Point2(5565974, 775978);
+
+            var tx = new Proj4Transform(wgs, crs);
+            var actual3832 = (Point2)tx.TransformValue(ptWgs);
+            Assert.AreEqual(pt3832.X, actual3832.X, 1);
+            Assert.AreEqual(pt3832.Y, actual3832.Y, 1);
+
+            var inv = tx.GetInverse();
+            var actual4326 = (GeographicCoordinate)inv.TransformValue(pt3832);
+            Assert.AreEqual(ptWgs.Longitude, actual4326.Longitude, 0.001);
+            Assert.AreEqual(ptWgs.Latitude, actual4326.Latitude, 0.001);
         }
 
         [Test]
@@ -309,6 +397,37 @@ namespace Pigeoid.Interop.Proj4.Test
 
             Assert.AreEqual(6378300.789, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius, 0.001);
             Assert.AreEqual(6356566.435, prj.GeographicInfo.Datum.Spheroid.PolarRadius, 0.001);
+        }
+
+        [Test]
+        public void epsg29871() {
+            var crs = EpsgCrs.Get(29871);
+            Assert.IsNotNull(crs);
+
+            var prj = Proj4Crs.CreateProjection(crs);
+            Assert.IsNotNull(prj);
+            Assert.AreEqual("omerc", prj.Transform.Proj4Name);
+            Assert.AreEqual(4, prj.LatitudeOfOrigin);
+            Assert.AreEqual(115, prj.LongitudeOfCenter);
+            Assert.AreEqual(53.31, prj.alpha, 0.1);
+            Assert.AreEqual(0.99984, prj.ScaleFactor);
+            Assert.AreEqual(590476, prj.FalseEasting, 1);
+            Assert.AreEqual(442857, prj.FalseNorthing, 1);
+
+            var wgs = EpsgCrs.Get(4326);
+            var posWgs = new GeographicCoordinate(4.26, 114.46);
+            var pos29871 = new Point2(26368.683206333983, 23434.55243084071);
+
+            var tx = new Proj4Transform(wgs, crs);
+            var forwardResult = (Point2)tx.TransformValue(posWgs);
+            Assert.AreEqual(pos29871.X, forwardResult.X);
+            Assert.AreEqual(pos29871.Y, forwardResult.Y);
+
+            var inv = tx.GetInverse();
+            var reverseResult = (GeographicCoordinate)inv.TransformValue(pos29871);
+            Assert.AreEqual(posWgs.Longitude, reverseResult.Longitude);
+            Assert.AreEqual(posWgs.Latitude, reverseResult.Latitude);
+
         }
 
         [Test]

@@ -71,6 +71,10 @@ namespace Pigeoid.Interop.Proj4
         private static readonly LinearUnit MetersUnit;
         private static readonly Proj4LinearUnit MetersUnitWrapped;
 
+        public static Proj4LinearUnit Meter {
+            get { return MetersUnitWrapped; }
+        }
+
         static Proj4LinearUnit() {
             KnownUnits = Array.ConvertAll(KnownUnitCodes, uomCode => {
                 var result = new LinearUnit();
@@ -89,7 +93,7 @@ namespace Pigeoid.Interop.Proj4
             if(conversion != null){
                 if(conversion is UnitUnityConversion)
                     return MetersUnit;
-                var scalarConversion = conversion as UnitScalarConversion;
+                var scalarConversion = conversion as IUnitScalarConversion<double>;
                 if (scalarConversion != null) {
                     var knownMatch = KnownUnits.FirstOrDefault(x => x.Meters == scalarConversion.Factor);
                     if (knownMatch != null)

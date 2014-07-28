@@ -26,30 +26,41 @@ namespace Pigeoid.Interop.Proj4
             if(spheroidInfo == null) throw new ArgumentNullException("spheroidInfo");
             Contract.Ensures(Contract.Result<Spheroid>() != null);
 
+            var aMeters = spheroidInfo.A;
+            var bMeters = spheroidInfo.B;
+
+            if (spheroidInfo.AxisUnit != null) {
+                var conversion = SimpleUnitConversionGenerator.FindConversion(spheroidInfo.AxisUnit, Proj4LinearUnit.Meter);
+                if (conversion != null && !(conversion is UnitUnityConversion)) {
+                    aMeters = conversion.TransformValue(aMeters);
+                    bMeters = conversion.TransformValue(bMeters);
+                }
+            }
+
             Spheroid result;
-            if (spheroidInfo.A == spheroidInfo.B) {
+            if (aMeters == bMeters) {
                 var knownMatch = AllKnownSpheroids
-                    .Where(k => k.PolarRadius == spheroidInfo.A)
+                    .Where(k => k.PolarRadius == aMeters)
                     .OrderByDescending(k => SpheroidNameNormalizedComparer.Default.Equals(k.Name, spheroidInfo.Name))
                     .FirstOrDefault();
                 if (knownMatch != null)
                     return knownMatch;
                 
                 result = new Spheroid(Proj4Ellipsoid.Custom);
-                result.PolarRadius = spheroidInfo.A;
+                result.PolarRadius = aMeters;
             }
             else{
                 var knownMatch = AllKnownSpheroids
-                    .Where(k => k.EquatorialRadius == spheroidInfo.A && (k.InverseFlattening == spheroidInfo.InvF || k.PolarRadius == spheroidInfo.B))
+                    .Where(k => k.EquatorialRadius == aMeters && (k.InverseFlattening == spheroidInfo.InvF || k.PolarRadius == bMeters))
                     .OrderByDescending(k => SpheroidNameNormalizedComparer.Default.Equals(k.Name, spheroidInfo.Name))
                     .FirstOrDefault();
                 if (knownMatch != null)
                     return knownMatch;
 
                 result = new Spheroid(Proj4Ellipsoid.Custom);
-                result.EquatorialRadius = spheroidInfo.A;
+                result.EquatorialRadius = aMeters;
                 // NOTE: do not directly set the InverseFlattening as it is stored as PolarRadius
-                result.PolarRadius = spheroidInfo.B;
+                result.PolarRadius = bMeters;
             }
             result.Name = spheroidInfo.Name;
             return result;
