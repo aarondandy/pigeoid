@@ -181,10 +181,16 @@ namespace Pigeoid.Interop.Proj4.Test
             var ptWgs = new GeographicCoordinate(-18, 178);
             var pt3140 = new Point2(545951.34693297, 703208.56983734); // units in links
 
+            Assert.IsNotNull(prj.GeographicInfo.Datum.ToWGS84);
+            Assert.AreEqual(3, prj.GeographicInfo.Datum.ToWGS84.Length);
+            Assert.AreEqual(51, prj.GeographicInfo.Datum.ToWGS84[0]);
+            Assert.AreEqual(391, prj.GeographicInfo.Datum.ToWGS84[1]);
+            Assert.AreEqual(-36, prj.GeographicInfo.Datum.ToWGS84[2]);
+
             var tx = new Proj4Transform(wgs, crs);
             var actualForward = (Point2)tx.TransformValue(ptWgs);
-            Assert.AreEqual(pt3140.X, actualForward.X, 2000);
-            Assert.AreEqual(pt3140.Y, actualForward.Y, 1000);
+            Assert.AreEqual(pt3140.X, actualForward.X, 1);
+            Assert.AreEqual(pt3140.Y, actualForward.Y, 1);
 
             var inv = tx.GetInverse();
             var actualReverse = (GeographicCoordinate)inv.TransformValue(pt3140);
