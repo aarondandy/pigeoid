@@ -152,13 +152,13 @@ namespace Pigeoid.Interop.Proj4.Test
 
             var proj4_3079_to_4326 = new Proj4Transform(crs, wgs);
             var a = (GeographicCoordinate)proj4_3079_to_4326.TransformValue(expected3079);
-            Assert.AreEqual(somePlaceInMichigan.Latitude, a.Latitude);
-            Assert.AreEqual(somePlaceInMichigan.Longitude, a.Longitude);
+            Assert.AreEqual(somePlaceInMichigan.Latitude, a.Latitude, 0.001);
+            Assert.AreEqual(somePlaceInMichigan.Longitude, a.Longitude, 0.001);
 
             var proj4_4326_to_3079 = new Proj4Transform(wgs, crs);
             var b = (Point2)proj4_4326_to_3079.TransformValue(somePlaceInMichigan);
-            Assert.AreEqual(expected3079.X, b.X);
-            Assert.AreEqual(expected3079.Y, b.Y);
+            Assert.AreEqual(expected3079.X, b.X, 5);
+            Assert.AreEqual(expected3079.Y, b.Y, 5);
         }
 
         [Test]
@@ -178,14 +178,15 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(6356571.996, prj.GeographicInfo.Datum.Spheroid.PolarRadius, 1);
 
             var wgs = EpsgCrs.Get(4326);
-            var ptWgs = new GeographicCoordinate(-18, 178);
-            var pt3140 = new Point2(545951.34693297, 703208.56983734); // units in links
+            var ptWgs = new GeographicCoordinate((-17.25 + -18.32)/2.0, (178.74+177.2)/2.0);
+            var pt3140 = new Point2(530138.52663372, 821498.68898981); // units in links
 
             Assert.IsNotNull(prj.GeographicInfo.Datum.ToWGS84);
             Assert.AreEqual(3, prj.GeographicInfo.Datum.ToWGS84.Length);
             Assert.AreEqual(51, prj.GeographicInfo.Datum.ToWGS84[0]);
             Assert.AreEqual(391, prj.GeographicInfo.Datum.ToWGS84[1]);
             Assert.AreEqual(-36, prj.GeographicInfo.Datum.ToWGS84[2]);
+
 
             var tx = new Proj4Transform(wgs, crs);
             var actualForward = (Point2)tx.TransformValue(ptWgs);
@@ -426,13 +427,13 @@ namespace Pigeoid.Interop.Proj4.Test
 
             var tx = new Proj4Transform(wgs, crs);
             var forwardResult = (Point2)tx.TransformValue(posWgs);
-            Assert.AreEqual(pos29871.X, forwardResult.X);
-            Assert.AreEqual(pos29871.Y, forwardResult.Y);
+            Assert.AreEqual(pos29871.X, forwardResult.X, 10);
+            Assert.AreEqual(pos29871.Y, forwardResult.Y, 10);
 
             var inv = tx.GetInverse();
             var reverseResult = (GeographicCoordinate)inv.TransformValue(pos29871);
-            Assert.AreEqual(posWgs.Longitude, reverseResult.Longitude);
-            Assert.AreEqual(posWgs.Latitude, reverseResult.Latitude);
+            Assert.AreEqual(posWgs.Longitude, reverseResult.Longitude, 0.002);
+            Assert.AreEqual(posWgs.Latitude, reverseResult.Latitude, 0.002);
 
         }
 

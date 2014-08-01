@@ -220,6 +220,9 @@ namespace Pigeoid.Proj4ComparisonTests
                     if (areaIntersection == null)
                         continue;
 
+                    if (areaIntersection.LongitudeRange.Start > areaIntersection.LongitudeRange.End)
+                        continue; // ignore the dateline wrapped ones for now
+
                     var inputCoordsWgs84 = CreateTestPoints(areaIntersection);
                     var transformedInputCoords = inputCoordsWgs84.ConvertAll(c => fromTestable.From4325Transform.TransformValue(c));
 

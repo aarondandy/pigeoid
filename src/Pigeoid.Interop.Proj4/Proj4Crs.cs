@@ -208,7 +208,7 @@ namespace Pigeoid.Interop.Proj4
             }
 
             var finalResult = ProjectionInfo.FromProj4String(result.ToProj4String()); // TODO: fix this hack
-            finalResult.CentralMeridian = result.CentralMeridian;
+            /*finalResult.CentralMeridian = result.CentralMeridian;
             finalResult.LongitudeOfCenter = result.LongitudeOfCenter;
             finalResult.LatitudeOfOrigin = result.LatitudeOfOrigin;
             finalResult.StandardParallel1 = result.StandardParallel1;
@@ -230,7 +230,7 @@ namespace Pigeoid.Interop.Proj4
                 else {
                     finalResult.GeographicInfo.Datum.Spheroid = result.GeographicInfo.Datum.Spheroid;
                 }
-            }
+            }*/
             return finalResult;
         }
 
