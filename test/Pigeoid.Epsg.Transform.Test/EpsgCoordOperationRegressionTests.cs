@@ -53,5 +53,97 @@ namespace Pigeoid.Epsg.Transform.Test
             Assert.AreEqual(expected3575.Y, actual3575.Y, 1);
         }
 
+        [Test]
+        public void epsg3140_to_wgs() {
+            var crs = EpsgCrs.Get(3140);
+            var wgs = EpsgCrs.Get(4326);
+
+            var ptWgs = new GeographicCoordinate(-17.785, 177.97);
+            var pt3140 = new Point2(530138.52663372, 821498.68898981); // units in links
+
+            var gen = new EpsgCrsCoordinateOperationPathGenerator();
+            var paths = gen.Generate(wgs, crs);
+            var compiler = new StaticCoordinateOperationCompiler();
+            var txs = paths.Select(p => compiler.Compile(p)).Where(p => p != null);
+
+            var forward = txs.Single();
+            var actualForward = (Point2)forward.TransformValue(ptWgs);
+            Assert.AreEqual(pt3140.X, actualForward.X, 30);
+            Assert.AreEqual(pt3140.Y, actualForward.Y, 30);
+
+            var reverse = forward.GetInverse();
+            var actualReverse = (GeographicCoordinate)reverse.TransformValue(pt3140);
+            Assert.AreEqual(ptWgs.Longitude, actualReverse.Longitude, 0.01);
+            Assert.AreEqual(ptWgs.Latitude, actualReverse.Latitude, 0.01);
+        }
+
+        [Test]
+        public void epsg4087_to_wgs() {
+            var crs = EpsgCrs.Get(4087);
+            var wgs = EpsgCrs.Get(4326);
+
+            var ptWgs = new GeographicCoordinate(39, -104);
+            var pt4087 = new Point2(-11577227,4341460);
+
+            var gen = new EpsgCrsCoordinateOperationPathGenerator();
+            var paths = gen.Generate(wgs, crs);
+            var compiler = new StaticCoordinateOperationCompiler();
+            var txs = paths.Select(p => compiler.Compile(p)).Where(p => p != null);
+
+            var forward = txs.Single();
+
+            var actualZeroMeters = (Point2)forward.TransformValue(GeographicCoordinate.Zero);
+            Assert.AreEqual(0, actualZeroMeters.X);
+            Assert.AreEqual(0, actualZeroMeters.Y);
+
+            var actualForward = (Point2)forward.TransformValue(ptWgs);
+            Assert.AreEqual(pt4087.X, actualForward.X, 30);
+            Assert.AreEqual(pt4087.Y, actualForward.Y, 30);
+
+            var reverse = forward.GetInverse();
+
+            var actualZeroDegrees = (GeographicCoordinate)reverse.TransformValue(Point2.Zero);
+            Assert.AreEqual(0, actualZeroDegrees.Longitude);
+            Assert.AreEqual(0, actualZeroDegrees.Latitude);
+
+            var actualReverse = (GeographicCoordinate)reverse.TransformValue(pt4087);
+            Assert.AreEqual(ptWgs.Longitude, actualReverse.Longitude, 0.01);
+            Assert.AreEqual(ptWgs.Latitude, actualReverse.Latitude, 0.01);
+        }
+
+        [Test]
+        public void epsg3857_to_wgs() {
+            var crs = EpsgCrs.Get(3857);
+            var wgs = EpsgCrs.Get(4326);
+
+            var ptWgs = new GeographicCoordinate(45,10);
+            var pt3857 = new Point2(1113194, 5621521);
+
+            var gen = new EpsgCrsCoordinateOperationPathGenerator();
+            var paths = gen.Generate(wgs, crs);
+            var compiler = new StaticCoordinateOperationCompiler();
+            var txs = paths.Select(p => compiler.Compile(p)).Where(p => p != null);
+
+            var forward = txs.Single();
+
+            var actualZeroMeters = (Point2)forward.TransformValue(GeographicCoordinate.Zero);
+            Assert.AreEqual(0, actualZeroMeters.X);
+            Assert.AreEqual(0, actualZeroMeters.Y, 0.0000001);
+
+            var actualForward = (Point2)forward.TransformValue(ptWgs);
+            Assert.AreEqual(pt3857.X, actualForward.X, 30);
+            Assert.AreEqual(pt3857.Y, actualForward.Y, 30);
+
+            var reverse = forward.GetInverse();
+
+            var actualZeroDegrees = (GeographicCoordinate)reverse.TransformValue(Point2.Zero);
+            Assert.AreEqual(0, actualZeroDegrees.Longitude);
+            Assert.AreEqual(0, actualZeroDegrees.Latitude);
+
+            var actualReverse = (GeographicCoordinate)reverse.TransformValue(pt3857);
+            Assert.AreEqual(ptWgs.Longitude, actualReverse.Longitude, 0.0001);
+            Assert.AreEqual(ptWgs.Latitude, actualReverse.Latitude, 0.0001);
+        }
+
     }
 }

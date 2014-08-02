@@ -181,6 +181,8 @@ namespace Pigeoid.Proj4ComparisonTests
             foreach (var crs in GetAllCrs().Where(x => x.Kind == EpsgCrsKind.Projected)) {
                 if (crs.Area == null)
                     continue;
+                if (crs.Area.LongitudeRange.Start > crs.Area.LongitudeRange.End)
+                    continue; // ignore the dateline wrapped ones for now
 
                 var paths = _epsgPathGenerator.Generate(crs4326, crs)
                     .OrderBy(x => GetEpsgAccuracy(x) ?? 999);

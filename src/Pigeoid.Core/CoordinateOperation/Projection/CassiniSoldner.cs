@@ -105,32 +105,30 @@ namespace Pigeoid.CoordinateOperation.Projection
         }
 
         public override Point2 TransformValue(GeographicCoordinate coordinate) {
-            var v = Math.Sin(coordinate.Latitude);
-            v = MajorAxis / Math.Sqrt(1.0 - (ESq * v * v));
-            var c = Math.Cos(coordinate.Latitude);
-            var a = (coordinate.Longitude - NaturalOrigin.Longitude) * c;
-            c = ESecSq * c * c;
+            var cosLat = Math.Cos(coordinate.Latitude);
+            var cosLatSq = cosLat * cosLat;
+            var sinLat = Math.Sin(coordinate.Latitude);
+            var sinLatSq = sinLat * sinLat;
             var tanLat = Math.Tan(coordinate.Latitude);
-            var t = tanLat * tanLat;
+            var tanLatSq = tanLat * tanLat;
+            var a = (coordinate.Longitude - NaturalOrigin.Longitude) * cosLat;
             var a2 = a * a;
-
-            var east = FalseProjectedOffset.X + (
-                v * (a - (((t * a * a2) * (20.0 + (a2 * (8.0 + (8.0 * c) - t)))) / 120.0))
-            );
+            var a3 = a2 * a;
+            var a4 = a3 * a;
+            var a5 = a4 * a;
+            var t = tanLatSq;
+            var c = ESq * cosLatSq / (1.0 - ESq);
+            var v = MajorAxis / Math.Sqrt(1.0 - (ESq * sinLatSq));
             var m = MajorAxis * (
                 (MLineCoefficient1 * coordinate.Latitude)
                 - (MLineCoefficient2 * Math.Sin(2.0 * coordinate.Latitude))
                 + (MLineCoefficient3 * Math.Sin(4.0 * coordinate.Latitude))
-                - (MLineCoefficient4 * Math.Sin(6.0 * coordinate.Latitude))
-            );
-            var x =
-                m
-                - MOrigin
-                + ((v * tanLat * a2 * (12 + (a2 * (5.0 - t + (6.0 * c))))) / 24.0)
-            ;
-            var north = FalseProjectedOffset.Y + x;
+                - (MLineCoefficient4 * Math.Sin(6.0 * coordinate.Latitude)));
+            var x = m - MOrigin + (v * tanLat * ((a2 / 2) + ((5 - t + (6 * c)) * a4 / 24)));
+            var easting = FalseProjectedOffset.X + (v * (a - (t * a3 / 6.0) - ((8 - t + (8 * c)) * t * a5 / 120.0)));
+            var northing = FalseProjectedOffset.Y + x;
 
-            return new Point2(east, north);
+            return new Point2(easting, northing);
         }
 
         public override ITransformation<Point2, GeographicCoordinate> GetInverse() {
