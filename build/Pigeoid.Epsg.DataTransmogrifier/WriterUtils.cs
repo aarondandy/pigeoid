@@ -468,7 +468,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			}
 		}
 
-		public static void WriteCoordinateReferenceSystem(EpsgData data, BinaryWriter writerText, BinaryWriter writerProjection, BinaryWriter writerGeo, BinaryWriter writerComposite) {
+		public static void WriteCoordinateReferenceSystem(EpsgData data, BinaryWriter writerText, BinaryWriter writerNormal, BinaryWriter writerComposite) {
 			var stringLookUp = WriteTextDictionary(data, writerText,
 				data.Repository.Crs.Select(x => x.Name)
 				.Where(x => !String.IsNullOrEmpty(x))
@@ -506,7 +506,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 					kindByte = (byte)'P';
 				}*/
 
-                if (coordinateReferenceSystem.Projection != null) {
+                /*if (coordinateReferenceSystem.Projection != null) {
 					writerProjection.Write((uint)coordinateReferenceSystem.Code);
 
 					writerProjection.Write((ushort)coordinateReferenceSystem.SourceGeographicCrs.Code);
@@ -517,8 +517,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 					writerProjection.Write((ushort)stringLookUp[coordinateReferenceSystem.Name]);
 					writerProjection.Write((byte)(coordinateReferenceSystem.Deprecated ? 0xff : 0));
                     writerProjection.Write((byte)kindByte);
-				}
-				else if (kindByte == (byte)'C') {
+				}*/
+				if (kindByte == (byte)'C') {
 					writerComposite.Write((ushort)coordinateReferenceSystem.Code);
 					
 					writerComposite.Write((ushort)coordinateReferenceSystem.CompoundHorizontalCrs.Code);
@@ -529,15 +529,17 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 					writerComposite.Write((byte)(coordinateReferenceSystem.Deprecated ? 0xff : 0));
 				}
 				else {
-					writerGeo.Write((uint) coordinateReferenceSystem.Code);
+                    writerNormal.Write((uint)coordinateReferenceSystem.Code);
 
-					writerGeo.Write((ushort)(null == coordinateReferenceSystem.Datum ? 0 : coordinateReferenceSystem.Datum.Code));
+                    writerNormal.Write((ushort)(null == coordinateReferenceSystem.Datum ? 0 : coordinateReferenceSystem.Datum.Code));
+                    writerNormal.Write((ushort)(coordinateReferenceSystem.SourceGeographicCrs == null ? 0 : coordinateReferenceSystem.SourceGeographicCrs.Code));
+                    writerNormal.Write((ushort)(coordinateReferenceSystem.Projection == null ? 0 : coordinateReferenceSystem.Projection.Code));
 
-					writerGeo.Write((ushort)coordinateReferenceSystem.CoordinateSystem.Code);
-					writerGeo.Write((ushort)coordinateReferenceSystem.Area.Code);
-					writerGeo.Write((ushort)stringLookUp[coordinateReferenceSystem.Name]);
-					writerGeo.Write((byte)(coordinateReferenceSystem.Deprecated ? 0xff : 0));
-					writerGeo.Write((byte)kindByte);
+                    writerNormal.Write((ushort)coordinateReferenceSystem.CoordinateSystem.Code);
+                    writerNormal.Write((ushort)coordinateReferenceSystem.Area.Code);
+                    writerNormal.Write((ushort)stringLookUp[coordinateReferenceSystem.Name]);
+                    writerNormal.Write((byte)(coordinateReferenceSystem.Deprecated ? 0xff : 0));
+                    writerNormal.Write((byte)kindByte);
 				}
 
 			}

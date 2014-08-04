@@ -201,15 +201,13 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                         )
                     );
 
-                using (var streamDataProjection = File.Open(Path.Combine(outFolder, "crsprj.dat"), FileMode.Create))
-                using (var writerDataProjection = new BinaryWriter(streamDataProjection))
+                using (var streamDataNormal = File.Open(Path.Combine(outFolder, "crs.dat"), FileMode.Create))
+                using (var writerDataNormal = new BinaryWriter(streamDataNormal))
                 using (var streamDataComposite = File.Open(Path.Combine(outFolder, "crscmp.dat"), FileMode.Create))
                 using (var writerDataComposite = new BinaryWriter(streamDataComposite))
-                using (var streamDataGeo = File.Open(Path.Combine(outFolder, "crsgeo.dat"), FileMode.Create))
-                using (var writerDataGeo = new BinaryWriter(streamDataGeo))
                 using (var streamText = File.Open(Path.Combine(outFolder, "crs.txt"), FileMode.Create))
                 using (var writerText = new BinaryWriter(streamText))
-                    WriterUtils.WriteCoordinateReferenceSystem(epsgData, writerText, writerDataProjection, writerDataGeo, writerDataComposite);
+                    WriterUtils.WriteCoordinateReferenceSystem(epsgData, writerText, writerDataNormal, writerDataComposite);
 
                 using (var streamDataConversion = File.Open(Path.Combine(outFolder, "opconv.dat"), FileMode.Create))
                 using (var writerDataConversion = new BinaryWriter(streamDataConversion))
