@@ -4,6 +4,7 @@ using System.IO;
 
 namespace Pigeoid.Epsg.Resources
 {
+    [Obsolete]
 	internal class EpsgNumberLookUp : IDisposable
 	{
 

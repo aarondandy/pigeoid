@@ -4,6 +4,7 @@ using System.Diagnostics.Contracts;
 namespace Pigeoid.Epsg.Resources
 {
 
+    [System.Obsolete]
     [ContractClass(typeof(EpsgLookUpBaseContracts<,>))]
 	internal abstract class EpsgLookUpBase<TKey, TValue>
 	{

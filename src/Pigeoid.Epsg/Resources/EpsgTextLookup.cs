@@ -6,6 +6,7 @@ using System.Text;
 
 namespace Pigeoid.Epsg.Resources
 {
+    [Obsolete]
 	internal class EpsgTextLookUp : IDisposable
 	{
 

@@ -1,6 +1,4 @@
-﻿// TODO: source header
-
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -8,6 +6,7 @@ using System.Linq;
 
 namespace Pigeoid.Epsg.Resources
 {
+    [Obsolete]
     [ContractClass(typeof(EpsgDynamicLookUpBaseContract<,>))]
 	internal abstract class EpsgDynamicLookUpBase<TKey, TValue> :
 		EpsgLookUpBase<TKey, TValue>

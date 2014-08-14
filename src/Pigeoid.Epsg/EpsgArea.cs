@@ -15,6 +15,7 @@ namespace Pigeoid.Epsg
         IRelatableWithin<EpsgArea>
     {
 
+        [Obsolete]
         internal class EpsgAreaLookUp : EpsgDynamicLookUpBase<ushort, EpsgArea>
         {
 
@@ -78,14 +79,18 @@ namespace Pigeoid.Epsg
 
         }
 
+        [Obsolete]
         internal static readonly EpsgAreaLookUp LookUp = new EpsgAreaLookUp();
 
+        [Obsolete]
         public static EpsgArea Get(int code) {
             if (code < 0 || code >= UInt16.MaxValue)
                 return null;
             return LookUp.Get(unchecked((ushort)code));
         }
 
+
+        [Obsolete]
         public static IEnumerable<EpsgArea> Values {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgArea>>() != null);
