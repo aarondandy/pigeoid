@@ -30,6 +30,7 @@ namespace Pigeoid.Epsg
 
         }
 
+        [Obsolete]
         private sealed class EpsgAxisSetLookUp : EpsgDynamicLookUpBase<ushort, EpsgAxisSet>
         {
             private const string DatFileName = "axis.dat";

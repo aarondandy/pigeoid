@@ -76,14 +76,17 @@ namespace Pigeoid.Epsg
             }
         }
 
+        [Obsolete]
         internal static readonly EpsgCoordinateSystemLookUp LookUp = new EpsgCoordinateSystemLookUp();
 
+        [Obsolete]
         public static EpsgCoordinateSystem Get(int code) {
             return code >= 0 && code <= UInt16.MaxValue
                 ? LookUp.Get(unchecked((ushort)code))
                 : null;
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgCoordinateSystem> Values {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCoordinateSystem>>() != null);

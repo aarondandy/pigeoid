@@ -38,6 +38,7 @@ namespace Pigeoid.Epsg.Resources
         protected readonly int RecordKeySize;
         protected readonly int RecordDataSize;
         protected readonly int RecordTotalSize;
+        protected readonly EpsgTextLookUp TextLookup;
 
         protected EpsgDataResourceReaderBasic(string dataFileName, string textFileName, int recordDataSize) {
             DataFileName = dataFileName;
@@ -46,6 +47,7 @@ namespace Pigeoid.Epsg.Resources
             RecordKeySize = sizeof(ushort);
             RecordDataSize = recordDataSize;
             RecordTotalSize = RecordKeySize + RecordDataSize;
+            TextLookup = new EpsgTextLookUp(textFileName);
         }
 
         public IEnumerable<TValue> ReadAllValues() {
@@ -107,10 +109,9 @@ namespace Pigeoid.Epsg.Resources
             var eastBound = DecodeDegreeValueFromShort(reader.ReadInt16());
             var southBound = DecodeDegreeValueFromShort(reader.ReadInt16());
             var northBound = DecodeDegreeValueFromShort(reader.ReadInt16());
-            var nameCode = reader.ReadUInt16();
-            var name = String.Empty; // TODO: read text
-            var iso2 = (string)null; // TODO
-            var iso3 = (string)null; // TODO
+            var name = TextLookup.GetString(reader.ReadUInt16()); // TODO: read text
+            var iso2 = EpsgTextLookUp.LookUpIsoString(key, "iso2.dat", 2); // TODO: optimize
+            var iso3 = EpsgTextLookUp.LookUpIsoString(key, "iso3.dat", 3); // TODO: optimize
             return new EpsgArea(
                 key,
                 name,
