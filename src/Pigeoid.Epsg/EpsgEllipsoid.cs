@@ -10,52 +10,27 @@ namespace Pigeoid.Epsg
     public class EpsgEllipsoid : ISpheroidInfo
     {
 
-        internal static readonly EpsgFixedLookUpBase<ushort, EpsgEllipsoid> LookUp;
+        [Obsolete]
+        internal static readonly EpsgDataResourceReaderEllipsoid Reader = new EpsgDataResourceReaderEllipsoid();
 
-        static EpsgEllipsoid() {
-            var lookUpDictionary = new SortedDictionary<ushort, EpsgEllipsoid>();
-            using (var readerTxt = EpsgDataResource.CreateBinaryReader("ellipsoids.txt"))
-            using (var numberLookUp = new EpsgNumberLookUp())
-            using (var readerDat = EpsgDataResource.CreateBinaryReader("ellipsoids.dat")) {
-                for (int i = readerDat.ReadUInt16(); i > 0; i--) {
-                    var code = readerDat.ReadUInt16();
-                    var semiMajorAxis = numberLookUp.Get(readerDat.ReadUInt16());
-                    var valueB = numberLookUp.Get(readerDat.ReadUInt16());
-                    var name = EpsgTextLookUp.GetString(readerDat.ReadUInt16(), readerTxt);
-                    Contract.Assume(!String.IsNullOrEmpty(name));
-                    var uom = EpsgUnit.Get(readerDat.ReadByte() + 9000);
-                    Contract.Assume(uom != null);
-                    // ReSharper disable CompareOfFloatsByEqualityOperator
-                    lookUpDictionary.Add(code, new EpsgEllipsoid(
-                        code, name, uom,
-                        (valueB == semiMajorAxis)
-                            ? new Sphere(semiMajorAxis)
-                        : (valueB < semiMajorAxis / 10.0)
-                            ? new SpheroidEquatorialInvF(semiMajorAxis, valueB) as ISpheroid<double>
-                        : new SpheroidEquatorialPolar(semiMajorAxis, valueB)
-                    ));
-                    // ReSharper restore CompareOfFloatsByEqualityOperator
-                }
-            }
-            LookUp = new EpsgFixedLookUpBase<ushort, EpsgEllipsoid>(lookUpDictionary);
-        }
-
+        [Obsolete]
         public static EpsgEllipsoid Get(int code) {
             return code >= 0 && code < ushort.MaxValue
-                ? LookUp.Get((ushort)code)
+                ? Reader.GetByKey((ushort)code)
                 : null;
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgEllipsoid> Values {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgEllipsoid>>() != null);
-                return LookUp.Values;
+                return Reader.ReadAllValues();
             }
         }
 
         private readonly ushort _code;
 
-        private EpsgEllipsoid(ushort code, string name, EpsgUnit unit, ISpheroid<double> core) {
+        internal EpsgEllipsoid(ushort code, string name, EpsgUnit unit, ISpheroid<double> core) {
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(unit != null);
             Contract.Requires(core != null);

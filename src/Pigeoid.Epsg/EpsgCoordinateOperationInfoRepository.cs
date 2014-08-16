@@ -8,9 +8,11 @@ using System.Collections.ObjectModel;
 
 namespace Pigeoid.Epsg
 {
+    [Obsolete]
     public class EpsgCoordinateOperationInfoRepository
     {
 
+        [Obsolete]
         internal class EpsgCoordinateConversionInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgCoordinateOperationInfo>
         {
             private const string DatFileName = "opconv.dat";
@@ -54,6 +56,7 @@ namespace Pigeoid.Epsg
 
         }
 
+        [Obsolete]
         internal class EpsgCoordinateTransformInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgCoordinateTransformInfo>
         {
 
@@ -168,6 +171,7 @@ namespace Pigeoid.Epsg
 
         }
 
+        [Obsolete]
         internal class EpsgCoordinateOperationConcatenatedInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgConcatenatedCoordinateOperationInfo>
         {
             private const string DatFileName = "opcat.dat";
@@ -286,29 +290,37 @@ namespace Pigeoid.Epsg
             }
 
         }
-
+        [Obsolete]
         internal static readonly EpsgCoordinateTransformInfoLookUp TransformLookUp = EpsgCoordinateTransformInfoLookUp.Create();
+        [Obsolete]
         internal static readonly EpsgCoordinateConversionInfoLookUp ConversionLookUp = new EpsgCoordinateConversionInfoLookUp();
+        [Obsolete]
         internal static readonly EpsgCoordinateOperationConcatenatedInfoLookUp ConcatenatedLookUp = EpsgCoordinateOperationConcatenatedInfoLookUp.Create();
 
+        [Obsolete]
         private static readonly ReadOnlyCollection<EpsgCoordinateTransformInfo> EmptyEcti =
             Array.AsReadOnly(new EpsgCoordinateTransformInfo[0]);
 
+        [Obsolete]
         private static readonly ReadOnlyCollection<EpsgConcatenatedCoordinateOperationInfo> EmptyEccoi =
             Array.AsReadOnly(new EpsgConcatenatedCoordinateOperationInfo[0]);
 
+        [Obsolete]
         public static EpsgCoordinateTransformInfo GetTransformInfo(int code) {
             return code >= 0 && code < UInt16.MaxValue ? TransformLookUp.Get((ushort)code) : null;
         }
 
+        [Obsolete]
         public static EpsgCoordinateOperationInfo GetConversionInfo(int code) {
             return code >= 0 && code < UInt16.MaxValue ? ConversionLookUp.Get((ushort)code) : null;
         }
 
+        [Obsolete]
         public static EpsgConcatenatedCoordinateOperationInfo GetConcatenatedInfo(int code) {
             return code >= 0 && code < UInt16.MaxValue ? ConcatenatedLookUp.Get((ushort)code) : null;
         }
 
+        [Obsolete]
         /// <summary>
         /// Finds either a transformation or conversion for the given code.
         /// </summary>
@@ -322,6 +334,7 @@ namespace Pigeoid.Epsg
                 ?? ConversionLookUp.Get(codeShort);
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgCoordinateTransformInfo> TransformInfos {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCoordinateTransformInfo>>() != null);
@@ -329,6 +342,7 @@ namespace Pigeoid.Epsg
             }
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgCoordinateOperationInfo> ConversionInfos {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCoordinateOperationInfo>>() != null);
@@ -336,6 +350,7 @@ namespace Pigeoid.Epsg
             }
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgConcatenatedCoordinateOperationInfo> ConcatenatedInfos {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgConcatenatedCoordinateOperationInfo>>() != null);
@@ -343,31 +358,37 @@ namespace Pigeoid.Epsg
             }
         }
 
+        [Obsolete]
         public static ReadOnlyCollection<EpsgCoordinateTransformInfo> GetTransformForwardReferenced(int sourceCode) {
             Contract.Ensures(Contract.Result<ReadOnlyCollection<EpsgCoordinateTransformInfo>>() != null);
             return ConvertToOperations(TransformLookUp.GetForwardReferencedOperationCodes(sourceCode));
         }
 
+        [Obsolete]
         public static ReadOnlyCollection<EpsgCoordinateTransformInfo> GetTransformReverseReferenced(int targetCode) {
             Contract.Ensures(Contract.Result<ReadOnlyCollection<EpsgCoordinateTransformInfo>>() != null);
             return ConvertToOperations(TransformLookUp.GetReverseReferencedOperationCodes(targetCode));
         }
 
+        [Obsolete]
         private static ReadOnlyCollection<EpsgCoordinateTransformInfo> ConvertToOperations(ushort[] ids) {
             Contract.Ensures(Contract.Result<ReadOnlyCollection<EpsgCoordinateTransformInfo>>() != null);
             return null == ids ? EmptyEcti : Array.AsReadOnly(Array.ConvertAll(ids, TransformLookUp.Get));
         }
 
+        [Obsolete]
         public static ReadOnlyCollection<EpsgConcatenatedCoordinateOperationInfo> GetConcatenatedForwardReferenced(int sourceCode) {
             Contract.Ensures(Contract.Result<ReadOnlyCollection<EpsgConcatenatedCoordinateOperationInfo>>() != null);
             return ConvertToCatOperations(ConcatenatedLookUp.GetForwardReferencedOperationCodes(sourceCode));
         }
 
+        [Obsolete]
         public static ReadOnlyCollection<EpsgConcatenatedCoordinateOperationInfo> GetConcatenatedReverseReferenced(int targetCode) {
             Contract.Ensures(Contract.Result<ReadOnlyCollection<EpsgConcatenatedCoordinateOperationInfo>>() != null);
             return ConvertToCatOperations(ConcatenatedLookUp.GetReverseReferencedOperationCodes(targetCode));
         }
 
+        [Obsolete]
         private static ReadOnlyCollection<EpsgConcatenatedCoordinateOperationInfo> ConvertToCatOperations(ushort[] ids) {
             Contract.Ensures(Contract.Result<ReadOnlyCollection<EpsgConcatenatedCoordinateOperationInfo>>() != null);
             return null == ids ? EmptyEccoi : Array.AsReadOnly(Array.ConvertAll(ids, ConcatenatedLookUp.Get));

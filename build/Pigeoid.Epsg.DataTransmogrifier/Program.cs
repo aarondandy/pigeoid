@@ -131,11 +131,15 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                 using (var writerIso3 = new BinaryWriter(streamIso3))
                     WriterUtils.WriteAreas(epsgData, writerData, writerText, writerIso2, writerIso3);
 
-                using (var streamData = File.Open(Path.Combine(outFolder, "axis.dat"), FileMode.Create))
-                using (var writerData = new BinaryWriter(streamData))
                 using (var streamText = File.Open(Path.Combine(outFolder, "axis.txt"), FileMode.Create))
                 using (var writerText = new BinaryWriter(streamText))
-                    WriterUtils.WriteAxes(epsgData, writerData, writerText);
+                using (var stream1Data = File.Open(Path.Combine(outFolder, "axis1.dat"), FileMode.Create))
+                using (var writer1Data = new BinaryWriter(stream1Data))
+                using (var stream2Data = File.Open(Path.Combine(outFolder, "axis2.dat"), FileMode.Create))
+                using (var writer2Data = new BinaryWriter(stream2Data))
+                using (var stream3Data = File.Open(Path.Combine(outFolder, "axis3.dat"), FileMode.Create))
+                using (var writer3Data = new BinaryWriter(stream3Data))
+                    WriterUtils.WriteAxes(epsgData, writerText, writer1Data, writer2Data, writer3Data);
 
                 using (var streamData = File.Open(Path.Combine(outFolder, "ellipsoids.dat"), FileMode.Create))
                 using (var writerData = new BinaryWriter(streamData))
@@ -159,13 +163,13 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                 using (var writerText = new BinaryWriter(streamText))
                     WriterUtils.WriteDatums(epsgData, writerDataEngineering, writerDataVertical, writerDataGeo, writerText);
 
-                using (var streamDataLength = File.Open(Path.Combine(outFolder, "uomlen.dat"), FileMode.Create))
+                using (var streamDataLength = File.Open(Path.Combine(outFolder, "uomlength.dat"), FileMode.Create))
                 using (var writerDataLength = new BinaryWriter(streamDataLength))
-                using (var streamDataAngle = File.Open(Path.Combine(outFolder, "uomang.dat"), FileMode.Create))
+                using (var streamDataAngle = File.Open(Path.Combine(outFolder, "uomangle.dat"), FileMode.Create))
                 using (var writerDataAngle = new BinaryWriter(streamDataAngle))
-                using (var streamDataScale = File.Open(Path.Combine(outFolder, "uomscl.dat"), FileMode.Create))
+                using (var streamDataScale = File.Open(Path.Combine(outFolder, "uomscale.dat"), FileMode.Create))
                 using (var writerDataScale = new BinaryWriter(streamDataScale))
-                using (var streamDataTime = File.Open(Path.Combine(outFolder, "uomtim.dat"), FileMode.Create))
+                using (var streamDataTime = File.Open(Path.Combine(outFolder, "uomtime.dat"), FileMode.Create))
                 using (var writerDataTime = new BinaryWriter(streamDataTime))
                 using (var streamText = File.Open(Path.Combine(outFolder, "uoms.txt"), FileMode.Create))
                 using (var writerText = new BinaryWriter(streamText))

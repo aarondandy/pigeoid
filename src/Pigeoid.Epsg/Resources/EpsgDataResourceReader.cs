@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -33,21 +34,23 @@ namespace Pigeoid.Epsg.Resources
     {
 
         protected readonly string DataFileName;
-        protected readonly string TextFileName;
         protected readonly int FileHeaderSize;
         protected readonly int RecordKeySize;
         protected readonly int RecordDataSize;
         protected readonly int RecordTotalSize;
         protected readonly EpsgTextLookUp TextLookup;
 
-        protected EpsgDataResourceReaderBasic(string dataFileName, string textFileName, int recordDataSize) {
+        protected EpsgDataResourceReaderBasic(string dataFileName, string textFileName, int recordDataSize)
+            : this(dataFileName, new EpsgTextLookUp(textFileName), recordDataSize) { }
+
+        protected EpsgDataResourceReaderBasic(string dataFileName, EpsgTextLookUp textLookup, int recordDataSize) {
+            Contract.Requires(textLookup != null);
             DataFileName = dataFileName;
-            TextFileName = textFileName;
             FileHeaderSize = sizeof(ushort);
             RecordKeySize = sizeof(ushort);
             RecordDataSize = recordDataSize;
             RecordTotalSize = RecordKeySize + RecordDataSize;
-            TextLookup = new EpsgTextLookUp(textFileName);
+            TextLookup = textLookup;
         }
 
         public IEnumerable<TValue> ReadAllValues() {
@@ -64,6 +67,7 @@ namespace Pigeoid.Epsg.Resources
         public TValue GetByKey(ushort targetKey) {
             using (var reader = EpsgDataResourceReader.CreateBinaryReader(DataFileName)) {
                 var count = reader.ReadUInt16();
+                //return GetByLinearSearch(targetKey, reader);
                 return GetByBinarySearch(targetKey, count, reader);
             }
         }
@@ -73,20 +77,28 @@ namespace Pigeoid.Epsg.Resources
             var baseSteam = reader.BaseStream;
             var searchIndexLow = 0;
             var searchIndexHigh = count - 1;
-            while (searchIndexLow < searchIndexHigh) {
+            while (searchIndexHigh >= searchIndexLow) {
                 var searchAtIndex = (searchIndexLow + searchIndexHigh) / 2;
-                Contract.Assume(searchAtIndex < searchIndexHigh);
-
-                // seek to the key
-                baseSteam.Seek(FileHeaderSize + (searchAtIndex * RecordTotalSize), SeekOrigin.Begin);
+                baseSteam.Seek(FileHeaderSize + (searchAtIndex * RecordTotalSize), SeekOrigin.Begin); // seek to the key
                 var localKey = reader.ReadUInt16();
-
                 if (localKey == targetKey)
                     return ReadValue(localKey, reader);
                 else if (localKey < targetKey)
                     searchIndexLow = searchAtIndex + 1;
                 else
-                    searchIndexHigh = searchAtIndex;
+                    searchIndexHigh = searchAtIndex - 1;
+            }
+            return null;
+        }
+
+        private TValue GetByLinearSearch(ushort targetKey, BinaryReader reader) {
+            var baseSteam = reader.BaseStream;
+            while (baseSteam.Position < baseSteam.Length) {
+                var key = reader.ReadUInt16();
+                if (key == targetKey)
+                    return ReadValue(key, reader);
+                else
+                    baseSteam.Seek(this.RecordDataSize, SeekOrigin.Current);
             }
             return null;
         }
@@ -109,7 +121,7 @@ namespace Pigeoid.Epsg.Resources
             var eastBound = DecodeDegreeValueFromShort(reader.ReadInt16());
             var southBound = DecodeDegreeValueFromShort(reader.ReadInt16());
             var northBound = DecodeDegreeValueFromShort(reader.ReadInt16());
-            var name = TextLookup.GetString(reader.ReadUInt16()); // TODO: read text
+            var name = TextLookup.GetString(reader.ReadUInt16());
             var iso2 = EpsgTextLookUp.LookUpIsoString(key, "iso2.dat", 2); // TODO: optimize
             var iso3 = EpsgTextLookUp.LookUpIsoString(key, "iso3.dat", 3); // TODO: optimize
             return new EpsgArea(
@@ -132,6 +144,241 @@ namespace Pigeoid.Epsg.Resources
         }
     }
 
+    internal sealed class EpsgDataResourceReaderOperationMethod : EpsgDataResourceReaderBasic<EpsgCoordinateOperationMethodInfo>
+    {
+        public EpsgDataResourceReaderOperationMethod() : base(
+            "opmethod.dat",
+            "opmethod.txt",
+            (sizeof(ushort) + sizeof(byte))
+        ) { }
 
+        protected override EpsgCoordinateOperationMethodInfo ReadValue(ushort key, BinaryReader reader) {
+            var canReverse = reader.ReadByte() == 'B';
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            return new EpsgCoordinateOperationMethodInfo(key, name, canReverse);
+        }
+    }
+
+    internal sealed class EpsgDataResourceReaderParameterInfo : EpsgDataResourceReaderBasic<EpsgParameterInfo>
+    {
+        public EpsgDataResourceReaderParameterInfo() : base(
+            "parameters.dat",
+            "parameters.txt",
+            sizeof(ushort)
+        ) { }
+
+        protected override EpsgParameterInfo ReadValue(ushort key, BinaryReader reader) {
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            Contract.Assume(!String.IsNullOrEmpty(name));
+            return new EpsgParameterInfo(key, name);
+        }
+
+    }
+
+    internal sealed class EpsgDataResourceReaderCoordinateSystem : EpsgDataResourceReaderBasic<EpsgCoordinateSystem>
+    {
+        public EpsgDataResourceReaderCoordinateSystem()
+            : base(
+                "coordsys.dat",
+                "coordsys.txt",
+                sizeof(ushort) + sizeof(byte)
+            ) { }
+
+        protected override EpsgCoordinateSystem ReadValue(ushort key, BinaryReader reader) {
+            var typeData = reader.ReadByte();
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            return new EpsgCoordinateSystem(
+                key, name,
+                dimension: typeData & 3,
+                deprecated: 0 != (typeData & 128),
+                csType: DecodeCsType(typeData)
+            );
+        }
+
+        private static EpsgCoordinateSystemKind DecodeCsType(byte value) {
+            switch (value & 0x70) {
+                case 0x10: return EpsgCoordinateSystemKind.Cartesian;
+                case 0x20: return EpsgCoordinateSystemKind.Ellipsoidal;
+                case 0x30: return EpsgCoordinateSystemKind.Spherical;
+                case 0x40: return EpsgCoordinateSystemKind.Vertical;
+                default: return EpsgCoordinateSystemKind.None;
+            }
+        }
+
+    }
+
+    internal sealed class EpsgDataResourceReaderEllipsoid : EpsgDataResourceReaderBasic<EpsgEllipsoid>
+    {
+
+        private readonly EpsgNumberLookUp _numberLookup = new EpsgNumberLookUp();
+
+        public EpsgDataResourceReaderEllipsoid() : base(
+            "ellipsoids.dat",
+            "ellipsoids.txt",
+            (sizeof(ushort) * 3) + sizeof(byte)
+        ) { }
+
+        protected override EpsgEllipsoid ReadValue(ushort key, BinaryReader reader) {
+            var semiMajorAxis = _numberLookup.Get(reader.ReadUInt16());
+            var valueB = _numberLookup.Get(reader.ReadUInt16());
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            Contract.Assume(!String.IsNullOrEmpty(name));
+            var uom = EpsgUnit.Get(reader.ReadByte() + 9000);
+            Contract.Assume(uom != null);
+            return new EpsgEllipsoid(
+                key, name, uom,
+                (valueB == semiMajorAxis)
+                    ? new Sphere(semiMajorAxis)
+                : (valueB < semiMajorAxis / 10.0)
+                    ? new SpheroidEquatorialInvF(semiMajorAxis, valueB) as ISpheroid<double>
+                : new SpheroidEquatorialPolar(semiMajorAxis, valueB)
+            );
+        }
+    }
+
+    internal sealed class EpsgDataResourceReaderPrimeMeridian : EpsgDataResourceReaderBasic<EpsgPrimeMeridian>
+    {
+
+        private readonly EpsgNumberLookUp _numberLookup = new EpsgNumberLookUp();
+
+        public EpsgDataResourceReaderPrimeMeridian() : base(
+            "meridians.dat",
+            "meridians.txt",
+            (sizeof(ushort) * 2) + sizeof(byte)
+        ) { }
+
+        protected override EpsgPrimeMeridian ReadValue(ushort key, BinaryReader reader) {
+            var uom = EpsgUnit.Get(reader.ReadUInt16());
+            Contract.Assume(uom != null);
+            var longitude = _numberLookup.Get(reader.ReadUInt16());
+            var name = TextLookup.GetString(reader.ReadByte());
+            Contract.Assume(!String.IsNullOrEmpty(name));
+            return new EpsgPrimeMeridian(key, name, longitude, uom);
+        }
+
+    }
+
+    internal sealed class EpsgDataResourceReaderAxisSet : EpsgDataResourceReaderBasic<EpsgAxisSet>
+    {
+
+        private readonly int Dimensions;
+
+        public EpsgDataResourceReaderAxisSet(int dimensions, EpsgTextLookUp textLookup) : base(
+            "axis" + dimensions.ToString(CultureInfo.InvariantCulture) + ".dat",
+            textLookup,
+            (4 * sizeof(ushort)) * dimensions
+        ){
+            Contract.Requires(dimensions > 0);
+            Dimensions = dimensions;
+        }
+
+        protected override EpsgAxisSet ReadValue(ushort key, BinaryReader reader) {
+            var axes = new EpsgAxis[Dimensions];
+            for (int i = 0; i < axes.Length; ++i) {
+                var unit = EpsgUnit.Get(reader.ReadUInt16());
+                var name = TextLookup.GetString(reader.ReadUInt16());
+                var orientation = TextLookup.GetString(reader.ReadUInt16());
+                var abbr = TextLookup.GetString(reader.ReadUInt16());
+                axes[i] = new EpsgAxis(name, abbr, orientation, unit);
+            }
+            return new EpsgAxisSet(key, axes);
+        }
+
+    }
+
+    internal sealed class EpsgDataResourceAllAxisSetReaders
+    {
+
+        public EpsgDataResourceAllAxisSetReaders() {
+            var textLookup = new EpsgTextLookUp("axis.txt");
+            Dimension1 = new EpsgDataResourceReaderAxisSet(1, textLookup);
+            Dimension2 = new EpsgDataResourceReaderAxisSet(2, textLookup);
+            Dimension3 = new EpsgDataResourceReaderAxisSet(3, textLookup);
+        }
+
+        public EpsgDataResourceReaderAxisSet Dimension1 { get; private set; }
+        public EpsgDataResourceReaderAxisSet Dimension2 { get; private set; }
+        public EpsgDataResourceReaderAxisSet Dimension3 { get; private set; }
+
+        public EpsgAxisSet GetSetByCsKey(ushort key) {
+            return Dimension2.GetByKey(key)
+                ?? Dimension3.GetByKey(key)
+                ?? Dimension1.GetByKey(key);
+        }
+
+        [Obsolete]
+        public IEnumerable<EpsgAxisSet> ReadAllValues() {
+            return Dimension1.ReadAllValues()
+                .Concat(Dimension2.ReadAllValues())
+                .Concat(Dimension3.ReadAllValues());
+        }
+
+    }
+
+    internal sealed class EpsgDataResourceReaderUnit : EpsgDataResourceReaderBasic<EpsgUnit>
+    {
+
+        private readonly EpsgNumberLookUp _numberLookup = new EpsgNumberLookUp();
+
+        public EpsgDataResourceReaderUnit(string typeName) : base(
+            "uom" + typeName.ToLowerInvariant() + ".dat",
+            "uoms.txt",
+            sizeof(ushort) * 3
+        ) {
+            Contract.Requires(typeName != null);
+            TypeName = typeName;
+        }
+
+        public string TypeName { get; private set; }
+
+        protected override EpsgUnit ReadValue(ushort key, BinaryReader reader) {
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            Contract.Assume(!String.IsNullOrEmpty(name));
+            var factorB = _numberLookup.Get(reader.ReadUInt16());
+            var factorC = _numberLookup.Get(reader.ReadUInt16());
+            // ReSharper disable CompareOfFloatsByEqualityOperator
+            if (factorC == 0) {
+                if (factorB == 0)
+                    factorC = Double.NaN;
+                else
+                    throw new InvalidDataException("Bad unit conversion factor values.");
+            }
+            // ReSharper restore CompareOfFloatsByEqualityOperator
+            return new EpsgUnit(key, name, TypeName, factorB, factorC);
+        }
+
+    }
+
+    internal sealed class EpsgDataResourceAllUnitsReader
+    {
+
+        public EpsgDataResourceAllUnitsReader() {
+            ReaderLength = new EpsgDataResourceReaderUnit("Length");
+            ReaderAngle = new EpsgDataResourceReaderUnit("Angle");
+            ReaderScale = new EpsgDataResourceReaderUnit("Scale");
+            ReaderTime = new EpsgDataResourceReaderUnit("Time");
+        }
+
+        public EpsgDataResourceReaderUnit ReaderLength { get; private set; }
+        public EpsgDataResourceReaderUnit ReaderAngle { get; private set; }
+        public EpsgDataResourceReaderUnit ReaderScale { get; private set; }
+        public EpsgDataResourceReaderUnit ReaderTime { get; private set; }
+
+        public EpsgUnit GetByKey(ushort targetKey) {
+            return ReaderLength.GetByKey(targetKey)
+                ?? ReaderAngle.GetByKey(targetKey)
+                ?? ReaderScale.GetByKey(targetKey)
+                ?? ReaderTime.GetByKey(targetKey);
+        }
+
+        public IEnumerable<EpsgUnit> ReadAllValues() {
+            Contract.Ensures(Contract.Result<IEnumerable<EpsgUnit>>() != null);
+            return ReaderTime.ReadAllValues()
+                .Concat(ReaderLength.ReadAllValues())
+                .Concat(ReaderAngle.ReadAllValues())
+                .Concat(ReaderScale.ReadAllValues())
+                .OrderBy(x => x.Code);
+        }
+    }
 
 }

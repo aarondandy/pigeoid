@@ -9,43 +9,26 @@ namespace Pigeoid.Epsg
     public class EpsgPrimeMeridian : IPrimeMeridianInfo
     {
 
-        internal static readonly EpsgFixedLookUpBase<ushort, EpsgPrimeMeridian> LookUp;
+        [Obsolete]
+        internal static readonly EpsgDataResourceReaderPrimeMeridian Reader = new EpsgDataResourceReaderPrimeMeridian();
 
-        static EpsgPrimeMeridian() {
-            var lookUpDictionary = new SortedDictionary<ushort, EpsgPrimeMeridian>();
-            using (var readerTxt = EpsgDataResource.CreateBinaryReader("meridians.txt"))
-            using (var numberLookUp = new EpsgNumberLookUp())
-            using (var readerDat = EpsgDataResource.CreateBinaryReader("meridians.dat")) {
-                for (int i = readerDat.ReadUInt16(); i > 0; i--) {
-                    var code = readerDat.ReadUInt16();
-                    var uom = EpsgUnit.Get(readerDat.ReadUInt16());
-                    Contract.Assume(uom != null);
-                    var longitude = numberLookUp.Get(readerDat.ReadUInt16());
-                    var name = EpsgTextLookUp.GetString(readerDat.ReadByte(), readerTxt);
-                    Contract.Assume(!String.IsNullOrEmpty(name));
-                    lookUpDictionary.Add(code, new EpsgPrimeMeridian(code, name, longitude, uom));
-                }
-            }
-            LookUp = new EpsgFixedLookUpBase<ushort, EpsgPrimeMeridian>(lookUpDictionary);
-        }
-
+        [Obsolete]
         public static EpsgPrimeMeridian Get(int code) {
-            return code >= 0 && code < ushort.MaxValue ? LookUp.Get(unchecked((ushort)code)) : null;
+            return code >= 0 && code < ushort.MaxValue ? Reader.GetByKey(unchecked((ushort)code)) : null;
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgPrimeMeridian> Values {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgPrimeMeridian>>() != null);
-                return LookUp.Values;
+                return Reader.ReadAllValues();
             }
         }
 
-        private readonly ushort _code;
-
-        private EpsgPrimeMeridian(ushort code, string name, double longitude, EpsgUnit unit) {
+        internal EpsgPrimeMeridian(ushort code, string name, double longitude, EpsgUnit unit) {
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(unit != null);
-            _code = code;
+            Code = code;
             Unit = unit;
             Longitude = longitude;
             Name = name;
@@ -57,7 +40,7 @@ namespace Pigeoid.Epsg
             Contract.Invariant(Unit != null);
         }
 
-        public int Code { get { return _code; } }
+        public int Code { get; private set; }
 
         public string Name { get; private set; }
 
@@ -70,7 +53,7 @@ namespace Pigeoid.Epsg
         public IAuthorityTag Authority {
             get {
                 Contract.Ensures(Contract.Result<IAuthorityTag>() != null);
-                return new EpsgAuthorityTag(_code);
+                return new EpsgAuthorityTag(Code);
             }
         }
 

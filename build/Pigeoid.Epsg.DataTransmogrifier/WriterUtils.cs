@@ -228,7 +228,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		}
 
-		public static void WriteAxes(EpsgData data, BinaryWriter dataWriter, BinaryWriter textWriter) {
+        public static void WriteAxes(EpsgData data, BinaryWriter textWriter, BinaryWriter data1Writer, BinaryWriter data2Writer, BinaryWriter data3Writer) {
 			var stringLookUp = WriteTextDictionary(data, textWriter,
 				data.Repository.Axes.Select(x => x.Name)
 				.Concat(data.Repository.Axes.Select(x => x.Orientation))
@@ -237,18 +237,32 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			);
 
 			var axesData = data.Repository.Axes.ToLookup(x => x.CoordinateSystem.Code);
-			int c = axesData.Count();
-			dataWriter.Write((ushort)c);
-			foreach (var axisSet in axesData.OrderBy(x => x.Key)) {
-				dataWriter.Write((ushort)axisSet.Key);
-				dataWriter.Write((byte)axisSet.Count());
-				foreach (var axis in axisSet.OrderBy(x => x.OrderValue)) {
-					dataWriter.Write((ushort)axis.Uom.Code);
-					dataWriter.Write((ushort)stringLookUp[axis.Name]);
-					dataWriter.Write((ushort)stringLookUp[axis.Orientation]);
-					dataWriter.Write((ushort)stringLookUp[axis.Abbreviation]);
-				}
-			}
+
+            
+            foreach(var axisFileGroup in axesData.GroupBy(x => x.Count())){
+                var axisCount = axisFileGroup.Key;
+                BinaryWriter dataWriter;
+                if (axisCount == 1)
+                    dataWriter = data1Writer;
+                else if (axisCount == 2)
+                    dataWriter = data2Writer;
+                else if (axisCount == 3)
+                    dataWriter = data3Writer;
+                else
+                    throw new InvalidDataException();
+
+                dataWriter.Write((ushort)axisFileGroup.Count());
+                foreach (var axisSet in axisFileGroup.OrderBy(x => x.Key)) {
+                    dataWriter.Write((ushort)axisSet.Key);
+                    foreach (var axis in axisSet.OrderBy(x => x.OrderValue)) {
+                        dataWriter.Write((ushort)axis.Uom.Code);
+                        dataWriter.Write((ushort)stringLookUp[axis.Name]);
+                        dataWriter.Write((ushort)stringLookUp[axis.Orientation]);
+                        dataWriter.Write((ushort)stringLookUp[axis.Abbreviation]);
+                    }
+                }
+
+            }
 		}
 
 		public static void WriteEllipsoids(EpsgData data, BinaryWriter dataWriter, BinaryWriter textWriter) {
@@ -329,32 +343,28 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				.Distinct()
 			);
 
-			foreach (var unit in data.Repository.Uoms.OrderBy(x => x.Code)) {
-				BinaryWriter writer;
-				switch (unit.Type.ToUpper()) {
-					case "LENGTH": {
-						writer = lengthWriter;
-						break;
-					}
-					case "ANGLE": {
-						writer = angleWriter;
-						break;
-					}
-					case "SCALE": {
-						writer = scaleWriter;
-						break;
-					}
-                    case "TIME": {
-                        writer = timeWriter;
-                        break;
-                    }
-					default: throw new InvalidDataException("Invalid uom type: " + unit.Type);
-				}
-				writer.Write((ushort)unit.Code);
-				writer.Write((ushort)stringLookUp[unit.Name]);
-				writer.Write((ushort)data.GetNumberIndex(unit.FactorB ?? 0));
-				writer.Write((ushort)data.GetNumberIndex(unit.FactorC ?? 0));
-			}
+            var uomGroups = data.Repository.Uoms.GroupBy(x => x.Type.ToUpper());
+            foreach (var uomGroup in uomGroups) {
+                BinaryWriter writer;
+                if (uomGroup.Key == "LENGTH")
+                    writer = lengthWriter;
+                else if (uomGroup.Key == "ANGLE")
+                    writer = angleWriter;
+                else if (uomGroup.Key == "SCALE")
+                    writer = scaleWriter;
+                else if (uomGroup.Key == "TIME")
+                    writer = timeWriter;
+                else
+                    throw new InvalidDataException("Invalid uom type: " + uomGroup.Key);
+
+                writer.Write((ushort)uomGroup.Count());
+                foreach (var uom in uomGroup.OrderBy(x => x.Code)) {
+                    writer.Write((ushort)uom.Code);
+                    writer.Write((ushort)stringLookUp[uom.Name]);
+                    writer.Write((ushort)data.GetNumberIndex(uom.FactorB ?? 0));
+                    writer.Write((ushort)data.GetNumberIndex(uom.FactorC ?? 0));
+                }
+            }
 
 		}
 

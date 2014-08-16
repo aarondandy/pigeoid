@@ -12,51 +12,11 @@ namespace Pigeoid.Epsg
     public class EpsgCoordinateOperationMethodInfo : ICoordinateOperationMethodInfo
     {
 
-        internal class EpsgCoordinateOperationMethodInfoLookUp : EpsgDynamicLookUpBase<ushort, EpsgCoordinateOperationMethodInfo>
-        {
-            private const string DatFileName = "opmethod.dat";
-            private const string TxtFileName = "opmethod.txt";
-            private const int FileHeaderSize = sizeof(ushort);
-            private const int RecordDataSize = sizeof(ushort) + sizeof(byte);
-            private const int RecordSize = sizeof(ushort) + RecordDataSize;
-            private const int CodeSize = sizeof(ushort);
-
-            private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
-
-            private static ushort[] GetKeys() {
-                Contract.Ensures(Contract.Result<ushort[]>() != null);
-                using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-                    var keys = new ushort[reader.ReadUInt16()];
-                    for (int i = 0; i < keys.Length; i++) {
-                        keys[i] = reader.ReadUInt16();
-                        reader.BaseStream.Seek(RecordDataSize, SeekOrigin.Current);
-                    }
-                    return keys;
-                }
-            }
-
-            public EpsgCoordinateOperationMethodInfoLookUp() : base(GetKeys()) { }
-
-            protected override EpsgCoordinateOperationMethodInfo Create(ushort key, int index) {
-                Contract.Ensures(Contract.Result<EpsgCoordinateOperationMethodInfo>() != null);
-                using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-                    reader.BaseStream.Seek((index * RecordSize) + FileHeaderSize + CodeSize, SeekOrigin.Begin);
-                    var reverse = reader.ReadByte() == 'B';
-                    var name = TextLookUp.GetString(reader.ReadUInt16());
-                    Contract.Assume(!String.IsNullOrEmpty(name));
-                    return new EpsgCoordinateOperationMethodInfo(key, name, reverse);
-                }
-            }
-
-            protected override ushort GetKeyForItem(EpsgCoordinateOperationMethodInfo value) {
-                return value._code;
-            }
-
-        }
-
+        [Obsolete]
         private class EpsgCoordinateOperationMethodParamInfoLookUp
         {
 
+            [Obsolete]
             private class OpParamValueDynamicLookUp : EpsgDynamicLookUpBase<ushort, OpParamValueInfo>
             {
 
@@ -265,25 +225,28 @@ namespace Pigeoid.Epsg
             public ReadOnlyCollection<INamedParameter> Values { get; private set; }
         }
 
-        internal static readonly EpsgCoordinateOperationMethodInfoLookUp LookUp = new EpsgCoordinateOperationMethodInfoLookUp();
+        [Obsolete]
+        internal static readonly EpsgDataResourceReaderOperationMethod Reader = new EpsgDataResourceReaderOperationMethod();
 
+        [Obsolete]
         public static EpsgCoordinateOperationMethodInfo Get(int code) {
             return code >= 0 && code <= UInt16.MaxValue
-                ? LookUp.Get(unchecked((ushort)code))
+                ? Reader.GetByKey(unchecked((ushort)code))
                 : null;
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgCoordinateOperationMethodInfo> Values {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCoordinateOperationMethodInfo>>() != null);
-                return LookUp.Values;
+                return Reader.ReadAllValues();
             }
         }
 
         private readonly ushort _code;
         private readonly Lazy<EpsgCoordinateOperationMethodParamInfoLookUp> _paramData;
 
-        private EpsgCoordinateOperationMethodInfo(ushort code, string name, bool canReverse) {
+        internal EpsgCoordinateOperationMethodInfo(ushort code, string name, bool canReverse) {
             Contract.Requires(!String.IsNullOrEmpty(name));
             _code = code;
             Name = name;

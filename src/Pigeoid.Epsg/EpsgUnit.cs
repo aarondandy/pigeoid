@@ -11,51 +11,43 @@ namespace Pigeoid.Epsg
     public class EpsgUnit : IUnit, IAuthorityBoundEntity
     {
 
-        internal static readonly EpsgFixedLookUpBase<ushort, EpsgUnit> LookUp;
+        [Obsolete]
+        private static readonly EpsgDataResourceAllUnitsReader Readers = new EpsgDataResourceAllUnitsReader();
+
+        [Obsolete]
         private static readonly ReadOnlyUnitConversionMap AllConversionMap;
 
+        [Obsolete]
         static EpsgUnit() {
-            var lookUpDictionary = new SortedDictionary<ushort, EpsgUnit>();
-            using (var readerTxt = EpsgDataResource.CreateBinaryReader("uoms.txt"))
-            using (var numberLookUp = new EpsgNumberLookUp()) {
-                PopulateFromFile("uomang.dat", "Angle", readerTxt, numberLookUp, lookUpDictionary);
-                PopulateFromFile("uomlen.dat", "Length", readerTxt, numberLookUp, lookUpDictionary);
-                PopulateFromFile("uomscl.dat", "Scale", readerTxt, numberLookUp, lookUpDictionary);
-                PopulateFromFile("uomtim.dat", "Time", readerTxt, numberLookUp, lookUpDictionary);
-            }
 
-
-
-            LookUp = new EpsgFixedLookUpBase<ushort, EpsgUnit>(lookUpDictionary);
-
-            var indianFoot = LookUp.Get(9080);
+            var indianFoot = Readers.GetByKey(9080);
             Contract.Assume(indianFoot != null);
-            var britishFoot = LookUp.Get(9070);
+            var britishFoot = Readers.GetByKey(9070);
             Contract.Assume(britishFoot != null);
 
-            var degree9102 = LookUp.Get(9102);
+            var degree9102 = Readers.GetByKey(9102);
             Contract.Assume(degree9102 != null);
-            var degree9122 = LookUp.Get(9122);
+            var degree9122 = Readers.GetByKey(9122);
             Contract.Assume(degree9122 != null);
-            var arcMinute = LookUp.Get(9103);
+            var arcMinute = Readers.GetByKey(9103);
             Contract.Assume(arcMinute != null);
-            var arcSecond = LookUp.Get(9103);
+            var arcSecond = Readers.GetByKey(9103);
             Contract.Assume(arcSecond != null);
-            var grad = LookUp.Get(9105);
+            var grad = Readers.GetByKey(9105);
             Contract.Assume(grad != null);
-            var gon = LookUp.Get(9106);
+            var gon = Readers.GetByKey(9106);
             Contract.Assume(gon != null);
-            var centesimalMinute = LookUp.Get(9112);
+            var centesimalMinute = Readers.GetByKey(9112);
             Contract.Assume(centesimalMinute != null);
-            var centesimalSecond = LookUp.Get(9113);
+            var centesimalSecond = Readers.GetByKey(9113);
             Contract.Assume(centesimalSecond != null);
-            var dms = LookUp.Get(9110);
+            var dms = Readers.GetByKey(9110);
             Contract.Assume(dms != null);
-            var dm = LookUp.Get(9111);
+            var dm = Readers.GetByKey(9111);
             Contract.Assume(dm != null);
 
             AllConversionMap = new ReadOnlyUnitConversionMap(
-                lookUpDictionary.Values
+                Readers.ReadAllValues()
                     .Select(x => x.BuildConversionToBase())
                     .Where(x => null != x)
                     .Concat(new IUnitConversion<double>[] {
@@ -112,59 +104,36 @@ namespace Pigeoid.Epsg
             );
         }
 
+        [Obsolete]
         private static UnitScalarConversion CreateScalarConversion(ushort fromKey, ushort toKey, double factor) {
             Contract.Requires(!Double.IsNaN(factor));
             Contract.Requires(factor != 0);
             Contract.Ensures(Contract.Result<UnitScalarConversion>() != null);
-            var from = LookUp.Get(fromKey);
-            var to = LookUp.Get(toKey);
+            var from = Readers.GetByKey(fromKey);
+            var to = Readers.GetByKey(toKey);
             Contract.Assume(from != null);
             Contract.Assume(to != null);
             return new UnitScalarConversion(from, to, factor);
         }
 
-        private static void PopulateFromFile(string datFileName, string typeName, BinaryReader readerTxt, EpsgNumberLookUp numberLookUp, SortedDictionary<ushort, EpsgUnit> lookUpDictionary) {
-            Contract.Requires(!String.IsNullOrEmpty(datFileName));
-            Contract.Requires(!String.IsNullOrEmpty(typeName));
-            Contract.Requires(readerTxt != null);
-            Contract.Requires(numberLookUp != null);
-            Contract.Requires(lookUpDictionary != null);
-            using (var readerDat = EpsgDataResource.CreateBinaryReader(datFileName)) {
-                while (readerDat.BaseStream.Position < readerDat.BaseStream.Length) {
-                    var code = readerDat.ReadUInt16();
-                    var name = EpsgTextLookUp.GetString(readerDat.ReadUInt16(), readerTxt);
-                    Contract.Assume(!String.IsNullOrEmpty(name));
-                    var factorB = numberLookUp.Get(readerDat.ReadUInt16());
-                    var factorC = numberLookUp.Get(readerDat.ReadUInt16());
-// ReSharper disable CompareOfFloatsByEqualityOperator
-                    if (factorC == 0) {
-                        if(factorB == 0)
-                            factorC = Double.NaN;
-                        else
-                            throw new InvalidDataException("Bad unit conversion factor values.");
-                    }
-// ReSharper restore CompareOfFloatsByEqualityOperator
-                    lookUpDictionary.Add(code, new EpsgUnit(code, name, typeName, factorB, factorC));
-                }
-            }
-        }
-
+        [Obsolete]
         public static EpsgUnit Get(int code) {
             return code >= 0 && code < ushort.MaxValue
-                ? LookUp.Get((ushort)code)
+                ? Readers.GetByKey((ushort)code)
                 : null;
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgUnit> Values {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgUnit>>() != null);
-                return LookUp.Values;
+                return Readers.ReadAllValues();
             }
         }
 
         private readonly ushort _code;
 
-        private EpsgUnit(ushort code, string name, string type, double factorB, double factorC) {
+        internal EpsgUnit(ushort code, string name, string type, double factorB, double factorC) {
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(!String.IsNullOrEmpty(type));
 // ReSharper disable CompareOfFloatsByEqualityOperator
@@ -220,15 +189,15 @@ namespace Pigeoid.Epsg
             Contract.Ensures(Contract.Result<IUnit>() != null);
             IUnit unit;
             if (StringComparer.OrdinalIgnoreCase.Equals("Angle", Type))
-                unit = LookUp.Get(9101);
+                unit = Readers.ReaderAngle.GetByKey(9101);
             else if (StringComparer.OrdinalIgnoreCase.Equals("Length", Type))
-                unit = LookUp.Get(9001);
+                unit = Readers.ReaderLength.GetByKey(9001);
             else if (StringComparer.OrdinalIgnoreCase.Equals("Scale", Type))
-                unit = LookUp.Get(9201);
+                unit = Readers.ReaderScale.GetByKey(9201);
             else if (StringComparer.OrdinalIgnoreCase.Equals("Time", Type))
-                unit = LookUp.Get(1040);
+                unit = Readers.ReaderTime.GetByKey(1040);
             else
-                unit = null; // TODO: consider, LookUp.Values.Where(x => x.Type == Type).Single(x => x.FactorB == 1 && x.FactorC == 1);
+                unit = null; // TODO: consider, Readers.ReadAllValues().Where(x => x.Type == Type).Single(x => x.FactorB == 1 && x.FactorC == 1);
 
             if (unit != null)
                 return unit;

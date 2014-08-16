@@ -131,12 +131,14 @@
     <Compile Include="EpsgArea.cs" />
     <Compile Include="EpsgAuthorityTag.cs" />
     <Compile Include="EpsgAxis.cs" />
+    <Compile Include="EpsgAxisSet.cs" />
     <Compile Include="EpsgCoordinateOperationInfo.cs" />
     <Compile Include="EpsgConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="EpsgCoordinateOperationInfoBase.cs" />
     <Compile Include="EpsgCoordinateOperationInfoRepository.cs" />
     <Compile Include="EpsgCoordinateOperationInverse.cs" />
     <Compile Include="EpsgCoordinateSystem.cs" />
+    <Compile Include="EpsgCoordinateSystemKind.cs" />
     <Compile Include="EpsgCoordinateTransformInfo.cs" />
     <Compile Include="EpsgCoordinateOperationMethodInfo.cs" />
     <Compile Include="EpsgCrs.cs" />
@@ -174,7 +176,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\areas.dat" />
-    <EmbeddedResource Include="Resources\axis.dat" />
     <EmbeddedResource Include="Resources\coordsys.dat" />
     <EmbeddedResource Include="Resources\crscmp.dat" />
     <EmbeddedResource Include="Resources\datumegr.dat" />
@@ -290,9 +291,6 @@
     <EmbeddedResource Include="Resources\param9843.dat" />
     <EmbeddedResource Include="Resources\param9844.dat" />
     <EmbeddedResource Include="Resources\parameters.dat" />
-    <EmbeddedResource Include="Resources\uomang.dat" />
-    <EmbeddedResource Include="Resources\uomlen.dat" />
-    <EmbeddedResource Include="Resources\uomscl.dat" />
     <EmbeddedResource Include="Resources\words.dat" />
   </ItemGroup>
   <ItemGroup>
@@ -362,8 +360,17 @@
     <EmbeddedResource Include="Resources\param1057.dat" />
     <EmbeddedResource Include="Resources\param1058.dat" />
     <EmbeddedResource Include="Resources\param1060.dat" />
-    <EmbeddedResource Include="Resources\uomtim.dat" />
     <EmbeddedResource Include="Resources\crs.dat" />
+    <EmbeddedResource Include="Resources\param1061.dat" />
+    <EmbeddedResource Include="Resources\param1062.dat" />
+    <EmbeddedResource Include="Resources\param1063.dat" />
+    <EmbeddedResource Include="Resources\axis1.dat" />
+    <EmbeddedResource Include="Resources\axis2.dat" />
+    <EmbeddedResource Include="Resources\axis3.dat" />
+    <EmbeddedResource Include="Resources\uomangle.dat" />
+    <EmbeddedResource Include="Resources\uomlength.dat" />
+    <EmbeddedResource Include="Resources\uomscale.dat" />
+    <EmbeddedResource Include="Resources\uomtime.dat" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
