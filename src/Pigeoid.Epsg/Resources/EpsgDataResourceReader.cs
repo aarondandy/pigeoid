@@ -258,6 +258,48 @@ namespace Pigeoid.Epsg.Resources
 
     }
 
+    internal sealed class EpsgDataResourceReaderBasicDatum<T> : EpsgDataResourceReaderBasic<T>
+    {
+        public readonly Func<ushort, string, EpsgArea, T> _construct;
+
+        public EpsgDataResourceReaderBasicDatum(string dataFileName, Func<ushort, string, EpsgArea, T> construct)
+            : base(
+            dataFileName,
+            "datums.txt",
+            sizeof(ushort) * 2
+        ) {
+            Contract.Requires(construct != null);
+            _construct = construct;
+        }
+
+        protected override T ReadValue(ushort key, BinaryReader reader) {
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            var area = EpsgArea.Get(reader.ReadUInt16());
+            return _construct(key, name, area);
+        }
+    }
+
+    internal sealed class EpsgDataResourceReaderGeodeticDatum : EpsgDataResourceReaderBasic<EpsgDatumGeodetic>
+    {
+        public EpsgDataResourceReaderGeodeticDatum() : base(
+            "datumgeo.dat",
+            "datums.txt",
+            sizeof(ushort) * 4
+        ) { }
+
+        protected override EpsgDatumGeodetic ReadValue(ushort key, BinaryReader reader) {
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            Contract.Assume(!String.IsNullOrEmpty(name));
+            var area = EpsgArea.Get(reader.ReadUInt16());
+            Contract.Assume(area != null);
+            var spheroid = EpsgEllipsoid.Get(reader.ReadUInt16());
+            Contract.Assume(spheroid != null);
+            var meridian = EpsgPrimeMeridian.Get(reader.ReadUInt16());
+            Contract.Assume(meridian != null);
+            return new EpsgDatumGeodetic(key, name, spheroid, meridian, area);
+        }
+    }
+
     internal sealed class EpsgDataResourceReaderAxisSet : EpsgDataResourceReaderBasic<EpsgAxisSet>
     {
 

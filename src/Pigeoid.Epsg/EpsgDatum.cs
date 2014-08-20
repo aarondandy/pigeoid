@@ -13,7 +13,7 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.Epsg
 {
-
+    [Obsolete]
     public static class EpsgDatumRepository
     {
 
@@ -40,6 +40,7 @@ namespace Pigeoid.Epsg
             return lookUp;
         }
 
+        [Obsolete]
         internal class EpsgDatumGeodeticLookUp : EpsgDynamicLookUpBase<ushort, EpsgDatumGeodetic>
         {
             private const string DatFileName = "datumgeo.dat";
@@ -151,6 +152,7 @@ namespace Pigeoid.Epsg
     public abstract class EpsgDatum : IDatum
     {
 
+        [Obsolete]
         public static IEnumerable<EpsgDatum> Values {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgDatum>>() != null);
@@ -158,6 +160,7 @@ namespace Pigeoid.Epsg
             }
         }
 
+        [Obsolete]
         public static EpsgDatum Get(int code) {
             return EpsgDatumRepository.Get(code);
         }
