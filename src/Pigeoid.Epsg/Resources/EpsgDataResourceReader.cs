@@ -258,11 +258,11 @@ namespace Pigeoid.Epsg.Resources
 
     }
 
-    internal sealed class EpsgDataResourceReaderBasicDatum<T> : EpsgDataResourceReaderBasic<T>
+    internal sealed class EpsgDataResourceReaderBasicDatum<TValue> : EpsgDataResourceReaderBasic<TValue> where TValue : class
     {
-        public readonly Func<ushort, string, EpsgArea, T> _construct;
+        public readonly Func<ushort, string, EpsgArea, TValue> _construct;
 
-        public EpsgDataResourceReaderBasicDatum(string dataFileName, Func<ushort, string, EpsgArea, T> construct)
+        public EpsgDataResourceReaderBasicDatum(string dataFileName, Func<ushort, string, EpsgArea, TValue> construct)
             : base(
             dataFileName,
             "datums.txt",
@@ -272,7 +272,7 @@ namespace Pigeoid.Epsg.Resources
             _construct = construct;
         }
 
-        protected override T ReadValue(ushort key, BinaryReader reader) {
+        protected override TValue ReadValue(ushort key, BinaryReader reader) {
             var name = TextLookup.GetString(reader.ReadUInt16());
             var area = EpsgArea.Get(reader.ReadUInt16());
             return _construct(key, name, area);

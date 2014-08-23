@@ -307,32 +307,38 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				.Distinct()
 			);
 
-			foreach (var datum in data.Repository.Datums.OrderBy(x => x.Code)) {
-				switch(datum.Type.ToUpper())
-				{
-					case "ENGINEERING": {
-						engineeringWriter.Write((ushort)datum.Code);
-						engineeringWriter.Write((ushort)(stringLookUp[datum.Name]));
-						engineeringWriter.Write((ushort)datum.AreaOfUse.Code);
-						break;
-					}
-					case "VERTICAL": {
-						verticalWriter.Write((ushort)datum.Code);
-						verticalWriter.Write((ushort)(stringLookUp[datum.Name]));
-						verticalWriter.Write((ushort)datum.AreaOfUse.Code);
-						break;
-					}
-					case "GEODETIC": {
-						geodeticWriter.Write((ushort)datum.Code);
-						geodeticWriter.Write((ushort)(stringLookUp[datum.Name]));
-						geodeticWriter.Write((ushort)datum.AreaOfUse.Code);
-						geodeticWriter.Write((ushort)datum.Ellipsoid.Code);
-						geodeticWriter.Write((ushort)datum.PrimeMeridian.Code);
-						break;
-					}
-					default: throw new InvalidDataException("Invalid datum type: " + datum.Type);
-				}
-			}
+            foreach (var datumSet in data.Repository.Datums.GroupBy(x => x.Type)) {
+                var datums = datumSet.OrderBy(x => x.Code);
+                switch (datumSet.Key.ToUpper()) {
+                    case "ENGINEERING":
+                        engineeringWriter.Write((ushort)datums.Count());
+                        foreach (var datum in datums) {
+                            engineeringWriter.Write((ushort)datum.Code);
+                            engineeringWriter.Write((ushort)(stringLookUp[datum.Name]));
+                            engineeringWriter.Write((ushort)datum.AreaOfUse.Code);
+                        }
+                        break;
+                    case "VERTICAL":
+                        verticalWriter.Write((ushort)datums.Count());
+                        foreach (var datum in datums) {
+                            verticalWriter.Write((ushort)datum.Code);
+                            verticalWriter.Write((ushort)(stringLookUp[datum.Name]));
+                            verticalWriter.Write((ushort)datum.AreaOfUse.Code);
+                        }
+                        break;
+                    case "GEODETIC":
+                        geodeticWriter.Write((ushort)datums.Count());
+                        foreach (var datum in datums) {
+                            geodeticWriter.Write((ushort)datum.Code);
+                            geodeticWriter.Write((ushort)(stringLookUp[datum.Name]));
+                            geodeticWriter.Write((ushort)datum.AreaOfUse.Code);
+                            geodeticWriter.Write((ushort)datum.Ellipsoid.Code);
+                            geodeticWriter.Write((ushort)datum.PrimeMeridian.Code);
+                        }
+                        break;
+                    default: throw new InvalidDataException("Invalid datum type: " + datumSet.Key);
+                }
+            }
 
 		}
 
