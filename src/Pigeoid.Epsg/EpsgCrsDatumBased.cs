@@ -2,12 +2,14 @@
 using System.IO;
 using Pigeoid.Epsg.Resources;
 using System.Collections.Generic;
+using System;
 
 namespace Pigeoid.Epsg
 {
     public abstract class EpsgCrsDatumBased : EpsgCrs
     {
 
+        [Obsolete]
         internal class EpsgCrsDatumBasedLookUp : EpsgDynamicLookUpBase<int, EpsgCrsDatumBased>
         {
 
@@ -69,12 +71,15 @@ namespace Pigeoid.Epsg
 
         }
 
+        [Obsolete]
         internal static readonly EpsgCrsDatumBasedLookUp LookUp = new EpsgCrsDatumBasedLookUp();
 
+        [Obsolete]
         public static EpsgCrsDatumBased GetDatumBased(int code) {
             return LookUp.Get(code);
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgCrsDatumBased> DatumBasedValues {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCrsDatumBased>>() != null);

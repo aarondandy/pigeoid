@@ -9,6 +9,7 @@ namespace Pigeoid.Epsg
     public class EpsgCrsCompound : EpsgCrs, ICrsCompound
     {
 
+        [Obsolete]
         internal class EpsgCrsCompoundLookUp : EpsgDynamicLookUpBase<ushort, EpsgCrsCompound>
         {
 
@@ -57,14 +58,17 @@ namespace Pigeoid.Epsg
 
         }
 
+        [Obsolete]
         internal static readonly EpsgCrsCompoundLookUp LookUp = new EpsgCrsCompoundLookUp();
 
+        [Obsolete]
         public static EpsgCrsCompound GetCompound(int code) {
             return code >= 0 && code <= UInt16.MaxValue
                 ? LookUp.Get((ushort)code)
                 : null;
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgCrsCompound> CompoundValues {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCrsCompound>>() != null);

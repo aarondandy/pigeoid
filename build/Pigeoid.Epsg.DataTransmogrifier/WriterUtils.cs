@@ -518,22 +518,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 					default: throw new NotSupportedException();
 				}
 
-				/*if(kindByte != (byte)'P' && coordinateReferenceSystem.Projection != null) {
-					kindByte = (byte)'P';
-				}*/
-
-                /*if (coordinateReferenceSystem.Projection != null) {
-					writerProjection.Write((uint)coordinateReferenceSystem.Code);
-
-					writerProjection.Write((ushort)coordinateReferenceSystem.SourceGeographicCrs.Code);
-					writerProjection.Write((ushort)coordinateReferenceSystem.Projection.Code);
-
-					writerProjection.Write((ushort)coordinateReferenceSystem.CoordinateSystem.Code);
-					writerProjection.Write((ushort)coordinateReferenceSystem.Area.Code);
-					writerProjection.Write((ushort)stringLookUp[coordinateReferenceSystem.Name]);
-					writerProjection.Write((byte)(coordinateReferenceSystem.Deprecated ? 0xff : 0));
-                    writerProjection.Write((byte)kindByte);
-				}*/
 				if (kindByte == (byte)'C') {
 					writerComposite.Write((ushort)coordinateReferenceSystem.Code);
 					

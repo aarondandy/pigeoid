@@ -13,6 +13,7 @@ namespace Pigeoid.Epsg
     public class EpsgCrsProjected : EpsgCrs, ICrsProjected
     {
 
+        [Obsolete]
         internal class EpsgCrsProjectedLookUp : EpsgDynamicLookUpBase<int, EpsgCrsProjected>
         {
             private const string DatFileName = "crsprj.dat";
@@ -104,12 +105,15 @@ namespace Pigeoid.Epsg
             }
         }
 
+        [Obsolete]
         internal static readonly EpsgCrsProjectedLookUp LookUp = EpsgCrsProjectedLookUp.Create();
 
+        [Obsolete]
         public static EpsgCrsProjected GetProjected(int code) {
             return LookUp.Get(code);
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgCrsProjected> ProjectedValues {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCrsProjected>>() != null);
@@ -117,10 +121,12 @@ namespace Pigeoid.Epsg
             }
         }
 
+        [Obsolete]
         public static ReadOnlyCollection<int> GetProjectionCodesBasedOn(int baseCrsCode) {
             return LookUp.GetProjectionCodesBasedOn(baseCrsCode);
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgCrsProjected> GetProjectionsBasedOn(int baseCrsCode) {
             Contract.Ensures(Contract.Result<IEnumerable<EpsgCrsProjected>>() != null);
             var projectionCodes = GetProjectionCodesBasedOn(baseCrsCode);
@@ -133,6 +139,7 @@ namespace Pigeoid.Epsg
             return result;
         }
 
+        [Obsolete]
         private static EpsgCrsGeodetic FindGeodeticBase(EpsgCrsProjected queryCrs) {
             Contract.Requires(queryCrs != null);
             var crs = queryCrs.BaseCrs;

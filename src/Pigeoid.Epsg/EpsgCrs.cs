@@ -10,12 +10,14 @@ namespace Pigeoid.Epsg
 
         internal const int Wgs84GeographicCode = 4326;
 
+        [Obsolete]
         public static EpsgCrs Get(int code) {
             return EpsgCrsDatumBased.GetDatumBased(code)
                 ?? EpsgCrsProjected.GetProjected(code)
                 ?? (EpsgCrs)(EpsgCrsCompound.GetCompound(code));
         }
 
+        [Obsolete]
         public static IEnumerable<EpsgCrs> Values {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCrs>>() != null);
