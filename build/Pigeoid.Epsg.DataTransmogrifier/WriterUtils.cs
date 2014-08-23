@@ -484,6 +484,26 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			}
 		}
 
+        private static byte ToCrsKindByte(string crsKind) {
+            switch (crsKind.ToLower()) {
+                case "compound":
+                    return (byte)'C';
+                case "engineering":
+                    return (byte)'E';
+                case "geocentric":
+                    return (byte)'G';
+                case "geographic 2d":
+                    return (byte)'2';
+                case "geographic 3d":
+                    return (byte)'3';
+                case "projected":
+                    return (byte)'P';
+                case "vertical":
+                    return (byte)'V';
+                default: throw new NotSupportedException();
+            }
+        }
+
 		public static void WriteCoordinateReferenceSystem(EpsgData data, BinaryWriter writerText, BinaryWriter writerNormal, BinaryWriter writerComposite) {
 			var stringLookUp = WriteTextDictionary(data, writerText,
 				data.Repository.Crs.Select(x => x.Name)
@@ -491,56 +511,36 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				.Distinct()
 			);
 
-			foreach (var coordinateReferenceSystem in data.Repository.Crs.OrderBy(x => x.Code)) {
-				byte kindByte;
-				switch (coordinateReferenceSystem.Kind.ToLower()) {
-					case "compound":
-						kindByte = (byte)'C';
-						break;
-					case "engineering":
-						kindByte = (byte)'E';
-						break;
-					case "geocentric":
-						kindByte = (byte)'G';
-						break;
-					case "geographic 2d":
-						kindByte = (byte)'2';
-						break;
-					case "geographic 3d":
-						kindByte = (byte)'3';
-						break;
-					case "projected":
-						kindByte = (byte)'P';
-						break;
-					case "vertical":
-						kindByte = (byte)'V';
-						break;
-					default: throw new NotSupportedException();
-				}
-
-				if (kindByte == (byte)'C') {
-					writerComposite.Write((ushort)coordinateReferenceSystem.Code);
-					
-					writerComposite.Write((ushort)coordinateReferenceSystem.CompoundHorizontalCrs.Code);
-					writerComposite.Write((ushort)coordinateReferenceSystem.CompoundVerticalCrs.Code);
-
-					writerComposite.Write((ushort)coordinateReferenceSystem.Area.Code);
-					writerComposite.Write((ushort)stringLookUp[coordinateReferenceSystem.Name]);
-					writerComposite.Write((byte)(coordinateReferenceSystem.Deprecated ? 0xff : 0));
-				}
-				else {
-                    writerNormal.Write((uint)coordinateReferenceSystem.Code);
-
-                    writerNormal.Write((ushort)(null == coordinateReferenceSystem.Datum ? 0 : coordinateReferenceSystem.Datum.Code));
-                    writerNormal.Write((ushort)(coordinateReferenceSystem.SourceGeographicCrs == null ? 0 : coordinateReferenceSystem.SourceGeographicCrs.Code));
-                    writerNormal.Write((ushort)(coordinateReferenceSystem.Projection == null ? 0 : coordinateReferenceSystem.Projection.Code));
-
-                    writerNormal.Write((ushort)coordinateReferenceSystem.CoordinateSystem.Code);
-                    writerNormal.Write((ushort)coordinateReferenceSystem.Area.Code);
-                    writerNormal.Write((ushort)stringLookUp[coordinateReferenceSystem.Name]);
-                    writerNormal.Write((byte)(coordinateReferenceSystem.Deprecated ? 0xff : 0));
-                    writerNormal.Write((byte)kindByte);
-				}
+            foreach (var crsGroup in data.Repository.Crs.Select(x => new { KindByte = ToCrsKindByte (x.Kind), Crs = x}).GroupBy(x => x.KindByte == 'C')) {
+                var crsItemCount = crsGroup.Count();
+                var crsItems = crsGroup.OrderBy(x => x.Crs.Code);
+                var groupIsComposite = crsGroup.Key;
+                if (groupIsComposite) {
+                    writerComposite.Write((ushort)crsItemCount);
+                    foreach (var crs in crsItems.Select(x => x.Crs)) {
+                        writerComposite.Write((ushort)crs.Code);
+                        writerComposite.Write((ushort)crs.CompoundHorizontalCrs.Code);
+                        writerComposite.Write((ushort)crs.CompoundVerticalCrs.Code);
+                        writerComposite.Write((ushort)crs.Area.Code);
+                        writerComposite.Write((ushort)stringLookUp[crs.Name]);
+                        writerComposite.Write((byte)(crs.Deprecated ? 0xff : 0));
+                    }
+                }
+                else {
+                    writerNormal.Write((ushort)crsItemCount);
+                    foreach (var crsData in crsItems) {
+                        var crs = crsData.Crs;
+                        writerNormal.Write((uint)crs.Code);
+                        writerNormal.Write((ushort)(null == crs.Datum ? 0 : crs.Datum.Code));
+                        writerNormal.Write((ushort)(crs.SourceGeographicCrs == null ? 0 : crs.SourceGeographicCrs.Code));
+                        writerNormal.Write((ushort)(crs.Projection == null ? 0 : crs.Projection.Code));
+                        writerNormal.Write((ushort)crs.CoordinateSystem.Code);
+                        writerNormal.Write((ushort)crs.Area.Code);
+                        writerNormal.Write((ushort)stringLookUp[crs.Name]);
+                        writerNormal.Write((byte)(crs.Deprecated ? 0xff : 0));
+                        writerNormal.Write((byte)crsData.KindByte);
+                    }
+                }
 
 			}
 
