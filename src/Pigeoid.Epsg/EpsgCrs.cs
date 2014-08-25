@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pigeoid.Epsg.Resources;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -10,20 +11,20 @@ namespace Pigeoid.Epsg
 
         internal const int Wgs84GeographicCode = 4326;
 
+        internal static readonly EpsgDataResourceReaderCrsNormal ReaderNormal = new EpsgDataResourceReaderCrsNormal();
+
         [Obsolete]
         public static EpsgCrs Get(int code) {
-            return EpsgCrsDatumBased.GetDatumBased(code)
-                ?? EpsgCrsProjected.GetProjected(code)
-                ?? (EpsgCrs)(EpsgCrsCompound.GetCompound(code));
+            if (code < 0)
+                return null;
+            return ReaderNormal.GetByKey(unchecked((uint)code));
         }
 
         [Obsolete]
         public static IEnumerable<EpsgCrs> Values {
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCrs>>() != null);
-                return EpsgCrsDatumBased.DatumBasedValues
-                    .Concat<EpsgCrs>(EpsgCrsProjected.ProjectedValues)
-                    .Concat<EpsgCrs>(EpsgCrsCompound.CompoundValues)
+                return ReaderNormal.ReadAllValues()
                     .OrderBy(x => x.Code);
             }
         }

@@ -64,6 +64,7 @@ namespace Pigeoid.Epsg.Resources
                 }
             }
         }
+
         public TValue GetByKey(ushort targetKey) {
             using (var reader = EpsgDataResourceReader.CreateBinaryReader(DataFileName)) {
                 var count = reader.ReadUInt16();
@@ -421,6 +422,82 @@ namespace Pigeoid.Epsg.Resources
                 .Concat(ReaderScale.ReadAllValues())
                 .OrderBy(x => x.Code);
         }
+    }
+
+    internal sealed class EpsgDataResourceReaderCrsNormal
+    {
+
+        private const int FileHeaderSize = sizeof(ushort);
+        private const string DataFileName = "crs.dat";
+        private const int RecordKeySize = sizeof(uint);
+        private const int RecordDataSize = (sizeof(ushort) * 6) + (sizeof(byte) * 2);
+        private const int RecordTotalSize = RecordKeySize + RecordDataSize;
+        protected readonly EpsgTextLookUp TextLookup;
+
+        public EpsgDataResourceReaderCrsNormal() {
+            TextLookup = new EpsgTextLookUp("crs.txt");
+        }
+
+        protected EpsgCrs ReadValue(uint key, BinaryReader reader) {
+            var datum = EpsgDatum.Get(reader.ReadUInt16());
+            var baseCrs = EpsgCrs.Get(reader.ReadInt16());
+            var baseOpCode = reader.ReadInt16();
+            var coordSys = EpsgCoordinateSystem.Get(reader.ReadUInt16());
+            var area = EpsgArea.Get(reader.ReadUInt16());
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            var isDeprecated = reader.ReadByte() != 0;
+            var kind = reader.ReadByte();
+
+            Contract.Assume(kind != (byte)('C'));
+            Contract.Assume(key <= Int32.MaxValue);
+
+            if (kind == (byte)('V'))
+                return new EpsgCrsVertical(unchecked((int)key), name, area, isDeprecated, coordSys, (EpsgDatumVertical)datum);
+            if (kind == (byte)('E'))
+                return new EpsgCrsEngineering(unchecked((int)key), name, area, isDeprecated, coordSys, (EpsgDatumEngineering)datum);
+
+            throw new NotImplementedException();
+        }
+
+        public EpsgCrs GetByKey(uint targetKey) {
+            using (var reader = EpsgDataResourceReader.CreateBinaryReader(DataFileName)) {
+                var count = reader.ReadUInt16();
+                //return GetByLinearSearch(targetKey, reader);
+                return GetByBinarySearch(targetKey, count, reader);
+            }
+        }
+
+        private EpsgCrs GetByBinarySearch(uint targetKey, ushort count, BinaryReader reader) {
+            Contract.Assume(count > 1);
+            var baseSteam = reader.BaseStream;
+            var searchIndexLow = 0;
+            var searchIndexHigh = count - 1;
+            while (searchIndexHigh >= searchIndexLow) {
+                var searchAtIndex = (searchIndexLow + searchIndexHigh) / 2;
+                baseSteam.Seek(FileHeaderSize + (searchAtIndex * RecordTotalSize), SeekOrigin.Begin); // seek to the key
+                var localKey = reader.ReadUInt32();
+                if (localKey == targetKey)
+                    return ReadValue(localKey, reader);
+                else if (localKey < targetKey)
+                    searchIndexLow = searchAtIndex + 1;
+                else
+                    searchIndexHigh = searchAtIndex - 1;
+            }
+            return null;
+        }
+
+        public IEnumerable<EpsgCrs> ReadAllValues() {
+            using (var reader = EpsgDataResourceReader.CreateBinaryReader(DataFileName)) {
+                var baseStream = reader.BaseStream;
+                var count = reader.ReadUInt16();
+                while (baseStream.Position < baseStream.Length) {
+                    var key = reader.ReadUInt32();
+                    var value = ReadValue(key, reader);
+                    yield return value;
+                }
+            }
+        }
+
     }
 
 }
