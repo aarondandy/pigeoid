@@ -9,7 +9,7 @@ namespace Pigeoid.Epsg
     public class EpsgCrsCompound : EpsgCrs, ICrsCompound
     {
 
-        [Obsolete]
+        /*[Obsolete]
         internal class EpsgCrsCompoundLookUp : EpsgDynamicLookUpBase<ushort, EpsgCrsCompound>
         {
 
@@ -59,26 +59,11 @@ namespace Pigeoid.Epsg
         }
 
         [Obsolete]
-        internal static readonly EpsgCrsCompoundLookUp LookUp = new EpsgCrsCompoundLookUp();
+        internal static readonly EpsgCrsCompoundLookUp LookUp = new EpsgCrsCompoundLookUp();*/
 
-        [Obsolete]
-        public static EpsgCrsCompound GetCompound(int code) {
-            return code >= 0 && code <= UInt16.MaxValue
-                ? LookUp.Get((ushort)code)
-                : null;
-        }
-
-        [Obsolete]
-        public static IEnumerable<EpsgCrsCompound> CompoundValues {
-            get {
-                Contract.Ensures(Contract.Result<IEnumerable<EpsgCrsCompound>>() != null);
-                return LookUp.Values;
-            }
-        }
-
-        private EpsgCrsCompound(
+        internal EpsgCrsCompound(
             int code, string name, EpsgArea area, bool deprecated,
-            EpsgCrs horizontal, EpsgCrsVertical vertical
+            EpsgCrsDatumBased horizontal, EpsgCrsVertical vertical
         )
             : base(code, name, area, deprecated) {
             Contract.Requires(code >= 0);
@@ -96,7 +81,7 @@ namespace Pigeoid.Epsg
             Contract.Invariant(Vertical != null);
         }
 
-        public EpsgCrs Horizontal { get; private set; }
+        public EpsgCrsDatumBased Horizontal { get; private set; }
 
         ICrs ICrsCompound.Head { get { return Horizontal; } }
 

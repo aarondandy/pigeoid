@@ -504,6 +504,15 @@ namespace Pigeoid.Epsg.DataTransmogrifier
             }
         }
 
+        private static EpsgDatum GetFirstDatum(EpsgCrs crs) {
+            while (crs != null) {
+                if (crs.Datum != null)
+                    return crs.Datum;
+                crs = crs.SourceGeographicCrs;
+            }
+            return null;
+        }
+
 		public static void WriteCoordinateReferenceSystem(EpsgData data, BinaryWriter writerText, BinaryWriter writerNormal, BinaryWriter writerComposite) {
 			var stringLookUp = WriteTextDictionary(data, writerText,
 				data.Repository.Crs.Select(x => x.Name)
@@ -531,7 +540,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                     foreach (var crsData in crsItems) {
                         var crs = crsData.Crs;
                         writerNormal.Write((uint)crs.Code);
-                        writerNormal.Write((ushort)(null == crs.Datum ? 0 : crs.Datum.Code));
+                        var datum = GetFirstDatum(crs);
+                        writerNormal.Write((ushort)(null == datum ? 0 : datum.Code));
                         writerNormal.Write((ushort)(crs.SourceGeographicCrs == null ? 0 : crs.SourceGeographicCrs.Code));
                         writerNormal.Write((ushort)(crs.Projection == null ? 0 : crs.Projection.Code));
                         writerNormal.Write((ushort)crs.CoordinateSystem.Code);

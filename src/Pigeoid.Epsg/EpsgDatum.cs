@@ -192,7 +192,9 @@ namespace Pigeoid.Epsg
             if (Code == EpsgDatumRepository.Wgs84DatumCode)
                 return new Helmert7Transformation(Vector3.Zero);
 
-            var transformsFromThisDatum = EpsgCrsDatumBased.DatumBasedValues.Where(x => x.Datum.Code == Code).Select(x => x.Code)
+            throw new NotImplementedException();
+
+            /*var transformsFromThisDatum = EpsgCrsDatumBased.DatumBasedValues.Where(x => x.Datum.Code == Code).Select(x => x.Code)
                 .Concat(EpsgCrsProjected.ProjectedValues.Where(x => x.Datum.Code == Code).Select(x => x.Code))
                 .SelectMany(EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced)
                 .Where(x => x.TargetCrsCode == EpsgCrs.Wgs84GeographicCode)
@@ -235,7 +237,7 @@ namespace Pigeoid.Epsg
                 }
             }
 
-            return null;
+            return null;*/
         }
 
         public Helmert7Transformation BasicWgs84Transformation {

@@ -11,13 +11,24 @@ namespace Pigeoid.Epsg
 
         internal const int Wgs84GeographicCode = 4326;
 
+        [Obsolete]
         internal static readonly EpsgDataResourceReaderCrsNormal ReaderNormal = new EpsgDataResourceReaderCrsNormal();
+        [Obsolete]
+        internal static readonly EpsgDataResourceReaderCrsCompound ReaderCompound = new EpsgDataResourceReaderCrsCompound();
 
         [Obsolete]
         public static EpsgCrs Get(int code) {
-            if (code < 0)
+            if (code <= 0)
                 return null;
-            return ReaderNormal.GetByKey(unchecked((uint)code));
+            
+            var result = ReaderNormal.GetByKey(unchecked((uint)code));
+            if(result != null)
+                return result;
+
+            if(code <= UInt16.MaxValue)
+                return (EpsgCrs)(ReaderCompound.GetByKey(unchecked((ushort)code)));
+
+            return null;
         }
 
         [Obsolete]
@@ -25,6 +36,7 @@ namespace Pigeoid.Epsg
             get {
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCrs>>() != null);
                 return ReaderNormal.ReadAllValues()
+                    .Concat(ReaderCompound.ReadAllValues())
                     .OrderBy(x => x.Code);
             }
         }

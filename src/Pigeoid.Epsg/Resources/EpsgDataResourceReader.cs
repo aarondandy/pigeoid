@@ -440,21 +440,37 @@ namespace Pigeoid.Epsg.Resources
 
         protected EpsgCrs ReadValue(uint key, BinaryReader reader) {
             var datum = EpsgDatum.Get(reader.ReadUInt16());
-            var baseCrs = EpsgCrs.Get(reader.ReadInt16());
+            var baseCrs = (EpsgCrsGeodetic)EpsgCrs.Get(reader.ReadInt16());
             var baseOpCode = reader.ReadInt16();
             var coordSys = EpsgCoordinateSystem.Get(reader.ReadUInt16());
             var area = EpsgArea.Get(reader.ReadUInt16());
             var name = TextLookup.GetString(reader.ReadUInt16());
             var isDeprecated = reader.ReadByte() != 0;
-            var kind = reader.ReadByte();
+            var kind = (EpsgCrsKind)reader.ReadByte();
 
-            Contract.Assume(kind != (byte)('C'));
+            Contract.Assume(kind != EpsgCrsKind.Compound);
             Contract.Assume(key <= Int32.MaxValue);
 
-            if (kind == (byte)('V'))
-                return new EpsgCrsVertical(unchecked((int)key), name, area, isDeprecated, coordSys, (EpsgDatumVertical)datum);
-            if (kind == (byte)('E'))
-                return new EpsgCrsEngineering(unchecked((int)key), name, area, isDeprecated, coordSys, (EpsgDatumEngineering)datum);
+            var epsgCode = unchecked((int)key);
+
+            if (kind == EpsgCrsKind.Projected)
+                return new EpsgCrsProjected(epsgCode, name, area, isDeprecated, coordSys, (EpsgDatumGeodetic)datum, baseCrs, baseOpCode);
+
+            if (kind == EpsgCrsKind.Geographic2D || kind == EpsgCrsKind.Geographic3D) {
+                // TODO: consider a path to the base
+                return new EpsgCrsGeographic(epsgCode, name, area, isDeprecated, coordSys, (EpsgDatumGeodetic)datum, baseCrs, kind);
+            }
+
+            if (kind == EpsgCrsKind.Geocentric) {
+                // TODO: what does baseOpCode/baseCrs mean here?
+                return new EpsgCrsGeocentric(epsgCode, name, area, isDeprecated, coordSys, (EpsgDatumGeodetic)datum, baseCrs);
+            }
+
+            if (kind == EpsgCrsKind.Vertical)
+                return new EpsgCrsVertical(epsgCode, name, area, isDeprecated, coordSys, (EpsgDatumVertical)datum);
+
+            if (kind == EpsgCrsKind.Engineering)
+                return new EpsgCrsEngineering(epsgCode, name, area, isDeprecated, coordSys, (EpsgDatumEngineering)datum);
 
             throw new NotImplementedException();
         }
@@ -498,6 +514,23 @@ namespace Pigeoid.Epsg.Resources
             }
         }
 
+    }
+
+    internal sealed class EpsgDataResourceReaderCrsCompound : EpsgDataResourceReaderBasic<EpsgCrsCompound>
+    {
+
+        public EpsgDataResourceReaderCrsCompound()
+            : base("crscmp.dat", "crs.txt", (sizeof(ushort) * 4) + sizeof(byte))
+        { }
+
+        protected override EpsgCrsCompound ReadValue(ushort key, BinaryReader reader) {
+            var horizontal = (EpsgCrsDatumBased)EpsgCrs.Get(reader.ReadUInt16());
+            var vertical = (EpsgCrsVertical)EpsgCrs.Get(reader.ReadUInt16());
+            var area = EpsgArea.Get(reader.ReadUInt16());
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            var isDeprecated = reader.ReadByte() != 0;
+            return new EpsgCrsCompound(unchecked((int)key), name, area, isDeprecated, horizontal, vertical);
+        }
     }
 
 }

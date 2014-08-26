@@ -222,7 +222,9 @@ namespace Pigeoid.Epsg
             Contract.Requires(current != null);
             Contract.Ensures(Contract.Result<IEnumerable<PathNode>>() != null);
 
-            var currentCode = current.Crs.Code;
+            throw new NotImplementedException();
+
+            /*var currentCode = current.Crs.Code;
             if (currentCode == TargetCrs.Code)
                 return ArrayUtil.CreateSingleElementArray(current);
 
@@ -344,7 +346,7 @@ namespace Pigeoid.Epsg
                 }
             }
 
-            return results;
+            return results;*/
         }
 
     }

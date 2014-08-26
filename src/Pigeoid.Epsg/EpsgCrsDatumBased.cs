@@ -8,7 +8,7 @@ namespace Pigeoid.Epsg
 {
     public abstract class EpsgCrsDatumBased : EpsgCrs
     {
-
+        /*
         [Obsolete]
         internal class EpsgCrsDatumBasedLookUp : EpsgDynamicLookUpBase<int, EpsgCrsDatumBased>
         {
@@ -85,12 +85,12 @@ namespace Pigeoid.Epsg
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCrsDatumBased>>() != null);
                 return LookUp.Values;
             }
-        }
+        }*/
 
         internal EpsgCrsDatumBased(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs)
             : base(code, name, area, deprecated) {
             Contract.Requires(code >= 0);
-            Contract.Requires(!string.IsNullOrEmpty(name));
+            Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
             Contract.Requires(cs != null);
             CoordinateSystem = cs;

@@ -10,9 +10,9 @@ using Pigeoid.Unit;
 
 namespace Pigeoid.Epsg
 {
-    public class EpsgCrsProjected : EpsgCrs, ICrsProjected
+    public class EpsgCrsProjected : EpsgCrsGeodetic, ICrsProjected
     {
-
+        /*
         [Obsolete]
         internal class EpsgCrsProjectedLookUp : EpsgDynamicLookUpBase<int, EpsgCrsProjected>
         {
@@ -107,6 +107,7 @@ namespace Pigeoid.Epsg
 
         [Obsolete]
         internal static readonly EpsgCrsProjectedLookUp LookUp = EpsgCrsProjectedLookUp.Create();
+        
 
         [Obsolete]
         public static EpsgCrsProjected GetProjected(int code) {
@@ -119,8 +120,9 @@ namespace Pigeoid.Epsg
                 Contract.Ensures(Contract.Result<IEnumerable<EpsgCrsProjected>>() != null);
                 return LookUp.Values;
             }
-        }
+        } */
 
+        /*
         [Obsolete]
         public static ReadOnlyCollection<int> GetProjectionCodesBasedOn(int baseCrsCode) {
             return LookUp.GetProjectionCodesBasedOn(baseCrsCode);
@@ -129,6 +131,7 @@ namespace Pigeoid.Epsg
         [Obsolete]
         public static IEnumerable<EpsgCrsProjected> GetProjectionsBasedOn(int baseCrsCode) {
             Contract.Ensures(Contract.Result<IEnumerable<EpsgCrsProjected>>() != null);
+            throw new NotImplementedException();
             var projectionCodes = GetProjectionCodesBasedOn(baseCrsCode);
             var result = new List<EpsgCrsProjected>(projectionCodes.Count);
             result.AddRange(
@@ -137,74 +140,29 @@ namespace Pigeoid.Epsg
                     .Where(projection => null != projection)
             );
             return result;
-        }
-
-        [Obsolete]
-        private static EpsgCrsGeodetic FindGeodeticBase(EpsgCrsProjected queryCrs) {
-            Contract.Requires(queryCrs != null);
-            var crs = queryCrs.BaseCrs;
-            do {
-                var geodeticCrs = crs as EpsgCrsGeodetic;
-                if (geodeticCrs != null)
-                    return geodeticCrs;
-
-                var projectedCrs = crs as EpsgCrsProjected;
-                if (projectedCrs != null)
-                    crs = projectedCrs.BaseCrs;
-
-            } while (true);
-            throw new NotSupportedException();
-        }
+        }*/
 
         private readonly int _projectionCode;
-        private readonly EpsgCrsKind _kind;
 
-        internal EpsgCrsProjected(int code, string name, EpsgArea area, bool deprecated, EpsgCrs baseCrs, EpsgCoordinateSystem cs, int projectionCode, EpsgCrsKind kind)
-            : base(code, name, area, deprecated) {
+        internal EpsgCrsProjected(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic datum, EpsgCrsGeodetic baseCrs, int projectionCode)
+            : base(code, name, area, deprecated, cs, datum, baseCrs) {
             Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
             Contract.Requires(baseCrs != null);
-            Contract.Requires(
-                baseCrs is EpsgCrsGeodetic
-                || baseCrs is EpsgCrsProjected);
             Contract.Requires(cs != null);
-            BaseCrs = baseCrs;
-            CoordinateSystem = cs;
+            Contract.Requires(datum != null);
             _projectionCode = projectionCode;
-            _kind = kind;
         }
 
-        [ContractInvariantMethod] 
-        private void CodeContractInvariants() {
+        [ContractInvariantMethod]
+        private void ObjectInvariants() {
             Contract.Invariant(BaseCrs != null);
-            Contract.Invariant(
-                BaseCrs is EpsgCrsGeodetic
-                || BaseCrs is EpsgCrsProjected);
             Contract.Invariant(CoordinateSystem != null);
         }
 
-        public EpsgCoordinateSystem CoordinateSystem { get; private set; }
 
-        public EpsgCrs BaseCrs { get; private set; }
-
-        public EpsgCrsGeodetic BaseGeodeticCrs {
-            get {
-                Contract.Ensures(Contract.Result<EpsgCrsGeodetic>() != null);
-
-                var geodeticCrs = BaseCrs as EpsgCrsGeodetic;
-                if (geodeticCrs != null)
-                    return geodeticCrs;
-
-                var projectedCrs = BaseCrs as EpsgCrsProjected;
-                if (projectedCrs != null)
-                    return FindGeodeticBase(projectedCrs);
-
-                throw new NotSupportedException();
-            }
-        }
-
-        ICrsGeodetic ICrsProjected.BaseCrs { get { return BaseGeodeticCrs; } }
+        ICrsGeodetic ICrsProjected.BaseCrs { get { return BaseCrs; } }
 
         public EpsgCoordinateOperationInfo Projection {
             get {
@@ -214,37 +172,6 @@ namespace Pigeoid.Epsg
 
         ICoordinateOperationInfo ICrsProjected.Projection { get { return Projection; } }
 
-        public EpsgDatumGeodetic Datum {
-            get {
-                Contract.Ensures(Contract.Result<EpsgDatumGeodetic>() != null);
-                return BaseGeodeticCrs.GeodeticDatum;
-            }
-        }
-
-        IDatumGeodetic ICrsGeodetic.Datum { get { return Datum; } }
-
-        public EpsgUnit Unit {
-            get {
-                Contract.Ensures(Contract.Result<EpsgUnit>() != null);
-                var axes = CoordinateSystem.Axes;
-                if(axes.Count == 0)
-                    throw new NotImplementedException();
-                Contract.Assume(axes[0] != null);
-                return axes[0].Unit;
-            }
-        }
-
-        IUnit ICrsGeodetic.Unit { get { return Unit; } }
-
-        public IList<EpsgAxis> Axes {
-            get {
-                Contract.Ensures(Contract.Result<IList<EpsgAxis>>() != null);
-                return CoordinateSystem.Axes.ToArray();
-            }
-        }
-
-        IList<IAxis> ICrsGeodetic.Axes { get { return Axes.Cast<IAxis>().ToArray(); } }
-
-        public override EpsgCrsKind Kind { get { return _kind; } }
+        public override EpsgCrsKind Kind { get { return EpsgCrsKind.Projected; } }
     }
 }
