@@ -155,6 +155,7 @@
     <Compile Include="EpsgEllipsoid.cs" />
     <Compile Include="EpsgMiniDatabase.cs" />
     <Compile Include="EpsgParameter.cs" />
+    <Compile Include="EpsgParameterUsage.cs" />
     <Compile Include="EpsgPrimeMeridian.cs" />
     <Compile Include="EpsgCrsCoordinateOperationPathGeneratorOld.cs" />
     <Compile Include="EpsgUnit.cs" />
@@ -162,7 +163,6 @@
     <Compile Include="Resources\EpsgDataResource.cs" />
     <Compile Include="Resources\EpsgDataResourceReader.cs" />
     <Compile Include="Resources\EpsgDynamicLookupBase.cs" />
-    <Compile Include="Resources\EpsgFixedLookupBase.cs" />
     <Compile Include="Resources\EpsgLookupBase.cs" />
     <Compile Include="Resources\EpsgNumberLookup.cs" />
     <Compile Include="Resources\EpsgTextLookup.cs" />

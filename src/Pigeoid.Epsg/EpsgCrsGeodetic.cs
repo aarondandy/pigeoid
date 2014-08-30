@@ -9,7 +9,7 @@ namespace Pigeoid.Epsg
     public abstract class EpsgCrsGeodetic : EpsgCrsDatumBased, ICrsGeodetic
     {
 
-        internal EpsgCrsGeodetic(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum, EpsgCrsGeodetic baseCrs)
+        internal EpsgCrsGeodetic(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum, EpsgCrsGeodetic baseCrs, int baseOperationCode)
             : base(code, name, area, deprecated, cs) {
             Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
@@ -18,6 +18,7 @@ namespace Pigeoid.Epsg
             Contract.Requires(geodeticDatum != null);
             GeodeticDatum = geodeticDatum;
             BaseCrs = baseCrs;
+            BaseOperationCode = baseOperationCode;
         }
 
         [ContractInvariantMethod]
@@ -33,6 +34,10 @@ namespace Pigeoid.Epsg
         }
 
         public EpsgCrsGeodetic BaseCrs { get; private set; }
+
+        public bool HasBaseOperationCode { get { return BaseOperationCode > 0; } }
+
+        public int BaseOperationCode { get; private set; }
 
         public EpsgDatumGeodetic GeodeticDatum { get; private set; }
 
@@ -65,8 +70,8 @@ namespace Pigeoid.Epsg
 
     public class EpsgCrsGeocentric : EpsgCrsGeodetic, ICrsGeocentric
     {
-        internal EpsgCrsGeocentric(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum, EpsgCrsGeodetic baseCrs)
-            : base(code, name, area, deprecated, cs, geodeticDatum, baseCrs) {
+        internal EpsgCrsGeocentric(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum, EpsgCrsGeodetic baseCrs, int baseOperationCode)
+            : base(code, name, area, deprecated, cs, geodeticDatum, baseCrs, baseOperationCode) {
             Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
@@ -82,8 +87,8 @@ namespace Pigeoid.Epsg
 
         private readonly EpsgCrsKind _kind;
 
-        internal EpsgCrsGeographic(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum, EpsgCrsGeodetic baseCrs, EpsgCrsKind kind)
-            : base(code, name, area, deprecated, cs, geodeticDatum, baseCrs) {
+        internal EpsgCrsGeographic(int code, string name, EpsgArea area, bool deprecated, EpsgCoordinateSystem cs, EpsgDatumGeodetic geodeticDatum, EpsgCrsGeodetic baseCrs, int baseOperationCode, EpsgCrsKind kind)
+            : base(code, name, area, deprecated, cs, geodeticDatum, baseCrs, baseOperationCode) {
             Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
@@ -92,9 +97,7 @@ namespace Pigeoid.Epsg
             _kind = kind;
         }
 
-        public override EpsgCrsKind Kind {
-            get { return _kind; }
-        }
+        public override EpsgCrsKind Kind { get { return _kind; } }
     }
 
 }

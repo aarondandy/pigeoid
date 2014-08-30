@@ -26,12 +26,12 @@ namespace Pigeoid.Epsg.ResourceData.Test
 
 		}
 
-		private bool AssertEqual(ReadOnlyCollection<EpsgCoordinateOperationMethodInfo.ParamUsage> a, IList<DataTransmogrifier.EpsgParamUse> b) {
-			Assert.AreEqual(a.Count, b.Count);
-			for(int i = 0; i < a.Count; i++) {
+		private bool AssertEqual(EpsgParameterUsage[] a, IList<DataTransmogrifier.EpsgParamUse> b) {
+			Assert.AreEqual(a.Length, b.Count);
+			for(int i = 0; i < a.Length; i++) {
 				var x = a[i];
 				var y = b[i];
-				Assert.AreEqual(x.Parameter.Code, y.Parameter.Code);
+				Assert.AreEqual(x.ParameterInfo.Code, y.Parameter.Code);
 				Assert.AreEqual(x.SignReversal, y.SignReversal ?? false);
 			}
 			return true;
@@ -47,7 +47,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 					var dbParamValues = dbOperation.ParameterValues.Where(x => x.NumericValue != null || x.TextValue != null).ToList();
 					Assert.AreEqual(dbParamValues.Count, assemblyParamValues.Count);
 					foreach(var dbParamValue in dbParamValues) {
-						var assemblyParamValue = assemblyParamValues.First(x => x.Name == dbParamValue.Parameter.Name);
+						var assemblyParamValue = assemblyParamValues.Single(x => x.Name == dbParamValue.Parameter.Name);
 						var dbValue = (object)dbParamValue.NumericValue ?? dbParamValue.TextValue;
 						var dbUom = dbParamValue.Uom;
 						Assert.AreEqual(dbValue, assemblyParamValue.Value);

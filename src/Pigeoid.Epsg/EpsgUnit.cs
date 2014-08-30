@@ -118,7 +118,7 @@ namespace Pigeoid.Epsg
 
         [Obsolete]
         public static EpsgUnit Get(int code) {
-            return code >= 0 && code < ushort.MaxValue
+            return code > 0 && code < UInt16.MaxValue
                 ? Readers.GetByKey((ushort)code)
                 : null;
         }

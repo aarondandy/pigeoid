@@ -75,12 +75,12 @@ namespace Pigeoid.Epsg.Resources
 
         private TValue GetByBinarySearch(ushort targetKey, ushort count, BinaryReader reader) {
             Contract.Assume(count > 1);
-            var baseSteam = reader.BaseStream;
+            var baseStream = reader.BaseStream;
             var searchIndexLow = 0;
             var searchIndexHigh = count - 1;
             while (searchIndexHigh >= searchIndexLow) {
                 var searchAtIndex = (searchIndexLow + searchIndexHigh) / 2;
-                baseSteam.Seek(FileHeaderSize + (searchAtIndex * RecordTotalSize), SeekOrigin.Begin); // seek to the key
+                baseStream.Seek(FileHeaderSize + (searchAtIndex * RecordTotalSize), SeekOrigin.Begin); // seek to the key
                 var localKey = reader.ReadUInt16();
                 if (localKey == targetKey)
                     return ReadValue(localKey, reader);
@@ -456,15 +456,11 @@ namespace Pigeoid.Epsg.Resources
             if (kind == EpsgCrsKind.Projected)
                 return new EpsgCrsProjected(epsgCode, name, area, isDeprecated, coordSys, (EpsgDatumGeodetic)datum, baseCrs, baseOpCode);
 
-            if (kind == EpsgCrsKind.Geographic2D || kind == EpsgCrsKind.Geographic3D) {
-                // TODO: consider a path to the base
-                return new EpsgCrsGeographic(epsgCode, name, area, isDeprecated, coordSys, (EpsgDatumGeodetic)datum, baseCrs, kind);
-            }
+            if (kind == EpsgCrsKind.Geographic2D || kind == EpsgCrsKind.Geographic3D)
+                return new EpsgCrsGeographic(epsgCode, name, area, isDeprecated, coordSys, (EpsgDatumGeodetic)datum, baseCrs, baseOpCode, kind);
 
-            if (kind == EpsgCrsKind.Geocentric) {
-                // TODO: what does baseOpCode/baseCrs mean here?
-                return new EpsgCrsGeocentric(epsgCode, name, area, isDeprecated, coordSys, (EpsgDatumGeodetic)datum, baseCrs);
-            }
+            if (kind == EpsgCrsKind.Geocentric)
+                return new EpsgCrsGeocentric(epsgCode, name, area, isDeprecated, coordSys, (EpsgDatumGeodetic)datum, baseCrs, baseOpCode);
 
             if (kind == EpsgCrsKind.Vertical)
                 return new EpsgCrsVertical(epsgCode, name, area, isDeprecated, coordSys, (EpsgDatumVertical)datum);
@@ -485,12 +481,12 @@ namespace Pigeoid.Epsg.Resources
 
         private EpsgCrs GetByBinarySearch(uint targetKey, ushort count, BinaryReader reader) {
             Contract.Assume(count > 1);
-            var baseSteam = reader.BaseStream;
+            var baseStream = reader.BaseStream;
             var searchIndexLow = 0;
             var searchIndexHigh = count - 1;
             while (searchIndexHigh >= searchIndexLow) {
                 var searchAtIndex = (searchIndexLow + searchIndexHigh) / 2;
-                baseSteam.Seek(FileHeaderSize + (searchAtIndex * RecordTotalSize), SeekOrigin.Begin); // seek to the key
+                baseStream.Seek(FileHeaderSize + (searchAtIndex * RecordTotalSize), SeekOrigin.Begin); // seek to the key
                 var localKey = reader.ReadUInt32();
                 if (localKey == targetKey)
                     return ReadValue(localKey, reader);
@@ -531,6 +527,113 @@ namespace Pigeoid.Epsg.Resources
             var isDeprecated = reader.ReadByte() != 0;
             return new EpsgCrsCompound(unchecked((int)key), name, area, isDeprecated, horizontal, vertical);
         }
+    }
+
+    internal sealed class EpsgDataResourceReaderParameterValues
+    {
+
+        private readonly ushort _operationMethodCode;
+        private readonly string _dataFileName;
+        private readonly EpsgNumberLookUp _numberLookup;
+        private readonly EpsgTextLookUp _textLookup;
+
+        public EpsgDataResourceReaderParameterValues(ushort operationMethodCode) {
+            _operationMethodCode = operationMethodCode;
+            _dataFileName = "param" + _operationMethodCode.ToString(CultureInfo.InvariantCulture) + ".dat";
+            _textLookup = new EpsgTextLookUp("params.txt"); // TODO: reuse one instance
+            _numberLookup = new EpsgNumberLookUp(); // TODO: reuse one instance
+        }
+
+        private EpsgParameterUsage[] ReadParameterUsages(BinaryReader reader) {
+            var usageCount = reader.ReadByte();
+            var results = new EpsgParameterUsage[usageCount];
+            for (int i = 0; i < usageCount; ++i) {
+                var parameterInfo = EpsgParameterInfo.Get(reader.ReadUInt16());
+                var signReversal = reader.ReadByte() == 0x01;
+                results[i] = new EpsgParameterUsage(parameterInfo, signReversal);
+            }
+            return results;
+        }
+
+        public EpsgParameterUsage[] ReadParameterUsages() {
+            using (var reader = EpsgDataResourceReader.CreateBinaryReader(_dataFileName)) {
+                return ReadParameterUsages(reader); // TODO: always return a new array to prevent mutation
+            }
+        }
+
+        public List<INamedParameter> ReadParameters(ushort coordinateOperationCode) {
+            using (var reader = EpsgDataResourceReader.CreateBinaryReader(_dataFileName)) {
+                var usages = ReadParameterUsages(reader);
+                var operationCount = reader.ReadUInt16();
+                var baseStream = reader.BaseStream;
+                var operationDataOffset = baseStream.Position;
+                const int operationKeySize = sizeof(ushort);
+                var operationDataSize = ((sizeof(ushort) * 2) * usages.Length);
+                var operaionRecordSize = operationKeySize + operationDataSize;
+                Contract.Assume(operationDataOffset == sizeof(byte) + ((sizeof(ushort) + sizeof(byte)) * usages.Length) + sizeof(ushort));
+
+                var searchIndexLow = 0;
+                var searchIndexHigh = operationCount - 1;
+                while (searchIndexHigh >= searchIndexLow) {
+                    var searchAtIndex = (searchIndexLow + searchIndexHigh) / 2;
+                    baseStream.Seek(operationDataOffset + (searchAtIndex * operaionRecordSize), SeekOrigin.Begin); // seek to the key
+                    var localKey = reader.ReadUInt16();
+                    if (localKey == coordinateOperationCode)
+                        return ReadParametersForOperation(localKey, usages, reader);
+                    else if (localKey < coordinateOperationCode)
+                        searchIndexLow = searchAtIndex + 1;
+                    else
+                        searchIndexHigh = searchAtIndex - 1;
+                }
+            }
+            return null;
+        }
+
+        private List<INamedParameter> ReadParametersForOperation(ushort key, EpsgParameterUsage[] usages, BinaryReader reader) {
+            Contract.Requires(usages != null);
+            Contract.Requires(reader != null);
+            var parameters = new List<INamedParameter>(usages.Length);
+            foreach(var usage in usages){
+                var valueCode = reader.ReadUInt16();
+                var uomCode = reader.ReadUInt16();
+
+                EpsgUnit unit;
+                if (uomCode == UInt16.MaxValue) {
+                    unit = null;
+                }
+                else {
+                    unit = EpsgUnit.Get(uomCode);
+                    Contract.Assume(unit != null);
+                }
+
+                var parameterName = usage.ParameterInfo.Name;
+                if (valueCode != 0xffff) {
+                    INamedParameter parameter;
+                    if ((valueCode & 0xc000) == 0x8000) {
+                        var textValue = _textLookup.GetString((ushort)(valueCode & 0x7fff));
+                        parameter = new NamedParameter<string>(parameterName, textValue, unit);
+                    }
+                    else {
+                        parameter = new NamedParameter<double>(parameterName, _numberLookup.Get(valueCode), unit);
+                    }
+                    parameters.Add(parameter);
+                }
+
+            }
+            return parameters;
+        }
+
+    }
+
+    internal class EpsgDataResourceReaderCoordinateConversionInfo : EpsgDataResourceReaderBasic<EpsgCoordinateOperationInfo> {
+
+        public EpsgDataResourceReaderCoordinateConversionInfo()
+            : base("opconv.dat", "op.txt", (sizeof(ushort) * 3) + sizeof(byte)) { }
+
+        protected override EpsgCoordinateOperationInfo ReadValue(ushort key, BinaryReader reader) {
+            throw new NotImplementedException();
+        }
+
     }
 
 }

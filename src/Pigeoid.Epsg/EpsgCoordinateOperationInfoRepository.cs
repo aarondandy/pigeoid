@@ -123,7 +123,7 @@ namespace Pigeoid.Epsg
             }
 
             [ContractInvariantMethod]
-            private void CodeContractInvariants() {
+            private void ObjectInvariants() {
                 Contract.Invariant(_forwardLookUp != null);
                 Contract.Invariant(_reverseLookUp != null);
             }
@@ -147,6 +147,7 @@ namespace Pigeoid.Epsg
                 }
             }
 
+            [Obsolete]
             internal ushort[] GetForwardReferencedOperationCodes(int sourceCode) {
                 ushort[] data;
                 return sourceCode >= 0
@@ -156,6 +157,7 @@ namespace Pigeoid.Epsg
                     : null;
             }
 
+            [Obsolete]
             internal ushort[] GetReverseReferencedOperationCodes(int targetCode) {
                 ushort[] data;
                 return targetCode >= 0

@@ -9,58 +9,6 @@ namespace Pigeoid.Epsg
     public class EpsgCrsCompound : EpsgCrs, ICrsCompound
     {
 
-        /*[Obsolete]
-        internal class EpsgCrsCompoundLookUp : EpsgDynamicLookUpBase<ushort, EpsgCrsCompound>
-        {
-
-            private const string DatFileName = "crscmp.dat";
-            private const string TxtFileName = "crs.txt";
-            private const int RecordDataSize = (sizeof(ushort) * 4) + sizeof(byte);
-            private const int CodeSize = sizeof(ushort);
-            private const int RecordSize = CodeSize + RecordDataSize;
-
-            private static readonly EpsgTextLookUp TextLookUp = new EpsgTextLookUp(TxtFileName);
-
-            private static ushort[] GetKeys() {
-                Contract.Ensures(Contract.Result<ushort[]>() != null);
-                var keys = new List<ushort>();
-                using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-                    while (reader.BaseStream.Position < reader.BaseStream.Length) {
-                        keys.Add(reader.ReadUInt16());
-                        reader.BaseStream.Seek(RecordDataSize, SeekOrigin.Current);
-                    }
-                }
-                return keys.ToArray();
-            }
-
-            public EpsgCrsCompoundLookUp() : base(GetKeys()) { }
-
-            protected override EpsgCrsCompound Create(ushort code, int index) {
-                Contract.Ensures(Contract.Result<EpsgCrsCompound>() != null);
-                using (var reader = EpsgDataResource.CreateBinaryReader(DatFileName)) {
-                    reader.BaseStream.Seek((index * RecordSize) + CodeSize, SeekOrigin.Begin);
-                    var horizontal = EpsgCrs.Get(reader.ReadUInt16());
-                    Contract.Assume(horizontal != null);
-                    var vertical = (EpsgCrsVertical)EpsgCrsDatumBased.GetDatumBased(reader.ReadUInt16());
-                    Contract.Assume(vertical != null);
-                    var area = EpsgArea.Get(reader.ReadUInt16());
-                    Contract.Assume(area != null);
-                    var name = TextLookUp.GetString(reader.ReadUInt16());
-                    Contract.Assume(!String.IsNullOrEmpty(name));
-                    var deprecated = reader.ReadByte() == 0xff;
-                    return new EpsgCrsCompound(code, name, area, deprecated, horizontal, vertical);
-                }
-            }
-
-            protected override ushort GetKeyForItem(EpsgCrsCompound value) {
-                return (ushort)value.Code;
-            }
-
-        }
-
-        [Obsolete]
-        internal static readonly EpsgCrsCompoundLookUp LookUp = new EpsgCrsCompoundLookUp();*/
-
         internal EpsgCrsCompound(
             int code, string name, EpsgArea area, bool deprecated,
             EpsgCrsDatumBased horizontal, EpsgCrsVertical vertical
@@ -76,7 +24,7 @@ namespace Pigeoid.Epsg
         }
 
         [ContractInvariantMethod]
-        private void CodeContractInvariants() {
+        private void ObjectInvariants() {
             Contract.Invariant(Horizontal != null);
             Contract.Invariant(Vertical != null);
         }
@@ -89,9 +37,7 @@ namespace Pigeoid.Epsg
 
         ICrs ICrsCompound.Tail { get { return Vertical; } }
 
-        public override EpsgCrsKind Kind {
-            get { return EpsgCrsKind.Compound; }
-        }
+        public override EpsgCrsKind Kind { get { return EpsgCrsKind.Compound; } }
 
     }
 }

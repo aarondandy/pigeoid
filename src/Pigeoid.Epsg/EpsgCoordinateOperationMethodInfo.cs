@@ -12,7 +12,7 @@ namespace Pigeoid.Epsg
     public class EpsgCoordinateOperationMethodInfo : ICoordinateOperationMethodInfo
     {
 
-        [Obsolete]
+        /*[Obsolete]
         private class EpsgCoordinateOperationMethodParamInfoLookUp
         {
 
@@ -186,6 +186,7 @@ namespace Pigeoid.Epsg
             }
         }
 
+        [Obsolete]
         public class ParamUsage
         {
 
@@ -196,7 +197,7 @@ namespace Pigeoid.Epsg
             }
 
             [ContractInvariantMethod]
-            private void CodeContractInvariant() {
+            private void ObjectInvariants() {
                 Contract.Invariant(Parameter != null);
             }
 
@@ -206,6 +207,7 @@ namespace Pigeoid.Epsg
 
         }
 
+        [Obsolete]
         public class OpParamValueInfo
         {
             private readonly ushort _opCode;
@@ -217,13 +219,13 @@ namespace Pigeoid.Epsg
             }
 
             [ContractInvariantMethod]
-            private void CodeContractInvariants() {
+            private void ObjectInvariants() {
                 Contract.Invariant(Values != null);
             }
 
             public int OpCode { get { return _opCode; } }
             public ReadOnlyCollection<INamedParameter> Values { get; private set; }
-        }
+        }*/
 
         [Obsolete]
         internal static readonly EpsgDataResourceReaderOperationMethod Reader = new EpsgDataResourceReaderOperationMethod();
@@ -244,26 +246,25 @@ namespace Pigeoid.Epsg
         }
 
         private readonly ushort _code;
-        private readonly Lazy<EpsgCoordinateOperationMethodParamInfoLookUp> _paramData;
+        
+        [Obsolete]
+        private readonly EpsgDataResourceReaderParameterValues _paramValuesReader;
+        
+        //[Obsolete]
+        //private readonly Lazy<EpsgCoordinateOperationMethodParamInfoLookUp> _paramData;
 
         internal EpsgCoordinateOperationMethodInfo(ushort code, string name, bool canReverse) {
             Contract.Requires(!String.IsNullOrEmpty(name));
             _code = code;
             Name = name;
             CanReverse = canReverse;
-            _paramData = new Lazy<EpsgCoordinateOperationMethodParamInfoLookUp>(
-                CreateParamInfoLookUp, LazyThreadSafetyMode.ExecutionAndPublication);
+            _paramValuesReader = new EpsgDataResourceReaderParameterValues(code);
         }
 
         [ContractInvariantMethod]
-        private void CodeContractInvariants() {
+        private void ObjectInvariants() {
             Contract.Invariant(!String.IsNullOrEmpty(Name));
-            Contract.Invariant(_paramData != null);
-        }
-
-        private EpsgCoordinateOperationMethodParamInfoLookUp CreateParamInfoLookUp() {
-            Contract.Ensures(Contract.Result<EpsgCoordinateOperationMethodParamInfoLookUp>() != null);
-            return new EpsgCoordinateOperationMethodParamInfoLookUp(_code);
+            Contract.Invariant(_paramValuesReader != null);
         }
 
         public int Code {
@@ -275,18 +276,17 @@ namespace Pigeoid.Epsg
         public string Name { get; private set; }
         public bool CanReverse { get; private set; }
 
-        public ReadOnlyCollection<ParamUsage> ParameterUsage {
+        public EpsgParameterUsage[] ParameterUsage {
             get {
-                Contract.Ensures(Contract.Result<ReadOnlyCollection<ParamUsage>>() != null);
-                Contract.Assume(_paramData.Value != null);
-                return _paramData.Value.ParameterUsage;
+                Contract.Ensures(Contract.Result<EpsgParameterUsage[]>() != null);
+                return _paramValuesReader.ReadParameterUsages();
             }
         }
 
-        public ReadOnlyCollection<INamedParameter> GetOperationParameters(int operationCode) {
-            Contract.Assume(_paramData.Value != null);
-            var info = _paramData.Value.GetParameterValueInfo(operationCode);
-            return null == info ? null : info.Values;
+        public List<INamedParameter> GetOperationParameters(int operationCode) {
+            if (operationCode <= 0 || operationCode > UInt16.MaxValue)
+                return null;
+            return _paramValuesReader.ReadParameters(unchecked((ushort)operationCode));
         }
 
         public IAuthorityTag Authority {

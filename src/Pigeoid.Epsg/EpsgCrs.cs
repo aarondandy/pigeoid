@@ -56,7 +56,7 @@ namespace Pigeoid.Epsg
         }
 
         [ContractInvariantMethod]
-        private void CodeContractInvariants() {
+        private void ObjectInvariants() {
             Contract.Invariant(_code >= 0);
             Contract.Invariant(!String.IsNullOrEmpty(Name));
             Contract.Invariant(_area != null);

@@ -19,7 +19,7 @@ namespace Pigeoid.Epsg
         }
 
         [ContractInvariantMethod]
-        private void CodeContractInvariants() {
+        private void ObjectInvariants() {
             Contract.Invariant(VerticalDatum != null);
         }
 
@@ -52,8 +52,6 @@ namespace Pigeoid.Epsg
 
         IAxis ICrsVertical.Axis { get { return Axis; } }
 
-        public override EpsgCrsKind Kind {
-            get { return EpsgCrsKind.Vertical; }
-        }
+        public override EpsgCrsKind Kind { get { return EpsgCrsKind.Vertical; } }
     }
 }
