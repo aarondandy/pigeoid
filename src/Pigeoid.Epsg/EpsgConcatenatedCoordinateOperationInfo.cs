@@ -67,7 +67,7 @@ namespace Pigeoid.Epsg
             get {
                 Contract.Ensures(Contract.Result<EpsgCoordinateOperationInfo[]>() != null);
                 Contract.Ensures(Contract.ForAll(Contract.Result<EpsgCoordinateOperationInfo[]>(), x => x != null));
-                var result = Array.ConvertAll(_stepCodes, code => EpsgCoordinateOperationInfoRepository.GetOperationInfo(code));
+                var result = Array.ConvertAll(_stepCodes, code => EpsgCoordinateOperationInfoRepository.GetSingleOperationInfo(code));
                 Contract.Assume(Contract.ForAll(result, x => x != null));
                 return result;
             }

@@ -162,8 +162,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\EpsgDataResource.cs" />
     <Compile Include="Resources\EpsgDataResourceReader.cs" />
-    <Compile Include="Resources\EpsgDynamicLookupBase.cs" />
-    <Compile Include="Resources\EpsgLookupBase.cs" />
     <Compile Include="Resources\EpsgNumberLookup.cs" />
     <Compile Include="Resources\EpsgTextLookup.cs" />
     <Compile Include="Utility\ArrayUtil.cs" />

@@ -565,52 +565,66 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				.Distinct()
 			);
 
-			var pathOffset = 0;
+            var opGroups = data.Repository.CoordinateOperations.GroupBy(x => x.TypeName.ToLower());
 
-			foreach (var op in data.Repository.CoordinateOperations.OrderBy(x => x.Code)) {
-				var opCode = op.Code;
-				switch(op.TypeName.ToLower()) {
-					case "transformation": {
-						writerDataTransformation.Write((ushort)opCode);
-						writerDataTransformation.Write((ushort)op.SourceCrs.Code);
-						writerDataTransformation.Write((ushort)op.TargetCrs.Code);
-						writerDataTransformation.Write((ushort)op.Method.Code);
-						writerDataTransformation.Write((ushort)data.GetNumberIndex(op.Accuracy ?? 0));
-						writerDataTransformation.Write((ushort)op.Area.Code);
-						writerDataTransformation.Write((byte)(op.Deprecated ? 0xff : 0));
-						writerDataTransformation.Write((ushort)stringLookUp[op.Name]);
-						break;
-					}
-					case "conversion": {
-						writerDataConversion.Write((ushort)opCode);
-						writerDataConversion.Write((ushort)op.Method.Code);
-						writerDataConversion.Write((ushort)op.Area.Code);
-						writerDataConversion.Write((byte)(op.Deprecated ? 0xff : 0));
-						writerDataConversion.Write((ushort)stringLookUp[op.Name]);
-						break;
-					}
-					case "concatenated operation": {
-						writerDataConcatenated.Write((ushort)opCode);
-						writerDataConcatenated.Write((ushort)op.SourceCrs.Code);
-						writerDataConcatenated.Write((ushort)op.TargetCrs.Code);
-						writerDataConcatenated.Write((ushort)op.Area.Code);
-						writerDataConcatenated.Write((byte)(op.Deprecated ? 0xff : 0));
-						writerDataConcatenated.Write((ushort)stringLookUp[op.Name]);
-						var catOps = data.Repository.CoordOpPathItems
-							.Where(x => x.CatCode == opCode)
-							.OrderBy(x => x.Step)
-							.ToList();
-						writerDataConcatenated.Write((byte)(catOps.Count));
-						writerDataConcatenated.Write((ushort)pathOffset);
-						foreach(var catOp in catOps) {
-							writerDataPath.Write((ushort)catOp.Operation.Code);
-						}
-						pathOffset += catOps.Count*sizeof (ushort);
-						break;
-					}
-					default: throw new InvalidDataException();
-				}
-			}
+            foreach (var opGroup in opGroups) {
+                var ops = opGroup.OrderBy(x => x.Code);
+                var typeName = opGroup.Key;
+                switch (typeName) {
+                    case "transformation": {
+                        writerDataTransformation.Write((ushort)ops.Count());
+                        foreach (var op in ops) {
+                            writerDataTransformation.Write((ushort)op.Code);
+                            writerDataTransformation.Write((ushort)op.SourceCrs.Code);
+                            writerDataTransformation.Write((ushort)op.TargetCrs.Code);
+                            writerDataTransformation.Write((ushort)op.Method.Code);
+                            writerDataTransformation.Write((ushort)data.GetNumberIndex(op.Accuracy ?? 0));
+                            writerDataTransformation.Write((ushort)op.Area.Code);
+                            writerDataTransformation.Write((byte)(op.Deprecated ? 0xff : 0));
+                            writerDataTransformation.Write((ushort)stringLookUp[op.Name]);
+                        }
+                        break;
+                    }
+                    case "conversion": {
+                        writerDataConversion.Write((ushort)ops.Count());
+                        foreach (var op in ops) {
+                            writerDataConversion.Write((ushort)op.Code);
+                            writerDataConversion.Write((ushort)op.Method.Code);
+                            writerDataConversion.Write((ushort)op.Area.Code);
+                            writerDataConversion.Write((byte)(op.Deprecated ? 0xff : 0));
+                            writerDataConversion.Write((ushort)stringLookUp[op.Name]);
+                        }
+                        break;
+                    }
+                    case "concatenated operation": {
+                        var pathOffset = 0;
+                        writerDataConcatenated.Write((ushort)ops.Count());
+
+                        foreach (var op in ops) {
+                            var catOps = data.Repository.CoordOpPathItems
+                                .Where(x => x.CatCode == op.Code)
+                                .OrderBy(x => x.Step)
+                                .ToList();
+                            foreach (var catOp in catOps) {
+                                writerDataPath.Write((ushort)catOp.Operation.Code);
+                            }
+
+                            writerDataConcatenated.Write((ushort)op.Code);
+                            writerDataConcatenated.Write((ushort)op.SourceCrs.Code);
+                            writerDataConcatenated.Write((ushort)op.TargetCrs.Code);
+                            writerDataConcatenated.Write((ushort)op.Area.Code);
+                            writerDataConcatenated.Write((byte)(op.Deprecated ? 0xff : 0));
+                            writerDataConcatenated.Write((ushort)stringLookUp[op.Name]);
+                            writerDataConcatenated.Write((byte)(catOps.Count));
+                            writerDataConcatenated.Write((ushort)pathOffset);
+
+                            pathOffset += catOps.Count * sizeof(ushort);
+                        }
+                        break;
+                    }
+                    default: throw new NotSupportedException();
+                }
+            }
 
 		}
 	}

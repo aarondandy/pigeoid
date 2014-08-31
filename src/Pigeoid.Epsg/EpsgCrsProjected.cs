@@ -35,7 +35,7 @@ namespace Pigeoid.Epsg
 
         public EpsgCoordinateOperationInfo Projection {
             get {
-                return EpsgCoordinateOperationInfoRepository.GetOperationInfo(BaseOperationCode);
+                return EpsgCoordinateOperationInfoRepository.GetSingleOperationInfo(BaseOperationCode);
             }
         }
 

@@ -631,7 +631,72 @@ namespace Pigeoid.Epsg.Resources
             : base("opconv.dat", "op.txt", (sizeof(ushort) * 3) + sizeof(byte)) { }
 
         protected override EpsgCoordinateOperationInfo ReadValue(ushort key, BinaryReader reader) {
-            throw new NotImplementedException();
+            var opMethodCode = reader.ReadUInt16();
+            var areaCode = reader.ReadUInt16();
+            var deprecated = reader.ReadByte() != 0;
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            Contract.Assume(!String.IsNullOrEmpty(name));
+            return new EpsgCoordinateOperationInfo(key, opMethodCode, areaCode, deprecated, name);
+        }
+
+    }
+
+    internal class EpsgDataResourceReaderCoordinateTransformInfo : EpsgDataResourceReaderBasic<EpsgCoordinateTransformInfo> {
+
+        private readonly EpsgNumberLookUp _numberLookup;
+
+
+        public EpsgDataResourceReaderCoordinateTransformInfo()
+            : base("optran.dat", "op.txt", (sizeof(ushort) * 6) + sizeof(byte))
+        {
+            _numberLookup = new EpsgNumberLookUp();
+        }
+
+        protected override EpsgCoordinateTransformInfo ReadValue(ushort key, BinaryReader reader) {
+            var sourceCrsCode = reader.ReadUInt16();
+            var targetCrsCode = reader.ReadUInt16();
+            var opMethodCode = reader.ReadUInt16();
+            var accuracy = _numberLookup.Get(reader.ReadUInt16());
+            var areaCode = reader.ReadUInt16();
+            var deprecated = reader.ReadByte() != 0;
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            Contract.Assume(!String.IsNullOrEmpty(name));
+            return new EpsgCoordinateTransformInfo(
+                key, sourceCrsCode, targetCrsCode, opMethodCode,
+                accuracy, areaCode, deprecated, name);
+        }
+
+    }
+
+    internal class EpsgDataResourceReaderConcatenatedCoordinateOperationInfo : EpsgDataResourceReaderBasic<EpsgConcatenatedCoordinateOperationInfo> {
+
+        private const string CatPathFileName = "oppath.dat";
+
+        public EpsgDataResourceReaderConcatenatedCoordinateOperationInfo()
+            : base("opcat.dat", "op.txt", (sizeof(ushort) * 5) + (sizeof(byte) * 2))
+        {
+
+        }
+
+        protected override EpsgConcatenatedCoordinateOperationInfo ReadValue(ushort key, BinaryReader reader) {
+            var sourceCrsCode = reader.ReadUInt16();
+            var targetCrsCode = reader.ReadUInt16();
+            var areaCode = reader.ReadUInt16();
+            var deprecated = reader.ReadByte() != 0;
+            var name = TextLookup.GetString(reader.ReadUInt16());
+            Contract.Assume(!String.IsNullOrEmpty(name));
+            var stepCodes = new ushort[reader.ReadByte()];
+            var stepFileOffset = reader.ReadUInt16();
+            using (var readerPath = EpsgDataResourceReader.CreateBinaryReader(CatPathFileName)) {
+                readerPath.BaseStream.Seek(stepFileOffset, SeekOrigin.Begin);
+                for (int i = 0; i < stepCodes.Length; i++) {
+                    stepCodes[i] = readerPath.ReadUInt16();
+                }
+            }
+            return new EpsgConcatenatedCoordinateOperationInfo(
+                key, sourceCrsCode, targetCrsCode, areaCode,
+                deprecated, name, stepCodes
+            );
         }
 
     }
