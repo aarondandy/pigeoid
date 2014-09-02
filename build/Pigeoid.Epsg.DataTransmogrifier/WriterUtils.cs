@@ -178,7 +178,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			return v;
 		}
 
-		public static void WriteAreas(EpsgData data, BinaryWriter dataWriter, BinaryWriter textWriter, BinaryWriter iso2Writer, BinaryWriter iso3Writer) {
+		public static void WriteAreas(EpsgData data, BinaryWriter dataWriter, BinaryWriter textWriter) {
 			var stringLookUp = WriteTextDictionary(data, textWriter,
 				data.Repository.Areas.Select(x => x.Name)
 				//.Concat(data.Areas.Select(x => StringUtils.TrimTrailingPeriod(x.AreaOfUse)))
@@ -186,7 +186,9 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				.Distinct()
 			);
 
-			dataWriter.Write((ushort)data.Repository.Areas.Count);
+            var isos = new List<EpsgArea>();
+
+            dataWriter.Write((ushort)data.Repository.Areas.Count);
 			foreach (var area in data.Repository.Areas.OrderBy(x => x.Code)) {
 				dataWriter.Write((ushort)area.Code);
 
@@ -211,19 +213,25 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 				dataWriter.Write(encodedSouthBound);
 				dataWriter.Write(encodedNorthBound);
 				dataWriter.Write((ushort)stringLookUp[area.Name ?? String.Empty]);
-				//dataWriter.Write((ushort)stringLookup[StringUtils.TrimTrailingPeriod(area.AreaOfUse) ?? String.Empty]);
-				if(!String.IsNullOrWhiteSpace(area.Iso2)) {
-					iso2Writer.Write((ushort)area.Code);
-					iso2Writer.Write((byte)area.Iso2[0]);
-					iso2Writer.Write((byte)area.Iso2[1]);
-				}
 
-				if (!String.IsNullOrWhiteSpace(area.Iso3)) {
-					iso3Writer.Write((ushort)area.Code);
-					iso3Writer.Write((byte)area.Iso3[0]);
-					iso3Writer.Write((byte)area.Iso3[1]);
-					iso3Writer.Write((byte)area.Iso3[2]);
-				}
+                if (String.IsNullOrWhiteSpace(area.Iso2)) {
+                    dataWriter.Write((ushort)0);
+                }
+                else {
+                    dataWriter.Write((byte)area.Iso2[0]);
+                    dataWriter.Write((byte)area.Iso2[1]);
+                }
+
+                if (String.IsNullOrWhiteSpace(area.Iso3)) {
+                    dataWriter.Write((ushort)0);
+                    dataWriter.Write((byte)0);
+                }
+                else {
+                    dataWriter.Write((byte)area.Iso3[0]);
+                    dataWriter.Write((byte)area.Iso3[1]);
+                    dataWriter.Write((byte)area.Iso3[2]);
+                }
+
 			}
 
 		}

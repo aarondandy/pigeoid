@@ -125,11 +125,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                 using (var writerData = new BinaryWriter(streamData))
                 using (var streamText = File.Open(Path.Combine(outFolder, "areas.txt"), FileMode.Create))
                 using (var writerText = new BinaryWriter(streamText))
-                using (var streamIso2 = File.Open(Path.Combine(outFolder, "iso2.dat"), FileMode.Create))
-                using (var writerIso2 = new BinaryWriter(streamIso2))
-                using (var streamIso3 = File.Open(Path.Combine(outFolder, "iso3.dat"), FileMode.Create))
-                using (var writerIso3 = new BinaryWriter(streamIso3))
-                    WriterUtils.WriteAreas(epsgData, writerData, writerText, writerIso2, writerIso3);
+                    WriterUtils.WriteAreas(epsgData, writerData, writerText);
 
                 using (var streamText = File.Open(Path.Combine(outFolder, "axis.txt"), FileMode.Create))
                 using (var writerText = new BinaryWriter(streamText))
