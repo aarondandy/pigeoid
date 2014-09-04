@@ -279,7 +279,7 @@ namespace Pigeoid.Epsg
         public EpsgParameterUsage[] ParameterUsage {
             get {
                 Contract.Ensures(Contract.Result<EpsgParameterUsage[]>() != null);
-                return _paramValuesReader.ReadParameterUsages();
+                return _paramValuesReader.GetParameterUsages();
             }
         }
 
