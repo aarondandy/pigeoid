@@ -17,7 +17,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg2039() {
-            var crs = EpsgCrs.Get(2039);
+            var crs = EpsgMicroDatabase.Default.GetCrs(2039);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -35,7 +35,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg2281() {
-            var crs = EpsgCrs.Get(2281);
+            var crs = EpsgMicroDatabase.Default.GetCrs(2281);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -49,7 +49,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg2318() {
-            var crs = EpsgCrs.Get(2318);
+            var crs = EpsgMicroDatabase.Default.GetCrs(2318);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -65,7 +65,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg2469() {
-            var crs = EpsgCrs.Get(2469);
+            var crs = EpsgMicroDatabase.Default.GetCrs(2469);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -79,7 +79,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg2985() {
-            var crs = EpsgCrs.Get(2985);
+            var crs = EpsgMicroDatabase.Default.GetCrs(2985);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -95,7 +95,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3031() {
-            var crs = EpsgCrs.Get(3031);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3031);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -111,7 +111,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3078() {
-            var crs = EpsgCrs.Get(3078);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3078);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -129,7 +129,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3079() {
-            var crs = EpsgCrs.Get(3079);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3079);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -144,7 +144,7 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(6378137, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius);
             Assert.AreEqual(298.257222101, prj.GeographicInfo.Datum.Spheroid.InverseFlattening, 0.0000001);
 
-            var wgs = EpsgCrs.Get(4326);
+            var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
             var wgsProj4 = Proj4Crs.CreateProjection(wgs);
 
             var somePlaceInMichigan = new GeographicCoordinate(40.4, -91.8);
@@ -163,7 +163,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3140() {
-            var crs = EpsgCrs.Get(3140);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3140);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -177,7 +177,7 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(6378306, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius, 1);
             Assert.AreEqual(6356571.996, prj.GeographicInfo.Datum.Spheroid.PolarRadius, 1);
 
-            var wgs = EpsgCrs.Get(4326);
+            var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
             var ptWgs = new GeographicCoordinate((-17.25 + -18.32)/2.0, (178.74+177.2)/2.0);
             var pt3140 = new Point2(530138.52663372, 821498.68898981); // units in links
 
@@ -201,7 +201,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3293() {
-            var crs = EpsgCrs.Get(3293);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3293);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -217,7 +217,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3395() {
-            var crs = EpsgCrs.Get(3395);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3395);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -227,7 +227,7 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(0, prj.FalseEasting);
             Assert.AreEqual(0, prj.FalseNorthing);
 
-            var wgs = EpsgCrs.Get(4326);
+            var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
             var ptWgs = new GeographicCoordinate(40, -105);
             var pt3395 = new Point2(-11688546, 4838471);
 
@@ -244,7 +244,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3571() {
-            var crs = EpsgCrs.Get(3571);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3571);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -258,7 +258,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3574() {
-            var crs = EpsgCrs.Get(3574);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3574);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -271,7 +271,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3575() {
-            var crs = EpsgCrs.Get(3575);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3575);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -284,7 +284,7 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(6378137, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius);
             Assert.AreEqual(298.257223563, prj.GeographicInfo.Datum.Spheroid.InverseFlattening, 0.0000001);
 
-            var wgs = EpsgCrs.Get(4326);
+            var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
             var wgsProj4 = Proj4Crs.CreateProjection(wgs);
             var somePlaceInMichigan = new GeographicCoordinate(40.4, -91.8);
             var expected3575 = new Point2(-5244224.354585549, 1095575.5476152631);
@@ -302,7 +302,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3832() {
-            var crs = EpsgCrs.Get(3832);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3832);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -316,7 +316,7 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(6378137, prj.GeographicInfo.Datum.Spheroid.EquatorialRadius, 0.001);
             Assert.AreEqual(298.257223563, prj.GeographicInfo.Datum.Spheroid.InverseFlattening, 0.001);
 
-            var wgs = EpsgCrs.Get(4326);
+            var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
             var ptWgs = new GeographicCoordinate(7, -160);
             var pt3832 = new Point2(5565974, 775978);
 
@@ -333,7 +333,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg4326() {
-            var crs = EpsgCrs.Get(4326);
+            var crs = EpsgMicroDatabase.Default.GetCrs(4326);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -345,7 +345,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg26931() {
-            var crs = EpsgCrs.Get(26931);
+            var crs = EpsgMicroDatabase.Default.GetCrs(26931);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -360,7 +360,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg28191() {
-            var crs = EpsgCrs.Get(28191);
+            var crs = EpsgMicroDatabase.Default.GetCrs(28191);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -384,7 +384,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg28192() {
-            var crs = EpsgCrs.Get(28192);
+            var crs = EpsgMicroDatabase.Default.GetCrs(28192);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -408,7 +408,7 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg29871() {
-            var crs = EpsgCrs.Get(29871);
+            var crs = EpsgMicroDatabase.Default.GetCrs(29871);
             Assert.IsNotNull(crs);
 
             var prj = Proj4Crs.CreateProjection(crs);
@@ -421,7 +421,7 @@ namespace Pigeoid.Interop.Proj4.Test
             Assert.AreEqual(590476, prj.FalseEasting, 1);
             Assert.AreEqual(442857, prj.FalseNorthing, 1);
 
-            var wgs = EpsgCrs.Get(4326);
+            var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
             var posWgs = new GeographicCoordinate(4.26, 114.46);
             var pos29871 = new Point2(26368.683206333983, 23434.55243084071);
 
@@ -439,8 +439,8 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg2039_to_epsg28191() {
-            var from = EpsgCrs.Get(2039);
-            var to = EpsgCrs.Get(28191);
+            var from = EpsgMicroDatabase.Default.GetCrs(2039);
+            var to = EpsgMicroDatabase.Default.GetCrs(28191);
             var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
             var epsgPath = pathGenerator.Generate(from, to);
             Assert.IsNotEmpty(epsgPath);
@@ -450,8 +450,8 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3078_to_epsg3575() {
-            var from = EpsgCrs.Get(3078);
-            var to = EpsgCrs.Get(3575);
+            var from = EpsgMicroDatabase.Default.GetCrs(3078);
+            var to = EpsgMicroDatabase.Default.GetCrs(3575);
             var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
             var epsgPath = pathGenerator.Generate(from, to);
             Assert.IsNotEmpty(epsgPath);
@@ -461,8 +461,8 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3031_to_epsg3293() {
-            var from = EpsgCrs.Get(3031);
-            var to = EpsgCrs.Get(3293);
+            var from = EpsgMicroDatabase.Default.GetCrs(3031);
+            var to = EpsgMicroDatabase.Default.GetCrs(3293);
             var pathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
             var epsgPath = pathGenerator.Generate(from, to);
             Assert.IsNotEmpty(epsgPath);
@@ -472,9 +472,9 @@ namespace Pigeoid.Interop.Proj4.Test
 
         [Test]
         public void epsg3079_to_epsg3575_proj4() {
-            var from = EpsgCrs.Get(3079);
+            var from = EpsgMicroDatabase.Default.GetCrs(3079);
             var fromProj4 = Proj4Crs.CreateProjection(from);
-            var to = EpsgCrs.Get(3575);
+            var to = EpsgMicroDatabase.Default.GetCrs(3575);
             var toProj4 = Proj4Crs.CreateProjection(to);
 
             var expected3079 = new Point2(6992.885640195105, -644.956855237484);

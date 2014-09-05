@@ -489,7 +489,7 @@ namespace Pigeoid.Epsg.Resources
 
         protected override TValue ReadValue(ushort key, BinaryReader reader) {
             var name = TextReader.GetString(reader.ReadUInt16());
-            var area = EpsgArea.Get(reader.ReadUInt16());
+            var area = EpsgMicroDatabase.Default.GetArea(reader.ReadUInt16());
             return _construct(key, name, area);
         }
     }
@@ -505,7 +505,7 @@ namespace Pigeoid.Epsg.Resources
         protected override EpsgDatumGeodetic ReadValue(ushort key, BinaryReader reader) {
             var name = TextReader.GetString(reader.ReadUInt16());
             Contract.Assume(!String.IsNullOrEmpty(name));
-            var area = EpsgArea.Get(reader.ReadUInt16());
+            var area = EpsgMicroDatabase.Default.GetArea(reader.ReadUInt16());
             Contract.Assume(area != null);
             var spheroid = EpsgEllipsoid.Get(reader.ReadUInt16());
             Contract.Assume(spheroid != null);
@@ -656,10 +656,10 @@ namespace Pigeoid.Epsg.Resources
 
         private EpsgCrs ReadValue(uint key, BinaryReader reader) {
             var datum = EpsgDatum.Get(reader.ReadUInt16());
-            var baseCrs = (EpsgCrsGeodetic)EpsgCrs.Get(reader.ReadInt16());
+            var baseCrs = (EpsgCrsGeodetic)EpsgMicroDatabase.Default.GetCrs(reader.ReadUInt16());
             var baseOpCode = reader.ReadInt16();
-            var coordSys = EpsgCoordinateSystem.Get(reader.ReadUInt16());
-            var area = EpsgArea.Get(reader.ReadUInt16());
+            var coordSys = EpsgMicroDatabase.Default.GetCoordinateSystem(reader.ReadUInt16());
+            var area = EpsgMicroDatabase.Default.GetArea(reader.ReadUInt16());
             var name = TextReader.GetString(reader.ReadUInt16());
             var isDeprecated = reader.ReadByte() != 0;
             var kind = (EpsgCrsKind)reader.ReadByte();
@@ -747,9 +747,9 @@ namespace Pigeoid.Epsg.Resources
         { }
 
         protected override EpsgCrsCompound ReadValue(ushort key, BinaryReader reader) {
-            var horizontal = (EpsgCrsDatumBased)EpsgCrs.Get(reader.ReadUInt16());
-            var vertical = (EpsgCrsVertical)EpsgCrs.Get(reader.ReadUInt16());
-            var area = EpsgArea.Get(reader.ReadUInt16());
+            var horizontal = (EpsgCrsDatumBased)EpsgMicroDatabase.Default.GetCrs(reader.ReadUInt16());
+            var vertical = (EpsgCrsVertical)EpsgMicroDatabase.Default.GetCrs(reader.ReadUInt16());
+            var area = EpsgMicroDatabase.Default.GetArea(reader.ReadUInt16());
             var name = TextReader.GetString(reader.ReadUInt16());
             var isDeprecated = reader.ReadByte() != 0;
             return new EpsgCrsCompound(unchecked((int)key), name, area, isDeprecated, horizontal, vertical);

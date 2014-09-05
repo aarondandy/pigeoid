@@ -48,7 +48,7 @@ namespace Pigeoid.Epsg
         public EpsgCrs SourceCrs {
             get {
                 Contract.Ensures(Contract.Result<EpsgCrs>() != null);
-                var source = EpsgCrs.Get(_sourceCrsCode);
+                var source = EpsgMicroDatabase.Default.GetCrs(_sourceCrsCode);
                 Contract.Assume(source != null); // _sourceCrsCode comes from a trusted source
                 return source;
             }
@@ -57,7 +57,7 @@ namespace Pigeoid.Epsg
         public EpsgCrs TargetCrs {
             get {
                 Contract.Ensures(Contract.Result<EpsgCrs>() != null);
-                var target = EpsgCrs.Get(_targetCrsCode);
+                var target = EpsgMicroDatabase.Default.GetCrs(_targetCrsCode);
                 Contract.Assume(target != null); // _targetCrsCode comes from a trusted source
                 return target;
             }

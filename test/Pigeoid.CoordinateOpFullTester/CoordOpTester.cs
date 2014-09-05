@@ -12,7 +12,7 @@ namespace Pigeoid.CoordinateOpFullTester
     public class CoordOpTester
     {
 
-        public static EpsgCrs Crs4326 { get { return EpsgCrs.Get(4326); } }
+        public static EpsgCrs Crs4326 { get { return EpsgMicroDatabase.Default.GetCrs(4326); } }
 
         public static double[] GetValues(double start, double end, int count) {
             var result = new double[count];
@@ -77,7 +77,7 @@ namespace Pigeoid.CoordinateOpFullTester
         private readonly StaticCoordinateOperationCompiler _coordinateOperationCompiler;
         
         public IEnumerable<ICrs> GetAllCrs() {
-            return EpsgCrs.Values.Where(x => !x.Deprecated);
+            return EpsgMicroDatabase.Default.GetAllCrs().Where(x => !x.Deprecated);
         }
 
         private IGeographicMbr ExtractMbr(ICrs crs) {

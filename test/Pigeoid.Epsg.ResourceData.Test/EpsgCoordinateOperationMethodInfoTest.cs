@@ -12,7 +12,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var assemblyItems = EpsgCoordinateOperationMethodInfo.Values;
+            var assemblyItems = EpsgMicroDatabase.Default.GetOperationMethods();
 			var databaseItems = Repository.CoordinateOperationMethods;
 
 			AssertMatches(
@@ -40,7 +40,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Operation_Param_Values() {
 			foreach(var dbOpMethod in Repository.CoordinateOperationMethods) {
-				var assemblyOperationMethod = EpsgCoordinateOperationMethodInfo.Get(dbOpMethod.Code);
+                var assemblyOperationMethod = EpsgMicroDatabase.Default.GetOperationMethod(dbOpMethod.Code);
 				Assert.IsNotNull(assemblyOperationMethod);
 				foreach(var dbOperation in dbOpMethod.UsedBy) {
 					var assemblyParamValues = assemblyOperationMethod.GetOperationParameters(dbOperation.Code);

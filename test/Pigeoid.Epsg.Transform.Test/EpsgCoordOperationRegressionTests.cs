@@ -14,9 +14,9 @@ namespace Pigeoid.Epsg.Transform.Test
 
         [Test]
         public void epsg3079_to_epsg3575() {
-            var from = EpsgCrs.Get(3079);
-            var to = EpsgCrs.Get(3575);
-            var wgs = EpsgCrs.Get(4326);
+            var from = EpsgMicroDatabase.Default.GetCrs(3079);
+            var to = EpsgMicroDatabase.Default.GetCrs(3575);
+            var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
 
             var somePlaceInMichigan = new GeographicCoordinate(40.4, -91.8);
             var expected3079 = new Point2(6992.885640195105, -644.956855237484);
@@ -55,8 +55,8 @@ namespace Pigeoid.Epsg.Transform.Test
 
         [Test]
         public void epsg3140_to_wgs() {
-            var crs = EpsgCrs.Get(3140);
-            var wgs = EpsgCrs.Get(4326);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3140);
+            var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
 
             var ptWgs = new GeographicCoordinate(-17.785, 177.97);
             var pt3140 = new Point2(530138.52663372, 821498.68898981); // units in links
@@ -79,8 +79,8 @@ namespace Pigeoid.Epsg.Transform.Test
 
         [Test]
         public void epsg4087_to_wgs() {
-            var crs = EpsgCrs.Get(4087);
-            var wgs = EpsgCrs.Get(4326);
+            var crs = EpsgMicroDatabase.Default.GetCrs(4087);
+            var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
 
             var ptWgs = new GeographicCoordinate(39, -104);
             var pt4087 = new Point2(-11577227,4341460);
@@ -113,8 +113,8 @@ namespace Pigeoid.Epsg.Transform.Test
 
         [Test]
         public void epsg3857_to_wgs() {
-            var crs = EpsgCrs.Get(3857);
-            var wgs = EpsgCrs.Get(4326);
+            var crs = EpsgMicroDatabase.Default.GetCrs(3857);
+            var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
 
             var ptWgs = new GeographicCoordinate(45,10);
             var pt3857 = new Point2(1113194, 5621521);

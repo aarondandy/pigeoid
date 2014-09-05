@@ -16,7 +16,7 @@ namespace Pigeoid.Proj4ComparisonTests
     public class TestRunner
     {
 
-        public static EpsgCrs Crs4326 { get { return EpsgCrs.Get(4326); } }
+        public static EpsgCrs Crs4326 { get { return EpsgMicroDatabase.Default.GetCrs(4326); } }
 
         public static double[] GetValues(double start, double end, int count) {
             var result = new double[count];
@@ -162,7 +162,7 @@ namespace Pigeoid.Proj4ComparisonTests
         private readonly StaticCoordinateOperationCompiler _coordinateOperationCompiler;
 
         public IEnumerable<EpsgCrs> GetAllCrs() {
-            return EpsgCrs.Values.Where(IsNotDeprecated);
+            return EpsgMicroDatabase.Default.GetAllCrs().Where(IsNotDeprecated);
         }
 
         private class TestableCrs

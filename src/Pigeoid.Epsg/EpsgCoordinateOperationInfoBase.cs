@@ -27,7 +27,7 @@ namespace Pigeoid.Epsg
 
         public string Name { get; private set; }
         public int Code { get { return _code; } }
-        public EpsgArea Area { get { return EpsgArea.Get(_areaCode); } }
+        public EpsgArea Area { get { return EpsgMicroDatabase.Default.GetArea(_areaCode); } }
         public bool Deprecated { get { return _deprecated; } }
 
         public abstract bool HasInverse { get; }

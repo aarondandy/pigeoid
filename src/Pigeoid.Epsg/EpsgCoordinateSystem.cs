@@ -10,24 +10,6 @@ namespace Pigeoid.Epsg
     public class EpsgCoordinateSystem
     {
 
-        [Obsolete]
-        internal static readonly EpsgDataResourceReaderCoordinateSystem Reader = new EpsgDataResourceReaderCoordinateSystem();
-
-        [Obsolete]
-        public static EpsgCoordinateSystem Get(int code) {
-            return code >= 0 && code <= UInt16.MaxValue
-                ? Reader.GetByKey(unchecked((ushort)code))
-                : null;
-        }
-
-        [Obsolete]
-        public static IEnumerable<EpsgCoordinateSystem> Values {
-            get {
-                Contract.Ensures(Contract.Result<IEnumerable<EpsgCoordinateSystem>>() != null);
-                return Reader.ReadAllValues();
-            }
-        }
-
         private readonly ushort _code;
         private readonly int _dimension;
         private readonly bool _deprecated;
@@ -43,7 +25,7 @@ namespace Pigeoid.Epsg
         }
 
         [ContractInvariantMethod]
-        private void CodeContractInvariants() {
+        private void ObjectInvariants() {
             Contract.Invariant(!String.IsNullOrEmpty(Name));
         }
 
@@ -61,7 +43,7 @@ namespace Pigeoid.Epsg
             get {
                 Contract.Ensures(Contract.Result<IList<EpsgAxis>>() != null);
                 Contract.Ensures(Contract.ForAll(Contract.Result<IList<EpsgAxis>>(), x => x != null));
-                return EpsgAxis.Get(_code);
+                return EpsgMicroDatabase.Default.GetAxisSet(_code);
             }
         }
 

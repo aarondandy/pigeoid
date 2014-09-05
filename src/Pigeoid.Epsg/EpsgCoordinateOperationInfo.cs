@@ -21,7 +21,7 @@ namespace Pigeoid.Epsg
         public EpsgCoordinateOperationMethodInfo Method {
             get {
                 Contract.Ensures(Contract.Result<EpsgCoordinateOperationMethodInfo>() != null);
-                var method = EpsgCoordinateOperationMethodInfo.Get(_opMethodCode);
+                var method = EpsgMicroDatabase.Default.GetOperationMethod(_opMethodCode);
                 Contract.Assume(method != null); // because _opMethodCode comes from a trusted source
                 return method;
             }

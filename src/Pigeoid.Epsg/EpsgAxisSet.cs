@@ -9,10 +9,10 @@ namespace Pigeoid.Epsg
     internal class EpsgAxisSet
     {
 
-        internal EpsgAxisSet(ushort key, EpsgAxis[] axes) {
+        internal EpsgAxisSet(ushort csKey, EpsgAxis[] axes) {
             Contract.Requires(axes != null);
             Contract.Requires(Contract.ForAll(axes, x => x != null));
-            CoordinateSystemKey = key;
+            CoordinateSystemKey = csKey;
             Axes = axes;
         }
 

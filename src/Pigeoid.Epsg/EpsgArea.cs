@@ -15,25 +15,6 @@ namespace Pigeoid.Epsg
         IRelatableWithin<EpsgArea>
     {
 
-        [Obsolete]
-        internal static readonly EpsgDataResourceReaderArea Reader = new EpsgDataResourceReaderArea();
-
-        [Obsolete]
-        public static EpsgArea Get(int code) {
-            if (code < 0 || code >= UInt16.MaxValue)
-                return null;
-            return Reader.GetByKey(unchecked((ushort)code));
-        }
-
-
-        [Obsolete]
-        public static IEnumerable<EpsgArea> Values {
-            get {
-                Contract.Ensures(Contract.Result<IEnumerable<EpsgArea>>() != null);
-                return Reader.ReadAllValues();
-            }
-        }
-
         internal EpsgArea(ushort code, string name, string iso2, string iso3, LongitudeDegreeRange longitudeRange, Range latRange) {
             Contract.Requires(code >= 0);
             Contract.Requires(!String.IsNullOrEmpty(name));

@@ -11,7 +11,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var assemblyItems = EpsgCoordinateSystem.Values;
+			var assemblyItems = EpsgMicroDatabase.Default.GetCoordinateSystems();
 			var databaseItems = Repository.CoordinateSystems;
 
 			AssertMatches(
