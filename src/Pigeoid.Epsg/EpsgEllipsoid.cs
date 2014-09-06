@@ -10,24 +10,6 @@ namespace Pigeoid.Epsg
     public class EpsgEllipsoid : ISpheroidInfo
     {
 
-        [Obsolete]
-        internal static readonly EpsgDataResourceReaderEllipsoid Reader = new EpsgDataResourceReaderEllipsoid();
-
-        [Obsolete]
-        public static EpsgEllipsoid Get(int code) {
-            return code >= 0 && code < ushort.MaxValue
-                ? Reader.GetByKey((ushort)code)
-                : null;
-        }
-
-        [Obsolete]
-        public static IEnumerable<EpsgEllipsoid> Values {
-            get {
-                Contract.Ensures(Contract.Result<IEnumerable<EpsgEllipsoid>>() != null);
-                return Reader.ReadAllValues();
-            }
-        }
-
         private readonly ushort _code;
 
         internal EpsgEllipsoid(ushort code, string name, EpsgUnit unit, ISpheroid<double> core) {

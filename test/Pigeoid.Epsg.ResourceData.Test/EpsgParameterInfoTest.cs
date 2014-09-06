@@ -10,7 +10,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var assemblyItems = EpsgParameterInfo.Values;
+			var assemblyItems = EpsgMicroDatabase.Default.GetParameterInfos();
 			var databaseItems = Repository.Parameters;
 
 			AssertMatches(

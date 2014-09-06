@@ -13,78 +13,11 @@ using Vertesaur.Transformation;
 
 namespace Pigeoid.Epsg
 {
-    [Obsolete]
-    public static class EpsgDatumRepository
-    {
-
-        internal const int Wgs84DatumCode = 6326;
-
-        [Obsolete]
-        internal static readonly EpsgDataResourceReaderBasicDatum<EpsgDatumEngineering> ReaderEngineering
-            = new EpsgDataResourceReaderBasicDatum<EpsgDatumEngineering>(
-                "datumegr.dat",
-                (code, name, area) => new EpsgDatumEngineering(code, name, area));
-
-        [Obsolete]
-        internal static readonly EpsgDataResourceReaderBasicDatum<EpsgDatumVertical> ReaderVertical
-            = new EpsgDataResourceReaderBasicDatum<EpsgDatumVertical>(
-                "datumver.dat",
-                (code, name, area) => new EpsgDatumVertical(code, name, area));
-
-        [Obsolete]
-        internal static readonly EpsgDataResourceReaderGeodeticDatum ReaderGeodetic = new EpsgDataResourceReaderGeodeticDatum();
-
-        [Obsolete]
-        public static EpsgDatum Get(int code) {
-            return code >= 0 && code < UInt16.MaxValue
-                ? RawGet((ushort)code)
-                : null;
-        }
-
-        [Obsolete]
-        private static EpsgDatum RawGet(ushort code) {
-            return ReaderGeodetic.GetByKey(code)
-                ?? ReaderVertical.GetByKey(code)
-                ?? ReaderEngineering.GetByKey(code)
-                as EpsgDatum;
-        }
-
-        [Obsolete]
-        public static EpsgDatumGeodetic GetGeodetic(int code) {
-            return code >= 0 && code < UInt16.MaxValue
-                ? ReaderGeodetic.GetByKey((ushort)code)
-                : null;
-        }
-
-        [Obsolete]
-        public static IEnumerable<EpsgDatum> Values {
-            get {
-                Contract.Ensures(Contract.Result<IEnumerable<EpsgDatum>>() != null);
-
-                return ReaderGeodetic.ReadAllValues().Cast<EpsgDatum>()
-                    .Concat(ReaderVertical.ReadAllValues())
-                    .Concat(ReaderEngineering.ReadAllValues())
-                    .OrderBy(x => x.Code);
-            }
-        }
-
-    }
 
     public abstract class EpsgDatum : IDatum
     {
 
-        [Obsolete]
-        public static IEnumerable<EpsgDatum> Values {
-            get {
-                Contract.Ensures(Contract.Result<IEnumerable<EpsgDatum>>() != null);
-                return EpsgDatumRepository.Values;
-            }
-        }
-
-        [Obsolete]
-        public static EpsgDatum Get(int code) {
-            return EpsgDatumRepository.Get(code);
-        }
+        internal const int Wgs84DatumCode = 6326;
 
         private readonly ushort _code;
 
@@ -139,6 +72,11 @@ namespace Pigeoid.Epsg
 
     public class EpsgDatumEngineering : EpsgDatum
     {
+
+        internal static EpsgDatumEngineering Create(ushort code, string name, EpsgArea area) {
+            return new EpsgDatumEngineering(code, name, area);
+        }
+
         internal EpsgDatumEngineering(ushort code, string name, EpsgArea area) : base(code, name, area) {
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
@@ -148,6 +86,10 @@ namespace Pigeoid.Epsg
 
     public class EpsgDatumVertical : EpsgDatum
     {
+        internal static EpsgDatumVertical Create(ushort code, string name, EpsgArea area) {
+            return new EpsgDatumVertical(code, name, area);
+        }
+
         internal EpsgDatumVertical(ushort code, string name, EpsgArea area) : base(code, name, area) {
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(area != null);
@@ -189,7 +131,7 @@ namespace Pigeoid.Epsg
         public override string Type { get { return "Geodetic"; } }
 
         private Helmert7Transformation FindBasicWgs84Transformation() {
-            if (Code == EpsgDatumRepository.Wgs84DatumCode)
+            if (Code == EpsgDatum.Wgs84DatumCode)
                 return new Helmert7Transformation(Vector3.Zero);
 
             throw new NotImplementedException();

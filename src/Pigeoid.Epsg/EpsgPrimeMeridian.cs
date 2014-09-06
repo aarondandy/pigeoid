@@ -9,22 +9,6 @@ namespace Pigeoid.Epsg
     public class EpsgPrimeMeridian : IPrimeMeridianInfo
     {
 
-        [Obsolete]
-        internal static readonly EpsgDataResourceReaderPrimeMeridian Reader = new EpsgDataResourceReaderPrimeMeridian();
-
-        [Obsolete]
-        public static EpsgPrimeMeridian Get(int code) {
-            return code >= 0 && code < ushort.MaxValue ? Reader.GetByKey(unchecked((ushort)code)) : null;
-        }
-
-        [Obsolete]
-        public static IEnumerable<EpsgPrimeMeridian> Values {
-            get {
-                Contract.Ensures(Contract.Result<IEnumerable<EpsgPrimeMeridian>>() != null);
-                return Reader.ReadAllValues();
-            }
-        }
-
         internal EpsgPrimeMeridian(ushort code, string name, double longitude, EpsgUnit unit) {
             Contract.Requires(!String.IsNullOrEmpty(name));
             Contract.Requires(unit != null);

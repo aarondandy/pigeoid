@@ -507,9 +507,9 @@ namespace Pigeoid.Epsg.Resources
             Contract.Assume(!String.IsNullOrEmpty(name));
             var area = EpsgMicroDatabase.Default.GetArea(reader.ReadUInt16());
             Contract.Assume(area != null);
-            var spheroid = EpsgEllipsoid.Get(reader.ReadUInt16());
+            var spheroid = EpsgMicroDatabase.Default.GetEllipsoid(reader.ReadUInt16());
             Contract.Assume(spheroid != null);
-            var meridian = EpsgPrimeMeridian.Get(reader.ReadUInt16());
+            var meridian = EpsgMicroDatabase.Default.GetPrimeMeridian(reader.ReadUInt16());
             Contract.Assume(meridian != null);
             return new EpsgDatumGeodetic(key, name, spheroid, meridian, area);
         }
@@ -655,7 +655,7 @@ namespace Pigeoid.Epsg.Resources
         }
 
         private EpsgCrs ReadValue(uint key, BinaryReader reader) {
-            var datum = EpsgDatum.Get(reader.ReadUInt16());
+            var datum = EpsgMicroDatabase.Default.GetDatum(reader.ReadUInt16());
             var baseCrs = (EpsgCrsGeodetic)EpsgMicroDatabase.Default.GetCrs(reader.ReadUInt16());
             var baseOpCode = reader.ReadInt16();
             var coordSys = EpsgMicroDatabase.Default.GetCoordinateSystem(reader.ReadUInt16());
@@ -779,7 +779,7 @@ namespace Pigeoid.Epsg.Resources
             var usageCount = reader.ReadByte();
             var results = new EpsgParameterUsage[usageCount];
             for (int i = 0; i < usageCount; ++i) {
-                var parameterInfo = EpsgParameterInfo.Get(reader.ReadUInt16());
+                var parameterInfo = EpsgMicroDatabase.Default.GetParameterInfo(reader.ReadUInt16());
                 var signReversal = reader.ReadByte() == 0x01;
                 results[i] = new EpsgParameterUsage(parameterInfo, signReversal);
             }

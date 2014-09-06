@@ -10,7 +10,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var assemblyItems = EpsgPrimeMeridian.Values;
+			var assemblyItems = EpsgMicroDatabase.Default.GetPrimeMeridians();
 			var databaseItems = Repository.PrimeMeridians;
 
 			AssertMatches(

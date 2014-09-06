@@ -11,7 +11,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var assemblyItems = EpsgDatum.Values;
+			var assemblyItems = EpsgMicroDatabase.Default.GetDatums();
 			var dbItems = Repository.Datums;
 
 			AssertMatches(
@@ -34,7 +34,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var assemblyItems = EpsgDatum.Values.OfType<EpsgDatumGeodetic>();
+            var assemblyItems = EpsgMicroDatabase.Default.GetGeodeticDatums();
 			var dbItems = Repository.Datums.Where(x => String.Equals("Geodetic",x.Type,StringComparison.OrdinalIgnoreCase));
 
 			AssertMatches(
