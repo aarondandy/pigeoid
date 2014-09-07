@@ -9,8 +9,6 @@ namespace Pigeoid.Epsg
     public abstract class EpsgCrs : ICrs
     {
 
-        internal const int Wgs84GeographicCode = 4326;
-
         private readonly int _code;
         private readonly EpsgArea _area;
         private readonly bool _deprecated;

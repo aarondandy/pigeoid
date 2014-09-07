@@ -6,6 +6,7 @@ using System.IO;
 using System.Threading;
 using Pigeoid.CoordinateOperation;
 using Pigeoid.Epsg.Resources;
+using System.Xml.Serialization;
 
 namespace Pigeoid.Epsg
 {
@@ -13,8 +14,9 @@ namespace Pigeoid.Epsg
     {
 
         private readonly ushort _code;
-        
-        [Obsolete("Having this here makes serialization hard.")]
+
+        [XmlIgnore]
+        [NonSerialized]
         private readonly EpsgDataResourceReaderParameterValues _paramValuesReader;
         
         internal EpsgCoordinateOperationMethodInfo(ushort code, string name, bool canReverse) {
@@ -48,9 +50,10 @@ namespace Pigeoid.Epsg
         }
 
         public List<INamedParameter> GetOperationParameters(int operationCode) {
-            if (operationCode <= 0 || operationCode > UInt16.MaxValue)
-                return null;
-            return _paramValuesReader.ReadParameters(unchecked((ushort)operationCode));
+            return (operationCode >= 0 && operationCode <= UInt16.MaxValue)
+                ? _paramValuesReader.ReadParameters(unchecked((ushort)operationCode))
+                : null;
+            ;
         }
 
         public IAuthorityTag Authority {

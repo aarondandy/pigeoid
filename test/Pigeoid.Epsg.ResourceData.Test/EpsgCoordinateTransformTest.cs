@@ -13,7 +13,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var assemblyItems = EpsgCoordinateOperationInfoRepository.TransformInfos;
+            var assemblyItems = EpsgMicroDatabase.Default.GetCoordinateTransformInfos();
 			var databaseItems = Repository.CoordinateOperations
 				.Where(x => String.Equals("Transformation", x.TypeName, StringComparison.OrdinalIgnoreCase))
 				.ToList();

@@ -31,9 +31,11 @@ namespace Pigeoid.Epsg
         private readonly EpsgDataResourceReaderEllipsoid _readerEllipsoids = new EpsgDataResourceReaderEllipsoid();
         private readonly EpsgDataResourceReaderParameterInfo _readerParamInfos = new EpsgDataResourceReaderParameterInfo();
         private readonly EpsgDataResourceReaderPrimeMeridian _readerPrimeMeridians = new EpsgDataResourceReaderPrimeMeridian();
+        private readonly EpsgDataResourceReaderCoordinateConversionInfo _readerOpConversion = new EpsgDataResourceReaderCoordinateConversionInfo();
+        private readonly EpsgDataResourceReaderCoordinateTransformInfo _readerOpTransform = new EpsgDataResourceReaderCoordinateTransformInfo();
+        private readonly EpsgDataResourceReaderConcatenatedCoordinateOperationInfo _readerOpConcatenated = new EpsgDataResourceReaderConcatenatedCoordinateOperationInfo();
 
-        public EpsgMicroDatabase() {
-        }
+        public EpsgMicroDatabase() { }
 
         public EpsgArea GetArea(int code) {
             return code >= 0 && code <= UInt16.MaxValue
@@ -200,6 +202,54 @@ namespace Pigeoid.Epsg
         public IEnumerable<EpsgPrimeMeridian> GetPrimeMeridians() {
             Contract.Ensures(Contract.Result<IEnumerable<EpsgPrimeMeridian>>() != null);
             return _readerPrimeMeridians.ReadAllValues();
+        }
+
+        public EpsgCoordinateTransformInfo GetCoordinateTransformInfo(int code) {
+            return code >= 0 && code < UInt16.MaxValue ? GetCoordinateTransformInfo(unchecked((ushort)code)) : null;
+        }
+
+        internal EpsgCoordinateTransformInfo GetCoordinateTransformInfo(ushort code) {
+            return _readerOpTransform.GetByKey(code);
+        }
+
+        public EpsgCoordinateOperationInfo GetCoordinateConversionInfo(int code) {
+            return code >= 0 && code < UInt16.MaxValue ? GetCoordinateConversionInfo(unchecked((ushort)code)) : null;
+        }
+
+        internal EpsgCoordinateOperationInfo GetCoordinateConversionInfo(ushort code) {
+            return _readerOpConversion.GetByKey(code);
+        }
+
+        public EpsgConcatenatedCoordinateOperationInfo GetConcatenatedCoordinateOperationInfo(int code) {
+            return code >= 0 && code < UInt16.MaxValue ? GetConcatenatedCoordinateOperationInfo(unchecked((ushort)code)) : null;
+        }
+
+        internal EpsgConcatenatedCoordinateOperationInfo GetConcatenatedCoordinateOperationInfo(ushort code) {
+            return _readerOpConcatenated.GetByKey(code);
+        }
+
+        public EpsgCoordinateOperationInfo GetSingleCoordinateOperationInfo(int code) {
+            return code >= 0 && code < UInt16.MaxValue ? GetSingleCoordinateOperationInfo(unchecked((ushort)code)) : null;
+        }
+
+        internal EpsgCoordinateOperationInfo GetSingleCoordinateOperationInfo(ushort code) {
+            return GetCoordinateTransformInfo(code)
+                ?? GetCoordinateConversionInfo(code);
+        }
+
+        public IEnumerable<EpsgCoordinateTransformInfo> GetCoordinateTransformInfos() {
+            Contract.Ensures(Contract.Result<IEnumerable<EpsgCoordinateTransformInfo>>() != null);
+            return _readerOpTransform.ReadAllValues();
+        }
+
+        public IEnumerable<EpsgCoordinateOperationInfo> GetCoordinateConversionInfos() {
+            Contract.Ensures(Contract.Result<IEnumerable<EpsgCoordinateOperationInfo>>() != null);
+            return _readerOpConversion.ReadAllValues();
+        }
+
+        public IEnumerable<EpsgConcatenatedCoordinateOperationInfo> GetConcatenatedCoordinateOperationInfos() {
+            Contract.Ensures(Contract.Result<IEnumerable<EpsgConcatenatedCoordinateOperationInfo>>() != null);
+            return _readerOpConcatenated.ReadAllValues();
         }
         
     }

@@ -135,7 +135,6 @@
     <Compile Include="EpsgCoordinateOperationInfo.cs" />
     <Compile Include="EpsgConcatenatedCoordinateOperationInfo.cs" />
     <Compile Include="EpsgCoordinateOperationInfoBase.cs" />
-    <Compile Include="EpsgCoordinateOperationInfoRepository.cs" />
     <Compile Include="EpsgCoordinateOperationInverse.cs" />
     <Compile Include="EpsgCoordinateSystem.cs" />
     <Compile Include="EpsgCoordinateSystemKind.cs" />

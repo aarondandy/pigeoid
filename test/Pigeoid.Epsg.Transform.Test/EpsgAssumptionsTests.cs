@@ -12,14 +12,13 @@ namespace Pigeoid.Epsg.Transform.Test
 
         [Test]
         public void all_geocentric_transforms_are_to_geocentric() {
-            var geocTxs = EpsgCoordinateOperationInfoRepository.TransformInfos
+            var geocTxs = EpsgMicroDatabase.Default.GetCoordinateTransformInfos()
                 .Where(x => x.SourceCrs.Kind == EpsgCrsKind.Geocentric || x.TargetCrs.Kind == EpsgCrsKind.Geocentric);
             foreach (var tx in geocTxs) {
                 Assert.AreEqual(EpsgCrsKind.Geocentric, tx.SourceCrs.Kind);
                 Assert.AreEqual(EpsgCrsKind.Geocentric, tx.TargetCrs.Kind);
             }
         }
-
 
     }
 }

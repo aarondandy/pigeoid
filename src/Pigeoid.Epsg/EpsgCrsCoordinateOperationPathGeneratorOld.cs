@@ -176,8 +176,8 @@ namespace Pigeoid.Epsg
                     yield break;
 
                 var nodeCode = node.Code;
-
-                foreach (var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedForwardReferenced(nodeCode)) {
+                /*
+                foreach (var op in EpsgMicroDatabase.Default.GetConcatenatedForwardReferenced(nodeCode)) {
                     if (!_opValidator.IsValid(op))
                         continue;
                     var crs = op.TargetCrs;
@@ -186,7 +186,7 @@ namespace Pigeoid.Epsg
                     yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
                 }
 
-                foreach (var op in EpsgCoordinateOperationInfoRepository.GetConcatenatedReverseReferenced(nodeCode)) {
+                foreach (var op in EpsgMicroDatabase.Default.GetConcatenatedReverseReferenced(nodeCode)) {
                     if (!_opValidator.IsValid(op))
                         continue;
                     if (!op.HasInverse)
@@ -197,7 +197,7 @@ namespace Pigeoid.Epsg
                     yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
                 }
 
-                foreach (var op in EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced(nodeCode)) {
+                foreach (var op in EpsgMicroDatabase.Default.GetTransformForwardReferenced(nodeCode)) {
                     if (!_opValidator.IsValid(op))
                         continue;
                     var crs = op.TargetCrs;
@@ -206,7 +206,7 @@ namespace Pigeoid.Epsg
                     yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op);
                 }
 
-                foreach (var op in EpsgCoordinateOperationInfoRepository.GetTransformReverseReferenced(nodeCode)) {
+                foreach (var op in EpsgMicroDatabase.Default.GetTransformReverseReferenced(nodeCode)) {
                     if (!_opValidator.IsValid(op))
                         continue;
                     if (!op.HasInverse)
@@ -216,7 +216,7 @@ namespace Pigeoid.Epsg
                         continue;
                     yield return new DynamicGraphNodeData<EpsgCrs, int, ICoordinateOperationInfo>(crs, costPlusOne, op.GetInverse());
                 }
-
+                */
             }
         }
 
