@@ -11,7 +11,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		[Test]
 		public void Resources_Match_Db() {
 
-			var assemblyItems = EpsgUnit.Values;
+			var assemblyItems = EpsgMicroDatabase.Default.GetUnits();
 			var databaseItems = Repository.Uoms;
 
 			AssertMatches(

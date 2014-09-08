@@ -88,7 +88,7 @@ namespace Pigeoid.Epsg.Transform.Test
         public void TestFixtureSetUp() {
             PathGenerator = new EpsgCrsCoordinateOperationPathGenerator();
             StaticCompiler = new StaticCoordinateOperationCompiler();
-            DegreesToRadians = SimpleUnitConversionGenerator.FindConversion(EpsgUnit.Get(9102), EpsgUnit.Get(9101));
+            DegreesToRadians = SimpleUnitConversionGenerator.FindConversion(EpsgMicroDatabase.Default.GetUnit(9102), EpsgMicroDatabase.Default.GetUnit(9101));
             DenverWgs84Degrees = new GeographicCoordinate(39.739167, -104.984722);
             MadridWgs84Degrees = new GeographicCoordinate(40.383333, -3.716667);
         }
