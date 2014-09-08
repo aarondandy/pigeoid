@@ -4,7 +4,9 @@ using Pigeoid.Unit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
+using System.Runtime.Caching;
 using System.Text;
 
 namespace Pigeoid.Epsg
@@ -37,7 +39,14 @@ namespace Pigeoid.Epsg
         private readonly EpsgDataResourceReaderCrsNormal _readerCrsNormal;
         private readonly EpsgDataResourceReaderCrsCompound _readerCrsCompound;
 
+        private readonly MemoryCache _cache;
+
         public EpsgMicroDatabase() {
+
+            _cache = new MemoryCache("epsg-microdb", new System.Collections.Specialized.NameValueCollection {
+                {"cacheMemoryLimitMegabytes","1"}
+            });
+
             _readerUnits = new EpsgDataResourceAllUnitsReader(this); // NOTE: doing this is nasty, but needs to be done until unit conversion is extracted from units
             var unitConversions = _readerUnits.ReadAllValues().Select(x => x.BuildConversionToBase()).Where(x => x != null).ToList();
             var indianFoot = _readerUnits.GetByKey(9080);
@@ -129,6 +138,30 @@ namespace Pigeoid.Epsg
             _readerOpConcatenated = new EpsgDataResourceReaderConcatenatedCoordinateOperationInfo(opTextReader);
         }
 
+
+        private TValue GetOrSetCache<TKey, TValue>(string prefix, TKey code, Func<TKey, TValue> getter)
+            where TValue : class
+            where TKey : struct {
+            Contract.Requires(getter != null);
+            var key = "epsg" + prefix + code.ToString();
+            object rawResult = _cache.Get(key);
+            TValue result = rawResult as TValue;
+            if (result == null) {
+                const byte noItemValue = (byte)0;
+                if (!noItemValue.Equals(rawResult)) {
+                    result = getter(code);
+                    var cachePolicy = new CacheItemPolicy { Priority = CacheItemPriority.Default };
+                    if (result == null) {
+                        _cache.Set(key, noItemValue, cachePolicy);
+                    }
+                    else {
+                        _cache.Set(key, result, cachePolicy);
+                    }
+                }
+            }
+            return result;
+        }
+
         private UnitScalarConversion CreateScalarConversion(ushort fromKey, ushort toKey, double factor) {
             Contract.Requires(!Double.IsNaN(factor));
             Contract.Requires(factor != 0);
@@ -141,13 +174,11 @@ namespace Pigeoid.Epsg
         }
 
         public EpsgArea GetArea(int code) {
-            return code >= 0 && code <= UInt16.MaxValue
-                ? GetArea(unchecked((ushort)code))
-                : null;
+            return code >= 0 && code <= UInt16.MaxValue ? GetArea(unchecked((ushort)code)) : null;
         }
 
         internal EpsgArea GetArea(ushort code) {
-            return _readerAreas.GetByKey(code);
+            return GetOrSetCache("area", code, _readerAreas.GetByKey);
         }
 
         public IEnumerable<EpsgArea> GetAreas() {
@@ -158,20 +189,18 @@ namespace Pigeoid.Epsg
         internal EpsgAxis[] GetAxisSet(ushort csCode) {
             Contract.Ensures(Contract.Result<EpsgAxis[]>() != null);
             Contract.Ensures(Contract.ForAll(Contract.Result<EpsgAxis[]>(), x => x != null));
-            var set = _readerAxes.GetSetByCsKey(csCode);
+            var set = GetOrSetCache("axes", csCode, _readerAxes.GetSetByCsKey);
             if (set == null)
                 return ArrayUtil<EpsgAxis>.Empty;
             return (EpsgAxis[])set.Axes.Clone();
         }
 
         public EpsgCoordinateOperationMethodInfo GetOperationMethod(int code) {
-            return code >= 0 && code <= UInt16.MaxValue
-                ? GetOperationMethod(unchecked((ushort)code))
-                : null;
+            return code >= 0 && code <= UInt16.MaxValue ? GetOperationMethod(unchecked((ushort)code)) : null;
         }
 
         internal EpsgCoordinateOperationMethodInfo GetOperationMethod(ushort code) {
-            return _readerOpMethods.GetByKey(code);
+            return GetOrSetCache("method", code, _readerOpMethods.GetByKey);
         }
 
         public IEnumerable<EpsgCoordinateOperationMethodInfo> GetOperationMethods(){
@@ -180,13 +209,11 @@ namespace Pigeoid.Epsg
         }
 
         public EpsgCoordinateSystem GetCoordinateSystem(int code) {
-            return code >= 0 && code <= UInt16.MaxValue
-                ? GetCoordinateSystem(unchecked((ushort)code))
-                : null;
+            return code >= 0 && code <= UInt16.MaxValue ? GetCoordinateSystem(unchecked((ushort)code)) : null;
         }
 
         internal EpsgCoordinateSystem GetCoordinateSystem(ushort code) {
-            return _readerCoordinateSystems.GetByKey(code);
+            return GetOrSetCache("cs", code, _readerCoordinateSystems.GetByKey);
         }
 
         public IEnumerable<EpsgCoordinateSystem> GetCoordinateSystems() {
@@ -209,17 +236,15 @@ namespace Pigeoid.Epsg
         }
 
         private EpsgCrs GetCrsNormal(uint code) {
-            return _readerCrsNormal.GetByKey(code);
+            return GetOrSetCache("crsnorm", code, _readerCrsNormal.GetByKey);
         }
 
         private EpsgCrsCompound GetCrsCompound(uint code) {
-            return code <= UInt16.MaxValue
-                ? GetCrsCompound(unchecked((ushort)code))
-                : null;
+            return code <= UInt16.MaxValue ? GetCrsCompound(unchecked((ushort)code)) : null;
         }
 
         private EpsgCrsCompound GetCrsCompound(ushort code) {
-            return _readerCrsCompound.GetByKey(code);
+            return GetOrSetCache("crscmp", code, _readerCrsCompound.GetByKey);
         }
 
         public IEnumerable<EpsgCrs> GetAllCrs() {
@@ -244,15 +269,15 @@ namespace Pigeoid.Epsg
         }
 
         internal EpsgDatumGeodetic GetGeodeticDatum(ushort code) {
-            return _readerGeodeticDatums.GetByKey(code);
+            return GetOrSetCache("datumgeo", code, _readerGeodeticDatums.GetByKey);
         }
 
         internal EpsgDatumVertical GetVerticalDatum(ushort code) {
-            return _readerVerticalDatums.GetByKey(code);
+            return GetOrSetCache("datumver", code, _readerVerticalDatums.GetByKey);
         }
 
         internal EpsgDatumEngineering GetEngineeringDatum(ushort code) {
-            return _readerEngineeringDatums.GetByKey(code);
+            return GetOrSetCache("datumegr", code, _readerEngineeringDatums.GetByKey);
         }
 
         public IEnumerable<EpsgDatum> GetDatums() {
@@ -273,7 +298,7 @@ namespace Pigeoid.Epsg
         }
 
         internal EpsgEllipsoid GetEllipsoid(ushort code) {
-            return _readerEllipsoids.GetByKey(code);
+            return GetOrSetCache("ellipsoid", code, _readerEllipsoids.GetByKey);
         }
 
         public IEnumerable<EpsgEllipsoid> GetEllipsoids() {
@@ -286,7 +311,7 @@ namespace Pigeoid.Epsg
         }
 
         internal EpsgParameterInfo GetParameterInfo(ushort code) {
-            return _readerParamInfos.GetByKey(code);
+            return GetOrSetCache("param", code, _readerParamInfos.GetByKey);
         }
 
         public IEnumerable<EpsgParameterInfo> GetParameterInfos() {
@@ -299,7 +324,7 @@ namespace Pigeoid.Epsg
         }
 
         internal EpsgPrimeMeridian GetPrimeMeridian(ushort code) {
-            return _readerPrimeMeridians.GetByKey(code);
+            return GetOrSetCache("meridian", code, _readerPrimeMeridians.GetByKey);
         }
 
         public IEnumerable<EpsgPrimeMeridian> GetPrimeMeridians() {
@@ -312,7 +337,7 @@ namespace Pigeoid.Epsg
         }
 
         internal EpsgCoordinateTransformInfo GetCoordinateTransformInfo(ushort code) {
-            return _readerOpTransform.GetByKey(code);
+            return GetOrSetCache("optx", code, _readerOpTransform.GetByKey);
         }
 
         public EpsgCoordinateOperationInfo GetCoordinateConversionInfo(int code) {
@@ -320,7 +345,7 @@ namespace Pigeoid.Epsg
         }
 
         internal EpsgCoordinateOperationInfo GetCoordinateConversionInfo(ushort code) {
-            return _readerOpConversion.GetByKey(code);
+            return GetOrSetCache("opcon", code, _readerOpConversion.GetByKey);
         }
 
         public EpsgConcatenatedCoordinateOperationInfo GetConcatenatedCoordinateOperationInfo(int code) {
@@ -328,7 +353,7 @@ namespace Pigeoid.Epsg
         }
 
         internal EpsgConcatenatedCoordinateOperationInfo GetConcatenatedCoordinateOperationInfo(ushort code) {
-            return _readerOpConcatenated.GetByKey(code);
+            return GetOrSetCache("opcat", code, _readerOpConcatenated.GetByKey);
         }
 
         public EpsgCoordinateOperationInfo GetSingleCoordinateOperationInfo(int code) {
@@ -360,7 +385,7 @@ namespace Pigeoid.Epsg
         }
 
         internal EpsgUnit GetUnit(ushort code) {
-            return _readerUnits.GetByKey(code);
+            return GetOrSetCache("unit", code, _readerUnits.GetByKey);
         }
 
         public EpsgUnit GetBaseUnit(string type) {
