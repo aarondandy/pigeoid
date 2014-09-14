@@ -35,10 +35,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		public void Resources_Match_Db() {
 
             var assemblyItems = EpsgMicroDatabase.Default.GetAllCrs().OfType<EpsgCrsProjected>().ToList();
-			var databaseItems = Repository.Crs
-				.Where(x => String.Equals(x.Kind,"projected",StringComparison.OrdinalIgnoreCase))
-				.OrderBy(x => x.Code)
-				.ToList();
+			var databaseItems = Repository.CrsProjected;
 
 			AssertMatches(
 				assemblyItems,
@@ -64,10 +61,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		public void Resources_Match_Db() {
 
             var assemblyItems = EpsgMicroDatabase.Default.GetAllCrs().OfType<EpsgCrsCompound>().ToList();
-			var databaseItems = Repository.Crs
-				.Where(x => String.Equals(x.Kind, "compound", StringComparison.OrdinalIgnoreCase))
-				.OrderBy(x => x.Code)
-				.ToList();
+			var databaseItems = Repository.CrsCompound;
 
 			AssertMatches(
 				assemblyItems,
@@ -107,12 +101,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		public void Resources_Match_Db() {
 
             var assemblyItems = EpsgMicroDatabase.Default.GetAllCrs().OfType<EpsgCrsDatumBased>().ToList();
-			var databaseItems = Repository.Crs
-				.Where(x =>
-					!String.Equals(x.Kind, "compound", StringComparison.OrdinalIgnoreCase)
-				)
-				.OrderBy(x => x.Code)
-				.ToList();
+			var databaseItems = Repository.CrsNotCompound;
 
 			AssertMatches(
 				assemblyItems,

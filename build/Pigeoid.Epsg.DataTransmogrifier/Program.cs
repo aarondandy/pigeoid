@@ -75,23 +75,26 @@ namespace Pigeoid.Epsg.DataTransmogrifier
             using (var repository = new EpsgRepository(new FileInfo(dataFilePath))) {
                 var epsgData = new EpsgData(repository);
 
-                epsgData.WordLookUpList = StringUtils.BuildWordCountLookUp(Concat(
-                    //ExtractStrings(epsgData.Aliases, o => o.Alias),
-                        ExtractStrings(epsgData.Repository.Areas, o => o.Name /*, o => StringUtils.TrimTrailingPeriod(o.AreaOfUse)*/ /*,o => o.Iso2*/ /*,o => o.Iso3*/),
-                        ExtractStrings(epsgData.Repository.Axes, o => o.Name, o => o.Orientation, o => o.Abbreviation),
-                        ExtractStrings(epsgData.Repository.Crs, o => o.Name),
-                        ExtractStrings(epsgData.Repository.CoordinateSystems, o => o.Name),
-                        ExtractStrings(epsgData.Repository.CoordinateOperations, o => o.Name),
-                        ExtractStrings(epsgData.Repository.CoordinateOperationMethods, o => o.Name),
-                        ExtractStrings(epsgData.Repository.Parameters, o => o.Name, o => o.Description),
-                        ExtractStrings(epsgData.Repository.ParamValues, o => o.TextValue),
-                        ExtractStrings(epsgData.Repository.Datums, o => o.Name),
-                        ExtractStrings(epsgData.Repository.Ellipsoids, o => o.Name),
-                        ExtractStrings(epsgData.Repository.PrimeMeridians, o => o.Name),
-                        ExtractStrings(epsgData.Repository.Uoms, o => o.Name)
-                    //ExtractStrings(epsgData.NamingSystems, o => o.Name)
-                    ).SelectMany(StringUtils.BreakIntoWordParts))
+                epsgData.WordLookUpList = StringUtils.BuildWordCountLookUp(
+                        Concat(
+                            epsgData.Repository.AreaNames,
+                            ExtractStrings(epsgData.Repository.Axes, o => o.Name, o => o.Orientation, o => o.Abbreviation),
+                            epsgData.Repository.CrsNames,
+                            epsgData.Repository.CoordinateSystemNames,
+                            epsgData.Repository.CoordinateOperationNames,
+                            epsgData.Repository.CoordinateOperationMethodNames,
+                            ExtractStrings(epsgData.Repository.Parameters, o => o.Name, o => o.Description),
+                            epsgData.Repository.ParamTextValues,
+                            epsgData.Repository.DatumNames,
+                            epsgData.Repository.EllipsoidNames,
+                            epsgData.Repository.PrimeMeridianNames,
+                            epsgData.Repository.UomNames
+                        )
+                        .Where(x => x != null)
+                        .SelectMany(StringUtils.BreakIntoWordParts)
+                    )
                     .OrderByDescending(o => o.Value)
+                    .ThenBy(o => o.Key.Length)
                     .Select(o => o.Key)
                     .ToList();
 

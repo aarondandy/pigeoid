@@ -247,9 +247,14 @@ namespace Pigeoid.Epsg
             return GetOrSetCache("crscmp", code, _readerCrsCompound.GetByKey);
         }
 
+        public IEnumerable<EpsgCrs> GetAllNormalCrs() {
+            Contract.Ensures(Contract.Result<IEnumerable<EpsgCrs>>() != null);
+            return _readerCrsNormal.ReadAllValues();
+        }
+
         public IEnumerable<EpsgCrs> GetAllCrs() {
             Contract.Ensures(Contract.Result<IEnumerable<EpsgCrs>>() != null);
-            return _readerCrsNormal.ReadAllValues()
+            return GetAllNormalCrs()
                 .Concat(_readerCrsCompound.ReadAllValues())
                 .OrderBy(x => x.Code);
         }

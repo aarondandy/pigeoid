@@ -6,6 +6,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 	{
 		public EpsgCrsMap() {
 			Table("[Coordinate Reference System]");
+            ReadOnly();
+            Cache.ReadOnly();
 			Id(x => x.Code).Column("COORD_REF_SYS_CODE");
 			Map(x => x.Name).Column("COORD_REF_SYS_NAME");
 			References(x => x.Area).Column("AREA_OF_USE_CODE");
@@ -23,7 +25,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.Deprecated).Column("DEPRECATED");
 			HasMany(x => x.OperationsFrom).KeyColumn("SOURCE_CRS_CODE").ReadOnly();
 			HasMany(x => x.OperationsTo).KeyColumn("TARGET_CRS_CODE").ReadOnly();
-			ReadOnly();
 		}
 	}
 }

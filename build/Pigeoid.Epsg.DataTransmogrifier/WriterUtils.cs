@@ -177,19 +177,21 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 			}
 			return v;
 		}
+        private static IEnumerable<string> DistinctNonEmptyStrings(this IEnumerable<string> items) {
+            return items.Where(x => !String.IsNullOrEmpty(x)).Distinct();
+        }
 
 		public static void WriteAreas(EpsgData data, BinaryWriter dataWriter, BinaryWriter textWriter) {
+            var areas = data.Repository.Areas.ToList();
+
 			var stringLookUp = WriteTextDictionary(data, textWriter,
-				data.Repository.Areas.Select(x => x.Name)
-				//.Concat(data.Areas.Select(x => StringUtils.TrimTrailingPeriod(x.AreaOfUse)))
-				.Where(x => !String.IsNullOrEmpty(x))
-				.Distinct()
+                areas.Select(x => x.Name).DistinctNonEmptyStrings()
 			);
 
             var isos = new List<EpsgArea>();
 
-            dataWriter.Write((ushort)data.Repository.Areas.Count);
-			foreach (var area in data.Repository.Areas.OrderBy(x => x.Code)) {
+            dataWriter.Write((ushort)areas.Count);
+            foreach (var area in areas) {
 				dataWriter.Write((ushort)area.Code);
 
 				var encodedWestBound = EncodeDegreeValueToShort(area.WestBound);
@@ -238,14 +240,13 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
         public static void WriteAxes(EpsgData data, BinaryWriter textWriter, BinaryWriter data1Writer, BinaryWriter data2Writer, BinaryWriter data3Writer) {
 			var stringLookUp = WriteTextDictionary(data, textWriter,
-				data.Repository.Axes.Select(x => x.Name)
-				.Concat(data.Repository.Axes.Select(x => x.Orientation))
-				.Concat(data.Repository.Axes.Select(x => x.Abbreviation))
-				.Distinct()
+                data.Repository.Axes.Select(x => x.NameObject.Name).Distinct()
+                .Concat(data.Repository.Axes.Select(x => x.Orientation).Distinct())
+                .Concat(data.Repository.Axes.Select(x => x.Abbreviation).Distinct())
+                .DistinctNonEmptyStrings()
 			);
 
 			var axesData = data.Repository.Axes.ToLookup(x => x.CoordinateSystem.Code);
-
             
             foreach(var axisFileGroup in axesData.GroupBy(x => x.Count())){
                 var axisCount = axisFileGroup.Key;
@@ -275,12 +276,10 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static void WriteEllipsoids(EpsgData data, BinaryWriter dataWriter, BinaryWriter textWriter) {
 			var stringLookUp = WriteTextDictionary(data, textWriter,
-				data.Repository.Ellipsoids.Select(x => x.Name)
-				.Where(x => !String.IsNullOrEmpty(x))
-				.Distinct()
+                data.Repository.Ellipsoids.Select(x => x.Name).DistinctNonEmptyStrings()
 			);
 
-			int c = data.Repository.Ellipsoids.Count;
+			int c = data.Repository.Ellipsoids.Count();
 			dataWriter.Write((ushort)c);
 			foreach (var ellipsoid in data.Repository.Ellipsoids.OrderBy(x => x.Code)) {
 				dataWriter.Write((ushort)ellipsoid.Code);
@@ -293,12 +292,10 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static void WriteMeridians(EpsgData data, BinaryWriter dataWriter, BinaryWriter textWriter) {
 			var stringLookUp = WriteTextDictionary(data, textWriter,
-				data.Repository.PrimeMeridians.Select(x => x.Name)
-				.Where(x => !String.IsNullOrEmpty(x))
-				.Distinct()
+                data.Repository.PrimeMeridians.Select(x => x.Name).DistinctNonEmptyStrings()
 			);
 
-			int c = data.Repository.PrimeMeridians.Count;
+			int c = data.Repository.PrimeMeridians.Count();
 			dataWriter.Write((ushort)c);
 			foreach (var meridian in data.Repository.PrimeMeridians.OrderBy(x => x.Code)) {
 				dataWriter.Write((ushort)meridian.Code);
@@ -310,9 +307,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static void WriteDatums(EpsgData data, BinaryWriter engineeringWriter, BinaryWriter verticalWriter, BinaryWriter geodeticWriter, BinaryWriter textWriter) {
 			var stringLookUp = WriteTextDictionary(data, textWriter,
-				data.Repository.Datums.Select(x => x.Name)
-				.Where(x => !String.IsNullOrEmpty(x))
-				.Distinct()
+                data.Repository.Datums.Select(x => x.Name).DistinctNonEmptyStrings()
 			);
 
             foreach (var datumSet in data.Repository.Datums.GroupBy(x => x.Type)) {
@@ -352,9 +347,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static void WriteUnitOfMeasures(EpsgData data, BinaryWriter lengthWriter, BinaryWriter angleWriter, BinaryWriter scaleWriter, BinaryWriter timeWriter, BinaryWriter textWriter) {
 			var stringLookUp = WriteTextDictionary(data, textWriter,
-				data.Repository.Uoms.Select(x => x.Name)
-				.Where(x => !String.IsNullOrEmpty(x))
-				.Distinct()
+                data.Repository.Uoms.Select(x => x.Name).DistinctNonEmptyStrings()
 			);
 
             var uomGroups = data.Repository.Uoms.GroupBy(x => x.Type.ToUpper());
@@ -385,12 +378,10 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static void WriteParameters(EpsgData data, BinaryWriter writerData, BinaryWriter writerText) {
 			var stringLookUp = WriteTextDictionary(data, writerText,
-				data.Repository.Parameters.Select(x => x.Name)
-				.Where(x => !String.IsNullOrEmpty(x))
-				.Distinct()
+                data.Repository.Parameters.Select(x => x.Name).DistinctNonEmptyStrings()
 			);
 
-			int c = data.Repository.Parameters.Count;
+			int c = data.Repository.Parameters.Count();
 			writerData.Write((ushort)c);
 			foreach (var parameter in data.Repository.Parameters.OrderBy(x => x.Code)) {
 				writerData.Write((ushort)parameter.Code);
@@ -400,12 +391,10 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static void WriteOpMethod(EpsgData data, BinaryWriter writerData, BinaryWriter writerText) {
 			var stringLookUp = WriteTextDictionary(data, writerText,
-				data.Repository.CoordinateOperationMethods.Select(x => x.Name)
-				.Where(x => !String.IsNullOrEmpty(x))
-				.Distinct()
+                data.Repository.CoordinateOperationMethods.Select(x => x.Name).DistinctNonEmptyStrings()
 			);
 
-			int c = data.Repository.CoordinateOperationMethods.Count;
+			int c = data.Repository.CoordinateOperationMethods.Count();
 			writerData.Write((ushort)c);
 			foreach (var opMethod in data.Repository.CoordinateOperationMethods.OrderBy(x => x.Code)) {
 				writerData.Write((ushort)opMethod.Code);
@@ -417,12 +406,10 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static void WriteCoordinateSystems(EpsgData data, BinaryWriter writerData, BinaryWriter writerText) {
 			var stringLookUp = WriteTextDictionary(data, writerText,
-				data.Repository.CoordinateSystems.Select(x => x.Name)
-				.Where(x => !String.IsNullOrEmpty(x))
-				.Distinct()
+                data.Repository.CoordinateSystems.Select(x => x.Name).DistinctNonEmptyStrings()
 			);
 
-			int c = data.Repository.CoordinateSystems.Count;
+			int c = data.Repository.CoordinateSystems.Count();
 			writerData.Write((ushort)c);
 			foreach (var cs in data.Repository.CoordinateSystems.OrderBy(x => x.Code)) {
 
@@ -447,13 +434,11 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static void WriteParamData(EpsgData data, BinaryWriter writerText, Func<ushort,BinaryWriter> paramFileGenerator) {
 			var stringLookUp = WriteTextDictionary(data, writerText,
-				data.Repository.ParamValues.Select(x => x.TextValue)
-				.Where(x => !String.IsNullOrEmpty(x))
-				.Distinct()
+                data.Repository.ParamTextValues.DistinctNonEmptyStrings()
 			);
 
 			foreach (var coordinateOpMethod in data.Repository.CoordinateOperationMethods) {
-				var usedBy = coordinateOpMethod.UsedBy.ToList();
+                var usedBy = coordinateOpMethod.UsedBy.OrderBy(x => x.Code).ToList();
 
 				using(var writerData = paramFileGenerator((ushort)coordinateOpMethod.Code)) {
 					var paramUses = coordinateOpMethod.ParamUse.OrderBy(x => x.SortOrder).ToList();
@@ -463,12 +448,12 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 						writerData.Write((byte)(paramUse.SignReversal.GetValueOrDefault() ? 0x01 : 0x02));
 					}
 					writerData.Write((ushort)usedBy.Count);
-					foreach (var coordinateOperation in usedBy.OrderBy(x => x.Code)) {
+					foreach (var coordinateOperation in usedBy) {
 						writerData.Write((ushort)coordinateOperation.Code);
 						var paramValues = coordinateOperation.ParameterValues.ToList();
 						foreach (var paramUse in paramUses) {
 							var paramCode = paramUse.Parameter.Code;
-							var paramValue = paramValues.FirstOrDefault(x => x.Parameter.Code == paramCode);
+							var paramValue = paramValues.SingleOrDefault(x => x.Parameter.Code == paramCode);
 
 							// the value
 							if(null != paramValue && paramValue.NumericValue.HasValue)
@@ -523,9 +508,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static void WriteCoordinateReferenceSystem(EpsgData data, BinaryWriter writerText, BinaryWriter writerNormal, BinaryWriter writerComposite) {
 			var stringLookUp = WriteTextDictionary(data, writerText,
-				data.Repository.Crs.Select(x => x.Name)
-				.Where(x => !String.IsNullOrEmpty(x))
-				.Distinct()
+                data.Repository.Crs.Select(x => x.Name).DistinctNonEmptyStrings()
 			);
 
             foreach (var crsGroup in data.Repository.Crs.Select(x => new { KindByte = ToCrsKindByte (x.Kind), Crs = x}).GroupBy(x => x.KindByte == 'C')) {
@@ -568,9 +551,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		public static void WriteCoordinateOperations(EpsgData data, BinaryWriter writerText, BinaryWriter writerDataConversion, BinaryWriter writerDataTransformation, BinaryWriter writerDataConcatenated, BinaryWriter writerDataPath) {
 			var stringLookUp = WriteTextDictionary(data, writerText,
-				data.Repository.CoordinateOperations.Select(x => x.Name)
-				.Where(x => !String.IsNullOrEmpty(x))
-				.Distinct()
+                data.Repository.CoordinateOperations.Select(x => x.Name).DistinctNonEmptyStrings()
 			);
 
             var opGroups = data.Repository.CoordinateOperations.GroupBy(x => x.TypeName.ToLower());

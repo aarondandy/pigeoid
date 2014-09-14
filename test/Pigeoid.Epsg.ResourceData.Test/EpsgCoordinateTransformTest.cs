@@ -14,9 +14,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		public void Resources_Match_Db() {
 
             var assemblyItems = EpsgMicroDatabase.Default.GetCoordinateTransformInfos();
-			var databaseItems = Repository.CoordinateOperations
-				.Where(x => String.Equals("Transformation", x.TypeName, StringComparison.OrdinalIgnoreCase))
-				.ToList();
+            var databaseItems = Repository.CoordinateTransforms;
 
 			AssertMatches(
 				assemblyItems,

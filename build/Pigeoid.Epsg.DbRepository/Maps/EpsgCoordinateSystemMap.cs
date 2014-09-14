@@ -7,6 +7,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 
 		public EpsgCoordinateSystemMap() {
 			Table("[Coordinate System]");
+            ReadOnly();
+            Cache.ReadOnly();
 			Id(x => x.Code).Column("COORD_SYS_CODE");
 			Map(x => x.Name).Column("COORD_SYS_NAME");
 			Map(x => x.TypeName).Column("COORD_SYS_TYPE");
@@ -16,7 +18,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.Deprecated).Column("DEPRECATED");
 			HasMany(x => x.Axes).KeyColumn("COORD_SYS_CODE").ReadOnly();
 			HasMany(x => x.CrsUsage).KeyColumn("COORD_SYS_CODE").ReadOnly();
-			ReadOnly();
 		}
 
 	}

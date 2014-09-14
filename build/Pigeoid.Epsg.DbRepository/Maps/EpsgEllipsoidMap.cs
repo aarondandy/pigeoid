@@ -7,6 +7,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 
 		public EpsgEllipsoidMap() {
 			Table("Ellipsoid");
+            ReadOnly();
+            Cache.ReadOnly();
 			Id(x => x.Code).Column("ELLIPSOID_CODE");
 			Map(x => x.Name).Column("ELLIPSOID_NAME");
 			Map(x => x.SemiMajorAxis).Column("SEMI_MAJOR_AXIS");
@@ -17,7 +19,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.RevisionDate).Column("REVISION_DATE");
 			Map(x => x.ChangeId).Column("CHANGE_ID");
 			Map(x => x.Deprecated).Column("DEPRECATED");
-			ReadOnly();
 		}
 
 	}

@@ -7,6 +7,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 
 		public EpsgUomMap() {
 			Table("[Unit of Measure]");
+            ReadOnly();
+            Cache.ReadOnly();
 			Id(x => x.Code).Column("UOM_CODE");
 			Map(x => x.Name).Column("UNIT_OF_MEAS_NAME");
 			Map(x => x.Type).Column("UNIT_OF_MEAS_TYPE");
@@ -17,7 +19,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.RevisionDate).Column("REVISION_DATE");
 			Map(x => x.ChangeId).Column("CHANGE_ID");
 			Map(x => x.Deprecated).Column("DEPRECATED");
-			ReadOnly();
 		}
 
 	}

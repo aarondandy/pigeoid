@@ -7,6 +7,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 
 		public EpsgCoordinateOperationMethodMap() {
 			Table("[Coordinate_Operation Method]");
+            ReadOnly();
+            Cache.ReadOnly();
 			Id(x => x.Code).Column("COORD_OP_METHOD_CODE");
 			Map(x => x.Name).Column("COORD_OP_METHOD_NAME");
 			Map(x => x.Reverse).Column("REVERSE_OP");
@@ -17,7 +19,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.Deprecated).Column("DEPRECATED");
 			HasMany(x => x.UsedBy).KeyColumn("COORD_OP_METHOD_CODE").ReadOnly();
 			HasMany(x => x.ParamUse).KeyColumn("COORD_OP_METHOD_CODE").ReadOnly();
-			ReadOnly();
 		}
 
 	}

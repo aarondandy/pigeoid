@@ -7,6 +7,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 
 		public EpsgParamValueMap() {
 			Table("[Coordinate_Operation Parameter Value]");
+            ReadOnly();
+            Cache.ReadOnly();
 			CompositeId()
 				.KeyReference(x => x.Operation, "COORD_OP_CODE")
 				.KeyReference(x => x.Method, "COORD_OP_METHOD_CODE")
@@ -14,7 +16,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.NumericValue).Column("PARAMETER_VALUE");
 			Map(x => x.TextValue).Column("PARAM_VALUE_FILE_REF");
 			References(x => x.Uom).Column("UOM_CODE");
-			ReadOnly();
 		}
 
 	}

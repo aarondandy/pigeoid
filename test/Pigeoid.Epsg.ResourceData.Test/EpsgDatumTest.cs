@@ -35,7 +35,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		public void Resources_Match_Db() {
 
             var assemblyItems = EpsgMicroDatabase.Default.GetGeodeticDatums();
-			var dbItems = Repository.Datums.Where(x => String.Equals("Geodetic",x.Type,StringComparison.OrdinalIgnoreCase));
+			var dbItems = Repository.DatumsGeodetic;
 
 			AssertMatches(
 				assemblyItems,

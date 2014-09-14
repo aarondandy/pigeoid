@@ -7,6 +7,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 
 		public EpsgDatumMap() {
 			Table("Datum");
+            ReadOnly();
+            Cache.ReadOnly();
 			Id(x => x.Code).Column("DATUM_CODE");
 			Map(x => x.Name).Column("DATUM_NAME");
 			Map(x => x.Type).Column("DATUM_TYPE");
@@ -19,7 +21,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.RevisionDate).Column("REVISION_DATE");
 			Map(x => x.ChangeId).Column("CHANGE_ID");
 			Map(x => x.Deprecated).Column("DEPRECATED");
-			ReadOnly();
 		}
 
 	}

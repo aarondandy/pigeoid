@@ -6,6 +6,9 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 	{
 
 		public EpsgAreaMap() {
+            Table("Area");
+            ReadOnly();
+            Cache.ReadOnly();
 			Id(x => x.Code).Column("AREA_CODE");
 			Map(x => x.Name).Column("AREA_NAME");
 			Map(x => x.AreaOfUse).Column("AREA_OF_USE");
@@ -20,8 +23,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier.Maps
 			Map(x => x.ChangeId).Column("CHANGE_ID");
 			Map(x => x.Deprecated).Column("DEPRECATED");
 			HasMany(x => x.CrsUsage).KeyColumn("AREA_OF_USE_CODE").ReadOnly();
-			Table("Area");
-			ReadOnly();
 		}
 
 	}

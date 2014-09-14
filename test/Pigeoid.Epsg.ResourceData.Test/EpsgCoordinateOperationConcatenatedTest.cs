@@ -15,9 +15,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 		public void Resources_Match_Db() {
 
             var assemblyItems = EpsgMicroDatabase.Default.GetConcatenatedCoordinateOperationInfos();
-			var databaseItems = Repository.CoordinateOperations
-				.Where(x => String.Equals("Concatenated Operation", x.TypeName, StringComparison.OrdinalIgnoreCase))
-				.ToList();
+            var databaseItems = Repository.CoordinateOperationsConcatenated;
 
 			AssertMatches(
 				assemblyItems,
