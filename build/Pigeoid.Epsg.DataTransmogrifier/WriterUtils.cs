@@ -616,5 +616,9 @@ namespace Pigeoid.Epsg.DataTransmogrifier
             }
 
 		}
-	}
+
+        internal static void WriteOpPaths(EpsgData data, BinaryWriter writerOpForward, BinaryWriter writerOpReverse, BinaryWriter writerConversionFromBase) {
+            throw new NotImplementedException();
+        }
+    }
 }

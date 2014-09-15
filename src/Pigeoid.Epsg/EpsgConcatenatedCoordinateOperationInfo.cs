@@ -6,7 +6,7 @@ using Pigeoid.CoordinateOperation;
 
 namespace Pigeoid.Epsg
 {
-    public class EpsgConcatenatedCoordinateOperationInfo : EpsgCoordinateOperationInfoBase, IConcatenatedCoordinateOperationInfo
+    public class EpsgConcatenatedCoordinateOperationInfo : EpsgCoordinateOperationInfoBase, IConcatenatedCoordinateOperationInfo, IEpsgCoordinateOperationCrsBound
     {
 
         private readonly ushort _sourceCrsCode;

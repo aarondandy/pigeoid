@@ -4,7 +4,7 @@ using System.Diagnostics.Contracts;
 namespace Pigeoid.Epsg
 {
 
-    public class EpsgCoordinateTransformInfo : EpsgCoordinateOperationInfo
+    public class EpsgCoordinateTransformInfo : EpsgCoordinateOperationInfo, IEpsgCoordinateOperationCrsBound
     {
 
         private readonly ushort _sourceCrsCode;

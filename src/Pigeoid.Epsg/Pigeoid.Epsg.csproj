@@ -159,6 +159,7 @@
     <Compile Include="EpsgPrimeMeridian.cs" />
     <Compile Include="EpsgCrsCoordinateOperationPathGeneratorOld.cs" />
     <Compile Include="EpsgUnit.cs" />
+    <Compile Include="IEpsgCoordinateOperationCrsBound.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources\EpsgDataResourceReader.cs" />
     <Compile Include="Utility\ArrayUtil.cs" />

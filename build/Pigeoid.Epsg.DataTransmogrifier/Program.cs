@@ -224,6 +224,16 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                 using (var writerText = new BinaryWriter(streamText))
                     WriterUtils.WriteCoordinateOperations(epsgData, writerText, writerDataConversion, writerDataTransform, writerDataConcat, writerDataPath);
 
+
+                using (var streamOpForward = File.Open(Path.Combine(outFolder, "txfrom.dat"), FileMode.Create))
+                using (var writerOpForward = new BinaryWriter(streamOpForward))
+                using (var streamOpReverse = File.Open(Path.Combine(outFolder, "txto.dat"), FileMode.Create))
+                using (var writerOpReverse = new BinaryWriter(streamOpReverse))
+                using (var streamConversionFromBase = File.Open(Path.Combine(outFolder, "convfrombase.dat"), FileMode.Create))
+                using (var writerConversionFromBase = new BinaryWriter(streamConversionFromBase)) {
+                    WriterUtils.WriteOpPaths(epsgData, writerOpForward, writerOpReverse, writerConversionFromBase);
+                }
+
             }
 
         }

@@ -112,8 +112,37 @@ namespace Pigeoid.Epsg.Transform.Test
         public void all_transforms_transition_as_expected() {
             var txs = EpsgMicroDatabase.Default.GetCoordinateTransformInfos();
             var catOps = EpsgMicroDatabase.Default.GetConcatenatedCoordinateOperationInfos();
+            var allOps = txs.Cast<IEpsgCoordinateOperationCrsBound>().Concat(catOps);
 
-            Assert.Inconclusive();
+            {
+                var opForwardTransitions = allOps.GroupBy(x => x.SourceCrs.Kind, x => x.TargetCrs.Kind)
+                    .ToDictionary(x => x.Key, x => x.Distinct().OrderBy(y => y).ToArray());
+
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Vertical }, opForwardTransitions[EpsgCrsKind.Vertical]);
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geographic2D, EpsgCrsKind.Geographic3D }, opForwardTransitions[EpsgCrsKind.Compound]);
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geocentric }, opForwardTransitions[EpsgCrsKind.Geocentric]);
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geographic2D, EpsgCrsKind.Vertical }, opForwardTransitions[EpsgCrsKind.Geographic2D]);
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geographic3D, EpsgCrsKind.Vertical }, opForwardTransitions[EpsgCrsKind.Geographic3D]);
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geographic2D, EpsgCrsKind.Geographic3D, EpsgCrsKind.Projected }, opForwardTransitions[EpsgCrsKind.Projected]);
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Engineering, EpsgCrsKind.Projected }, opForwardTransitions[EpsgCrsKind.Engineering]);
+                Assert.IsFalse(opForwardTransitions.ContainsKey(EpsgCrsKind.Unknown));
+            }
+
+            {
+                var opReverseTransitions = allOps.GroupBy(x => x.TargetCrs.Kind, x => x.SourceCrs.Kind)
+                    .ToDictionary(x => x.Key, x => x.Distinct().OrderBy(y => y).ToArray());
+
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geographic2D, EpsgCrsKind.Geographic3D, EpsgCrsKind.Vertical }, opReverseTransitions[EpsgCrsKind.Vertical]);
+                Assert.IsFalse(opReverseTransitions.ContainsKey(EpsgCrsKind.Compound));
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geocentric }, opReverseTransitions[EpsgCrsKind.Geocentric]);
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geographic2D, EpsgCrsKind.Compound, EpsgCrsKind.Projected }, opReverseTransitions[EpsgCrsKind.Geographic2D]);
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geographic3D, EpsgCrsKind.Compound, EpsgCrsKind.Projected }, opReverseTransitions[EpsgCrsKind.Geographic3D]);
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Engineering, EpsgCrsKind.Projected }, opReverseTransitions[EpsgCrsKind.Projected]);
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Engineering }, opReverseTransitions[EpsgCrsKind.Engineering]);
+                Assert.IsFalse(opReverseTransitions.ContainsKey(EpsgCrsKind.Unknown));
+            }
+
+            
         }
 
     }
