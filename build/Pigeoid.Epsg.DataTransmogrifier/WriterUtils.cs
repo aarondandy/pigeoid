@@ -618,7 +618,74 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 		}
 
         internal static void WriteOpPaths(EpsgData data, BinaryWriter writerOpForward, BinaryWriter writerOpReverse, BinaryWriter writerConversionFromBase) {
-            throw new NotImplementedException();
+            {
+                var crsBoundOps = data.Repository.CrsBoundCoordinateOperations;
+
+                {
+                    var forwardOpMappings = crsBoundOps.ToLookup(x => x.SourceCrs.Code, x => checked((ushort)x.Code));
+                    writerOpForward.Write((ushort)forwardOpMappings.Count);
+                    var pendingCodes = new List<ushort>();
+                    foreach (var map in forwardOpMappings.OrderBy(x => x.Key)) {
+                        var codes = map.ToList();
+                        writerOpForward.Write(checked((ushort)map.Key));
+                        writerOpForward.Write(checked((ushort)codes.Count));
+                        if (codes.Count == 1) {
+                            writerOpForward.Write(codes[0]);
+                        }
+                        else {
+                            writerOpForward.Write(checked((ushort)(pendingCodes.Count)));
+                            pendingCodes.AddRange(codes);
+                        }
+                    }
+                    foreach (var c in pendingCodes) {
+                        writerOpForward.Write(c);
+                    }
+                }
+
+                {
+                    var reverseOpMappings = crsBoundOps.ToLookup(x => x.TargetCrs.Code, x => checked((ushort)x.Code));
+                    writerOpReverse.Write((ushort)reverseOpMappings.Count);
+                    var pendingCodes = new List<ushort>();
+                    foreach (var map in reverseOpMappings.OrderBy(x => x.Key)) {
+                        var codes = map.ToList();
+                        writerOpReverse.Write(checked((ushort)map.Key));
+                        writerOpReverse.Write(checked((ushort)codes.Count));
+                        if (codes.Count == 1) {
+                            writerOpReverse.Write(codes[0]);
+                        }
+                        else {
+                            writerOpReverse.Write(checked((ushort)(pendingCodes.Count)));
+                            pendingCodes.AddRange(codes);
+                        }
+                    }
+                    foreach (var c in pendingCodes) {
+                        writerOpReverse.Write(c);
+                    }
+                }
+            }
+
+            {
+
+                var reverseFromBases = data.Repository.CrsProjected
+                    .Where(x => x.SourceGeographicCrs != null)
+                    .ToLookup(x => checked((ushort)x.SourceGeographicCrs.Code), x => checked((ushort)x.Code))
+                    .Select(x => Tuple.Create(x.Key, x.ToArray()))
+                    .OrderBy(x => x.Item1)
+                    .ToList();
+
+                var baseCodes = new List<ushort>();
+                writerConversionFromBase.Write((ushort)reverseFromBases.Count);
+                foreach (var rev in reverseFromBases) {
+                    writerConversionFromBase.Write((ushort)rev.Item1);
+                    writerConversionFromBase.Write(checked((ushort)(rev.Item2.Length)));
+                    writerConversionFromBase.Write(checked((ushort)baseCodes.Count));
+                    baseCodes.AddRange(rev.Item2);
+                }
+                foreach (var c in baseCodes) {
+                    writerConversionFromBase.Write(c);
+                }
+
+            }
         }
     }
 }

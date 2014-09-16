@@ -365,6 +365,9 @@
     <EmbeddedResource Include="Resources\uomlength.dat" />
     <EmbeddedResource Include="Resources\uomscale.dat" />
     <EmbeddedResource Include="Resources\uomtime.dat" />
+    <EmbeddedResource Include="Resources\convfrombase.dat" />
+    <EmbeddedResource Include="Resources\txfrom.dat" />
+    <EmbeddedResource Include="Resources\txto.dat" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

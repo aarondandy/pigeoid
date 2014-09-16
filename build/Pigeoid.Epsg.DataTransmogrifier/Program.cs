@@ -230,9 +230,8 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                 using (var streamOpReverse = File.Open(Path.Combine(outFolder, "txto.dat"), FileMode.Create))
                 using (var writerOpReverse = new BinaryWriter(streamOpReverse))
                 using (var streamConversionFromBase = File.Open(Path.Combine(outFolder, "convfrombase.dat"), FileMode.Create))
-                using (var writerConversionFromBase = new BinaryWriter(streamConversionFromBase)) {
+                using (var writerConversionFromBase = new BinaryWriter(streamConversionFromBase))
                     WriterUtils.WriteOpPaths(epsgData, writerOpForward, writerOpReverse, writerConversionFromBase);
-                }
 
             }
 

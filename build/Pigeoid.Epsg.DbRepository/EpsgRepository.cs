@@ -66,6 +66,10 @@ namespace Pigeoid.Epsg.DataTransmogrifier
             get { return GetAllItems<EpsgCoordinateOperation>().OrderBy(x => x.Code); }
 		}
 
+        public IEnumerable<EpsgCoordinateOperation> CrsBoundCoordinateOperations {
+            get { return GetAllItems<EpsgCoordinateOperation>().Where(x => x.SourceCrs != null && x.TargetCrs != null).OrderBy(x => x.Code); }
+        }
+
         public IEnumerable<EpsgCoordinateOperation> CoordinateConversions {
             get { return GetAllItems<EpsgCoordinateOperation>().Where(x => x.TypeName == "conversion").OrderBy(x => x.Code); }
         }
