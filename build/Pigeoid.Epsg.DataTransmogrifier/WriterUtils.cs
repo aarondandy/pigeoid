@@ -626,7 +626,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                     writerOpForward.Write((ushort)forwardOpMappings.Count);
                     var pendingCodes = new List<ushort>();
                     foreach (var map in forwardOpMappings.OrderBy(x => x.Key)) {
-                        var codes = map.ToList();
+                        var codes = map.OrderBy(x => x).ToList();
                         writerOpForward.Write(checked((ushort)map.Key));
                         writerOpForward.Write(checked((ushort)codes.Count));
                         if (codes.Count == 1) {
@@ -647,7 +647,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                     writerOpReverse.Write((ushort)reverseOpMappings.Count);
                     var pendingCodes = new List<ushort>();
                     foreach (var map in reverseOpMappings.OrderBy(x => x.Key)) {
-                        var codes = map.ToList();
+                        var codes = map.OrderBy(x => x).ToList();
                         writerOpReverse.Write(checked((ushort)map.Key));
                         writerOpReverse.Write(checked((ushort)codes.Count));
                         if (codes.Count == 1) {
@@ -669,7 +669,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                 var reverseFromBases = data.Repository.CrsProjected
                     .Where(x => x.SourceGeographicCrs != null)
                     .ToLookup(x => checked((ushort)x.SourceGeographicCrs.Code), x => checked((ushort)x.Code))
-                    .Select(x => Tuple.Create(x.Key, x.ToArray()))
+                    .Select(x => Tuple.Create(x.Key, x.OrderBy(y => y).ToArray()))
                     .OrderBy(x => x.Item1)
                     .ToList();
 
