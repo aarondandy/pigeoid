@@ -38,6 +38,9 @@ namespace Pigeoid.Epsg
         private readonly ReadOnlyUnitConversionMap _unitConversionMap;
         private readonly EpsgDataResourceReaderCrsNormal _readerCrsNormal;
         private readonly EpsgDataResourceReaderCrsCompound _readerCrsCompound;
+        private readonly EpsgMultiCodeMappingUInt16 _readerOpsFrom;
+        private readonly EpsgMultiCodeMappingUInt16 _readerOpsTo;
+        private readonly EpsgMultiCodeMappingUInt16 _readerCrsFromBase;
 
         private readonly MemoryCache _cache;
 
@@ -136,6 +139,9 @@ namespace Pigeoid.Epsg
             _readerOpConversion = new EpsgDataResourceReaderCoordinateConversionInfo(opTextReader);
             _readerOpTransform = new EpsgDataResourceReaderCoordinateTransformInfo(opTextReader);
             _readerOpConcatenated = new EpsgDataResourceReaderConcatenatedCoordinateOperationInfo(opTextReader);
+            _readerOpsFrom = new EpsgMultiCodeMappingUInt16("txfrom.dat");
+            _readerOpsTo = new EpsgMultiCodeMappingUInt16("txto.dat");
+            _readerCrsFromBase = new EpsgMultiCodeMappingUInt16("convfrombase.dat");
         }
 
 
@@ -415,6 +421,21 @@ namespace Pigeoid.Epsg
 
         public IEnumerable<EpsgUnit> GetUnits() {
             return _readerUnits.ReadAllValues();
+        }
+
+        [CLSCompliant(false)]
+        public ushort[] GetOpsFromCrs(ushort crsCodeFrom) {
+            return _readerOpsFrom.GetByKey(crsCodeFrom);
+        }
+
+        [CLSCompliant(false)]
+        public ushort[] GetOpsToCrs(ushort crsCodeTo) {
+            return _readerOpsTo.GetByKey(crsCodeTo);
+        }
+
+        [CLSCompliant(false)]
+        public ushort[] GetCrsFromBase(ushort crsBaseCode) {
+            return _readerCrsFromBase.GetByKey(crsBaseCode);
         }
         
     }

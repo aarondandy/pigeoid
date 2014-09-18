@@ -70,6 +70,7 @@
     <Compile Include="EpsgCoordinateSystemTest.cs" />
     <Compile Include="EpsgCoordinateTransformTest.cs" />
     <Compile Include="EpsgCoordinateOperationMethodInfoTest.cs" />
+    <Compile Include="EpsgCrsOpLookupTests.cs" />
     <Compile Include="EpsgCrsTest.cs" />
     <Compile Include="EpsgDataTestBase.cs" />
     <Compile Include="EpsgDatumTest.cs" />

@@ -678,8 +678,13 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                 foreach (var rev in reverseFromBases) {
                     writerConversionFromBase.Write((ushort)rev.Item1);
                     writerConversionFromBase.Write(checked((ushort)(rev.Item2.Length)));
-                    writerConversionFromBase.Write(checked((ushort)baseCodes.Count));
-                    baseCodes.AddRange(rev.Item2);
+                    if (rev.Item2.Length == 1) {
+                        writerConversionFromBase.Write(rev.Item2[0]);
+                    }
+                    else {
+                        writerConversionFromBase.Write(checked((ushort)baseCodes.Count));
+                        baseCodes.AddRange(rev.Item2);
+                    }
                 }
                 foreach (var c in baseCodes) {
                     writerConversionFromBase.Write(c);
