@@ -63,8 +63,17 @@ namespace Pigeoid.Epsg.ResourceData.Test
         }
 
         [Test]
-        public void verify_conversion_from_base_lookup() {
-            Assert.Inconclusive();
+        public void verify_crs_from_base_lookup() {
+            var crsReverseMapping = Repository.Crs
+                .Where(x => x.SourceGeographicCrs != null)
+                .GroupBy(x => checked((ushort)x.SourceGeographicCrs.Code), x => x.Code);
+
+            foreach (var set in crsReverseMapping) {
+                var dbCodes = set.OrderBy(x => x).ToArray();
+                var asmCodes = EpsgMicroDatabase.Default.GetCrsFromBase(set.Key);
+                Assert.AreEqual(dbCodes, asmCodes);
+            }
+
         }
 
     }

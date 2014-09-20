@@ -617,80 +617,98 @@ namespace Pigeoid.Epsg.DataTransmogrifier
 
 		}
 
-        internal static void WriteOpPaths(EpsgData data, BinaryWriter writerOpForward, BinaryWriter writerOpReverse, BinaryWriter writerConversionFromBase) {
-            {
-                var crsBoundOps = data.Repository.CrsBoundCoordinateOperations;
-
-                {
-                    var forwardOpMappings = crsBoundOps.ToLookup(x => x.SourceCrs.Code, x => checked((ushort)x.Code));
-                    writerOpForward.Write((ushort)forwardOpMappings.Count);
-                    var pendingCodes = new List<ushort>();
-                    foreach (var map in forwardOpMappings.OrderBy(x => x.Key)) {
-                        var codes = map.OrderBy(x => x).ToList();
-                        writerOpForward.Write(checked((ushort)map.Key));
-                        writerOpForward.Write(checked((ushort)codes.Count));
-                        if (codes.Count == 1) {
-                            writerOpForward.Write(codes[0]);
-                        }
-                        else {
-                            writerOpForward.Write(checked((ushort)(pendingCodes.Count)));
-                            pendingCodes.AddRange(codes);
-                        }
-                    }
-                    foreach (var c in pendingCodes) {
-                        writerOpForward.Write(c);
-                    }
+        internal static void WriteOpPaths(EpsgData data, BinaryWriter writerOpForward, BinaryWriter writerOpReverse) {
+            var crsBoundOps = data.Repository.CrsBoundCoordinateOperations;
+            var forwardOpMappings = crsBoundOps.ToLookup(x => x.SourceCrs.Code, x => checked((ushort)x.Code));
+            writerOpForward.Write((ushort)forwardOpMappings.Count);
+            var pendingCodes = new List<ushort>();
+            foreach (var map in forwardOpMappings.OrderBy(x => x.Key)) {
+                var codes = map.OrderBy(x => x).ToList();
+                writerOpForward.Write(checked((ushort)map.Key));
+                writerOpForward.Write(checked((ushort)codes.Count));
+                if (codes.Count == 1) {
+                    writerOpForward.Write(codes[0]);
                 }
-
-                {
-                    var reverseOpMappings = crsBoundOps.ToLookup(x => x.TargetCrs.Code, x => checked((ushort)x.Code));
-                    writerOpReverse.Write((ushort)reverseOpMappings.Count);
-                    var pendingCodes = new List<ushort>();
-                    foreach (var map in reverseOpMappings.OrderBy(x => x.Key)) {
-                        var codes = map.OrderBy(x => x).ToList();
-                        writerOpReverse.Write(checked((ushort)map.Key));
-                        writerOpReverse.Write(checked((ushort)codes.Count));
-                        if (codes.Count == 1) {
-                            writerOpReverse.Write(codes[0]);
-                        }
-                        else {
-                            writerOpReverse.Write(checked((ushort)(pendingCodes.Count)));
-                            pendingCodes.AddRange(codes);
-                        }
-                    }
-                    foreach (var c in pendingCodes) {
-                        writerOpReverse.Write(c);
-                    }
+                else {
+                    writerOpForward.Write(checked((ushort)(pendingCodes.Count)));
+                    pendingCodes.AddRange(codes);
                 }
             }
-
-            {
-
-                var reverseFromBases = data.Repository.CrsProjected
-                    .Where(x => x.SourceGeographicCrs != null)
-                    .ToLookup(x => checked((ushort)x.SourceGeographicCrs.Code), x => checked((ushort)x.Code))
-                    .Select(x => Tuple.Create(x.Key, x.OrderBy(y => y).ToArray()))
-                    .OrderBy(x => x.Item1)
-                    .ToList();
-
-                var baseCodes = new List<ushort>();
-                writerConversionFromBase.Write((ushort)reverseFromBases.Count);
-                foreach (var rev in reverseFromBases) {
-                    writerConversionFromBase.Write((ushort)rev.Item1);
-                    writerConversionFromBase.Write(checked((ushort)(rev.Item2.Length)));
-                    if (rev.Item2.Length == 1) {
-                        writerConversionFromBase.Write(rev.Item2[0]);
-                    }
-                    else {
-                        writerConversionFromBase.Write(checked((ushort)baseCodes.Count));
-                        baseCodes.AddRange(rev.Item2);
-                    }
-                }
-                foreach (var c in baseCodes) {
-                    writerConversionFromBase.Write(c);
-                }
-
+            foreach (var c in pendingCodes) {
+                writerOpForward.Write(c);
             }
+
+            var reverseOpMappings = crsBoundOps.ToLookup(x => x.TargetCrs.Code, x => checked((ushort)x.Code));
+            writerOpReverse.Write((ushort)reverseOpMappings.Count);
+            pendingCodes = new List<ushort>();
+            foreach (var map in reverseOpMappings.OrderBy(x => x.Key)) {
+                var codes = map.OrderBy(x => x).ToList();
+                writerOpReverse.Write(checked((ushort)map.Key));
+                writerOpReverse.Write(checked((ushort)codes.Count));
+                if (codes.Count == 1) {
+                    writerOpReverse.Write(codes[0]);
+                }
+                else {
+                    writerOpReverse.Write(checked((ushort)(pendingCodes.Count)));
+                    pendingCodes.AddRange(codes);
+                }
+            }
+            foreach (var c in pendingCodes) {
+                writerOpReverse.Write(c);
+            }
+            
         }
+
+        internal static void WriteFromBase(EpsgData epsgData, BinaryWriter writerFromBaseShort, BinaryWriter writerFromBaseWide) {
+            var sizedGroups = epsgData.Repository.Crs
+                .GroupBy(x => x.Code >= 0 && x.Code <= UInt16.MaxValue, x => x)
+                .ToList();
+
+            var shortGroup = sizedGroups.Single(x => x.Key)
+                .Where(x => x.SourceGeographicCrs != null)
+                .GroupBy(x => x.SourceGeographicCrs.Code, x => x.Code)
+                .ToList();
+            writerFromBaseShort.Write(checked((ushort)shortGroup.Count));
+            var shortBulkCodes = new List<ushort>();
+            foreach (var set in shortGroup.OrderBy(x => x.Key)) {
+                var codes = set.Select(x => checked((ushort)x)).OrderBy(x => x).ToArray();
+                writerFromBaseShort.Write(checked((ushort)set.Key));
+                writerFromBaseShort.Write(checked((ushort)codes.Length));
+                if (codes.Length == 1) {
+                    writerFromBaseShort.Write(codes[0]);
+                }
+                else {
+                    writerFromBaseShort.Write(checked((ushort)shortBulkCodes.Count));
+                    shortBulkCodes.AddRange(codes);
+                }
+            }
+            foreach (var code in shortBulkCodes) {
+                writerFromBaseShort.Write(code);
+            }
+
+            var wideGroup = sizedGroups.Single(x => !x.Key)
+                .Where(x => x.SourceGeographicCrs != null)
+                .GroupBy(x => x.SourceGeographicCrs.Code, x => x.Code)
+                .ToList();
+            writerFromBaseWide.Write(checked((ushort)wideGroup.Count));
+            var wideBulkCodes = new List<int>();
+            foreach (var set in wideGroup.OrderBy(x => x.Key)) {
+                var codes = set.OrderBy(x => x).ToArray();
+                writerFromBaseWide.Write(checked((ushort)set.Key));
+                writerFromBaseWide.Write(checked((ushort)codes.Length));
+                if (codes.Length == 1) {
+                    writerFromBaseWide.Write(codes[0]);
+                }
+                else {
+                    writerFromBaseWide.Write(wideBulkCodes.Count);
+                    wideBulkCodes.AddRange(codes);
+                }
+            }
+            foreach (var code in wideBulkCodes) {
+                writerFromBaseWide.Write(code);
+            }
+
+        }
+
     }
 }

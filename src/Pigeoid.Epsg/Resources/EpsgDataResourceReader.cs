@@ -52,7 +52,6 @@ namespace Pigeoid.Epsg.Resources
         }
 
         private readonly string _resourceName;
-        private object _cachedReaderMutex = new object();
         private BinaryReader _cachedReader = null;
 
         public EpsgDataResource(string resourceName){
@@ -108,7 +107,6 @@ namespace Pigeoid.Epsg.Resources
         private readonly double[] _preloadDouble;
         private readonly int[] _preloadInt;
         private readonly short[] _preloadShort;
-
 
         private EpsgDataResourceReaderNumbers() {
             _preloadDouble = new double[8];
@@ -167,8 +165,7 @@ namespace Pigeoid.Epsg.Resources
             using (var reader = ReaderShort.Get(index * sizeof(short))) {
                 return reader.BinaryReader.ReadInt16();
             }
-        } 
-
+        }
 
     }
 
@@ -281,6 +278,9 @@ namespace Pigeoid.Epsg.Resources
         protected readonly int RecordTotalSize;
         protected readonly EpsgDataResourceReaderText TextReader;
         private ushort _count = 0;
+        private ushort _lowKey = 0;
+        private ushort _highKey = 0;
+        private bool _areFileMetricsRead = false;
 
         protected EpsgDataResourceReaderBasic(string dataFileName, EpsgDataResourceReaderText textReader, int recordDataSize) {
             DataFile = new EpsgDataResource(dataFileName);
@@ -291,18 +291,34 @@ namespace Pigeoid.Epsg.Resources
             TextReader = textReader;
         }
 
-        protected ushort CountValue { get { return _count; } }
+        protected ushort CountValue {
+            get {
+                if (!_areFileMetricsRead) {
+                    using (var reader = DataFile.Get()) {
+                        ReadFileMetrics(reader);
+                    }
+                }
+                return _count;
+            }
+        }
+
+        private void ReadFileMetrics(EpsgDataResource.EpsgDataResourceReaderUsage reader) {
+            Contract.Requires(reader != null);
+            Contract.Ensures(_areFileMetricsRead);
+            reader.CoreStream.Seek(0, SeekOrigin.Begin);
+            _count = reader.BinaryReader.ReadUInt16();
+            _lowKey = reader.BinaryReader.ReadUInt16();
+            reader.CoreStream.Seek(FileHeaderSize + ((_count - 1) * RecordTotalSize), SeekOrigin.Begin);
+            _highKey = reader.BinaryReader.ReadUInt16();
+            _areFileMetricsRead = true;
+        }
 
         public IEnumerable<TValue> ReadAllValues() {
             using (var reader = DataFile.Get()) {
-                if (_count == 0) {
-                    reader.CoreStream.Seek(0, SeekOrigin.Begin);
-                    _count = reader.BinaryReader.ReadUInt16();
-                }
-                else {
-                    reader.CoreStream.Seek(sizeof(ushort), SeekOrigin.Begin);
-                }
+                if (!_areFileMetricsRead)
+                    ReadFileMetrics(reader);
 
+                reader.CoreStream.Seek(sizeof(ushort), SeekOrigin.Begin);
                 for(ushort i = 0; i < _count; ++i){
                     var key = reader.BinaryReader.ReadUInt16();
                     var value = ReadValue(key, reader.BinaryReader);
@@ -312,21 +328,25 @@ namespace Pigeoid.Epsg.Resources
         }
 
         public TValue GetByKey(ushort targetKey) {
+            var hasMetrics = _areFileMetricsRead;
+            if (hasMetrics) {
+                if (targetKey < _lowKey || targetKey > _highKey)
+                    return null;
+            }
+
             using (var reader = DataFile.Get()) {
-                if (_count == 0) {
-                    reader.CoreStream.Seek(0, SeekOrigin.Begin);
-                    _count = reader.BinaryReader.ReadUInt16();
+                if (!hasMetrics) {
+                    ReadFileMetrics(reader);
+                    if (targetKey < _lowKey || targetKey > _highKey)
+                        return null;
                 }
 
-                /*if (_count <= 8) {
-                    return GetByLinearSearch(targetKey, reader);
-                }*/
                 return GetByBinarySearch(targetKey, reader.BinaryReader);
             }
         }
 
         private TValue GetByBinarySearch(ushort targetKey, BinaryReader reader) {
-            Contract.Requires(_count != 0);
+            Contract.Requires(_areFileMetricsRead);
             var baseStream = reader.BaseStream;
             var searchIndexLow = 0;
             var searchIndexHigh = _count - 1;
@@ -345,7 +365,7 @@ namespace Pigeoid.Epsg.Resources
         }
 
         private TValue GetByLinearSearch(ushort targetKey, BinaryReader reader) {
-            Contract.Requires(_count != 0);
+            Contract.Requires(_areFileMetricsRead);
             var baseStream = reader.BaseStream;
             baseStream.Seek(sizeof(ushort), SeekOrigin.Begin);
             for(ushort i = 0; i < _count; ++i) {
@@ -707,14 +727,29 @@ namespace Pigeoid.Epsg.Resources
         private readonly EpsgDataResource DataFile = new EpsgDataResource("crs.dat");
         protected readonly EpsgDataResourceReaderText TextReader;
         private ushort _count = 0;
+        private uint _lowKey = 0;
+        private uint _highKey = 0;
+        private bool _areFileMetricsRead = false;
 
         public EpsgDataResourceReaderCrsNormal(EpsgDataResourceReaderText textReader) {
             TextReader = textReader;
         }
 
+        private void ReadFileMetrics(EpsgDataResource.EpsgDataResourceReaderUsage reader) {
+            Contract.Requires(reader != null);
+            Contract.Ensures(_areFileMetricsRead);
+            reader.CoreStream.Seek(0, SeekOrigin.Begin);
+            _count = reader.BinaryReader.ReadUInt16();
+            _lowKey = reader.BinaryReader.ReadUInt32();
+            reader.CoreStream.Seek(FileHeaderSize + ((_count - 1) * RecordTotalSize), SeekOrigin.Begin);
+            _highKey = reader.BinaryReader.ReadUInt32();
+            _areFileMetricsRead = true;
+        }
+
         private EpsgCrs ReadValue(uint key, BinaryReader reader) {
             var datum = EpsgMicroDatabase.Default.GetDatum(reader.ReadUInt16());
-            var baseCrs = (EpsgCrsGeodetic)EpsgMicroDatabase.Default.GetCrs(reader.ReadUInt16());
+            var baseCrsCode = reader.ReadUInt16();
+            var baseCrs = baseCrsCode == 0 ? null : (EpsgCrsGeodetic)EpsgMicroDatabase.Default.GetCrs(baseCrsCode);
             var baseOpCode = reader.ReadInt16();
             var coordSys = EpsgMicroDatabase.Default.GetCoordinateSystem(reader.ReadUInt16());
             var area = EpsgMicroDatabase.Default.GetArea(reader.ReadUInt16());
@@ -746,10 +781,17 @@ namespace Pigeoid.Epsg.Resources
         }
 
         public EpsgCrs GetByKey(uint targetKey) {
+            var hasMetrics = _areFileMetricsRead;
+            if (hasMetrics) {
+                if (targetKey < _lowKey || targetKey > _highKey)
+                    return null;
+            }
+
             using (var reader = DataFile.Get()) {
-                if (_count == 0) {
-                    reader.CoreStream.Seek(0, SeekOrigin.Begin);
-                    _count = reader.BinaryReader.ReadUInt16();
+                if (!hasMetrics) {
+                    ReadFileMetrics(reader);
+                    if (targetKey < _lowKey || targetKey > _highKey)
+                        return null;
                 }
                 
                 return GetByBinarySearch(targetKey, reader.BinaryReader);
@@ -757,7 +799,7 @@ namespace Pigeoid.Epsg.Resources
         }
 
         private EpsgCrs GetByBinarySearch(uint targetKey, BinaryReader reader) {
-            Contract.Requires(_count != 0);
+            Contract.Requires(_areFileMetricsRead);
             var baseStream = reader.BaseStream;
             var searchIndexLow = 0;
             var searchIndexHigh = _count - 1;
@@ -777,13 +819,10 @@ namespace Pigeoid.Epsg.Resources
 
         public IEnumerable<EpsgCrs> ReadAllValues() {
             using (var reader = DataFile.Get()) {
-                if (_count == 0) {
-                    reader.CoreStream.Seek(0, SeekOrigin.Begin);
-                    _count = reader.BinaryReader.ReadUInt16();
-                }
-                else {
-                    reader.CoreStream.Seek(sizeof(ushort), SeekOrigin.Begin);
-                }
+                if (!_areFileMetricsRead)
+                    ReadFileMetrics(reader);
+                
+                reader.CoreStream.Seek(sizeof(ushort), SeekOrigin.Begin);
 
                 for(ushort i = 0; i < _count; i++) {
                     var key = reader.BinaryReader.ReadUInt32();
@@ -1019,6 +1058,33 @@ namespace Pigeoid.Epsg.Resources
                 using (var setReader = _secondaryDataFile.Get(sizeof(ushort) + (CountValue * RecordTotalSize) + (offset * sizeof(ushort)))) {
                     for (int i = 0; i < result.Length; ++i) {
                         result[i] = setReader.BinaryReader.ReadUInt16();
+                    }
+                }
+            }
+            return result;
+        }
+    }
+
+    internal class EpsgMultiCodeMappingInt32 : EpsgDataResourceReaderBasic<int[]>
+    {
+        private readonly EpsgDataResource _secondaryDataFile;
+
+        public EpsgMultiCodeMappingInt32(string fileName)
+            : base(fileName, null, sizeof(ushort) + sizeof(int)) {
+            _secondaryDataFile = new EpsgDataResource(DataFile.ResourceName);
+        }
+
+        protected override int[] ReadValue(ushort key, BinaryReader reader) {
+            var c = reader.ReadUInt16();
+            var offset = reader.ReadInt32();
+            var result = new int[c];
+            if (c == 1) {
+                result[0] = offset; // value stored as offset in this case
+            }
+            else {
+                using (var setReader = _secondaryDataFile.Get(sizeof(ushort) + (CountValue * RecordTotalSize) + (offset * sizeof(int)))) {
+                    for (int i = 0; i < result.Length; ++i) {
+                        result[i] = setReader.BinaryReader.ReadInt32();
                     }
                 }
             }

@@ -124,6 +124,18 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                 using (var writerShort = new BinaryWriter(streamShort))
                     WriterUtils.WriteNumberLookUps(epsgData, writerDouble, writerInt, writerShort);
 
+                using (var streamOpForward = File.Open(Path.Combine(outFolder, "txfrom.dat"), FileMode.Create))
+                using (var writerOpForward = new BinaryWriter(streamOpForward))
+                using (var streamOpReverse = File.Open(Path.Combine(outFolder, "txto.dat"), FileMode.Create))
+                using (var writerOpReverse = new BinaryWriter(streamOpReverse))
+                    WriterUtils.WriteOpPaths(epsgData, writerOpForward, writerOpReverse);
+
+                using (var streamFromBase2 = File.Open(Path.Combine(outFolder, "crsfrombase.dat"), FileMode.Create))
+                using (var writerFromBase2 = new BinaryWriter(streamFromBase2))
+                using (var streamFromBase4 = File.Open(Path.Combine(outFolder, "crsfrombase_wide.dat"), FileMode.Create))
+                using (var writerFromBase4 = new BinaryWriter(streamFromBase4))
+                    WriterUtils.WriteFromBase(epsgData, writerFromBase2, writerFromBase4);
+
                 using (var streamData = File.Open(Path.Combine(outFolder, "areas.dat"), FileMode.Create))
                 using (var writerData = new BinaryWriter(streamData))
                 using (var streamText = File.Open(Path.Combine(outFolder, "areas.txt"), FileMode.Create))
@@ -224,14 +236,6 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                 using (var writerText = new BinaryWriter(streamText))
                     WriterUtils.WriteCoordinateOperations(epsgData, writerText, writerDataConversion, writerDataTransform, writerDataConcat, writerDataPath);
 
-
-                using (var streamOpForward = File.Open(Path.Combine(outFolder, "txfrom.dat"), FileMode.Create))
-                using (var writerOpForward = new BinaryWriter(streamOpForward))
-                using (var streamOpReverse = File.Open(Path.Combine(outFolder, "txto.dat"), FileMode.Create))
-                using (var writerOpReverse = new BinaryWriter(streamOpReverse))
-                using (var streamConversionFromBase = File.Open(Path.Combine(outFolder, "convfrombase.dat"), FileMode.Create))
-                using (var writerConversionFromBase = new BinaryWriter(streamConversionFromBase))
-                    WriterUtils.WriteOpPaths(epsgData, writerOpForward, writerOpReverse, writerConversionFromBase);
 
             }
 

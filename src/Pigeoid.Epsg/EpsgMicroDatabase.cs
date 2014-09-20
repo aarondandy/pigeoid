@@ -41,6 +41,7 @@ namespace Pigeoid.Epsg
         private readonly EpsgMultiCodeMappingUInt16 _readerOpsFrom;
         private readonly EpsgMultiCodeMappingUInt16 _readerOpsTo;
         private readonly EpsgMultiCodeMappingUInt16 _readerCrsFromBase;
+        private readonly EpsgMultiCodeMappingInt32 _readerCrsFromBaseWide;
 
         private readonly MemoryCache _cache;
 
@@ -141,7 +142,8 @@ namespace Pigeoid.Epsg
             _readerOpConcatenated = new EpsgDataResourceReaderConcatenatedCoordinateOperationInfo(opTextReader);
             _readerOpsFrom = new EpsgMultiCodeMappingUInt16("txfrom.dat");
             _readerOpsTo = new EpsgMultiCodeMappingUInt16("txto.dat");
-            _readerCrsFromBase = new EpsgMultiCodeMappingUInt16("convfrombase.dat");
+            _readerCrsFromBase = new EpsgMultiCodeMappingUInt16("crsfrombase.dat");
+            _readerCrsFromBaseWide = new EpsgMultiCodeMappingInt32("crsfrombase_wide.dat");
         }
 
 
@@ -237,19 +239,25 @@ namespace Pigeoid.Epsg
         }
 
         internal EpsgCrs GetCrs(ushort code){
+            if (code == 0)
+                return null;
             return GetCrsNormal(code)
                 ?? GetCrsCompound(code);
         }
 
         private EpsgCrs GetCrsNormal(uint code) {
+            if (code == 0)
+                return null;
             return GetOrSetCache("crsnorm", code, _readerCrsNormal.GetByKey);
         }
 
         private EpsgCrsCompound GetCrsCompound(uint code) {
-            return code <= UInt16.MaxValue ? GetCrsCompound(unchecked((ushort)code)) : null;
+            return code > 0 && code <= UInt16.MaxValue ? GetCrsCompound(unchecked((ushort)code)) : null;
         }
 
         private EpsgCrsCompound GetCrsCompound(ushort code) {
+            if (code == 0)
+                return null;
             return GetOrSetCache("crscmp", code, _readerCrsCompound.GetByKey);
         }
 
@@ -423,19 +431,43 @@ namespace Pigeoid.Epsg
             return _readerUnits.ReadAllValues();
         }
 
+        [Obsolete("Should be a part of the path generator.")]
         [CLSCompliant(false)]
         public ushort[] GetOpsFromCrs(ushort crsCodeFrom) {
             return _readerOpsFrom.GetByKey(crsCodeFrom);
         }
 
+        [Obsolete("Should be a part of the path generator.")]
         [CLSCompliant(false)]
         public ushort[] GetOpsToCrs(ushort crsCodeTo) {
             return _readerOpsTo.GetByKey(crsCodeTo);
         }
 
+        [Obsolete("Should be a part of the path generator.")]
         [CLSCompliant(false)]
-        public ushort[] GetCrsFromBase(ushort crsBaseCode) {
-            return _readerCrsFromBase.GetByKey(crsBaseCode);
+        public int[] GetCrsFromBase(ushort crsBaseCode) {
+            var shortResult = _readerCrsFromBase.GetByKey(crsBaseCode);
+            var wideResult = _readerCrsFromBaseWide.GetByKey(crsBaseCode);
+            if (shortResult == null) {
+                if (wideResult == null)
+                    return null;
+                else
+                    return wideResult;
+            }
+            else {
+                if (wideResult == null) {
+                    return Array.ConvertAll(shortResult, x => (int)x);
+                }
+                else {
+                    var result = new int[shortResult.Length + wideResult.Length];
+                    for(int i = 0; i < shortResult.Length; i++){
+                        result[i] = shortResult[i];
+                    }
+                    Array.Copy(wideResult, 0, result, shortResult.Length, wideResult.Length);
+                    return result;
+                }
+                    
+            }
         }
         
     }
