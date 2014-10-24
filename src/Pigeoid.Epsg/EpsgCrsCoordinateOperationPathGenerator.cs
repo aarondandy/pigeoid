@@ -27,17 +27,14 @@ namespace Pigeoid.Epsg
             Contract.Requires(from != null);
             Contract.Requires(to != null);
             Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationCrsPathInfo>>() != null);
-            var crsFilters = CrsFilters == null ? new List<Predicate<EpsgCrs>>() : CrsFilters.ToList();
-            var opFilters = OpFilters == null ? new List<Predicate<ICoordinateOperationInfo>>() : OpFilters.ToList();
-            var searcher = new EpsgCrsGraphSearcher(from, to) {
-                CrsFilters = crsFilters,
-                OpFilters = OpFilters
-            };
 
-            searcher.CrsFilters.Add(searcher.AreaContainsTest); // TODO: need a better way to handle this
+            if (from.Kind == EpsgCrsKind.Compound || from.Kind == EpsgCrsKind.Engineering)
+                throw new NotImplementedException(String.Format("Support for the from CRS kind {0} is not yet implemented.", from.Kind));
+            if (to.Kind == EpsgCrsKind.Compound || to.Kind == EpsgCrsKind.Engineering)
+                throw new NotImplementedException(String.Format("Support for the to CRS kind {0} is not yet implemented.", to.Kind));
 
-            var allPaths = searcher.FindAllPaths();
-            return allPaths;
+
+            throw new NotImplementedException();
         }
 
     }

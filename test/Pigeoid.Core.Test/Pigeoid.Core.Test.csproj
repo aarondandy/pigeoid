@@ -100,7 +100,9 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Pigeoid.Core\Pigeoid.Core.csproj">
       <Project>{ECDC3D02-067E-4D6F-9DF2-58015EFDAE87}</Project>

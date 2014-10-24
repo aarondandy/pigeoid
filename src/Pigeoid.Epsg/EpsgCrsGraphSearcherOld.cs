@@ -8,7 +8,8 @@ using System.Text;
 
 namespace Pigeoid.Epsg
 {
-    public class EpsgCrsGraphSearcher
+    [Obsolete]
+    public class EpsgCrsGraphSearcherOld
     {
 
         private class PathNode
@@ -143,7 +144,7 @@ namespace Pigeoid.Epsg
             }
         }
 
-        public EpsgCrsGraphSearcher(EpsgCrs sourceCrs, EpsgCrs targetCrs) {
+        public EpsgCrsGraphSearcherOld(EpsgCrs sourceCrs, EpsgCrs targetCrs) {
             if (sourceCrs == null) throw new ArgumentNullException("sourceCrs");
             if (targetCrs == null) throw new ArgumentNullException("targetCrs");
             Contract.EndContractBlock();
