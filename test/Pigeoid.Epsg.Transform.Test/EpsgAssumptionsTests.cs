@@ -41,6 +41,8 @@ namespace Pigeoid.Epsg.Transform.Test
                 Assert.IsNotNull(op);
                 var crsKind = crs.Kind;
                 var baseKind = crs.BaseCrs.Kind;
+                Assert.AreNotEqual(EpsgCrsKind.Vertical, baseKind);
+                Assert.AreNotEqual(EpsgCrsKind.Compound, baseKind);
                 switch (crsKind) {
                     case EpsgCrsKind.Projected:
                         Assert.AreNotEqual(EpsgCrsKind.Engineering, baseKind);
@@ -53,6 +55,7 @@ namespace Pigeoid.Epsg.Transform.Test
                         Assert.AreNotEqual(EpsgCrsKind.Projected, baseKind);
                         Assert.AreNotEqual(EpsgCrsKind.Engineering, baseKind);
                         Assert.AreNotEqual(EpsgCrsKind.Geographic2D, baseKind);
+                        
                         break;
                     case EpsgCrsKind.Geocentric:
                         throw new InvalidOperationException("Geocentric should not have a base.");
@@ -118,6 +121,7 @@ namespace Pigeoid.Epsg.Transform.Test
                 var opForwardTransitions = allOps.GroupBy(x => x.SourceCrs.Kind, x => x.TargetCrs.Kind)
                     .ToDictionary(x => x.Key, x => x.Distinct().OrderBy(y => y).ToArray());
 
+                // can go to [left] from right
                 Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Vertical }, opForwardTransitions[EpsgCrsKind.Vertical]);
                 Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geographic2D, EpsgCrsKind.Geographic3D }, opForwardTransitions[EpsgCrsKind.Compound]);
                 Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geocentric }, opForwardTransitions[EpsgCrsKind.Geocentric]);
@@ -129,16 +133,19 @@ namespace Pigeoid.Epsg.Transform.Test
             }
 
             {
-                var opReverseTransitions = allOps.GroupBy(x => x.TargetCrs.Kind, x => x.SourceCrs.Kind)
+                var opReverseTransitions = allOps
+                    .Where(x => x.HasInverse)
+                    .GroupBy(x => x.TargetCrs.Kind, x => x.SourceCrs.Kind)
                     .ToDictionary(x => x.Key, x => x.Distinct().OrderBy(y => y).ToArray());
 
-                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geographic2D, EpsgCrsKind.Geographic3D, EpsgCrsKind.Vertical }, opReverseTransitions[EpsgCrsKind.Vertical]);
+                // can go (using inverse) to [left] from right
+                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Vertical }, opReverseTransitions[EpsgCrsKind.Vertical]);
                 Assert.IsFalse(opReverseTransitions.ContainsKey(EpsgCrsKind.Compound));
                 Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geocentric }, opReverseTransitions[EpsgCrsKind.Geocentric]);
                 Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geographic2D, EpsgCrsKind.Compound, EpsgCrsKind.Projected }, opReverseTransitions[EpsgCrsKind.Geographic2D]);
                 Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Geographic3D, EpsgCrsKind.Compound, EpsgCrsKind.Projected }, opReverseTransitions[EpsgCrsKind.Geographic3D]);
                 Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Engineering, EpsgCrsKind.Projected }, opReverseTransitions[EpsgCrsKind.Projected]);
-                Assert.AreEqual(new EpsgCrsKind[] { EpsgCrsKind.Engineering }, opReverseTransitions[EpsgCrsKind.Engineering]);
+                Assert.IsFalse(opReverseTransitions.ContainsKey(EpsgCrsKind.Engineering));
                 Assert.IsFalse(opReverseTransitions.ContainsKey(EpsgCrsKind.Unknown));
             }
 
