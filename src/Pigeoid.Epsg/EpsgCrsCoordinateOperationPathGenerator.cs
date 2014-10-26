@@ -7,6 +7,34 @@ using System.Text;
 
 namespace Pigeoid.Epsg
 {
+
+    internal class EpsgCrsPathSearchNode
+    {
+
+        public EpsgCrsPathSearchNode(EpsgCrs crs) {
+            Contract.Requires(crs != null);
+            Crs = crs;
+        }
+
+        public EpsgCrsPathSearchNode(EpsgCrs crs, ICoordinateOperationInfo edgeFromParent, EpsgCrsPathSearchNode parent) {
+            Contract.Requires(crs != null);
+            Contract.Requires(edgeFromParent != null);
+            Contract.Requires(parent != null);
+            Crs = crs;
+            EdgeFromParent = edgeFromParent;
+            Parent = parent;
+        }
+
+        public readonly EpsgCrs Crs;
+        public readonly ICoordinateOperationInfo EdgeFromParent;
+        public readonly EpsgCrsPathSearchNode Parent;
+
+        private void ObjectInvariants() {
+            Contract.Invariant(Crs != null);
+        }
+
+    }
+
     public class EpsgCrsCoordinateOperationPathGenerator :
         ICoordinateOperationPathGenerator<EpsgCrs>,
         ICoordinateOperationPathGenerator<ICrs>
@@ -28,11 +56,23 @@ namespace Pigeoid.Epsg
             Contract.Requires(to != null);
             Contract.Ensures(Contract.Result<IEnumerable<ICoordinateOperationCrsPathInfo>>() != null);
 
-            if (from.Kind == EpsgCrsKind.Compound || from.Kind == EpsgCrsKind.Engineering)
+            if (from.Kind == EpsgCrsKind.Compound || from.Kind == EpsgCrsKind.Engineering || from.Kind == EpsgCrsKind.Vertical)
                 throw new NotImplementedException(String.Format("Support for the from CRS kind {0} is not yet implemented.", from.Kind));
-            if (to.Kind == EpsgCrsKind.Compound || to.Kind == EpsgCrsKind.Engineering)
+            if (to.Kind == EpsgCrsKind.Compound || to.Kind == EpsgCrsKind.Engineering || to.Kind == EpsgCrsKind.Vertical)
                 throw new NotImplementedException(String.Format("Support for the to CRS kind {0} is not yet implemented.", to.Kind));
+            if (from.Code == to.Code)
+                throw new NotImplementedException("Empty conversion not yet handled.");
 
+            var startNode = new EpsgCrsPathSearchNode(from);
+
+            var corePaths = FindAllCorePaths(startNode, to);
+
+            throw new NotImplementedException();
+        }
+
+        private IEnumerable<EpsgCrsPathSearchNode> FindAllCorePaths(EpsgCrsPathSearchNode startNode, EpsgCrs targetCrs) {
+            Contract.Requires(startNode != null);
+            Contract.Requires(targetCrs != null);
 
             throw new NotImplementedException();
         }
