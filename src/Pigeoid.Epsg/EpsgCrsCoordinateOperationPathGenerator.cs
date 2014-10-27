@@ -1,4 +1,5 @@
 ﻿using Pigeoid.CoordinateOperation;
+using Pigeoid.Epsg.Utility;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -65,14 +66,40 @@ namespace Pigeoid.Epsg
 
             var startNode = new EpsgCrsPathSearchNode(from);
 
-            var corePaths = FindAllCorePaths(startNode, to);
+            Contract.Assume(to is EpsgCrsGeodetic);
+            var corePaths = FindAllCorePaths(startNode, (EpsgCrsGeodetic)to);
 
             throw new NotImplementedException();
         }
 
-        private IEnumerable<EpsgCrsPathSearchNode> FindAllCorePaths(EpsgCrsPathSearchNode startNode, EpsgCrs targetCrs) {
-            Contract.Requires(startNode != null);
-            Contract.Requires(targetCrs != null);
+        private IEnumerable<EpsgCrsPathSearchNode> FindAllCorePaths(EpsgCrsPathSearchNode fromNode, EpsgCrsGeodetic toCrs) {
+            Contract.Requires(fromNode != null);
+            Contract.Requires(fromNode.Crs is EpsgCrsGeodetic);
+            Contract.Requires(toCrs != null);
+
+            var fromCrs = (EpsgCrsGeodetic)fromNode.Crs;
+            EpsgCrsPathSearchNode stackSearchNode;
+
+            // construct the hierarchy based on the from CRS
+            var fromStack = new List<EpsgCrsPathSearchNode>();
+            stackSearchNode = fromNode;
+            do {
+                fromStack.Add(stackSearchNode);
+                var currentCrs = (EpsgCrsGeodetic)stackSearchNode.Crs;
+                if (currentCrs.Code == toCrs.Code)
+                    return ArrayUtil.CreateSingleElementArray(stackSearchNode);
+
+                if (!currentCrs.HasBaseOperationCode)
+                    break;
+
+                var baseCrs = currentCrs.BaseCrs;
+                if (baseCrs == null)
+                    break;
+
+                var toBaseEdge = currentCrs.BaseOperation;
+                stackSearchNode = new EpsgCrsPathSearchNode(baseCrs, toBaseEdge, stackSearchNode);
+
+            } while (stackSearchNode != null);
 
             throw new NotImplementedException();
         }

@@ -233,7 +233,7 @@ namespace Pigeoid.Epsg
                 var result = new List<CrsOperationRelation> { new CrsOperationRelation {Cost = cost, RelatedCrs = current, Path = path} };
                 while (current is EpsgCrsProjected) {
                     var projected = current as EpsgCrsProjected;
-                    var projection = projected.Projection;
+                    var projection = projected.BaseOperation;
                     if (null == projection || !projection.HasInverse)
                         break;
 
@@ -258,13 +258,13 @@ namespace Pigeoid.Epsg
 				};
                 while (current is EpsgCrsProjected) {
                     var projected = current as EpsgCrsProjected;
-                    var projection = projected.Projection;
+                    var projection = projected.BaseOperation;
                     if (null == projection)
                         break;
 
                     cost++;
                     current = projected.BaseCrs;
-                    path = path.Prepend(current, projected.Projection);
+                    path = path.Prepend(current, projected.BaseOperation);
                     result.Add(new CrsOperationRelation { Cost = cost, RelatedCrs = current, Path = path });
                 }
                 Contract.Assume(Contract.ForAll(result, x => x != null));

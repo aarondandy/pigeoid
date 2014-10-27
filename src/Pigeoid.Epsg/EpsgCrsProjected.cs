@@ -30,16 +30,9 @@ namespace Pigeoid.Epsg
             Contract.Invariant(HasBaseOperationCode);
         }
 
-
         ICrsGeodetic ICrsProjected.BaseCrs { get { return BaseCrs; } }
 
-        public EpsgCoordinateOperationInfo Projection {
-            get {
-                return EpsgMicroDatabase.Default.GetSingleCoordinateOperationInfo(BaseOperationCode);
-            }
-        }
-
-        ICoordinateOperationInfo ICrsProjected.Projection { get { return Projection; } }
+        ICoordinateOperationInfo ICrsProjected.Projection { get { return BaseOperation; } }
 
         public override EpsgCrsKind Kind { get { return EpsgCrsKind.Projected; } }
     }
