@@ -34,7 +34,7 @@ namespace Pigeoid.Epsg.Transform.Test
         public void all_crs_with_base_move_towards_geocentric_as_expected() {
             var allCrsWithBaseOp = EpsgMicroDatabase.Default.GetAllNormalCrs()
                 .OfType<EpsgCrsGeodetic>()
-                .Where(x => x.HasBaseOperationCode);
+                .Where(x => x.HasBaseOperation);
             foreach (var crs in allCrsWithBaseOp) {
                 var opCode = crs.BaseOperationCode;
                 var op = EpsgMicroDatabase.Default.GetCoordinateConversionInfo(opCode);

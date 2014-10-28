@@ -27,12 +27,16 @@ namespace Pigeoid.Epsg
         private void ObjectInvariants() {
             Contract.Invariant(BaseCrs != null);
             Contract.Invariant(CoordinateSystem != null);
-            Contract.Invariant(HasBaseOperationCode);
+            Contract.Invariant(HasBaseOperation);
         }
 
         ICrsGeodetic ICrsProjected.BaseCrs { get { return BaseCrs; } }
 
-        ICoordinateOperationInfo ICrsProjected.Projection { get { return BaseOperation; } }
+        ICoordinateOperationInfo ICrsProjected.Projection {
+            get {
+                return HasBaseOperation ? GetBaseOperation() : null;
+            }
+        }
 
         public override EpsgCrsKind Kind { get { return EpsgCrsKind.Projected; } }
     }

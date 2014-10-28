@@ -35,16 +35,18 @@ namespace Pigeoid.Epsg
 
         public EpsgCrsGeodetic BaseCrs { get; private set; }
 
-        public bool HasBaseOperationCode { get { return BaseOperationCode > 0; } }
+        public bool HasBaseOperation { get { return BaseOperationCode > 0; } }
 
         public int BaseOperationCode { get; private set; }
 
-        public EpsgCoordinateOperationInfo BaseOperation {
-            get{
-                if (!HasBaseOperationCode) throw new InvalidOperationException("CRS has no base operation.");
-                Contract.Ensures(Contract.Result<EpsgCoordinateOperationInfo>() != null);
-                return EpsgMicroDatabase.Default.GetSingleCoordinateOperationInfo(BaseOperationCode);
-            }
+        /// <summary>
+        /// Gets the operation from the base CRS to this CRS if one is defined.
+        /// </summary>
+        /// <returns>The operation leading from the base CRS to this one.</returns>
+        public EpsgCoordinateOperationInfo GetBaseOperation(){
+            if (!HasBaseOperation) throw new InvalidOperationException("CRS has no base operation.");
+            Contract.Ensures(Contract.Result<EpsgCoordinateOperationInfo>() != null);
+            return EpsgMicroDatabase.Default.GetSingleCoordinateOperationInfo(BaseOperationCode);
         }
 
         public EpsgDatumGeodetic GeodeticDatum { get; private set; }

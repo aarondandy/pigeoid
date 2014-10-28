@@ -34,6 +34,26 @@ namespace Pigeoid.Epsg
             Contract.Invariant(Crs != null);
         }
 
+        public CoordinateOperationCrsPathInfo BuildCoordinateOperationCrsPathInfo() {
+            var nodes = new List<ICrs>();
+            var operations = new List<ICoordinateOperationInfo>();
+
+            var current = this;
+            do {
+                nodes.Add(current.Crs);
+                if (current.EdgeFromParent == null)
+                    break;
+
+                operations.Add(current.EdgeFromParent);
+                current = current.Parent;
+                Contract.Assume(current != null);
+            } while (true/*current != null*/);
+
+            nodes.Reverse();
+            operations.Reverse();
+            return new CoordinateOperationCrsPathInfo(nodes, operations);
+        }
+
     }
 
     public class EpsgCrsCoordinateOperationPathGenerator :
@@ -68,8 +88,7 @@ namespace Pigeoid.Epsg
 
             Contract.Assume(to is EpsgCrsGeodetic);
             var corePaths = FindAllCorePaths(startNode, (EpsgCrsGeodetic)to);
-
-            throw new NotImplementedException();
+            return corePaths.Select(node => node.BuildCoordinateOperationCrsPathInfo());
         }
 
         private IEnumerable<EpsgCrsPathSearchNode> FindAllCorePaths(EpsgCrsPathSearchNode fromNode, EpsgCrsGeodetic toCrs) {
@@ -77,6 +96,7 @@ namespace Pigeoid.Epsg
             Contract.Requires(fromNode.Crs is EpsgCrsGeodetic);
             Contract.Requires(toCrs != null);
 
+            var earlyResults = new List<EpsgCrsPathSearchNode>();
             var fromCrs = (EpsgCrsGeodetic)fromNode.Crs;
             EpsgCrsPathSearchNode stackSearchNode;
 
@@ -87,21 +107,24 @@ namespace Pigeoid.Epsg
                 fromStack.Add(stackSearchNode);
                 var currentCrs = (EpsgCrsGeodetic)stackSearchNode.Crs;
                 if (currentCrs.Code == toCrs.Code)
-                    return ArrayUtil.CreateSingleElementArray(stackSearchNode);
+                    earlyResults.Add(stackSearchNode);
 
-                if (!currentCrs.HasBaseOperationCode)
+                if (!currentCrs.HasBaseOperation)
                     break;
 
                 var baseCrs = currentCrs.BaseCrs;
                 if (baseCrs == null)
                     break;
 
-                var toBaseEdge = currentCrs.BaseOperation;
-                stackSearchNode = new EpsgCrsPathSearchNode(baseCrs, toBaseEdge, stackSearchNode);
+                var fromBaseEdge = currentCrs.GetBaseOperation();
+                if (!fromBaseEdge.HasInverse)
+                    break; // we have to invert the edge to traverse up the stack
 
+                var toBaseEdge = fromBaseEdge.GetInverse();
+                stackSearchNode = new EpsgCrsPathSearchNode(baseCrs, toBaseEdge, stackSearchNode);
             } while (stackSearchNode != null);
 
-            throw new NotImplementedException();
+            return earlyResults;
         }
 
     }
