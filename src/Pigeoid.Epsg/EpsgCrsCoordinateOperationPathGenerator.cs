@@ -91,6 +91,30 @@ namespace Pigeoid.Epsg
             return corePaths.Select(node => node.BuildCoordinateOperationCrsPathInfo());
         }
 
+
+        private EpsgCrsPathSearchNode FindLowestStackIntersection(List<EpsgCrsPathSearchNode> fromStack, List<EpsgCrsGeodetic> toStack) {
+            // first try to locate the lowest CRS where the stacks intersect
+            // there is a pretty good chance that most stacks will intersect
+            // it does not make much sense to do a full search once an intersection is found as the lowest will be best
+            foreach (var fromStackNode in fromStack) {
+                var fromStackCrs = fromStackNode.Crs;
+                for (int toStackSearchIndex = 0; toStackSearchIndex < toStack.Count; toStackSearchIndex++) {
+                    var toStackCrs = toStack[toStackSearchIndex];
+                    if (fromStackCrs.Code == toStackCrs.Code) {
+                        var node = fromStackNode;
+                        for (int backTrackIndex = toStackSearchIndex - 1; backTrackIndex >= 0; backTrackIndex--) {
+                            var crs = toStack[backTrackIndex];
+                            Contract.Assume(crs.HasBaseOperation);
+                            var edge = crs.GetBaseOperation();
+                            node = new EpsgCrsPathSearchNode(crs, edge, node);
+                        }
+                        return node;
+                    }
+                }
+            }
+            return null;
+        }
+
         private IEnumerable<EpsgCrsPathSearchNode> FindAllCorePaths(EpsgCrsPathSearchNode fromNode, EpsgCrsGeodetic toCrs) {
             Contract.Requires(fromNode != null);
             Contract.Requires(fromNode.Crs is EpsgCrsGeodetic);
@@ -98,31 +122,42 @@ namespace Pigeoid.Epsg
 
             var earlyResults = new List<EpsgCrsPathSearchNode>();
             var fromCrs = (EpsgCrsGeodetic)fromNode.Crs;
-            EpsgCrsPathSearchNode stackSearchNode;
 
             // construct the hierarchy based on the from CRS
             var fromStack = new List<EpsgCrsPathSearchNode>();
-            stackSearchNode = fromNode;
+            var fromStackConstructionNode = fromNode;
             do {
-                fromStack.Add(stackSearchNode);
-                var currentCrs = (EpsgCrsGeodetic)stackSearchNode.Crs;
-                if (currentCrs.Code == toCrs.Code)
-                    earlyResults.Add(stackSearchNode);
+                fromStack.Add(fromStackConstructionNode);
+                var currentCrs = (EpsgCrsGeodetic)fromStackConstructionNode.Crs;
+                //if (currentCrs.Code == toCrs.Code)
+                //    earlyResults.Add(stackSearchNode);
 
                 if (!currentCrs.HasBaseOperation)
                     break;
 
                 var baseCrs = currentCrs.BaseCrs;
-                if (baseCrs == null)
-                    break;
-
                 var fromBaseEdge = currentCrs.GetBaseOperation();
+                Contract.Assume(baseCrs != null);
+                Contract.Assume(fromBaseEdge != null);
+                
                 if (!fromBaseEdge.HasInverse)
                     break; // we have to invert the edge to traverse up the stack
 
                 var toBaseEdge = fromBaseEdge.GetInverse();
-                stackSearchNode = new EpsgCrsPathSearchNode(baseCrs, toBaseEdge, stackSearchNode);
-            } while (stackSearchNode != null);
+                fromStackConstructionNode = new EpsgCrsPathSearchNode(baseCrs, toBaseEdge, fromStackConstructionNode);
+            } while (true/*fromStackSearchNode != null*/);
+
+            // construct the hierarchy based on the to CRS
+            var toStack = new List<EpsgCrsGeodetic>();
+            var toStackConstructionCrs = toCrs;
+            do {
+                toStack.Add(toStackConstructionCrs);
+                toStackConstructionCrs = toStackConstructionCrs.BaseCrs;
+            } while (toStackConstructionCrs != null);
+
+            var lowestStackIntersection = FindLowestStackIntersection(fromStack, toStack);
+            if (lowestStackIntersection != null)
+                earlyResults.Add(lowestStackIntersection);
 
             return earlyResults;
         }
