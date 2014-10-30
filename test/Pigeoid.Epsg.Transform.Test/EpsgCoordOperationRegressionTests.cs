@@ -58,13 +58,16 @@ namespace Pigeoid.Epsg.Transform.Test
             var crs = EpsgMicroDatabase.Default.GetCrs(3140);
             var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
 
+            // source for coordinates is http://epsg.io/3140/map
             var ptWgs = new GeographicCoordinate(-17.785, 177.97);
             var pt3140 = new Point2(530138.52663372, 821498.68898981); // units in links
 
             var gen = new EpsgCrsCoordinateOperationPathGenerator();
             var paths = gen.Generate(wgs, crs);
             var compiler = new StaticCoordinateOperationCompiler();
-            var txs = paths.Select(p => compiler.Compile(p)).Where(p => p != null);
+            var txs = paths
+                .Select(p => compiler.Compile(p))
+                .Where(p => p != null);
 
             var forward = txs.Single();
             var actualForward = (Point2)forward.TransformValue(ptWgs);

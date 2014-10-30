@@ -54,6 +54,35 @@ namespace Pigeoid.Epsg
             return new CoordinateOperationCrsPathInfo(nodes, operations);
         }
 
+        [Obsolete("Remove if not used.")]
+        private static int GetEdgeCode(ICoordinateOperationInfo op) {
+            var epsgOp = op as EpsgCoordinateOperationInfoBase;
+            if(epsgOp == null && op is EpsgCoordinateOperationInverse)
+                epsgOp = ((EpsgCoordinateOperationInverse)op).GetInverse();
+
+            return epsgOp != null ? epsgOp.Code : 0;
+        }
+
+        [Obsolete("Remove if not used.")]
+        public bool ContainsNode(EpsgCrsPathSearchNode node) {
+            Contract.Requires(node != null);
+            return ContainsNode(node.Crs.Code, GetEdgeCode(node.EdgeFromParent));
+        }
+
+        [Obsolete("Remove if not used.")]
+        public bool ContainsNode(int crsCode, int edgeCode) {
+            var searchTarget = this;
+            do {
+                if (searchTarget.Crs.Code == crsCode) {
+                    var searchEdgeCode = GetEdgeCode(searchTarget.EdgeFromParent);
+                    if (searchEdgeCode == edgeCode)
+                        return true;
+                }
+                searchTarget = searchTarget.Parent;
+            } while (searchTarget != null);
+            return false;
+        }
+
     }
 
     public class EpsgCrsCoordinateOperationPathGenerator :
@@ -91,6 +120,16 @@ namespace Pigeoid.Epsg
             return corePaths.Select(node => node.BuildCoordinateOperationCrsPathInfo());
         }
 
+        private EpsgCrsPathSearchNode AppendBacktrackingToStack(EpsgCrsPathSearchNode fromNode, List<EpsgCrsGeodetic> toStack, int startIndex) {
+            var node = fromNode;
+            for (int backtrackIndex = startIndex; backtrackIndex >= 0; backtrackIndex--) {
+                var crs = toStack[backtrackIndex];
+                Contract.Assume(crs.HasBaseOperation);
+                var edge = crs.GetBaseOperation();
+                node = new EpsgCrsPathSearchNode(crs, edge, node);
+            }
+            return node;
+        }
 
         private EpsgCrsPathSearchNode FindLowestStackIntersection(List<EpsgCrsPathSearchNode> fromStack, List<EpsgCrsGeodetic> toStack) {
             // first try to locate the lowest CRS where the stacks intersect
@@ -100,19 +139,70 @@ namespace Pigeoid.Epsg
                 var fromStackCrs = fromStackNode.Crs;
                 for (int toStackSearchIndex = 0; toStackSearchIndex < toStack.Count; toStackSearchIndex++) {
                     var toStackCrs = toStack[toStackSearchIndex];
-                    if (fromStackCrs.Code == toStackCrs.Code) {
-                        var node = fromStackNode;
-                        for (int backTrackIndex = toStackSearchIndex - 1; backTrackIndex >= 0; backTrackIndex--) {
-                            var crs = toStack[backTrackIndex];
-                            Contract.Assume(crs.HasBaseOperation);
-                            var edge = crs.GetBaseOperation();
-                            node = new EpsgCrsPathSearchNode(crs, edge, node);
-                        }
-                        return node;
-                    }
+                    if (fromStackCrs.Code == toStackCrs.Code)
+                        return AppendBacktrackingToStack(fromStackNode, toStack, toStackSearchIndex - 1);
                 }
             }
             return null;
+        }
+
+        private IEnumerable<EpsgCrsPathSearchNode> FindDirectTransformations(List<EpsgCrsPathSearchNode> fromStack, List<EpsgCrsGeodetic> toStack) {
+            var results = new List<EpsgCrsPathSearchNode>();
+            foreach (var fromNode in fromStack) {
+                var fromCrs = fromNode.Crs;
+                if (fromCrs.Code < 0 || fromCrs.Code > UInt16.MaxValue)
+                    continue;
+
+                var fromCrsCodeShort = (ushort)fromCrs.Code;
+                var fromOpCodesForward = EpsgMicroDatabase.Default.GetOpsFromCrs(fromCrsCodeShort);
+                var fromOpCodesInverse = EpsgMicroDatabase.Default.GetOpsToCrs(fromCrsCodeShort);
+
+                if (fromOpCodesForward == null && fromOpCodesInverse == null)
+                    continue;
+
+                for (int toCrsIndex = 0; toCrsIndex < toStack.Count; toCrsIndex++) {
+                    var toCrs = toStack[toCrsIndex];
+                    if (toCrs.Code < 0 || toCrs.Code > UInt16.MaxValue)
+                        continue;
+
+                    var toCrsCodeShort = (ushort)toCrs.Code;
+                    var toOpCodesForward = EpsgMicroDatabase.Default.GetOpsToCrs(toCrsCodeShort);
+                    var toOpCodesInverse = EpsgMicroDatabase.Default.GetOpsFromCrs(toCrsCodeShort);
+
+                    var forwardIntersection = fromOpCodesForward == null || toOpCodesForward == null ? null : fromOpCodesForward.Intersect(toOpCodesForward).ToList();
+                    var inverseIntersection = fromOpCodesInverse == null || toOpCodesInverse == null ? null : fromOpCodesInverse.Intersect(toOpCodesInverse).ToList();
+                    
+                    if (forwardIntersection != null) {
+                        var toJoinNodes = forwardIntersection
+                            .Select(code => EpsgMicroDatabase.Default.GetCoordinateTransformInfo(code))
+                            .Where(op => op != null)
+                            .Select(op => new EpsgCrsPathSearchNode(toCrs, op, fromNode))
+                            .ToList();
+                        foreach (var n in toJoinNodes) {
+                            var fullPath = AppendBacktrackingToStack(n, toStack, toCrsIndex-1);
+                            results.Add(fullPath);
+                        }
+                    }
+                    if (inverseIntersection != null) {
+                        var toJoinNodes = inverseIntersection
+                            .Select(code => EpsgMicroDatabase.Default.GetCoordinateTransformInfo(code))
+                            .Where(op => op != null && op.HasInverse)
+                            .Select(op => new EpsgCrsPathSearchNode(toCrs, op.GetInverse(), fromNode))
+                            .ToList();
+                        foreach (var n in toJoinNodes) {
+                            var fullPath = AppendBacktrackingToStack(n, toStack, toCrsIndex - 1);
+                            results.Add(fullPath);
+                        }
+                    }
+                }
+
+            }
+            return results;
+        }
+
+        private IEnumerable<EpsgCrsPathSearchNode> FindIndirectTransformations(List<EpsgCrsPathSearchNode> fromStack, List<EpsgCrsGeodetic> toStack) {
+            var results = new List<EpsgCrsPathSearchNode>();
+            return results;
         }
 
         private IEnumerable<EpsgCrsPathSearchNode> FindAllCorePaths(EpsgCrsPathSearchNode fromNode, EpsgCrsGeodetic toCrs) {
@@ -129,9 +219,6 @@ namespace Pigeoid.Epsg
             do {
                 fromStack.Add(fromStackConstructionNode);
                 var currentCrs = (EpsgCrsGeodetic)fromStackConstructionNode.Crs;
-                //if (currentCrs.Code == toCrs.Code)
-                //    earlyResults.Add(stackSearchNode);
-
                 if (!currentCrs.HasBaseOperation)
                     break;
 
@@ -159,7 +246,10 @@ namespace Pigeoid.Epsg
             if (lowestStackIntersection != null)
                 earlyResults.Add(lowestStackIntersection);
 
-            return earlyResults;
+            var directResults = FindDirectTransformations(fromStack, toStack);
+            var indirectResults = FindIndirectTransformations(fromStack, toStack);
+
+            return earlyResults.Concat(directResults).Concat(indirectResults);
         }
 
     }

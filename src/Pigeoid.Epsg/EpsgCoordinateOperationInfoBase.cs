@@ -34,10 +34,14 @@ namespace Pigeoid.Epsg
 
         string ICoordinateOperationInfo.Name { get { return Name; } }
 
-        public ICoordinateOperationInfo GetInverse() {
+        public EpsgCoordinateOperationInverse GetInverse() {
             if (!HasInverse) throw new NoInverseException();
             Contract.Ensures(Contract.Result<ICoordinateOperationInfo>() != null);
             return new EpsgCoordinateOperationInverse(this);
+        }
+
+        ICoordinateOperationInfo ICoordinateOperationInfo.GetInverse() {
+            return GetInverse();
         }
 
         bool ICoordinateOperationInfo.IsInverseOfDefinition {
