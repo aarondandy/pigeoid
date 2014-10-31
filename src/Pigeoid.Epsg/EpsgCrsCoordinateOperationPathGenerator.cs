@@ -146,6 +146,13 @@ namespace Pigeoid.Epsg
             return null;
         }
 
+        private struct OperationNodeCandidate
+        {
+            public EpsgCoordinateOperationInfoBase CoreOp;
+            public double? Accuracy;
+            public EpsgCrsPathSearchNode Node; 
+        }
+
         private IEnumerable<EpsgCrsPathSearchNode> FindDirectTransformations(List<EpsgCrsPathSearchNode> fromStack, List<EpsgCrsGeodetic> toStack) {
             var results = new List<EpsgCrsPathSearchNode>();
             foreach (var fromNode in fromStack) {
@@ -154,9 +161,9 @@ namespace Pigeoid.Epsg
                     continue;
 
                 var fromCrsCodeShort = (ushort)fromCrs.Code;
+
                 var fromOpCodesForward = EpsgMicroDatabase.Default.GetOpsFromCrs(fromCrsCodeShort);
                 var fromOpCodesInverse = EpsgMicroDatabase.Default.GetOpsToCrs(fromCrsCodeShort);
-
                 if (fromOpCodesForward == null && fromOpCodesInverse == null)
                     continue;
 
@@ -166,31 +173,51 @@ namespace Pigeoid.Epsg
                         continue;
 
                     var toCrsCodeShort = (ushort)toCrs.Code;
+
                     var toOpCodesForward = EpsgMicroDatabase.Default.GetOpsToCrs(toCrsCodeShort);
                     var toOpCodesInverse = EpsgMicroDatabase.Default.GetOpsFromCrs(toCrsCodeShort);
+                    if (toOpCodesForward == null && toOpCodesInverse == null)
+                        continue;
 
-                    var forwardIntersection = fromOpCodesForward == null || toOpCodesForward == null ? null : fromOpCodesForward.Intersect(toOpCodesForward).ToList();
-                    var inverseIntersection = fromOpCodesInverse == null || toOpCodesInverse == null ? null : fromOpCodesInverse.Intersect(toOpCodesInverse).ToList();
-                    
+                    var forwardIntersection = fromOpCodesForward == null || toOpCodesForward == null ? null : fromOpCodesForward.Intersect(toOpCodesForward);
+                    var inverseIntersection = fromOpCodesInverse == null || toOpCodesInverse == null ? null : fromOpCodesInverse.Intersect(toOpCodesInverse);
+
+                    IEnumerable<OperationNodeCandidate> nodeCandidates = null;
+
                     if (forwardIntersection != null) {
                         var toJoinNodes = forwardIntersection
-                            .Select(code => EpsgMicroDatabase.Default.GetCoordinateTransformInfo(code))
+                            .Select(code => EpsgMicroDatabase.Default.GetCoordinateTransformOrConcatenatedInfo(code))
                             .Where(op => op != null)
-                            .Select(op => new EpsgCrsPathSearchNode(toCrs, op, fromNode))
-                            .ToList();
-                        foreach (var n in toJoinNodes) {
-                            var fullPath = AppendBacktrackingToStack(n, toStack, toCrsIndex-1);
-                            results.Add(fullPath);
-                        }
+                            .Select(op => new OperationNodeCandidate {
+                                CoreOp = op,
+                                Accuracy = null,
+                                Node = new EpsgCrsPathSearchNode(toCrs, op, fromNode)
+                            });
+
+                        Contract.Assume(nodeCandidates == null);
+                        nodeCandidates = toJoinNodes;
                     }
+
                     if (inverseIntersection != null) {
                         var toJoinNodes = inverseIntersection
-                            .Select(code => EpsgMicroDatabase.Default.GetCoordinateTransformInfo(code))
+                            .Select(code => EpsgMicroDatabase.Default.GetCoordinateTransformOrConcatenatedInfo(code))
                             .Where(op => op != null && op.HasInverse)
-                            .Select(op => new EpsgCrsPathSearchNode(toCrs, op.GetInverse(), fromNode))
-                            .ToList();
-                        foreach (var n in toJoinNodes) {
-                            var fullPath = AppendBacktrackingToStack(n, toStack, toCrsIndex - 1);
+                            .Select(op => new OperationNodeCandidate {
+                                CoreOp = op,
+                                Accuracy = null,
+                                Node = new EpsgCrsPathSearchNode(toCrs, op.GetInverse(), fromNode)
+                            });
+
+                        nodeCandidates = nodeCandidates == null ? toJoinNodes : nodeCandidates.Concat(toJoinNodes);
+                    }
+
+                    if (nodeCandidates != null) {
+                        nodeCandidates = nodeCandidates
+                            .OrderBy(x => x.CoreOp.Deprecated)
+                            .ThenByDescending(x => x.Accuracy.HasValue)
+                            .ThenBy(x => x.Accuracy.GetValueOrDefault());
+                        foreach (var candidate in nodeCandidates) {
+                            var fullPath = AppendBacktrackingToStack(candidate.Node, toStack, toCrsIndex - 1);
                             results.Add(fullPath);
                         }
                     }

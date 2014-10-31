@@ -375,6 +375,15 @@ namespace Pigeoid.Epsg
             return GetOrSetCache("opcat", code, _readerOpConcatenated.GetByKey);
         }
 
+        public EpsgCoordinateOperationInfoBase GetCoordinateTransformOrConcatenatedInfo(int code) {
+            return code >= 0 && code < UInt16.MaxValue ? GetCoordinateTransformOrConcatenatedInfo(unchecked((ushort)code)) : null;
+        }
+
+        internal EpsgCoordinateOperationInfoBase GetCoordinateTransformOrConcatenatedInfo(ushort code) {
+            return GetCoordinateTransformInfo(code)
+                ?? (EpsgCoordinateOperationInfoBase)GetConcatenatedCoordinateOperationInfo(code);
+        }
+
         public EpsgCoordinateOperationInfo GetSingleCoordinateOperationInfo(int code) {
             return code >= 0 && code < UInt16.MaxValue ? GetSingleCoordinateOperationInfo(unchecked((ushort)code)) : null;
         }
