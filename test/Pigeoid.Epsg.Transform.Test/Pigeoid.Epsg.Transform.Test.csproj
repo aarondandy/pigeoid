@@ -62,6 +62,7 @@
     <Compile Include="EpsgCoordinateOperationCoverage.cs" />
     <Compile Include="EpsgCoordOperationRegressionTests.cs" />
     <Compile Include="EpsgHelmertDatumShiftTests.cs" />
+    <Compile Include="EpsgPathGenerationTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

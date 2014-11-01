@@ -190,10 +190,9 @@ namespace Pigeoid.Epsg
                             .Where(op => op != null)
                             .Select(op => new OperationNodeCandidate {
                                 CoreOp = op,
-                                Accuracy = null,
+                                Accuracy = op.Accuracy,
                                 Node = new EpsgCrsPathSearchNode(toCrs, op, fromNode)
                             });
-
                         Contract.Assume(nodeCandidates == null);
                         nodeCandidates = toJoinNodes;
                     }
@@ -204,10 +203,9 @@ namespace Pigeoid.Epsg
                             .Where(op => op != null && op.HasInverse)
                             .Select(op => new OperationNodeCandidate {
                                 CoreOp = op,
-                                Accuracy = null,
+                                Accuracy = op.Accuracy,
                                 Node = new EpsgCrsPathSearchNode(toCrs, op.GetInverse(), fromNode)
                             });
-
                         nodeCandidates = nodeCandidates == null ? toJoinNodes : nodeCandidates.Concat(toJoinNodes);
                     }
 
@@ -216,6 +214,7 @@ namespace Pigeoid.Epsg
                             .OrderBy(x => x.CoreOp.Deprecated)
                             .ThenByDescending(x => x.Accuracy.HasValue)
                             .ThenBy(x => x.Accuracy.GetValueOrDefault());
+
                         foreach (var candidate in nodeCandidates) {
                             var fullPath = AppendBacktrackingToStack(candidate.Node, toStack, toCrsIndex - 1);
                             results.Add(fullPath);

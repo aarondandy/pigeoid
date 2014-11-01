@@ -60,7 +60,8 @@ namespace Pigeoid.Proj4ComparisonTests
         }
 
         private static double? GetEpsgAccuracy(ICoordinateOperationCrsPathInfo path) {
-            double? sum = null;
+            double sum = 0;
+            bool hasSumValue = false;
             foreach (var op in path.CoordinateOperations) {
                 EpsgCoordinateOperationInfoBase epsgOp;
                 var epsgInverse = op as EpsgCoordinateOperationInverse;
@@ -76,17 +77,13 @@ namespace Pigeoid.Proj4ComparisonTests
                 var tx = epsgOp as EpsgCoordinateTransformInfo;
                 if (tx != null) {
                     var accuracy = tx.Accuracy;
-                    if (!Double.IsNaN(accuracy)) {
-                        if (sum.HasValue) {
-                            sum += accuracy;
-                        }
-                        else {
-                            sum = accuracy;
-                        }
+                    if (accuracy.HasValue && !Double.IsNaN(accuracy.GetValueOrDefault())) {
+                        hasSumValue = true;
+                        sum += accuracy.GetValueOrDefault();
                     }
                 }
             }
-            return sum;
+            return hasSumValue ? sum : (double?)null;
         }
 
         private static HashSet<int> _restrictedOperationMethodCodes = new HashSet<int> {

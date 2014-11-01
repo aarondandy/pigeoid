@@ -32,8 +32,6 @@ namespace Pigeoid.Epsg
 
         public abstract bool HasInverse { get; }
 
-        string ICoordinateOperationInfo.Name { get { return Name; } }
-
         public EpsgCoordinateOperationInverse GetInverse() {
             if (!HasInverse) throw new NoInverseException();
             Contract.Ensures(Contract.Result<ICoordinateOperationInfo>() != null);
@@ -54,6 +52,8 @@ namespace Pigeoid.Epsg
                 return new EpsgAuthorityTag(_code);
             }
         }
+
+        public virtual double? Accuracy { get { return null; } }
 
         public override string ToString() {
             return Code.ToString() + " " + Name;

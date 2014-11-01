@@ -47,7 +47,7 @@ namespace Pigeoid.Epsg
             }
         }
 
-        public double Accuracy { get { return _accuracy; } }
+        public override double? Accuracy { get { return _accuracy; } }
 
     }
 

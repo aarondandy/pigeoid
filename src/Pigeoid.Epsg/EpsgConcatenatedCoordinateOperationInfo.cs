@@ -76,5 +76,21 @@ namespace Pigeoid.Epsg
         IEnumerable<ICoordinateOperationInfo> IConcatenatedCoordinateOperationInfo.Steps { get { return Steps; } }
 
         public override bool HasInverse { get { return Steps.All(step => step.HasInverse); } }
+
+        public override double? Accuracy {
+            get {
+                // there has to be a better way to do a nullable sum
+                var sum = 0.0;
+                var hasValue = false;
+                foreach (var step in Steps) {
+                    var localSum = step.Accuracy;
+                    if (localSum.HasValue) {
+                        sum += localSum.GetValueOrDefault();
+                        hasValue = true;
+                    }
+                }
+                return hasValue ? sum : (double?)null;
+            }
+        }
     }
 }

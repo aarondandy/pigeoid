@@ -110,5 +110,9 @@ namespace Pigeoid.CoordinateOperation
         public ICrs To {
             get { return CrsNodesArray[CrsNodesArray.Length-1]; }
         }
+
+        public override string ToString() {
+            return String.Format("{0} to {1}: {2}", From, To, String.Join(",",OperationEdgesArray.AsEnumerable()));
+        }
     }
 }
