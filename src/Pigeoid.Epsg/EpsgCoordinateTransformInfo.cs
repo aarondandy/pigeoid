@@ -9,13 +9,13 @@ namespace Pigeoid.Epsg
 
         private readonly ushort _sourceCrsCode;
         private readonly ushort _targetCrsCode;
-        private readonly double _accuracy;
+        private readonly double? _accuracy;
 
         internal EpsgCoordinateTransformInfo(
             ushort code,
             ushort sourceCrsCode, ushort targetCrsCode,
             ushort opMethodCode,
-            double accuracy,
+            double? accuracy,
             ushort areaCode, bool deprecated, string name
         )
             : base(code, opMethodCode, areaCode, deprecated, name) {

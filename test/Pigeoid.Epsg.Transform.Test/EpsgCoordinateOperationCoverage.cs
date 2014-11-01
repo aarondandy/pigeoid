@@ -1776,7 +1776,7 @@ namespace Pigeoid.Epsg.Transform.Test
             var expected4326 = DenverWgs84Degrees;
             var expected32663 = new Point2(-11686845.794113001, 4423743.8349890001);
 
-            Assert.Inconclusive("Accuracy issues.");
+            Assert.Inconclusive("Accuracy issues. Unsure of the test data.");
 
             AreEqual(expected32663, transformation.TransformValue(expected4326), 10);
             AreEqual(expected4326, inverse.TransformValue(expected32663), 0);

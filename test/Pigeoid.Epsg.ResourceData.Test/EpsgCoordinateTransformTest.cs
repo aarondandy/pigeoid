@@ -27,7 +27,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 				new Tester((x, y) => x.SourceCrs.Code == y.SourceCrs.Code),
 				new Tester((x, y) => x.TargetCrs.Code == y.TargetCrs.Code),
 // ReSharper disable CompareOfFloatsByEqualityOperator
-				new Tester((x, y) => x.Accuracy == (y.Accuracy ?? 0))
+				new Tester((x, y) => (x.Accuracy ?? 999) == (y.Accuracy ?? 999))
 // ReSharper restore CompareOfFloatsByEqualityOperator
 			);
 

@@ -130,44 +130,27 @@ namespace Pigeoid.Epsg
 
         public override string Type { get { return "Geodetic"; } }
 
-        private Helmert7Transformation FindBasicWgs84Transformation() {
-            if (Code == EpsgDatum.Wgs84DatumCode)
-                return new Helmert7Transformation(Vector3.Zero);
 
-            throw new NotImplementedException();
-
-            /*var transformsFromThisDatum = EpsgCrsDatumBased.DatumBasedValues.Where(x => x.Datum.Code == Code).Select(x => x.Code)
-                .Concat(EpsgCrsProjected.ProjectedValues.Where(x => x.Datum.Code == Code).Select(x => x.Code))
-                .SelectMany(EpsgCoordinateOperationInfoRepository.GetTransformForwardReferenced)
-                .Where(x => x.TargetCrsCode == EpsgCrs.Wgs84GeographicCode)
-                .Where(x => x.Method.Code == 9607 || x.Method.Code == 9606 || x.Method.Code == 9603);
-
-            var bestTransform = transformsFromThisDatum
-                .OrderBy(x => x.Deprecated)
-                .ThenByDescending(x => x.Method.Code) // translation is a lower EPSG code
-                .ThenBy(x => x.Accuracy)
-                .FirstOrDefault();
-
-            if (bestTransform == null)
-                return null;
+        private Helmert7Transformation ExtractHelmert7Transformation(EpsgCoordinateTransformInfo transform) {
+            var method = transform.Method;
+            Contract.Assume(method != null);
 
             var compiler = new StaticCoordinateOperationCompiler();
             var compileRequest = new CoordinateOperationCrsPathInfo(
-                new[] {bestTransform.SourceCrs, bestTransform.TargetCrs},
-                new[] {bestTransform});
+                new[] { transform.SourceCrs, transform.TargetCrs },
+                new[] { transform });
             var compileResult = compiler.Compile(compileRequest);
-
-            var transformationSteps = (compileResult as IEnumerable<ITransformation>)
-                ?? ArrayUtil.CreateSingleElementArray(compileResult);
-
-            transformationSteps = transformationSteps.Select(step => {
+            if (compileResult == null)
+                return null;
+            var transformSteps = (compileResult as IEnumerable<ITransformation>) ?? ArrayUtil.CreateSingleElementArray(compileResult);
+            var exposedSteps = transformSteps.Select(step => {
                 if (step is GeocentricTransformationGeographicWrapper) {
                     return ((GeocentricTransformationGeographicWrapper)step).GeocentricCore;
                 }
                 return step;
             });
 
-            foreach (var step in transformationSteps) {
+            foreach (var step in exposedSteps) {
                 if (step is Helmert7Transformation) {
                     return step as Helmert7Transformation;
                 }
@@ -179,7 +162,61 @@ namespace Pigeoid.Epsg
                 }
             }
 
-            return null;*/
+            return null;
+        }
+
+        private Helmert7Transformation FindBasicWgs84Transformation() {
+            if (Code == EpsgDatum.Wgs84DatumCode)
+                return new Helmert7Transformation(Vector3.Zero);
+
+            // TODO: this should be pre-calculated
+
+            var acceptedForwardOpMethodCodes = new HashSet<int> { 9603, 9606, 9607 };
+
+            const ushort GeogWgs84Code = 4326;
+            var opCodesForwardToGeog84 = EpsgMicroDatabase.Default.GetOpsToCrs(GeogWgs84Code);
+
+            var crsForThisDatum = EpsgMicroDatabase.Default.GetAllNormalCrs()
+                .Where(crs => crs is EpsgCrsGeographic || crs is EpsgCrsGeocentric)
+                .Cast<EpsgCrsDatumBased>()
+                .Where(crs => crs.Datum.Code == Code);
+
+            var crsCodesForThisDatum = crsForThisDatum
+                .Select(crs => crs.Code)
+                .Where(code => code >= 0 && code < UInt16.MaxValue)
+                .Select(code => (ushort)code);
+
+            var forwardOpCodes = crsCodesForThisDatum
+                .Select(EpsgMicroDatabase.Default.GetOpsFromCrs)
+                .Where(codes => codes != null)
+                .Select(opCodesForwardToGeog84.Intersect)
+                .SelectMany(codes => codes)
+                .Distinct();
+
+            var forwardOps = forwardOpCodes
+                .Select(EpsgMicroDatabase.Default.GetCoordinateTransformOrConcatenatedInfo)
+                .Where(op => op != null)
+                .SelectMany<EpsgCoordinateOperationInfoBase,EpsgCoordinateTransformInfo>(op => {
+                    if (op is EpsgCoordinateTransformInfo)
+                        return ArrayUtil.CreateSingleElementArray((EpsgCoordinateTransformInfo)op);
+                    else if (op is EpsgConcatenatedCoordinateOperationInfo)
+                        return ((EpsgConcatenatedCoordinateOperationInfo)op).Steps.OfType<EpsgCoordinateTransformInfo>();
+                    else
+                        return ArrayUtil<EpsgCoordinateTransformInfo>.Empty;
+                })
+                .Where(op => acceptedForwardOpMethodCodes.Contains(op.Method.Code));
+
+            var sortedTransformOperations = forwardOps
+                .OrderBy(x => x.Deprecated)
+                .ThenByDescending(x => x.Parameters.Count()) // prefer 7-parameter transforms to geocentric translations
+                .ThenByDescending(x => x.Accuracy.HasValue)
+                .ThenBy(x => x.Accuracy.GetValueOrDefault());
+
+            var bestTransform = sortedTransformOperations
+                .Select(ExtractHelmert7Transformation)
+                .FirstOrDefault(x => x != null);
+
+            return bestTransform;
         }
 
         public Helmert7Transformation BasicWgs84Transformation {

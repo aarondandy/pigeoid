@@ -567,7 +567,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
                             writerDataTransformation.Write((ushort)op.SourceCrs.Code);
                             writerDataTransformation.Write((ushort)op.TargetCrs.Code);
                             writerDataTransformation.Write((ushort)op.Method.Code);
-                            writerDataTransformation.Write((ushort)data.GetNumberIndex(op.Accuracy ?? 0));
+                            writerDataTransformation.Write((ushort)data.GetNumberIndex(op.Accuracy ?? 999));
                             writerDataTransformation.Write((ushort)op.Area.Code);
                             writerDataTransformation.Write((byte)(op.Deprecated ? 0xff : 0));
                             writerDataTransformation.Write((ushort)stringLookUp[op.Name]);

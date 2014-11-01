@@ -994,10 +994,11 @@ namespace Pigeoid.Epsg.Resources
             var sourceCrsCode = reader.ReadUInt16();
             var targetCrsCode = reader.ReadUInt16();
             var opMethodCode = reader.ReadUInt16();
-            var accuracy = _numberReader.GetValue(reader.ReadUInt16());
+            var accuracyValue = _numberReader.GetValue(reader.ReadUInt16());
             var areaCode = reader.ReadUInt16();
             var deprecated = reader.ReadByte() != 0;
             var name = TextReader.GetString(reader.ReadUInt16());
+            var accuracy = accuracyValue == 999.0 ? (double?)null : accuracyValue;
             Contract.Assume(!String.IsNullOrEmpty(name));
             return new EpsgCoordinateTransformInfo(
                 key, sourceCrsCode, targetCrsCode, opMethodCode,

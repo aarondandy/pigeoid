@@ -104,3 +104,4 @@ Backup*/
 UpgradeLog*.XML
 
 *.DotSettings
+*.TE.Tests*.*df

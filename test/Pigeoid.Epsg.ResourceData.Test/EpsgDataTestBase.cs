@@ -54,7 +54,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 						return;
 					if (aMoved)
 						Assert.Fail("First list has more items.");
-					Assert.Fail("Second list has more items.");
+                    Assert.Fail("Second list has more items.");
 				}
 
 				foreach (var matchTest in matchTests) {
