@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Pigeoid.Core</id>
+    <version>$version$</version>
+    <title>Pigeoid</title>
+    <authors>aarondandy</authors>
+    <description>A GIS library for the CLR.</description>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>GIS</tags>
+    <projectUrl>http://mediocresoft.com/</projectUrl>
+    <references>
+      <reference file="Pigeoid.Core.dll" />
+    </references>
+  </metadata>
+  <files>
+    <file src="..\bin\$configuration$\Pigeoid.Core.dll" target="lib\net40-client" />
+    <file src="..\bin\$configuration$\Pigeoid.Core.pdb" target="lib\net40-client" />
+    <file src="..\bin\$configuration$\Pigeoid.Core.XML" target="lib\net40-client" />
+
+    <file src="..\bin\$configuration$\CodeContracts\Pigeoid.Core.Contracts.dll" target="lib\net40-client\CodeContracts" />
+    <file src="..\src\Pigeoid.Core\**.cs" target="src" />
+  </files>
+</package>

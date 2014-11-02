@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>Pigeoid.Epsg</id>
+    <version>$version$</version>
+    <title>Pigeoid.Epsg</title>
+    <authors>aarondandy</authors>
+    <description>Adds EPSG data and types to Pigeoid.</description>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <tags>GIS EPSG</tags>
+    <projectUrl>http://mediocresoft.com/</projectUrl>
+    <dependencies>
+      <dependency id="Pigeoid.Core" version="$version$"/>
+    </dependencies>
+    <references>
+      <reference file="Pigeoid.Epsg.dll" />
+    </references>
+  </metadata>
+  <files>
+    <file src="..\bin\$configuration$\Pigeoid.Epsg.dll" target="lib\net40-client" />
+    <file src="..\bin\$configuration$\Pigeoid.Epsg.pdb" target="lib\net40-client" />
+    <file src="..\bin\$configuration$\Pigeoid.Epsg.XML" target="lib\net40-client" />
+
+    <file src="..\bin\$configuration$\CodeContracts\Pigeoid.Epsg.Contracts.dll" target="lib\net40-client\CodeContracts" />
+    <file src="..\src\Pigeoid.Epsg\**.cs" target="src" />
+  </files>
+</package>
