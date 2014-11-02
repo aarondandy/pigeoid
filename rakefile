@@ -15,6 +15,8 @@ task :default => [:build,:make_nupkg]
 
 task :make_nupkg => [:make_nupkg_core,:make_nupkg_generation]
 
+task :push_nupkg => [:push_nuget_core,:push_nuget_epsg]
+
 msbuild :build do |msb|
 	msb.targets = [:Clean, :Build]
 	msb.solution = "./pigeoid-all.sln"
@@ -32,4 +34,16 @@ exec :make_nupkg_generation do |cmd|
 	asmVersion3 = extract_assembly_version "./src/PigeoidAssemblyInfo.cs"
 	cmd.command = "./.nuget/nuget.exe"
 	cmd.parameters = "pack build/pigeoid.epsg.nuspec -Verbosity detailed -Version #{asmVersion3} -Symbols -OutputDirectory ./build/packed/ -Properties Configuration=Release"
+end
+
+exec :push_nuget_core do |cmd|
+	asmVersion3 = extract_assembly_version "./src/PigeoidAssemblyInfo.cs"
+	cmd.command = "./.nuget/nuget.exe"
+	cmd.parameters = "push build/packed/Pigeoid.Core.#{asmVersion3}.nupkg"
+end
+
+exec :push_nuget_epsg do |cmd|
+	asmVersion3 = extract_assembly_version "./src/PigeoidAssemblyInfo.cs"
+	cmd.command = "./.nuget/nuget.exe"
+	cmd.parameters = "push build/packed/Pigeoid.Epsg.#{asmVersion3}.nupkg"
 end

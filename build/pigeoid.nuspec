@@ -9,6 +9,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <tags>GIS</tags>
     <projectUrl>http://mediocresoft.com/</projectUrl>
+    <dependencies>
+      <dependency id="Vertesaur.Core" version="[0.11.1,1.0.0)"/>
+    </dependencies>
     <references>
       <reference file="Pigeoid.Core.dll" />
     </references>
