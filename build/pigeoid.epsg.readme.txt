@@ -1,0 +1,3 @@
+While this library (Pigeoid.Epsg) is released under an MIT license the data embedded within is sourced from the EPSG Dataset and has its own license and copyright.
+You and I both are required to acknowledge ownership of the EPSG Dataset by OGP.
+See http://www.ogp.org.uk/pubs/373-07-1.pdf for more details.
