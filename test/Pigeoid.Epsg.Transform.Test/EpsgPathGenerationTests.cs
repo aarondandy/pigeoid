@@ -12,10 +12,10 @@ namespace Pigeoid.Epsg.Transform.Test
 
         [Test]
         public void has_cat_paths_4267_and_4326() {
-            var generator = new EpsgCrsCoordinateOperationPathGenerator();
             var crs4267 = EpsgMicroDatabase.Default.GetCrs(4267);
             var crs4326 = EpsgMicroDatabase.Default.GetCrs(4326);
 
+            var generator = new EpsgCrsCoordinateOperationPathGenerator();
             var forwardPaths = generator.Generate(crs4267, crs4326);
             var forwardWithCatOps = forwardPaths
                 .Select(x => x.CoordinateOperations)
@@ -31,6 +31,26 @@ namespace Pigeoid.Epsg.Transform.Test
                     .OfType<EpsgConcatenatedCoordinateOperationInfo>()
                     .Any());
             Assert.IsNotEmpty(inverseWithCatOps);
+        }
+
+        [Test]
+        public void old_web_mercator_to_new_web_mercator() {
+            var oldCrs = EpsgMicroDatabase.Default.GetCrs(3785);
+            var newCrs = EpsgMicroDatabase.Default.GetCrs(3857);
+
+            var generator = new EpsgCrsCoordinateOperationPathGenerator();
+            var forwardPaths = generator.Generate(oldCrs, newCrs);
+            Assert.IsNotEmpty(forwardPaths);
+        }
+
+        [Test]
+        public void old_web_mercator_to_nad83() {
+            var oldCrs = EpsgMicroDatabase.Default.GetCrs(3785);
+            var newCrs = EpsgMicroDatabase.Default.GetCrs(4269);
+
+            var generator = new EpsgCrsCoordinateOperationPathGenerator();
+            var forwardPaths = generator.Generate(oldCrs, newCrs);
+            Assert.IsNotEmpty(forwardPaths);
         }
 
     }

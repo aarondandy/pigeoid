@@ -48,8 +48,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
                     1, -Core.RotationRadians.Z, Core.RotationRadians.Y,
                     Core.RotationRadians.Z, 1, -Core.RotationRadians.X,
                     -Core.RotationRadians.Y, Core.RotationRadians.X, 1
-                );
-                _invRot.Invert();
+                ).GetInverse();
             }
 
             [ContractInvariantMethod]

@@ -25,8 +25,7 @@ namespace Pigeoid.CoordinateOperation.Transformation
                     1, -Core.R.Z, Core.R.Y,
                     Core.R.Z, 1, -Core.R.X,
                     -Core.R.Y, Core.R.X, 1
-                );
-                _invRot.Invert();
+                ).GetInverse();
             }
 
             [ContractInvariantMethod]
