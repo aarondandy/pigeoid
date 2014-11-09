@@ -20,6 +20,24 @@ namespace Pigeoid.Epsg
             return !a.Equals(b);
         }
 
+        public static bool TryConvert(IAuthorityTag authorityTag, out EpsgAuthorityTag epsgTag) {
+            if (authorityTag != null) {
+                if (authorityTag is EpsgAuthorityTag) {
+                    epsgTag = (EpsgAuthorityTag)authorityTag;
+                    return true;
+                }
+                if (EpsgName.Equals(authorityTag.Name, StringComparison.OrdinalIgnoreCase)) {
+                    int codeNumber;
+                    if (Int32.TryParse(authorityTag.Code, out codeNumber)) {
+                        epsgTag = new EpsgAuthorityTag(codeNumber);
+                        return true;
+                    }
+                }
+            }
+            epsgTag = new EpsgAuthorityTag();
+            return false;
+        }
+
         internal const string EpsgName = "EPSG";
 
         private readonly int _code;
@@ -32,6 +50,10 @@ namespace Pigeoid.Epsg
         [ContractInvariantMethod]
         private void CodeContractInvariants() {
             Contract.Invariant(_code >= 0);
+        }
+
+        public int NumericalCode {
+            get { return _code; }
         }
 
         public string Code {

@@ -140,6 +140,23 @@ namespace Pigeoid.Epsg
 
         }
 
+        public static EpsgCrs GetEpsgCrs(ICrs crs) {
+            Contract.Requires(crs != null);
+            var result = crs as EpsgCrs;
+            if (result != null)
+                return result;
+
+            var authorityTag = crs.Authority;
+            if (authorityTag == null)
+                return null;
+
+            EpsgAuthorityTag epsgTag;
+            if(EpsgAuthorityTag.TryConvert(authorityTag, out epsgTag))
+                return EpsgMicroDatabase.Default.GetCrs(epsgTag.NumericalCode);
+
+            return null;
+        }
+
 
         public List<Predicate<EpsgCrs>> CrsFilters { get; set; } // TODO: make use of this collection
         public List<Predicate<ICoordinateOperationInfo>> OpFilters { get; set; } // TODO: make use of this collection
@@ -159,14 +176,18 @@ namespace Pigeoid.Epsg
         }
 
         public IEnumerable<ICoordinateOperationCrsPathInfo> Generate(ICrs from, ICrs to) {
-            var fromEpsg = from as EpsgCrs;
-            var toEpsg = to as EpsgCrs;
+            if(from == null || to == null)
+                return Enumerable.Empty<ICoordinateOperationCrsPathInfo>();
+
+            var fromEpsg = GetEpsgCrs(from);
+            var toEpsg = GetEpsgCrs(to);
             if (fromEpsg != null && toEpsg != null)
                 return Generate(fromEpsg, toEpsg);
 
-            // TODO: if one of the CRSs is not an EpsgCrs while the other is, no indirect operations can be used
+            // TODO: if one of the CRSs is not an EpsgCrs while the other is not, no indirect operations can be used as WGS84 will be required to bridge them
+            // TODO: force and indirect path between ICrs->WGS84->EpsgCrs or EpsgCrs->WGS84->ICrs
 
-            throw new NotImplementedException();
+            return Enumerable.Empty<ICoordinateOperationCrsPathInfo>();
         }
 
         public IEnumerable<ICoordinateOperationCrsPathInfo> Generate(EpsgCrs from, EpsgCrs to) {
