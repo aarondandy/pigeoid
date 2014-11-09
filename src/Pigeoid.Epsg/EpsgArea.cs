@@ -63,9 +63,19 @@ namespace Pigeoid.Epsg
                 && LatitudeRange.Intersects(other.LatitudeRange);
         }
 
+        public bool Contains(IGeographicMbr other) {
+            return LongitudeRange.Contains(other.LongitudeRange)
+                && LatitudeRange.Contains(other.LatitudeRange);
+        }
+
         public bool Contains(EpsgArea other) {
             return LongitudeRange.Contains(other.LongitudeRange)
                 && LatitudeRange.Contains(other.LatitudeRange);
+        }
+
+        public bool Within(IGeographicMbr other) {
+            return LongitudeRange.Within(other.LongitudeRange)
+                && LatitudeRange.Within(other.LatitudeRange);
         }
 
         public bool Within(EpsgArea other) {
@@ -106,6 +116,7 @@ namespace Pigeoid.Epsg
                     LongitudeRange = longitude
                 };
             }
+
         }
 
         public IGeographicMbr Intersection(IGeographicMbr other) {

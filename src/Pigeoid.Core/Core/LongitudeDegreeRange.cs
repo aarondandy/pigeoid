@@ -106,8 +106,16 @@ namespace Pigeoid
             return DefaultPeriodicOperations.Contains(Start, End, value);
         }
 
+        [Pure] public bool Contains(IPeriodicRange<double> r) {
+            return DefaultPeriodicOperations.Contains(Start, End, r.Start, r.End);
+        }
+
         [Pure] public bool Contains(LongitudeDegreeRange r) {
             return DefaultPeriodicOperations.Contains(Start, End, r.Start, r.End);
+        }
+
+        [Pure] public bool Within(IPeriodicRange<double> r) {
+            return DefaultPeriodicOperations.Contains(r.Start, r.End, Start, End);
         }
 
         [Pure] public bool Within(LongitudeDegreeRange r) {

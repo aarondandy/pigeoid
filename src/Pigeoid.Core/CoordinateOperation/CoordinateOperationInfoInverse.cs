@@ -61,6 +61,10 @@ namespace Pigeoid.CoordinateOperation
                     : null;
             }
         }
+
+        public override string ToString() {
+            return "Inverse " + Core.ToString();
+        }
     }
 
 }
