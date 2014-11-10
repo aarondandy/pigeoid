@@ -67,7 +67,7 @@ namespace Pigeoid.Epsg.Resources
         }
 
         public EpsgDataResourceReaderUsage Get(long seekLocation) {
-            Contract.Ensures(Contract.Result<BinaryReader>() != null);
+            Contract.Ensures(Contract.Result<EpsgDataResourceReaderUsage>() != null);
             var reader = Get();
             reader.CoreStream.Seek(seekLocation, SeekOrigin.Begin);
             return reader;

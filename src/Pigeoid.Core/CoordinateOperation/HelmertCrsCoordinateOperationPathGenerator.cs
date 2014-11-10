@@ -278,7 +278,7 @@ namespace Pigeoid.CoordinateOperation
         private ICoordinateOperationCrsPathInfo GenerateCoreDatumShift(ICrsGeocentric from, ICrsGeographic to) {
             Contract.Requires(from != null);
             Contract.Requires(to != null);
-            Contract.Ensures(Contract.Result<List<ICoordinateOperationInfo>>() != null);
+            Contract.Ensures(Contract.Result<ICoordinateOperationCrsPathInfo>() != null);
             throw new NotImplementedException();
             /*
             var operations = GenerateCoreDatumShiftGeocentric(from.Datum, to.Datum);
@@ -289,7 +289,7 @@ namespace Pigeoid.CoordinateOperation
         private ICoordinateOperationCrsPathInfo GenerateCoreDatumShift(ICrsGeographic from, ICrsGeocentric to) {
             Contract.Requires(from != null);
             Contract.Requires(to != null);
-            Contract.Ensures(Contract.Result<List<ICoordinateOperationInfo>>() != null);
+            Contract.Ensures(Contract.Result<ICoordinateOperationCrsPathInfo>() != null);
             throw new NotImplementedException();
             /*var operations = new List<ICoordinateOperationInfo>{
                 new GeographicGeocentricTransformation(from.Datum.Spheroid)

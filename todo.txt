@@ -1,2 +1,0 @@
-* Read: http://home.gdal.org/projects/opengis/wktproblems.html
-* Cache all transform inverses so there are less instances, use Lazy

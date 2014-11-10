@@ -39,6 +39,7 @@ namespace Pigeoid.Epsg
             private ushort[] _fromOps;
             private ushort[] _toOps;
 
+            [ContractInvariantMethod]
             private void ObjectInvariants() {
                 Contract.Invariant(Crs != null);
             }
@@ -244,7 +245,7 @@ namespace Pigeoid.Epsg
 
         private IEnumerable<OperationNodeCandidate> CreateForwardNodeCandidates(IEnumerable<ushort> forwardOperationCodes, EpsgCrs targetCrs, EpsgCrsPathSearchNode parentNode) {
             Contract.Requires(forwardOperationCodes != null);
-            Contract.Ensures(Contract.Result<IEnumerable<EpsgCrsPathSearchNode>>() != null);
+            Contract.Ensures(Contract.Result<IEnumerable<OperationNodeCandidate>>() != null);
             return forwardOperationCodes
                 .Select(code => EpsgMicroDatabase.Default.GetCoordinateTransformOrConcatenatedInfo(code))
                 .Where(op => op != null)
@@ -257,7 +258,7 @@ namespace Pigeoid.Epsg
 
         private IEnumerable<OperationNodeCandidate> CreateInverseNodeCandidates(IEnumerable<ushort> inverseOperationCodes, EpsgCrs targetCrs, EpsgCrsPathSearchNode parentNode) {
             Contract.Requires(inverseOperationCodes != null);
-            Contract.Ensures(Contract.Result<IEnumerable<EpsgCrsPathSearchNode>>() != null);
+            Contract.Ensures(Contract.Result<IEnumerable<OperationNodeCandidate>>() != null);
             return inverseOperationCodes
                 .Select(code => EpsgMicroDatabase.Default.GetCoordinateTransformOrConcatenatedInfo(code))
                 .Where(op => op != null && op.HasInverse)
