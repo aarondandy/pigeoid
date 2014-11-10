@@ -12,17 +12,17 @@ namespace Pigeoid.Epsg.ResourceData.Test
     public class EpsgCrsOpLookupTests
     {
 
-        private DataTransmogrifier.EpsgRepository _repository;
+        private DbRepository.EpsgRepository _repository;
 
         [CLSCompliant(false)]
-        public DataTransmogrifier.EpsgRepository Repository { get { return _repository; } }
+        public DbRepository.EpsgRepository Repository { get { return _repository; } }
 
         [TestFixtureSetUp]
         public void FixtureSetUp() {
             var asmDirectory = new FileInfo(new Uri(typeof(EpsgDataTestBase<,>).Assembly.CodeBase).LocalPath).Directory;
-            var dataFolderDirectory = new DirectoryInfo("../../build/data");
+            var dataFolderDirectory = new DirectoryInfo("../../../data");
             var file = dataFolderDirectory.GetFiles("EPSG_v*.mdb").OrderByDescending(x => x.Name).First();
-            _repository = new DataTransmogrifier.EpsgRepository(file);
+            _repository = new DbRepository.EpsgRepository(file);
         }
 
         [TestFixtureTearDown]

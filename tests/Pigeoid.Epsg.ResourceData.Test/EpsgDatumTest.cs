@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgDatumTest : EpsgDataTestBase<EpsgDatum, DataTransmogrifier.EpsgDatum>
+    public class EpsgDatumTest : EpsgDataTestBase<EpsgDatum, DbRepository.EpsgDatum>
 	{
 
 		[Test]
@@ -28,7 +28,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 	}
 
 	[TestFixture]
-	public class EpsgDatumGeodeticTest : EpsgDataTestBase<EpsgDatumGeodetic, DataTransmogrifier.EpsgDatum>
+    public class EpsgDatumGeodeticTest : EpsgDataTestBase<EpsgDatumGeodetic, DbRepository.EpsgDatum>
 	{
 
 		[Test]

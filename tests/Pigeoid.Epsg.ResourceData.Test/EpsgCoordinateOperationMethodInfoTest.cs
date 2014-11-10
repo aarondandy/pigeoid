@@ -6,7 +6,7 @@ using NUnit.Framework;
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgCoordinateOperationMethodInfoTest : EpsgDataTestBase<EpsgCoordinateOperationMethodInfo, DataTransmogrifier.EpsgCoordinateOperationMethod>
+    public class EpsgCoordinateOperationMethodInfoTest : EpsgDataTestBase<EpsgCoordinateOperationMethodInfo, DbRepository.EpsgCoordinateOperationMethod>
 	{
 
 		[Test]
@@ -26,7 +26,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 
 		}
 
-		private bool AssertEqual(EpsgParameterUsage[] a, IList<DataTransmogrifier.EpsgParamUse> b) {
+        private bool AssertEqual(EpsgParameterUsage[] a, IList<DbRepository.EpsgParamUse> b) {
 			Assert.AreEqual(a.Length, b.Count);
 			for(int i = 0; i < a.Length; i++) {
 				var x = a[i];

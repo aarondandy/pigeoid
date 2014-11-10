@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgCrsTest : EpsgDataTestBase<EpsgCrs, DataTransmogrifier.EpsgCrs>
+    public class EpsgCrsTest : EpsgDataTestBase<EpsgCrs, DbRepository.EpsgCrs>
 	{
 
 		[Test]
@@ -28,7 +28,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 	}
 
 	[TestFixture]
-	public class EpsgCrsProjectedTest : EpsgDataTestBase<EpsgCrsProjected, DataTransmogrifier.EpsgCrs>
+    public class EpsgCrsProjectedTest : EpsgDataTestBase<EpsgCrsProjected, DbRepository.EpsgCrs>
 	{
 
 		[Test]
@@ -54,7 +54,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 	}
 
 	[TestFixture]
-	public class EpsgCrsCompoundTest : EpsgDataTestBase<EpsgCrsCompound, DataTransmogrifier.EpsgCrs>
+    public class EpsgCrsCompoundTest : EpsgDataTestBase<EpsgCrsCompound, DbRepository.EpsgCrs>
 	{
 
 		[Test]
@@ -79,10 +79,10 @@ namespace Pigeoid.Epsg.ResourceData.Test
 	}
 
 	[TestFixture]
-	public class EpsgCrsDatumBasedTest : EpsgDataTestBase<EpsgCrsDatumBased, DataTransmogrifier.EpsgCrs>
+    public class EpsgCrsDatumBasedTest : EpsgDataTestBase<EpsgCrsDatumBased, DbRepository.EpsgCrs>
 	{
 
-        private static bool CompareDatums(EpsgCrsDatumBased x, DataTransmogrifier.EpsgCrs y) {
+        private static bool CompareDatums(EpsgCrsDatumBased x, DbRepository.EpsgCrs y) {
             var testDatum = y.Datum;
             if (testDatum == null) {
                 var searchCrs = y;

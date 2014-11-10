@@ -7,8 +7,8 @@
     <ProjectGuid>{C6EAB9F1-4132-4878-BAA2-535354A68899}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pigeoid.GoldData</RootNamespace>
-    <AssemblyName>Pigeoid.GoldData</AssemblyName>
+    <RootNamespace>Pigeoid.GoldData.Test</RootNamespace>
+    <AssemblyName>Pigeoid.GoldData.Test</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />

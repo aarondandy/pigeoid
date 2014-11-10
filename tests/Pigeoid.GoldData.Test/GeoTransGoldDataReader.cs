@@ -4,7 +4,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Vertesaur;
 
-namespace Pigeoid.GoldData
+namespace Pigeoid.GoldData.Test
 {
 	public class GeoTransGoldDataReader : IDisposable
 	{

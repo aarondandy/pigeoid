@@ -75,7 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Pigeoid.Epsg.DbRepository\Pigeoid.Epsg.DbRepository.csproj">
-      <Project>{4D930C82-3FDF-4B55-A57B-6295B4459CD7}</Project>
+      <Project>{4d930c82-3fdf-4b55-a57b-6295b4459cd7}</Project>
       <Name>Pigeoid.Epsg.DbRepository</Name>
     </ProjectReference>
   </ItemGroup>

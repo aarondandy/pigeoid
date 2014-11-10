@@ -9,7 +9,7 @@ using Vertesaur;
 using Pigeoid.Unit;
 using System.Collections.Generic;
 
-namespace Pigeoid.GoldData
+namespace Pigeoid.GoldData.Test
 {
     public static class GoldData
     {
@@ -21,7 +21,7 @@ namespace Pigeoid.GoldData
                 ?? ThisAssembly.GetManifestResourceStream(typeof(GoldData).Namespace + ".Data." + name);
 
             if (null == stream)
-                Assert.Inconclusive("Could not load resource: " + name, name);
+                Assert.Inconclusive("Could not load resource: " + name);
 
             return new StreamReader(stream);
         }
@@ -29,7 +29,7 @@ namespace Pigeoid.GoldData
         public static GeoTransGoldDataReader GetReadyReader(string name) {
             var reader = new GeoTransGoldDataReader(GetEmbeddedStreamReader(name));
             if (!reader.Read())
-                Assert.Inconclusive("Could not read header: " + name, name);
+                Assert.Inconclusive("Could not read header: " + name);
 
             return reader;
         }
@@ -38,7 +38,7 @@ namespace Pigeoid.GoldData
             if ("WGE".Equals(name.ToUpper()) || "WE".Equals(name.ToUpper()))
                 return new OgcSpheroid(new SpheroidEquatorialInvF(6378137, 298.257223563), name, OgcLinearUnit.DefaultMeter);
 
-            Assert.Inconclusive("Spheroid not found: " + name, name);
+            Assert.Inconclusive("Spheroid not found: " + name);
             return null;
         }
 

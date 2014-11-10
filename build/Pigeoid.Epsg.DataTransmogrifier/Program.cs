@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pigeoid.Epsg.DbRepository;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -55,7 +56,7 @@ namespace Pigeoid.Epsg.DataTransmogrifier
             if (args.Length > 0 && !String.IsNullOrWhiteSpace(args[0]))
                 dataFolderPath = Path.GetFullPath(args[0]);
 
-            var alternatePath = @"../../build/data";
+            var alternatePath = @"../../../data";
             if (Directory.Exists(dataFolderPath))
                 ;
             else if (Directory.Exists(alternatePath))

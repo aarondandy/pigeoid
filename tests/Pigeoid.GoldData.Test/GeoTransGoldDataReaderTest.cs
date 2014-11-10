@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using Vertesaur;
 
-namespace Pigeoid.GoldData
+namespace Pigeoid.GoldData.Test
 {
 	[TestFixture]
 	public class GeoTransGoldDataReaderTest

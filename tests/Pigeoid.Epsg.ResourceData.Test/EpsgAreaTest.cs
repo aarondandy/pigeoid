@@ -4,7 +4,7 @@ using Vertesaur;
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgAreaTest : EpsgDataTestBase<EpsgArea,DataTransmogrifier.EpsgArea>
+    public class EpsgAreaTest : EpsgDataTestBase<EpsgArea, DbRepository.EpsgArea>
 	{
 
 		[Test]

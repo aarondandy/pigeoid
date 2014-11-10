@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgUomTest : EpsgDataTestBase<EpsgUnit, DataTransmogrifier.EpsgUom>
+    public class EpsgUomTest : EpsgDataTestBase<EpsgUnit, DbRepository.EpsgUom>
 	{
 
 		[Test]

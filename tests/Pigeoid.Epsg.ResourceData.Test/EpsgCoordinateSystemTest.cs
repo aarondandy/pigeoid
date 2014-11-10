@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgCoordinateSystemTest : EpsgDataTestBase<EpsgCoordinateSystem, DataTransmogrifier.EpsgCoordinateSystem>
+    public class EpsgCoordinateSystemTest : EpsgDataTestBase<EpsgCoordinateSystem, DbRepository.EpsgCoordinateSystem>
 	{
 
 		[Test]
@@ -27,7 +27,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 
 		}
 
-		private static bool AreEqual(EpsgAxis[] x, DataTransmogrifier.EpsgAxis[] y) {
+        private static bool AreEqual(EpsgAxis[] x, DbRepository.EpsgAxis[] y) {
 			Assert.AreEqual(x.Length, y.Length);
 			for(int i = 0; i < x.Length; i++) {
 				var a = x[i];

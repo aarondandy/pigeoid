@@ -1,10 +1,9 @@
-﻿
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgEllipsoidTest : EpsgDataTestBase<EpsgEllipsoid, DataTransmogrifier.EpsgEllipsoid>
+    public class EpsgEllipsoidTest : EpsgDataTestBase<EpsgEllipsoid, DbRepository.EpsgEllipsoid>
 	{
 
 		[Test]

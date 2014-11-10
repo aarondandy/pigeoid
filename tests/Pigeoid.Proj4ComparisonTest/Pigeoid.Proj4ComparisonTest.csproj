@@ -7,8 +7,8 @@
     <ProjectGuid>{8858D42E-203D-4451-BDD8-22E79A766BEB}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Pigeoid.Proj4ComparisonTests</RootNamespace>
-    <AssemblyName>Pigeoid.Proj4ComparisonTests</AssemblyName>
+    <RootNamespace>Pigeoid.Proj4ComparisonTest</RootNamespace>
+    <AssemblyName>Pigeoid.Proj4ComparisonTest</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
@@ -79,10 +79,6 @@
     <ProjectReference Include="..\..\src\Pigeoid.Epsg\Pigeoid.Epsg.csproj">
       <Project>{4db9ee8b-b0a8-4efd-8c2b-c2dfca51a2de}</Project>
       <Name>Pigeoid.Epsg</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\src\Pigeoid.Interop.Proj4\Pigeoid.Interop.Proj4.csproj">
-      <Project>{560d8e81-795b-456f-a9f1-7166b3be13b1}</Project>
-      <Name>Pigeoid.Interop.Proj4</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

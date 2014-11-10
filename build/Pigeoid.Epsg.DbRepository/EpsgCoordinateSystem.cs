@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Pigeoid.Epsg.DataTransmogrifier
+namespace Pigeoid.Epsg.DbRepository
 {
 	public class EpsgCoordinateSystem
 	{

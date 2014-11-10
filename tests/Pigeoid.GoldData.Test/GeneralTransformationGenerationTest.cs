@@ -6,7 +6,7 @@ using System.Linq;
 using Vertesaur;
 using Vertesaur.Transformation;
 
-namespace Pigeoid.GoldData
+namespace Pigeoid.GoldData.Test
 {
 
     [TestFixture]

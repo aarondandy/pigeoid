@@ -9,7 +9,7 @@ using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Linq;
 
-namespace Pigeoid.Epsg.DataTransmogrifier
+namespace Pigeoid.Epsg.DbRepository
 {
 
 	public class EpsgRepository : IDisposable

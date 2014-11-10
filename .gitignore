@@ -107,3 +107,4 @@ UpgradeLog*.XML
 *.TE.Tests*.*df
 
 /build/packed
+/artifacts

@@ -1,6 +1,4 @@
-﻿
-
-namespace Pigeoid.Epsg.DataTransmogrifier
+﻿namespace Pigeoid.Epsg.DbRepository
 {
 	public class EpsgAlias
 	{

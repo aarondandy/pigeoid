@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgParameterInfoTest : EpsgDataTestBase<EpsgParameterInfo, DataTransmogrifier.EpsgParameter>
+    public class EpsgParameterInfoTest : EpsgDataTestBase<EpsgParameterInfo, DbRepository.EpsgParameter>
 	{
 
 		[Test]

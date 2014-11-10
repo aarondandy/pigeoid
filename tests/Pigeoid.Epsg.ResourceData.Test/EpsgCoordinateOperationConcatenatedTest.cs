@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgCoordinateOperationConcatenatedTest : EpsgDataTestBase<EpsgConcatenatedCoordinateOperationInfo, DataTransmogrifier.EpsgCoordinateOperation>
+    public class EpsgCoordinateOperationConcatenatedTest : EpsgDataTestBase<EpsgConcatenatedCoordinateOperationInfo, DbRepository.EpsgCoordinateOperation>
 	{
 
 		[Test]
@@ -31,7 +31,7 @@ namespace Pigeoid.Epsg.ResourceData.Test
 
 		}
 
-		private bool AreEqual(List<EpsgCoordinateOperationInfo> a, DataTransmogrifier.EpsgCoordinateOperation opB) {
+        private bool AreEqual(List<EpsgCoordinateOperationInfo> a, DbRepository.EpsgCoordinateOperation opB) {
 			var b = Repository.CoordOpPathItems
 				.Where(z => z.CatCode == opB.Code)
 				.OrderBy(z => z.Step)

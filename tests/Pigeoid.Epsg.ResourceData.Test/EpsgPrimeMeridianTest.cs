@@ -4,7 +4,7 @@ using NUnit.Framework;
 namespace Pigeoid.Epsg.ResourceData.Test
 {
 	[TestFixture]
-	public class EpsgPrimeMeridianTest : EpsgDataTestBase<EpsgPrimeMeridian, DataTransmogrifier.EpsgPrimeMeridian>
+    public class EpsgPrimeMeridianTest : EpsgDataTestBase<EpsgPrimeMeridian, DbRepository.EpsgPrimeMeridian>
 	{
 
 		[Test]

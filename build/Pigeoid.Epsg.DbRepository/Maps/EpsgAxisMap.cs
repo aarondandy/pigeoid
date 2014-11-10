@@ -1,6 +1,6 @@
 ﻿using FluentNHibernate.Mapping;
 
-namespace Pigeoid.Epsg.DataTransmogrifier.Maps
+namespace Pigeoid.Epsg.DbRepository.Maps
 {
 	public class EpsgAxisMap : ClassMap<EpsgAxis>
 	{

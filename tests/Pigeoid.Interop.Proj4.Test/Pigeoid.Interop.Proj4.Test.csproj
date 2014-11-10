@@ -81,10 +81,6 @@
       <Project>{4db9ee8b-b0a8-4efd-8c2b-c2dfca51a2de}</Project>
       <Name>Pigeoid.Epsg</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\Pigeoid.Interop.Proj4\Pigeoid.Interop.Proj4.csproj">
-      <Project>{560d8e81-795b-456f-a9f1-7166b3be13b1}</Project>
-      <Name>Pigeoid.Interop.Proj4</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

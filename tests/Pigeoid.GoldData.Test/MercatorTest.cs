@@ -3,7 +3,7 @@ using NUnit.Framework;
 using Pigeoid.CoordinateOperation.Projection;
 using Vertesaur;
 
-namespace Pigeoid.GoldData
+namespace Pigeoid.GoldData.Test
 {
 
     [TestFixture]
