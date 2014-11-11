@@ -18,8 +18,7 @@ pvc.Task("build", () => {
         .Pipe(new PvcMSBuild(
             buildTarget : "Clean;Build",
             enableParallelism : false,
-            configurationName : buildConfigurationName,
-            outputPath : "C:\\poop"
+            configurationName : buildConfigurationName
         ));
 });
 
