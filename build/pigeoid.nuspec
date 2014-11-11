@@ -17,11 +17,11 @@
     </references>
   </metadata>
   <files>
-    <file src="..\bin\$configuration$\Pigeoid.Core.dll" target="lib\net40-client" />
-    <file src="..\bin\$configuration$\Pigeoid.Core.pdb" target="lib\net40-client" />
-    <file src="..\bin\$configuration$\Pigeoid.Core.XML" target="lib\net40-client" />
+    <file src="..\artifacts\bin\$configuration$\Pigeoid.Core.dll" target="lib\net40-client" />
+    <file src="..\artifacts\bin\$configuration$\Pigeoid.Core.pdb" target="lib\net40-client" />
+    <file src="..\artifacts\bin\$configuration$\Pigeoid.Core.XML" target="lib\net40-client" />
 
-    <file src="..\bin\$configuration$\CodeContracts\Pigeoid.Core.Contracts.dll" target="lib\net40-client\CodeContracts" />
+    <file src="..\artifacts\bin\$configuration$\CodeContracts\Pigeoid.Core.Contracts.dll" target="lib\net40-client\CodeContracts" />
     <file src="..\src\Pigeoid.Core\**.cs" target="src" />
   </files>
 </package>

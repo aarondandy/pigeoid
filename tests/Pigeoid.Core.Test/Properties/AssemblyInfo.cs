@@ -1,6 +1,4 @@
-﻿// TODO: source header
-
-using System;
+﻿using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 

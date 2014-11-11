@@ -58,6 +58,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\src\PigeoidAssemblyInfo.cs">
+      <Link>Properties\PigeoidAssemblyInfo.cs</Link>
+    </Compile>
     <Compile Include="EpsgAssumptionsTests.cs" />
     <Compile Include="EpsgCoordinateOperationCoverage.cs" />
     <Compile Include="EpsgCoordOperationRegressionTests.cs" />

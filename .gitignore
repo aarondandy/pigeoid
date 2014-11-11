@@ -106,5 +106,5 @@ UpgradeLog*.XML
 *.DotSettings
 *.TE.Tests*.*df
 
-/build/packed
+/build/pvc-packages
 /artifacts

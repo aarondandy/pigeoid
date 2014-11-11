@@ -18,11 +18,11 @@
   </metadata>
   <files>
     <file src="pigeoid.epsg.readme.txt" target="\readme.txt" />
-    <file src="..\bin\$configuration$\Pigeoid.Epsg.dll" target="lib\net40-client" />
-    <file src="..\bin\$configuration$\Pigeoid.Epsg.pdb" target="lib\net40-client" />
-    <file src="..\bin\$configuration$\Pigeoid.Epsg.XML" target="lib\net40-client" />
+    <file src="..\artifacts\bin\$configuration$\Pigeoid.Epsg.dll" target="lib\net40-client" />
+    <file src="..\artifacts\bin\$configuration$\Pigeoid.Epsg.pdb" target="lib\net40-client" />
+    <file src="..\artifacts\bin\$configuration$\Pigeoid.Epsg.XML" target="lib\net40-client" />
 
-    <file src="..\bin\$configuration$\CodeContracts\Pigeoid.Epsg.Contracts.dll" target="lib\net40-client\CodeContracts" />
+    <file src="..\artifacts\bin\$configuration$\CodeContracts\Pigeoid.Epsg.Contracts.dll" target="lib\net40-client\CodeContracts" />
     <file src="..\src\Pigeoid.Epsg\**.cs" target="src" />
   </files>
 </package>
