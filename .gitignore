@@ -108,3 +108,4 @@ UpgradeLog*.XML
 
 /build/pvc-packages
 /artifacts
+**/App_Data/builtupp_usa

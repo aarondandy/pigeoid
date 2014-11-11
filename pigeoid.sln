@@ -20,6 +20,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.Epsg.Transform.Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pigeoid.GoldData.Test", "tests\Pigeoid.GoldData.Test\Pigeoid.GoldData.Test.csproj", "{C6EAB9F1-4132-4878-BAA2-535354A68899}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{4A67B682-CB82-4567-9B8A-EA143B2C90CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleRenderSample", "samples\SimpleRenderSample\SimpleRenderSample.csproj", "{5FA55440-ABF2-4F59-AC68-F90167CB06E9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,12 @@ Global
 		{C6EAB9F1-4132-4878-BAA2-535354A68899}.DebugCC|Any CPU.Build.0 = DebugCC|Any CPU
 		{C6EAB9F1-4132-4878-BAA2-535354A68899}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6EAB9F1-4132-4878-BAA2-535354A68899}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FA55440-ABF2-4F59-AC68-F90167CB06E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FA55440-ABF2-4F59-AC68-F90167CB06E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FA55440-ABF2-4F59-AC68-F90167CB06E9}.DebugCC|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FA55440-ABF2-4F59-AC68-F90167CB06E9}.DebugCC|Any CPU.Build.0 = Debug|Any CPU
+		{5FA55440-ABF2-4F59-AC68-F90167CB06E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FA55440-ABF2-4F59-AC68-F90167CB06E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,5 +77,6 @@ Global
 		{E598B157-1063-4652-A4BE-DD54E02C23FB} = {7E955526-8715-4399-984C-CB96BF2A158B}
 		{A580A78D-7975-42E4-89CA-831690872299} = {7E955526-8715-4399-984C-CB96BF2A158B}
 		{C6EAB9F1-4132-4878-BAA2-535354A68899} = {7E955526-8715-4399-984C-CB96BF2A158B}
+		{5FA55440-ABF2-4F59-AC68-F90167CB06E9} = {4A67B682-CB82-4567-9B8A-EA143B2C90CA}
 	EndGlobalSection
 EndGlobal

@@ -163,6 +163,45 @@ namespace Pigeoid.CoordinateOperation
             throw new InvalidOperationException();
         }
 
+        private AlbersEqualArea CreateAlbersEqualArea(ProjectionCompilationParams opData) {
+            Contract.Requires(opData != null);
+            var originLatParam = new MultiParameterSelector(
+                new LatitudeOfFalseOrigin(),
+                new LatitudeOfNaturalOriginParameterSelector());
+            var originLonParam = new MultiParameterSelector(
+                new LongitudeOfFalseOrigin(),
+                new CentralMeridianParameterSelector(),
+                new LongitudeOfNaturalOriginParameterSelector(),
+                new LongitudeOfCenterParameterSelector());
+            var offsetXParam = new FalseEastingParameterSelector();
+            var offsetYParam = new FalseNorthingParameterSelector();
+            var lat1SpParam = new StandardParallelParameterSelector(1);
+            var lat2SpParam = new StandardParallelParameterSelector(2);
+            opData.ParameterLookup.Assign(originLatParam, originLonParam, offsetXParam, offsetYParam, lat1SpParam, lat2SpParam);
+
+            var fromSpheroid = opData.StepParams.ConvertRelatedOutputSpheroidUnit(opData.StepParams.RelatedOutputCrsUnit);
+            if (null == fromSpheroid)
+                return null;
+
+            GeographicCoordinate origin;
+            if (!(originLatParam.IsSelected || originLonParam.IsSelected) || !TryCreateGeographicCoordinate(originLatParam.Selection, originLonParam.Selection, out origin))
+                origin = GeographicCoordinate.Zero;
+
+            Vector2 offset;
+            if (!(offsetXParam.IsSelected || offsetYParam.IsSelected) || !TryCreateVector2(offsetXParam.Selection, offsetYParam.Selection, opData.StepParams.RelatedOutputCrsUnit, out offset))
+                offset = Vector2.Zero;
+
+            double parallel1;
+            if (!lat1SpParam.IsSelected || !TryGetDouble(lat1SpParam.Selection, OgcAngularUnit.DefaultRadians, out parallel1))
+                parallel1 = 0;
+
+            double parallel2;
+            if (!lat2SpParam.IsSelected || !TryGetDouble(lat2SpParam.Selection, OgcAngularUnit.DefaultRadians, out parallel2))
+                parallel2 = 0;
+
+            return new AlbersEqualArea(origin, parallel1, parallel2, offset, fromSpheroid);
+        }
+
         private static SpheroidProjectionBase CreateTransverseMercator(ProjectionCompilationParams opData) {
             Contract.Requires(opData != null);
             var originLatParam = new LatitudeOfNaturalOriginParameterSelector();
@@ -742,7 +781,7 @@ namespace Pigeoid.CoordinateOperation
         public StaticProjectionStepCompiler(INameNormalizedComparer coordinateOperationNameComparer = null) {
             _coordinateOperationNameComparer = coordinateOperationNameComparer ?? CoordinateOperationNameNormalizedComparer.Default;
             _transformationCreatorLookup = new Dictionary<string, Func<ProjectionCompilationParams, ITransformation<GeographicCoordinate, Point2>>>(_coordinateOperationNameComparer) {
-                {CoordinateOperationStandardNames.AlbersEqualAreaConic,null},
+                {CoordinateOperationStandardNames.AlbersEqualAreaConic,CreateAlbersEqualArea},
                 {CoordinateOperationStandardNames.AzimuthalEquidistant,null},
                 {CoordinateOperationStandardNames.CassiniSoldner, CreateCassiniSoldner},
                 {CoordinateOperationStandardNames.CylindricalEqualArea,null},

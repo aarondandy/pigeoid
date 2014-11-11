@@ -148,5 +148,21 @@ namespace Pigeoid.Epsg.Transform.Test
             Assert.AreEqual(ptWgs.Latitude, actualReverse.Latitude, 0.0001);
         }
 
+        [Test]
+        public void epsg4326_to_5072() {
+            var wgs = EpsgMicroDatabase.Default.GetCrs(4326);
+            var nad83Albers = EpsgMicroDatabase.Default.GetCrs(5072);
+            var gen = new EpsgCrsCoordinateOperationPathGenerator();
+            var paths = gen.Generate(wgs, nad83Albers);
+            var compiler = new StaticCoordinateOperationCompiler();
+            var txs = paths.Select(p => compiler.Compile(p)).Where(p => p != null);
+            var forward = txs.Single();
+
+            var transformed = (Point2)forward.TransformValue(new GeographicCoordinate(39, -105));
+            Assert.AreEqual(-771063, transformed.X, 1);
+            Assert.AreEqual(1811448, transformed.Y, 1);
+
+        }
+
     }
 }

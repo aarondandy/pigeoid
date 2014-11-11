@@ -615,4 +615,38 @@ namespace Pigeoid.CoordinateOperation
         }
     }
 
+
+
+    public class LongitudeOfFalseOrigin : NamedParameterSelector
+    {
+        public override int Score(NamedParameterSelector.ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("LONOFFALSEORIGIN".Equals(parameterName))
+                return 100;
+
+            int score = 0;
+            if (parameterName.StartsWith("LON"))
+                score += 25;
+            if (parameterName.EndsWith("FALSEORIGIN"))
+                score += 25;
+            return score;
+        }
+    }
+
+    public class LatitudeOfFalseOrigin : NamedParameterSelector
+    {
+        public override int Score(NamedParameterSelector.ParameterData parameterData) {
+            var parameterName = parameterData.NormalizedName;
+            if ("LATOFFALSEORIGIN".Equals(parameterName))
+                return 100;
+
+            int score = 0;
+            if (parameterName.StartsWith("LAT"))
+                score += 25;
+            if (parameterName.EndsWith("FALSEORIGIN"))
+                score += 25;
+            return score;
+        }
+    }
+
 }
